@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Holiday & Travel Trade Fair Challenge</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:linear-gradient(135deg,#eef2ff 0%,#e0f2fe 100%);min-height:100vh;padding:1.5rem}
+.wrap{max-width:640px;margin:0 auto}
+.hdr{text-align:center;margin-bottom:1.5rem}
+.hdr h1{font-size:1.1rem;font-weight:700;color:#1e293b}
+.hdr p{font-size:.75rem;color:#94a3b8;margin-top:.25rem}
+.prog-row{display:flex;justify-content:space-between;font-size:.75rem;color:#64748b;margin-bottom:.4rem}
+.prog-row span:last-child{font-weight:600;color:#4f46e5}
+.prog-bar{height:8px;background:#e2e8f0;border-radius:99px;overflow:hidden;margin-bottom:.5rem}
+.prog-fill{height:100%;background:#4f46e5;border-radius:99px;transition:width .4s}
+.seg-row{display:flex;gap:2px;margin-bottom:1.25rem}
+.seg{height:4px;border-radius:99px;flex:1;transition:background .3s}
+.card{background:#fff;border-radius:1rem;box-shadow:0 2px 16px rgba(0,0,0,.07);overflow:hidden}
+.card.emergency{border:2px solid #f87171}
+.card-head{padding:1.25rem 1.25rem .75rem;background:linear-gradient(135deg,#eef2ff,#e0f2fe)}
+.card-head.emerg{background:linear-gradient(135deg,#fff1f2,#fff7ed)}
+.alert-badge{display:flex;align-items:center;gap:.4rem;background:#fee2e2;border:1px solid #fca5a5;border-radius:.5rem;padding:.4rem .75rem;margin-bottom:.75rem;font-size:.72rem;color:#b91c1c;font-weight:600}
+.q-meta{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#6366f1;margin-bottom:.2rem}
+.q-meta.emerg{color:#ef4444}
+.q-title{font-size:1rem;font-weight:700;color:#0f172a;line-height:1.3}
+.card-body{padding:1.25rem}
+.q-text{font-size:.85rem;color:#374151;line-height:1.65;margin-bottom:1rem}
+.opts{display:flex;flex-direction:column;gap:.5rem}
+.opt{background:#fff;border:1.5px solid #e2e8f0;border-radius:.75rem;padding:.75rem 1rem;text-align:left;cursor:pointer;font-size:.82rem;color:#1e293b;line-height:1.5;display:flex;gap:.6rem;align-items:flex-start;transition:border-color .15s,background .15s;width:100%}
+.opt:hover:not(.disabled){border-color:#818cf8;background:#eef2ff}
+.opt.disabled{opacity:.4;cursor:not-allowed}
+.opt-lbl{flex-shrink:0;width:20px;height:20px;border-radius:50%;border:1.5px solid #cbd5e1;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:#94a3b8;margin-top:1px}
+.opt.chosen-good .opt-lbl{border-color:var(--ac);background:var(--al);color:var(--ac)}
+.opt.chosen-bad .opt-lbl{border-color:#ef4444;background:#fee2e2;color:#ef4444}
+.feedback{margin-top:.9rem;border-radius:.75rem;padding:.85rem 1rem;border:1px solid var(--fb-border);background:var(--fb-bg)}
+.feedback-hd{font-size:.72rem;font-weight:700;color:var(--fb-c);margin-bottom:.35rem}
+.feedback-txt{font-size:.82rem;color:#374151;line-height:1.6}
+.next-btn{margin-top:.75rem;width:100%;background:#4338ca;color:#fff;border:none;border-radius:.75rem;padding:.65rem 1rem;font-size:.85rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.4rem;transition:background .15s}
+.next-btn:hover{background:#3730a3}
+.legend{display:flex;justify-content:center;gap:1.5rem;margin-top:.8rem;font-size:.72rem;color:#94a3b8}
+.legend span{display:flex;align-items:center;gap:.3rem}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+
+/* Results */
+.results{background:#fff;border-radius:1rem;box-shadow:0 2px 16px rgba(0,0,0,.07);padding:1.75rem}
+.res-score{text-align:center;margin-bottom:1.5rem}
+.res-icon{font-size:3.5rem;margin-bottom:.5rem}
+.res-title{font-size:1.2rem;font-weight:700;margin-bottom:.25rem}
+.res-num{font-size:3rem;font-weight:800;color:#1e293b}
+.res-num span{font-size:1.4rem;color:#94a3b8}
+.res-bar-wrap{height:10px;background:#e2e8f0;border-radius:99px;overflow:hidden;margin:.6rem 0}
+.res-bar{height:100%;border-radius:99px}
+.res-msg{font-size:.83rem;color:#475569;line-height:1.65;max-width:480px;margin:.75rem auto 0}
+.decisions-hd{font-size:.9rem;font-weight:700;color:#0f172a;margin:1.25rem 0 .6rem}
+.dec-item{border-radius:.75rem;padding:.8rem 1rem;display:flex;gap:.65rem;margin-bottom:.5rem;border:1px solid var(--di-border);background:var(--di-bg)}
+.dec-emoji{font-size:1.2rem;flex-shrink:0}
+.dec-badge{font-size:.68rem;font-weight:700;padding:.2rem .55rem;border-radius:99px;display:inline-block;margin-bottom:.2rem;background:var(--db-bg);color:var(--db-c)}
+.dec-ttl{font-size:.72rem;color:#64748b;font-weight:500;margin-left:.35rem}
+.dec-txt{font-size:.8rem;color:#374151;line-height:1.55}
+.restart-btn{width:100%;margin-top:1.25rem;background:#4338ca;color:#fff;border:none;border-radius:.75rem;padding:.75rem;font-size:.9rem;font-weight:600;cursor:pointer;transition:background .15s}
+.restart-btn:hover{background:#3730a3}
+
+/* Game over */
+.gameover{background:#fff;border-radius:1rem;box-shadow:0 2px 16px rgba(0,0,0,.07);padding:2rem;text-align:center}
+.go-icon{font-size:4rem;margin-bottom:.6rem}
+.go-title{font-size:1.4rem;font-weight:800;color:#b91c1c;margin-bottom:.25rem}
+.go-score{font-size:.8rem;color:#94a3b8;margin:.5rem 0 1.25rem}
+.go-txt{font-size:.85rem;color:#374151;line-height:1.65;margin-bottom:1.5rem}
+.go-btn{background:#dc2626;color:#fff;border:none;border-radius:.75rem;padding:.75rem 2rem;font-size:.9rem;font-weight:600;cursor:pointer;width:100%;transition:background .15s}
+.go-btn:hover{background:#b91c1c}
+
+/* Download button */
+.dl-wrap{text-align:center;margin-bottom:1rem}
+.dl-btn{background:#fff;border:1.5px solid #c7d2fe;color:#4f46e5;border-radius:.6rem;padding:.45rem 1rem;font-size:.78rem;font-weight:600;cursor:pointer;transition:background .15s}
+.dl-btn:hover{background:#eef2ff}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hdr">
+    <h1>✈️ Holiday &amp; Travel Trade Fair Challenge 🌍</h1>
+    <p>Every decision shapes your commercial credibility and long-term standing</p>
+  </div>
+  <div class="dl-wrap">
+    <button class="dl-btn" onclick="downloadSelf()">⬇ Download as HTML file</button>
+  </div>
+  <div id="app"></div>
+  <div class="legend">
+    <span><span class="dot" style="background:#4f46e5"></span>Decision</span>
+    <span><span class="dot" style="background:#ef4444"></span>Crisis</span>
+  </div>
+</div>
+<script>
+const STEPS=[
+{id:"venue",title:"Choose Your Exhibition Venue",emoji:"🏛️",question:"Where will the Holiday & Travel Trade Fair take place? This decision shapes exhibitor recruitment, buyer logistics, and the first impression the industry forms of your event.",options:[
+{text:"A purpose-built travel and lifestyle venue with immersive destination zones, outdoor space for live cultural performances, and a central atrium for flagship experiences. Larger hall footprint than most city-centre options.",points:5,feedback:"Travel sells emotion — a generic hall undercuts that entirely. Destination zones where visitors can hear music and smell street food turn browsers into bookers. The experiential model is the one WTM built its global standing on, and it works precisely because travel is aspirational."},
+{text:"A city-centre convention hotel with multiple meeting rooms and a modest exhibition floor. Highly cost-effective for a first edition and easy for local delegates to reach by public transport.",points:2,feedback:"Hotel floors are too constrained for travel exhibitors — airlines, cruise lines, and tourism boards expect large brandable stand footprints. The cost saving is real, but the signal sent to potential anchor exhibitors is boutique rather than industry-defining. Stand recruitment will be a constant struggle."},
+{text:"A major international exhibition centre in a gateway city with large halls, good transport links, on-site hotels, and proven experience hosting events of comparable scale.",points:3,feedback:"Solid professional foundation. Gateway city positioning maximises access for international exhibitors and buyers flying from source markets. On-site hotels reduce friction considerably. The limitation is atmosphere — generic halls require significant design investment to feel inspiring rather than transactional."},
+{text:"An airport-adjacent expo complex offering symbolic positioning that plays into the travel theme and is maximally convenient for international exhibitors arriving from overseas.",points:2,feedback:"Pragmatically convenient and thematically coherent, but airport-adjacent zones are rarely vibrant. Travel fairs depend on the energy of destination immersion, and that is hard to manufacture in a transit environment however strong the interior design. Exhibitor convenience is one factor among many."}
+]},
+{id:"zones",title:"Design the Exhibition Zones",emoji:"🗺️",question:"How will you organise the exhibition floor so that buyers navigate efficiently and exhibitors find themselves in commercially relevant company?",options:[
+{text:"Alphabetical exhibitor layout — transparent, simple to map, and familiar to visitors who attend multiple trade fairs each year. A printed directory makes navigation easy regardless of sector knowledge.",points:0,feedback:"Nobody searches for a holiday alphabetically, and trade buyers navigate by procurement need rather than exhibitor name. An alphabetical floor loses the exploratory magic that makes travel events compelling and means a sustainable tour operator is beside a ski chalet company with nothing in common. Every major travel fair abandoned this model for good reason."},
+{text:"Themed experience zones regardless of geography — Adventure, Luxury, Family, Wellness, Cultural, and Cruise — cut across destinations by travel style to reflect how modern travellers actually search and book.",points:5,feedback:"Inspired and commercially intelligent. A travel agent specialising in luxury wellness can navigate directly to the relevant zone rather than walking every continent pavilion. Cross-destination discovery also generates unexpected supplier conversations that continent-based layouts never produce. This reflects how consumers buy and therefore how trade buyers think."},
+{text:"A hybrid layout: themed experience zones at the show's heart, national pavilions on the perimeter, and a rotating destination spotlight that changes each day with live programming and headline offers.",points:5,feedback:"Best of both worlds. Themed zones serve the trade's buying patterns; national pavilions serve the tourism board relationships that anchor exhibitor recruitment; the daily rotating spotlight generates social media content, press coverage, and a reason to return across multiple days. Operationally complex but commercially superior."},
+{text:"Continent-based pavilions — Europe, Americas, Asia-Pacific, Africa, Middle East — each with a unifying design language, regional food and cultural programming, and dedicated buyer meeting facilities within the pavilion.",points:3,feedback:"Intuitive navigation and strong regional identity. National tourism boards and tour operators value co-location with their regional identity rather than alphabetical scatter. Regional food and live programming creates genuine dwell time. Less flexible than themed zones for buyers who shop by travel style rather than geography."}
+]},
+{id:"meetings",title:"Provide Buyer Meeting Infrastructure",emoji:"🤝",question:"Trade buyers need dedicated space to conduct private business meetings away from exhibition floor noise. A tour operator evaluating a destination partnership needs very different conditions from a casual browsing visit.",options:[
+{text:"Private meeting rooms on a floor above the exhibition — bookable by the hour, with a hosted buyer lounge offering complimentary catering and a business centre with printing and secretarial support.",points:3,feedback:"Professional and clearly valued. The conference centre model suits large events where buyers need meeting space across multiple days. Hourly booking flexibility accommodates varying negotiation depth. Some buyers will find the separation from the floor inconvenient when trying to move between stand visits and formal meetings."},
+{text:"Meeting tables scattered through the exhibition halls so buyers and suppliers can find space wherever available, keeping the meeting environment close to the stands themselves.",points:2,feedback:"The proximity to stands is the only advantage. Noise, lack of privacy, and competition for seats create frustration for serious trade buyers. Overheard negotiations and interrupted meetings are common. Buyers who need to conduct proper supplier discussions will find a way to do so away from your event — taking the meeting off your floor entirely."},
+{text:"A dedicated Buyers' Lounge with pre-bookable private meeting pods, hosted buyer concierge, refreshments, fast Wi-Fi, and a quiet zone for video calls — adjacent to the exhibition floor.",points:5,feedback:"Essential infrastructure for a serious trade event. A tour operator who spends the day on their feet without decent private space will not return next year. The hosted buyer concierge signals clearly that you understand which visitors deliver commercial value to exhibitors — and acts accordingly."},
+{text:"Leave meeting logistics to individual exhibitors who can invite buyers to their own stands or arrange offsite dinners — they know their buyer relationships better than the organiser does.",points:0,feedback:"Abdication of one of the fair's core value propositions. The organiser who creates productive meeting infrastructure is the one credited with generating real commercial outcomes. Leaving it to exhibitors produces wildly uneven experiences and means your best buyers depend on the most organised exhibitors — who may not be the most relevant ones."}
+]},
+{id:"exhibitors",title:"Define Your Exhibitor Mix",emoji:"🏗️",question:"Which sectors will you actively recruit to exhibit? The exhibitor mix determines whether trade buyers can complete their entire supplier review in one visit or find only a partial picture of the market.",options:[
+{text:"National and regional tourism boards, tour operators across all market segments, airlines, cruise lines, hotel groups, ground transport, travel technology platforms, travel insurance, and niche specialists including adventure, accessible travel, and sustainable tourism operators.",points:5,feedback:"The complete ecosystem. A travel agent should be able to review their entire supplier base in one visit — destination and transport through to accommodation, insurance, and booking technology. Niche segment inclusion reflects where buyer demand is growing fastest and keeps the fair commercially relevant beyond the established mass market."},
+{text:"Major destinations and airlines only, focusing on the brands buyers already recognise and the routes that move the most volume. A tighter exhibitor roster makes for a more curated experience.",points:2,feedback:"Commercially logical for a first pass but professionally incomplete. A travel agent building a package needs ground transport, accommodation, insurance, and technology as much as a flight. An exhibitor floor dominated by airlines and tourism boards looks impressive but serves only a fraction of actual buyer procurement needs."},
+{text:"Open application — any travel-related business can exhibit, with only a basic relevance check on the application form to keep out obviously non-travel businesses.",points:2,feedback:"Accessible and commercially inclusive but vulnerable to dilution. Travel accessories retailers, airport parking companies, and foreign exchange kiosks may all pass a basic relevance check. Without active curation your floor drifts from a professional trade event toward a general consumer travel marketplace — which serves neither audience well."},
+{text:"No cruise or aviation exhibitors to maintain a distinct identity focused on land-based destination travel, with the cruise and aviation gap filled by additional specialist adventure and outdoor travel operators.",points:0,feedback:"An arbitrary constraint that excludes two of the sector's highest-growth segments. Cruise is the fastest-growing holiday category in Europe; aviation is inseparable from international travel. Excluding them does not create distinctiveness — it creates an obviously incomplete product, and buyers will notice the gap on Day 1."}
+]},
+{id:"sustainable",title:"Incorporate Sustainable Tourism",emoji:"🌿",question:"Sustainable travel is one of the fastest-growing segments in the sector and a genuine procurement driver for corporate buyers with ESG reporting obligations. How do you incorporate it?",options:[
+{text:"Require all exhibitors to submit a sustainability statement as a condition of participation — raising the floor across the entire event and prompting operators who have not yet formalised their position to do so.",points:3,feedback:"Progressive and sector-leading. Mandatory sustainability statements send a clear signal about the event's values and begin shifting conversations with all exhibitors — not just the already-committed. Pair with a published summary so visitors can see the collective picture and recognise leaders from laggards."},
+{text:"Integrate sustainable exhibitors into the general floor — all travel should aspire to responsibility, and a separate zone implies it is a niche interest rather than an industry-wide expectation.",points:2,feedback:"A principled position, but in practice it makes sustainable options very hard for buyers to find. Specialist buyers — corporate travel managers with net-zero targets, operators building responsible product lines — need to identify sustainable suppliers efficiently. Dedicated visibility is not segregation; it is good service."},
+{text:"No dedicated provision — sustainability is a marketing positioning decision for each exhibitor, and the fair should not impose a values filter on participating businesses.",points:0,feedback:"Commercially and reputationally untenable by 2025. ABTA, ATOL, and all major travel trade bodies require member sustainability commitments. Corporate buyers face regulatory emissions reporting. A fair that ignores the issue is operating in a market that no longer exists — and will be publicly called out for it."},
+{text:"A dedicated Responsible Travel Pavilion featuring certified sustainable operators, eco-lodges, carbon-neutral transport, community tourism enterprises, and a certification showcase covering Travelife, B Corp, and Green Globe standards.",points:5,feedback:"Forward-thinking and commercially timely. Responsible Travel Pavilion exhibitors are among the fastest-growing segments in terms of consumer and corporate buyer demand. The certification showcase serves buyers who need to meet their own CSR commitments — increasingly a real procurement driver — and will attract journalists and influencers as much as trade buyers."}
+]},
+{id:"emergency1",type:"emergency",title:"🚨 EMERGENCY: Earthquake Hits an Exhibiting Destination",emoji:"🚨",question:"On Day 2 morning, a major earthquake strikes a popular tourist destination with a large national pavilion in the central hall. Significant casualties are reported. The tourism board team on the stand are visibly distressed and in contact with their government. Several tour operators have customers currently in-destination. Journalists are already asking for a statement. What do you do?",options:[
+{text:"Meet privately with the tourism board team to express support and ask what they need; establish a quiet room for their communications; set up an information point where operators can access consular contacts and emergency travel protocols; prepare a compassionate public statement.",points:5,feedback:"Compassionate and professionally exemplary. Prioritising the human dimension — the distressed team and the operators with customers in-destination — before the commercial dimensions is exactly right. The operator information point with consular contacts is practical crisis support that attendees will remember and respect long after the fair."},
+{text:"Quietly ask the destination's tourism board whether they would prefer to close their stand, and if they say yes, remove their branding from the area to avoid drawing additional attention to the situation on the floor.",points:0,feedback:"Removing the destination's branding is noticed by nearby exhibitors and one journalist within the hour. The story becomes your response rather than the earthquake. Social media coverage through the afternoon is devastating. Two major exhibitors publicly withdraw. Your crisis management failure defines the fair's legacy in the trade press for years. Game over.",emergency:true},
+{text:"Issue a press statement expressing sympathy and continue the fair as normal — the event must go on and interrupting it serves no practical purpose for those affected by the earthquake.",points:2,feedback:"Tone-deaf. Continuing as if nothing has happened while a destination team is visibly in distress creates a deeply uncomfortable atmosphere across the entire floor. Exhibitors and visitors notice, and several will make their discomfort public. The fair's empathy failure becomes the story, not the earthquake."},
+{text:"Suspend activity in the hall containing the affected destination's pavilion and offer all exhibitors in that area the option to pause participation for the day with no commercial penalty.",points:3,feedback:"Demonstrates genuine sensitivity and gives affected parties agency. The offer to pause is respected even by those who decline it. Suspending the relevant hall rather than the entire event is proportionate — other exhibitors should not have their participation cancelled because of a crisis they are not connected to."}
+]},
+{id:"agents",title:"Serve Independent Travel Agents",emoji:"🧑‍💼",question:"Independent travel agents are the most numerous trade visitor segment and a primary reason exhibitors invest in stands. They are also under structural pressure from OTAs and comparison platforms. How do you serve their specific needs?",options:[
+{text:"CPD-accredited product training workshops run by exhibitors in a small theatre — agents attend the sessions most relevant to their client mix and earn formal professional development credits they can log with their trade association.",points:2,feedback:"Useful but relatively passive. Product briefings are a minimum that agents expect — much of the same content is available via webinars and supplier educational trips. A fair that offers only what agents can access remotely has not made a compelling case for the investment of a full day's attendance and travel costs."},
+{text:"No specific agent content beyond access to the exhibition floor and general conference programme — experienced agents know how to extract value from trade events and do not need their hands held.",points:0,feedback:"Agents are the fair's most numerous and commercially consequential visitors. Providing nothing specific for them signals that the event prioritises exhibitor revenue over visitor value — a self-defeating position that will be reflected in declining agent attendance after the first edition. Exhibitors will notice the drop."},
+{text:"A dedicated Agent Academy: CPD-accredited training, an independent business skills programme covering social media marketing and managing the OTA threat, and a one-to-one business mentoring service with senior industry figures bookable across all three days.",points:5,feedback:"Outstanding. The Academy addresses both product knowledge and business survival skills — not just what exhibitors want to brief agents on. The mentoring service is rare, highly valued, and generates powerful word-of-mouth in the agent community before the next edition opens. This is what turns a single visit into a repeat relationship."},
+{text:"A peer-nominated Independent Agent of the Year Award presented at the gala dinner with prizes including educational trips and supplier partnerships — recognising excellence across market segments and business models.",points:3,feedback:"Powerful community recognition that generates genuine emotional investment in the event. Peer nomination creates organic social media engagement in the months before the fair opens. Educational trip prizes are smart — they reward agents with experiences that improve their product knowledge, serving both the winner and exhibiting destinations."}
+]},
+{id:"conference",title:"Design the Conference Programme",emoji:"🎙️",question:"What will anchor the professional knowledge programme? The conference is the primary reason serious trade buyers justify the time investment of attendance to their managers.",options:[
+{text:"A single-track conference with all attendees in one room, ensuring everyone hears the same content and maximising serendipitous networking between delegates who would otherwise self-select into separate streams.",points:2,feedback:"Egalitarian but inadequate for a diverse professional audience. A leisure agent and a corporate travel director have almost no overlapping professional development needs. A single track will be calibrated for nobody in particular. The travel sector's diversity is its strength — programme structure should reflect it, not flatten it."},
+{text:"A multi-stream programme covering consumer trend forecasting, destination and political risk briefings, technology and distribution strategy, sustainability, and a corporate travel management track — each targeted at a specific buyer segment.",points:5,feedback:"Comprehensive and professionally serious. Multi-stream programming acknowledges that different buyer types have different intelligence needs. The political risk briefings are particularly valued and rarely offered elsewhere — destination stability directly drives booking confidence and operator liability decisions, making it actionable intelligence rather than background noise."},
+{text:"A single headline keynote each morning from a well-known travel personality, followed by unstructured exhibition time in the afternoons — energetic and simple to programme and market.",points:2,feedback:"Strong opening energy but professionally thin. A celebrity keynote generates social media content and day-one excitement. The trade buyers who need to justify the trip to their manager need market intelligence and actionable content — not just inspiration. Unstructured afternoons haemorrhage professional delegate attendance from Day 2 onwards."},
+{text:"A Future of Travel Summit as the intellectual centrepiece — covering AI and personalisation, post-mass-tourism destination models, climate risk, and geopolitics of global mobility — with speakers from UNWTO, major OTAs, and independent researchers.",points:3,feedback:"Ambitious and genuinely differentiated. A Future of Travel Summit elevates the fair from a commercial marketplace to a thought leadership platform. The risk is abstract programming that is intellectually interesting but disconnected from daily professional decisions. Ensure practical sessions run in parallel for buyers who did not travel to discuss geopolitics."}
+]},
+{id:"corporate",title:"Build the Corporate Travel Track",emoji:"✈️",question:"Corporate travel managers represent high-volume, high-value buyers with very specific professional concerns — duty of care, sustainable travel policy, NDC distribution complexity — that have nothing in common with leisure buyer needs.",options:[
+{text:"Partner with the GBTA and Institute of Travel Management to co-design and promote the corporate travel track — association-endorsed, member-facing CPD content delivered at the fair, promoted through both organisations' channels.",points:5,feedback:"Association co-curation is the highest-leverage approach. GBTA and ITM members are exactly the buyers you need, and both organisations are actively seeking high-quality CPD for their communities. Co-design ensures the content reflects real professional needs; co-promotion reaches audiences your marketing cannot access alone."},
+{text:"Include corporate travel buyers in the general trade programme — business and leisure travel share many of the same supplier relationships and separating them creates an artificial division.",points:0,feedback:"They share some suppliers but almost no professional concerns. A corporate travel manager evaluating a hotel programme for 500 employees has nothing professionally in common with a leisure agent selling honeymoons. Mixed content frustrates both. A dedicated track is modest additional resource for disproportionate loyalty from a high-value segment."},
+{text:"A Corporate Travel Summit with sessions on duty of care, sustainable travel policy, NDC distribution, hotel programme management, and travel technology — with an invitation-only networking lunch for senior buyers and key supplier partners.",points:5,feedback:"Precisely calibrated. Duty of care is the dominant corporate travel conversation post-pandemic; NDC is the distribution challenge keeping corporate managers awake; sustainable travel policy is a boardroom-level requirement. The invitation-only lunch signals that corporate buyers are a premium segment worth protecting from the general delegate population."},
+{text:"A 90-minute corporate buyer speed-networking session — structured five-minute meetings between corporate buyers and relevant suppliers, pre-matched by category and spend level before the event.",points:3,feedback:"Efficient and commercially effective. Speed networking suits time-pressed corporate buyers who can pre-qualify multiple suppliers in 90 minutes rather than walking an entire exhibition floor. Works best as a complement to a full corporate content track — as a standalone it is commercially useful but professionally too thin to justify attendance from senior buyers."}
+]},
+{id:"technology",title:"Position Travel Technology",emoji:"💻",question:"Travel technology — from AI-powered personalisation to NDC distribution and dynamic packaging platforms — is reshaping how holidays are sold. How do you position this at the fair?",options:[
+{text:"Integrate technology exhibitors into the general floor alongside the destinations and operators they serve — keeping the exhibitor map simple and avoiding a separate zone that some visitors may not think to visit.",points:2,feedback:"Logical for a small event, insufficient at scale. Technology buyers navigate differently from destination buyers — they evaluate platforms, not places. Without a dedicated zone, technology exhibitors are invisible to the visitors most likely to become their customers, and technology buyers waste time in destination content irrelevant to their purpose."},
+{text:"A TravelTech Startup Pitch Competition — emerging companies present live to a panel of senior industry judges, with the winner receiving free exhibition space, mentoring from established operators, and a year-long industry introduction programme.",points:3,feedback:"An excellent innovation showcase. Startup pitch competitions are media-friendly, generate social content, and surface genuinely new ideas that established vendors cannot offer. The winner package is well-conceived — exhibition space and mentoring provide real commercial value rather than just applause. Ensure judging criteria reflect industry need rather than presentation style."},
+{text:"A conference stream on travel technology covering digital transformation, AI, and distribution — without dedicated exhibition space, on the grounds that technology is better discussed than demonstrated on the show floor.",points:2,feedback:"Intellectually useful but commercially incomplete. Technology suppliers need exhibition presence — buyers need to see live demonstrations, test platforms, and have software shown to them in context. A conference stream without exhibition space serves the intellectual agenda but abandons the commercial one, which is why most technology exhibitors will decline to participate."},
+{text:"A dedicated TravelTech Hall covering OTAs, booking engines, AI personalisation, NDC distribution, sustainable travel tech, and accessibility platforms — with a startup showcase and a TravelTech Innovation Award to anchor media attention.",points:5,feedback:"The travel technology sector now deserves its own hall rather than a corner of the general floor. Every visitor segment — agents, operators, corporate managers, tourism boards — has active technology purchasing decisions in progress. A full TravelTech Hall positions the fair as the primary meeting point for the sector's most significant structural transition since online booking began."}
+]},
+{id:"hostedbuyer",title:"Develop the Hosted Buyer Programme",emoji:"🎯",question:"Hosted buyer programmes — where the event funds travel and accommodation for qualified senior buyers — are a significant investment. Competing events all offer them. How do you approach this?",options:[
+{text:"No hosted buyer programme — quality buyers should fund their own attendance just as exhibitors do, and self-selected attendees are often more motivated than those brought in on complimentary packages.",points:0,feedback:"In practice this loses your most valuable visitors to competitors who fund them. Senior tour operator buyers and corporate travel managers are courted by multiple events simultaneously. Without a hosted buyer programme you are competing on content alone — which is possible but significantly harder, and your major exhibitors expect funded buyer access as a baseline."},
+{text:"A contribution model — the fair subsidises 50% of travel and accommodation for qualified buyers, with the buyer funding the remainder, on the basis that genuine commitment is demonstrated by co-investment.",points:3,feedback:"A reasonable compromise that still provides meaningful incentive. The risk is that partial funding attracts buyers already planning to attend rather than unlocking new senior visitors. Full funding for a smaller cohort tends to generate better buyer quality and stronger exhibitor ROI than a larger partially-funded cohort."},
+{text:"Partner with airline and hotel exhibitors to co-fund the hosted buyer programme — they provide complimentary travel and accommodation in exchange for premium marketing rights and guaranteed introductions to buyers in their relevant category.",points:5,feedback:"Elegant and commercially symbiotic. Airlines and hotel groups benefit directly from hosting buyers who may recommend their products; the fair accesses hosting inventory at minimal cash cost; buyers receive a premium experience. Ensure the arrangement does not create perception of bias — buyers should feel free to evaluate all options, including competitors of the hosting airline."},
+{text:"A fully funded programme for 300 senior buyers covering flights, accommodation, and transfers — with mandatory meeting quotas, a dedicated lounge, exclusive evening events, and pre-matched supplier meetings based on stated procurement interests.",points:5,feedback:"The gold standard. The mandatory meeting quota is essential — it protects exhibitors from funded buyers who attend for the programme and ignore the stands. Pre-matched meetings based on procurement interests deliver the right buyers to the right exhibitors, which is the only outcome that justifies the programme's significant cost."}
+]},
+{id:"media",title:"Serve Travel Media and Creators",emoji:"📸",question:"Travel journalists, broadcasters, and social media content creators shape consumer destination perception and drive booking trends. They attend events where stories are easy to find and resources are made available.",options:[
+{text:"An exclusive media preview day before the fair opens — journalists and content creators get first access to new products, destination announcements, and exhibitor reveals before the trade floor opens to general visitors.",points:5,feedback:"Highly effective. Media preview days generate advance coverage that amplifies opening day momentum. Exhibitors value the exclusive announcement opportunity. Previews set the news agenda before the general trade audience arrives, meaning your fair's announcements define the first morning's coverage rather than competing with the noise of opening day."},
+{text:"Standard press accreditation and a press room with a few chairs, a printer, and fast Wi-Fi — journalists are experienced trade fair attendees who know how to work an event floor.",points:2,feedback:"Adequate but passive. Journalists and content creators attend events where stories are made easy to find. A basic press room says you tolerate media presence; a Media Centre says you actively cultivate it. The difference in coverage volume and quality over a three-day event is substantial and directly affects exhibitor satisfaction."},
+{text:"No specific media provision — the strength of the exhibitor programme and conference content will generate coverage organically through the quality of announcements and ideas surfaced at the fair.",points:0,feedback:"Events do not speak for themselves. Every major travel fair invests in media infrastructure because earned media is the highest-value marketing available to exhibitors. A fair covered by BBC Travel and Condé Nast reaches millions of potential future buyers. A fair that offers journalists nothing competitive gets minimal coverage and exhibitors will ask why at their post-event review."},
+{text:"A Media Centre with press accreditation, interview facilities, a story pitching board, a daily press briefing, and a Creator Hub for social media influencers with backdrop opportunities, content creation equipment, and facilitated exhibitor introductions.",points:5,feedback:"Complete media infrastructure. The story pitching board is a particularly smart innovation — it flips the dynamic from exhibitors chasing journalists to journalists discovering stories they want to tell, producing better coverage and better relationships. The Creator Hub acknowledges that travel influencers now drive more booking inspiration than traditional journalism."}
+]},
+{id:"emergency2",type:"emergency",title:"🚨 EMERGENCY: Data Breach — Hosted Buyer Personal Data Compromised",emoji:"🚨",question:"On the evening of Day 1, your IT team alerts you that a vulnerability in the hosted buyer registration platform has been exploited. Personal data of 340 hosted buyers — including names, passport numbers, and hotel booking details — may have been accessed. The breach occurred 48 hours ago. Day 2 begins in 12 hours. What do you do?",options:[
+{text:"Quietly fix the vulnerability overnight and monitor the situation without notification, on the basis that you are not yet certain data was accessed and premature notification could cause disproportionate alarm among buyers arriving for Day 2.",points:0,feedback:"Three hosted buyers notice unusual account activity on Day 2 morning and contact your registration desk. One has already spoken to a journalist. By midday the story has broken. You have now missed the mandatory 72-hour ICO notification window and are in active breach of GDPR. The reputational damage extends far beyond the fair itself. Game over.",emergency:true},
+{text:"Instruct your data protection officer and legal counsel immediately; notify the ICO within the mandatory 72-hour GDPR window; contact all 340 affected buyers directly before Day 2 opens; engage a cybersecurity firm overnight; prepare a factual public statement for 9am; brief your senior team before the doors open.",points:5,feedback:"Legally compliant and ethically correct. The 72-hour ICO notification is non-negotiable — missing it compounds the breach with a regulatory violation. Direct contact with affected individuals before Day 2 demonstrates that you prioritise their interests over reputational comfort. Passport number exposure requires specific guidance including contact with the Passport Office."},
+{text:"Notify the ICO and affected buyers as required under GDPR, but delay any public statement until after the fair closes to avoid disrupting the commercial environment of Day 2 and Day 3.",points:3,feedback:"The ICO notification and individual buyer contact are correct. Delaying the public statement is understandable commercially but risky in practice — if the story breaks through another channel before your statement, you appear to be managing the narrative rather than being transparent. A factual morning statement is less damaging than a reactive one issued under press pressure."},
+{text:"Instruct your legal team to complete a full liability assessment before any notification takes place — you need to understand your legal exposure before communicating with regulators or individuals.",points:2,feedback:"Legal assessment is important but cannot delay mandatory ICO notification or buyer communication. GDPR notification obligations are not contingent on liability assessment being completed. The 72-hour clock started when you became aware of the breach. Compliance and legal review must run in parallel, with compliance taking priority on timing."}
+]},
+{id:"overtourism",title:"Address Overtourism and Destination Stewardship",emoji:"🏙️",question:"Overtourism is damaging iconic destinations and generating anti-tourism sentiment in communities including Barcelona, Venice, and Amsterdam. The issue is increasingly covered in mainstream media and affects booking patterns.",options:[
+{text:"Avoid the overtourism debate entirely — many exhibitors are the destinations and operators generating the problem, and surfacing the topic on the show floor risks alienating paying customers who did not come to be criticised.",points:0,feedback:"Avoidance is not neutral — it is perceived as complicity. Destinations suffering from overtourism are increasingly vocal, and the trade's failure to address the issue internally is generating external regulatory responses including caps, tourist taxes, and access restrictions. A fair that creates a constructive forum is ahead of the story; one that avoids it is behind it."},
+{text:"A Destination Stewardship Forum co-hosted with UNWTO and the Travel Foundation — covering evidence on overtourism's impact, visitor management models from destinations that have successfully dispersed flows, and practical tools for operators to build capacity-conscious itineraries.",points:5,feedback:"Authoritative and genuinely industry-advancing. UNWTO and Travel Foundation co-hosting gives the forum independent standing. Practical tools for operators are the key output — a tour operator who leaves with a workable framework for dispersing visitor flows has something to act on, not just something to feel guilty about. Every major travel trade publication will cover it."},
+{text:"A campaign promoting lesser-visited destinations — a Hidden Gems of Europe feature and an Undiscovered Asia showcase — encouraging buyer discovery and naturally dispersing tourist flows through commercial incentive rather than policy debate.",points:3,feedback:"Commercially effective and editorially compelling. Hidden gem campaigns generate press coverage, drive buyer curiosity, and create a discovery narrative that established-destination-only events cannot match. Dispersal alone does not solve overtourism — it can create new overtouristed spots — but as a commercial mechanism it is more actionable than most alternatives."},
+{text:"An open public debate titled 'Tourism — asset or burden? How the industry must reset its relationship with host communities' — accessible to consumers as well as trade visitors, with community voices given equal platform to industry ones.",points:3,feedback:"Brave and culturally significant. Opening this debate to the public acknowledges that the overtourism conversation is happening in civil society, not just industry boardrooms. The format may make some exhibitors uncomfortable — which is precisely the point. A fair that holds difficult conversations earns the trust that promotional-only events never receive."}
+]},
+{id:"ai",title:"Navigate AI and the Future of Travel Agents",emoji:"🤖",question:"AI is restructuring how travellers discover, plan, and book holidays — and directly challenging the independent travel agent's role as the primary source of personalised travel advice. How do you address this?",options:[
+{text:"A practical AI workshop for independent agents: hands-on sessions with five leading AI tools, a structured evaluation framework for assessing AI platforms for small businesses, and a take-home guide to integration published post-event.",points:5,feedback:"Immediately applicable and deeply valued by agents who lack time to evaluate technology independently. Hands-on sessions generate far better retention than keynotes. The take-home guide extends value beyond the event day and becomes a reference cited among agent communities for months — keeping your fair's name present in daily professional conversation."},
+{text:"Avoid the AI topic — it is too early to know what it means for the sector, and premature coverage may create anxiety among agent visitors who are already uncertain about their professional future.",points:0,feedback:"AI in travel is not a future topic — it is a present commercial reality for independent agents and a present opportunity for operators who move quickly. Avoiding it does not protect your audience; it abandons them. Any competitor event that addresses AI seriously will attract the agents and operators you are failing to serve."},
+{text:"A keynote from a major OTA or AI company presenting how machine learning is reshaping holiday search and booking behaviour — authoritative and likely to draw a large audience on the basis of brand recognition alone.",points:2,feedback:"Useful commercial intelligence and likely to attract a large audience. The risk is perspective bias — an OTA presenting AI as beneficial is presenting from a position of competitive interest relative to independent agents. Balance with independent research and practitioner voices who can speak honestly to impact on smaller operators and agents who cannot afford the same technology."},
+{text:"An AI and the Future of the Travel Agent forum: how AI tools can augment rather than replace the specialist agent, live demonstrations of relevant AI tools, an independent assessment of currently available platforms, and a debate on the ethics of using traveller data in personalisation.",points:5,feedback:"Agents are the visitor segment most existentially affected by AI. A forum that addresses their concern directly while demonstrating practical tools they can use the following week is precisely right. The independent tool assessment is rare and deeply valued — agents cannot evaluate dozens of AI platforms alone, and a fair-commissioned review creates lasting reference value."}
+]},
+{id:"slowtravel",title:"Address Slow Travel and Ground Transport",emoji:"🚂",question:"The flygskam movement and growing carbon consciousness among consumers is creating a genuine market shift toward slower, lower-emission travel. European overnight rail revival is accelerating. How does the fair respond?",options:[
+{text:"A dedicated Slow Travel and Ground Transport Pavilion featuring rail operators, cycle touring specialists, canal and river travel companies, and walking holiday operators — with a campaign showcasing carbon comparisons between rail and short-haul aviation for European journeys.",points:5,feedback:"Forward-looking and commercially timely. The European overnight rail revival is real — new services linking major cities are opening genuine commercial alternatives to short-haul aviation. A dedicated pavilion acknowledges this market shift and gives buyers tools to diversify their product range before consumer demand forces them to. Early movers in this space will be remembered."},
+{text:"Partner with an accredited carbon offset provider to offer all fair delegates a complimentary offset for their attendance travel, and publicly challenge exhibiting airlines to match with equivalent passenger offset incentives.",points:3,feedback:"A visible gesture that generates press coverage and sets a challenge that some airlines will accept and others will have to explain declining. Ensure your offset partner has Gold Standard or Verra VCS certification and be transparent about methodology — offsets are under increasing scientific and regulatory scrutiny and a poorly chosen partner will attract negative coverage."},
+{text:"Do not engage with flight shaming — aviation is essential to global tourism and the narrative is harmful to a sector that provides livelihoods for millions of people in developing destinations worldwide.",points:0,feedback:"Denial of a consumer trend is not a strategy. Flight shaming may be uncomfortable but it is actively reshaping booking behaviour among the affluent younger travellers who represent the industry's premium future market. A fair that creates honest, balanced content on travel emissions and alternatives earns trust; one that suppresses the conversation earns resentment."},
+{text:"A carbon comparison tool in the event app — visitors can calculate and compare emissions for different journey options to the same destination, displayed alongside journey time, cost, and booking link information.",points:3,feedback:"Practical and genuinely useful as a neutral, data-driven tool that buyers can use with clients. A tool that shows the emissions difference between flying to Rome and taking the overnight train is commercial intelligence — it helps agents answer the client question they are increasingly asked. Neutral tools are trusted in ways that advocacy content is not."}
+]},
+{id:"budget",title:"Structure Your Financial Model",emoji:"💰",question:"Travel fairs are particularly vulnerable to geopolitical shocks, health crises, and climate events — all of which can suppress exhibitor confidence and buyer attendance rapidly. How do you build financial resilience?",options:[
+{text:"Stand fees as the primary revenue source, supplemented by a modest sponsorship programme — simple, predictable, and easy to model in a business plan for the first edition of the event.",points:2,feedback:"Workable but structurally fragile. Stand fee dependency means the entire financial model is vulnerable if a geopolitical event depresses exhibitor confidence — a vulnerability COVID-19 demonstrated catastrophically across the exhibition sector. Diversification is not complexity for its own sake; it is the difference between surviving a difficult year and cancelling the event."},
+{text:"Diversified revenue model: tiered stand fees, conference delegate fees, hosted buyer co-funding partnerships, category-exclusive sponsorship, consumer day tickets, and a post-event digital content subscription — with a 12% contingency reserve and comprehensive cancellation insurance.",points:5,feedback:"Resilient and professionally structured. A diversified model and meaningful contingency reserve are existential necessities for a travel trade fair, not optional prudence. The post-event digital content subscription is a growing revenue stream that few fairs have yet fully monetised but represents significant upside as content consumption habits shift toward on-demand formats."},
+{text:"Seek government tourism funding as the financial foundation — apply for destination marketing body grants and regional economic development support, which are readily available for events with demonstrable tourism economic impact.",points:2,feedback:"Government funding is a legitimate and widely used supplementary income stream. As a foundation it is dangerously unreliable — grants are competitive, conditional, and subject to political change. Dependency on public funding means your event's survival is determined by decisions made in government offices rather than by the commercial value you deliver to the industry."},
+{text:"Consumer ticket revenue as the primary model — invest in a large-scale public event and monetise the footfall, with the trade element as a premium overlay for the most committed industry participants.",points:0,feedback:"Misaligns incentives from the outset. Exhibitors invest in stands to meet qualified trade buyers, not to sell holidays to the general public. When financial survival depends on public footfall, trade programme depth becomes secondary — and your best exhibitors, who generate the most stand revenue, will notice and leave for a more professionally focused competitor event."}
+]},
+{id:"sponsorship",title:"Architect Your Sponsorship Strategy",emoji:"🏆",question:"Sponsorship is a critical revenue stream, but poorly structured sponsorship destroys the premium environment that makes exhibitors willing to invest in the first place. How do you structure and sell sponsorship?",options:[
+{text:"Tiered category-exclusive packages: one Title Sponsor with naming rights, one per continental zone, one per conference stream with programme independence preserved, and a Creative tier for experiential activations — all with strict brand guidelines.",points:5,feedback:"Best practice architecture. Category exclusivity creates genuine premium value — an airline with exclusive sponsorship of the Asia-Pacific pavilion knows no competitor appears on the same lanyard or in the same theatre. The Creative tier for experiential activations is particularly well-suited to travel — a destination experience sponsored by a tourism board adds to the visitor journey rather than interrupting it."},
+{text:"Unlimited standard-rate sponsorship packages available to any exhibitor or non-exhibiting brand — maximum revenue extraction from every available surface, banner, lanyard, and catering point throughout the venue.",points:0,feedback:"Destroys the value of every package sold and degrades the visitor experience. When every surface carries a different brand, the commercial saturation is exactly what premium travel brands seek to avoid. Exclusivity is what makes sponsorship worth buying at a meaningful price; without it you are selling advertising space at below-market rates to a shrinking pool of interested brands."},
+{text:"Destination sponsorship only — national tourism boards sponsor their own pavilion and zone content, keeping the commercial feel of the event thematically coherent and avoiding intrusive brand presence from outside the travel sector.",points:2,feedback:"Clean and thematically coherent. The limitation is that it excludes the technology, insurance, car hire, and cruise categories whose sponsorship investment can be substantial — and whose stand-buying decision is often directly influenced by whether sponsorship opportunities exist. Revenue diversification matters as much in sponsorship as elsewhere."},
+{text:"Three to five blue-chip principal partners — one airline, one hotel group, one technology platform, one cruise line, one insurance company — sharing equal co-branding throughout the event, with no tiers below the principal level.",points:3,feedback:"Premium and manageable. A small number of principal partners creates exclusive, high-value relationships rather than a congested sponsor market. The category spread mirrors the industry ecosystem. Revenue concentration is the risk — if one principal partner withdraws, you lose a significant budget line with no lower-tier fallback to absorb the impact."}
+]},
+{id:"accessible",title:"Provide for Accessible Travel",emoji:"♿",question:"Accessible travel — for people with physical disabilities, sensory impairments, neurodivergent travellers, and those with hidden conditions — is estimated at £15bn annually in the UK alone and is structurally underserved by most mainstream operators.",options:[
+{text:"No dedicated provision — accessible travel exhibitors can participate in the general floor on the same terms as all other exhibitors, which is the most fair and non-discriminatory approach to exhibition floor management.",points:0,feedback:"General floor placement buries specialist accessible travel providers among thousands of mainstream exhibitors. Buyers looking for accessible product cannot find it efficiently. The absence of a dedicated zone signals that the fair has not seriously considered this market — which is both commercially and ethically shortsighted in a segment growing faster than most of the rest of the industry."},
+{text:"Run an independent accessibility audit of the fair itself — published in the post-event report with specific recommendations for future improvement, demonstrating that the organiser applies to themselves the standards they promote to exhibitors.",points:3,feedback:"Admirable and appropriately humble. An event promoting accessible travel that cannot demonstrate its own accessibility commitment would be a significant credibility gap. Publishing audit results — including shortcomings — signals genuine commitment rather than performative compliance. Disabled industry professionals will notice and respect it, and the press will cover it positively."},
+{text:"Partner with Disability Rights UK, ENAT, and the RNIB to co-curate an accessible travel zone — the organisations bring community relationships, credibility, and promotional reach to audiences no standard trade fair marketing can access.",points:5,feedback:"Co-curation with disability rights organisations transforms a commercial zone into a genuinely credible resource. These organisations reach communities of both disabled travellers and accessibility professionals that trade fair marketing cannot otherwise reach. Their involvement ensures the zone reflects lived experience rather than operator assumptions about disability."},
+{text:"An Accessible Travel Showcase featuring adaptive transport and accommodation providers, accessibility audit technology, assistive travel apps, and a panel of disabled travellers and advocates who present their own market intelligence to trade buyers.",points:5,feedback:"Precisely right in structure and ethics. Disabled travellers reviewing and presenting at a showcase about their own market transforms it from an operator-defined exercise into a genuine community voice. The market intelligence panel is commercially significant — buyers frequently underestimate the size and spending power of this market, and direct data corrects that quickly."}
+]},
+{id:"legacy",title:"Build a Lasting Industry Institution",emoji:"🌟",question:"What single initiative will do most to ensure this fair becomes an unmissable fixture in the global travel industry calendar rather than a commercial event that competes on footfall and stand prices alone?",options:[
+{text:"Secure multi-year partnership with a globally respected travel awards programme — giving the fair exclusive hosting rights for the ceremony and co-branded marketing throughout the year, embedding the fair's name in the industry's most high-profile annual recognition moment.",points:3,feedback:"A powerful anchor for prestige and media profile. Annual awards ceremonies bring senior figures who may not otherwise attend a trade fair. Co-branded year-round marketing keeps the fair present in industry consciousness between editions. Ensure the awards' judging process remains visibly independent — commercial influence, real or perceived, would damage both brands simultaneously."},
+{text:"An Industry Advisory Council of 12 senior figures representing tour operators, airlines, destinations, corporate travel, sustainability, and independent agents — who co-shape the programme, hold the organiser to account, and champion the event in their professional networks.",points:3,feedback:"The governance model that converts a commercial event into an industry institution. Advisory Council members bring their organisations' participation as a matter of professional endorsement rather than commercial calculation. When the ABTA president or UNWTO representative shapes the programme, their communities follow. The accountability function — holding the organiser to account — is what makes it meaningful rather than decorative."},
+{text:"An annual State of Travel report — original research covering booking trends, consumer sentiment, sustainability progress, technology adoption, and destination performance — launched at the fair and distributed free to the global travel industry.",points:5,feedback:"Potentially the single most powerful long-term credibility investment available to a trade fair organiser. When the State of Travel report is cited in UNWTO briefings, airline investor presentations, and tour operator strategy documents throughout the year, the fair's brand is present in the most credible professional contexts — not as a commercial event, but as the sector's primary intelligence source."},
+{text:"A Travel Industry Excellence Awards programme — covering innovation, sustainability, accessibility, technology, and employer of the year — independently judged, presented at the flagship gala dinner, and actively promoted by industry trade media partners.",points:3,feedback:"Awards institutionalise ambition across the industry. Companies invest in innovation partly for recognition; independently judged awards from a respected fair validate that investment publicly. Winners carry the credential for years, keeping the fair's name present in industry marketing long after the event closes. The employer of the year category is smart — it engages HR functions not traditionally activated by trade events."}
+]}
+];
+
+const TOTAL=STEPS.length;
+const RAW_MAX=STEPS.reduce((s,q)=>s+Math.max(...q.options.map(o=>o.points)),0);
+const sc=v=>Math.round((v/RAW_MAX)*100);
+
+const TIER={5:{color:"#059669",bg:"#ecfdf5",border:"#6ee7b7",label:"Excellent",dbBg:"#d1fae5",dbC:"#065f46"},
+  3:{color:"#0284c7",bg:"#eff6ff",border:"#93c5fd",label:"Good",dbBg:"#dbeafe",dbC:"#1e3a8a"},
+  2:{color:"#d97706",bg:"#fffbeb",border:"#fcd34d",label:"Acceptable",dbBg:"#fef3c7",dbC:"#78350f"},
+  0:{color:"#dc2626",bg:"#fef2f2",border:"#fca5a5",label:"Poor",dbBg:"#fee2e2",dbC:"#7f1d1d"}};
+
+let cur=0,rawScore=0,chosen=null,selections={},gameOver=false,gameOverMsg="",done=false;
+
+function render(){
+  const app=document.getElementById('app');
+  if(gameOver){app.innerHTML=renderGameOver();return;}
+  if(done){app.innerHTML=renderResults();return;}
+  app.innerHTML=renderQuestion();
+}
+
+function tierForPoints(p){return p===5?TIER[5]:p===3?TIER[3]:p===2?TIER[2]:TIER[0];}
+
+function renderQuestion(){
+  const s=STEPS[cur];
+  const isEmerg=s.type==="emergency";
+  const optHtml=s.options.map((opt,i)=>{
+    let cls="opt";
+    let lbl=String.fromCharCode(65+i);
+    if(chosen!==null){
+      if(i===chosen){cls+= opt.emergency?" opt chosen-bad":" opt chosen-good";lbl="✓";}
+      else cls+=" opt disabled";
+    }
+    if(chosen!==null&&i===chosen&&opt.emergency)lbl="✗";
+    const ac=isEmerg?"#ef4444":"#6366f1";
+    const al=isEmerg?"#fee2e2":"#eef2ff";
+    return`<button class="${cls}" style="--ac:${ac};--al:${al}" onclick="pick(${i})" ${chosen!==null&&i!==chosen?"disabled":""}>
+      <span class="opt-lbl">${lbl}</span>
+      <span>${opt.text}</span>
+    </button>`;
+  }).join('');
+
+  const feedbackHtml=chosen!==null&&!STEPS[cur].options[chosen].emergency?`
+    <div class="feedback" style="--fb-border:${tierForPoints(STEPS[cur].options[chosen].points).border};--fb-bg:${tierForPoints(STEPS[cur].options[chosen].points).bg};--fb-c:${tierForPoints(STEPS[cur].options[chosen].points).color}">
+      <div class="feedback-hd">${tierForPoints(STEPS[cur].options[chosen].points).label} · +${sc(STEPS[cur].options[chosen].points)} points</div>
+      <div class="feedback-txt">${STEPS[cur].options[chosen].feedback}</div>
+      <button class="next-btn" onclick="next()">${cur<STEPS.length-1?"Next Decision ›":"View Final Results ›"}</button>
+    </div>`:'';
+
+  const segHtml=STEPS.map((st,i)=>{
+    const isE=st.type==="emergency";
+    let bg=i<cur?(isE?"#f87171":"#4f46e5"):i===cur?(isE?"#dc2626":"#312e81"):(isE?"#fecaca":"#e2e8f0");
+    return`<div class="seg" style="background:${bg}"></div>`;
+  }).join('');
+
+  return`
+    <div class="prog-row"><span>Question ${cur+1} of ${TOTAL}</span><span>Score: ${sc(rawScore)} / 100</span></div>
+    <div class="prog-bar"><div class="prog-fill" style="width:${(cur/TOTAL)*100}%"></div></div>
+    <div class="seg-row">${segHtml}</div>
+    <div class="card${isEmerg?" emergency":""}">
+      <div class="card-head${isEmerg?" emerg":""}">
+        ${isEmerg?`<div class="alert-badge"><span style="font-size:14px">⚠</span> Crisis scenario — one choice will end your fair immediately</div>`:""}
+        <div class="q-meta${isEmerg?" emerg":" "}">${isEmerg?"Emergency":"Decision "+(cur+1)}</div>
+        <div style="display:flex;align-items:flex-start;gap:.6rem;margin-top:.25rem">
+          <span style="font-size:1.8rem;line-height:1">${s.emoji}</span>
+          <div class="q-title">${s.title}</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="q-text">${s.question}</div>
+        <div class="opts">${optHtml}</div>
+        ${feedbackHtml}
+      </div>
+    </div>`;
+}
+
+function renderGameOver(){
+  return`<div class="gameover">
+    <div class="go-icon">🚨</div>
+    <div class="go-title">Fair Terminated</div>
+    <div class="go-score">Score at termination: ${sc(rawScore)} / 100</div>
+    <div class="go-txt">${gameOverMsg}</div>
+    <button class="go-btn" onclick="restart()">Start Again</button>
+  </div>`;
+}
+
+function getResult(s){
+  if(s>=85)return{icon:"🏆",title:"Global Travel Institution",bar:"#059669",msg:"Your fair has become the unmissable annual event in the international travel calendar. Tourism boards compete for pavilion space, airlines announce routes from your stage, and the State of Travel report is cited in UNWTO briefings. You have built a landmark."};
+  if(s>=68)return{icon:"🌍",title:"Respected Trade Event",bar:"#0284c7",msg:"A credible, professionally respected fair with real commercial and intellectual value. Buyers leave with useful supplier intelligence, exhibitors report strong lead quality, and the conference programme is referenced long after the doors close. A few stronger decisions would make it unmissable."};
+  if(s>=50)return{icon:"🧳",title:"Promising but Uneven",bar:"#d97706",msg:"Strong foundations in some areas, but gaps in visitor quality, programme depth, or commercial structure create an inconsistent experience. A more focused second edition with sharper priorities can make a real mark on the industry calendar."};
+  return{icon:"📋",title:"Back to the Drawing Board",bar:"#dc2626",msg:"Fundamental weaknesses in the commercial model, visitor strategy, or crisis management undermined the fair's credibility. Exhibitors questioned their ROI; buyers did not find what they needed. A thorough strategic review is needed before the next edition."};
+}
+
+function renderResults(){
+  const disp=sc(rawScore);
+  const r=getResult(disp);
+  const decHtml=Object.entries(selections).map(([idx,sel])=>{
+    const t=tierForPoints(sel.points);
+    return`<div class="dec-item" style="--di-border:${t.border};--di-bg:${t.bg}">
+      <div class="dec-emoji">${sel.emoji}</div>
+      <div>
+        <span class="dec-badge" style="--db-bg:${t.dbBg};--db-c:${t.dbC}">${t.label} · +${sc(sel.points)}pts</span>
+        <span class="dec-ttl">${sel.title}</span>
+        <div class="dec-txt">${sel.feedback}</div>
+      </div>
+    </div>`;
+  }).join('');
+  return`<div class="results">
+    <div class="res-score">
+      <div class="res-icon">${r.icon}</div>
+      <div class="res-title" style="color:${r.bar}">${r.title}</div>
+      <div class="res-num">${disp}<span> / 100</span></div>
+      <div class="res-bar-wrap"><div class="res-bar" style="width:${disp}%;background:${r.bar}"></div></div>
+      <div class="res-msg">${r.msg}</div>
+    </div>
+    <div class="decisions-hd">Your Decision Record</div>
+    ${decHtml}
+    <button class="restart-btn" onclick="restart()">✈️ Organise Another Fair</button>
+  </div>`;
+}
+
+function pick(i){
+  if(chosen!==null)return;
+  const opt=STEPS[cur].options[i];
+  chosen=i;
+  if(opt.emergency){gameOverMsg=opt.feedback;gameOver=true;render();return;}
+  rawScore+=opt.points;
+  selections[cur]={points:opt.points,feedback:opt.feedback,title:STEPS[cur].title,emoji:STEPS[cur].emoji};
+  render();
+}
+function next(){
+  if(cur<STEPS.length-1){cur++;chosen=null;}
+  else done=true;
+  render();
+}
+function restart(){cur=0;rawScore=0;chosen=null;selections={};gameOver=false;gameOverMsg="";done=false;render();}
+
+function downloadSelf(){
+  const html=document.documentElement.outerHTML;
+  const blob=new Blob([html],{type:'text/html'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='travel-fair-challenge.html';
+  a.click();
+}
+
+render();
+</script>
+</body>
+</html>
