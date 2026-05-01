@@ -1,10 +1,9 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My HTML Pages</title>
+    <title>Project Directory</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -17,41 +16,105 @@
             color: #333;
         }
         .container {
-            max-width: 600px;
+            max-width: 700px;
             margin: auto;
             background: white;
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Two column layout for better scannability */
+            gap: 10px;
+        }
+        .header-section {
+            grid-column: span 2;
+            margin-bottom: 10px;
         }
         a {
             display: block;
-            margin: 10px 0;
-            padding: 10px;
+            padding: 12px;
             text-decoration: none;
             background: #007acc;
             color: white;
             border-radius: 5px;
+            font-size: 14px;
+            transition: background 0.2s;
         }
         a:hover {
             background: #005f99;
+        }
+        /* Mobile responsiveness */
+        @media (max-width: 600px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            .header-section {
+                grid-column: span 1;
+            }
         }
     </style>
 </head>
 <body>
 
-```
 <div class="container">
-    <h1>My HTML Pages</h1>
-    <p>Select a page below:</p>
+    <div class="header-section">
+        <h1>File Directory</h1>
+        <p>Select a page to view:</p>
+    </div>
 
-    <!-- EDIT THESE LINKS -->
-    <a href="page1.html">Page 1</a>
-    <a href="page2.html">Page 2</a>
-    <a href="page3.html">Page 3</a>
+    <!-- Links from Column 1 -->
+    <a href="accountant-busy-day-b1.html">Accountant Busy Day B1</a>
+    <a href="african-safari-a2.html">African Safari A2</a>
+    <a href="agri-plant-planner-b1.html">Agri Plant Planner B1</a>
+    <a href="agri-sales-b1.html">Agri Sales B1</a>
+    <a href="badminton-tournament-a2.html">Badminton Tournament A2</a>
+    <a href="bnb-french-getaway-b1.html">BnB French Getaway B1</a>
+    <a href="bnb-hell-b2.html">BnB Hell B2</a>
+    <a href="bnb-manhattan-b1.html">BnB Manhattan B1</a>
+    <a href="bnb-paris-b1.html">BnB Paris B1</a>
+    <a href="bnb-riverside-manor-b1.html">BnB Riverside Manor B1</a>
+    <a href="bushwalking-weekend-b1.html">Bushwalking Weekend B1</a>
+    <a href="cashier-a2.html">Cashier A2</a>
+    <a href="chess-tournament-b1.html">Chess Tournament B1</a>
+    <a href="dog-show-b1.html">Dog Show B1</a>
+    <a href="electrical-engineer-a2.html">Electrical Engineer A2</a>
+    <a href="eurotech-architect-b2.html">Eurotech Architect B2</a>
+    <a href="football-tournament-b1.html">Football Tournament B1</a>
+    <a href="forest-retreat-b1.html">Forest Retreat B1</a>
+    <a href="garden-challenge-b1.html">Garden Challenge B1</a>
+    <a href="garden-game-a2.html">Garden Game A2</a>
+    <a href="garden-maze-b2.html">Garden Maze B2</a>
+    <a href="hr-busy-day-b1.html">HR Busy Day B1</a>
+    <a href="hr-hero-precision-maze-b2.html">HR Hero Precision Maze B2</a>
+    <a href="hr-precision-engineering-b1.html">HR Precision Engineering B1</a>
+    <a href="it-insurance-risks-b2.html">IT Insurance Risks B2</a>
+
+    <!-- Links from Column 2 -->
+    <a href="it-nebula-realms-b1.html">IT Nebula Realms B1</a>
+    <a href="it-techbro-of-tomorrow-b1.html">IT Techbro of Tomorrow B1</a>
+    <a href="kens-karate-club-b1.html">Kens Karate Club B1</a>
+    <a href="knitters-international-b1.html">Knitters International B1</a>
+    <a href="london-weekend-a2.html">London Weekend A2</a>
+    <a href="london-weekend-b1.html">London Weekend B1</a>
+    <a href="new-york-visit-a2.html">New York Visit A2</a>
+    <a href="new-york-visit-b1.html">New York Visit B1</a>
+    <a href="pharma-difficult-day-b1.html">Pharma Difficult Day B1</a>
+    <a href="plant-manager-b1.html">Plant Manager B1</a>
+    <a href="poker-tournament-b1.html">Poker Tournament B1</a>
+    <a href="pub-trivia-quiz-b1.html">Pub Trivia Quiz B1</a>
+    <a href="put-your-town-on-the-map-b1.html">Put Your Town On The Map B1</a>
+    <a href="recruitment-agency-a2.html">Recruitment Agency A2</a>
+    <a href="renovation-time-a2.html">Renovation Time A2</a>
+    <a href="renovation-time-b1.html">Renovation Time B1</a>
+    <a href="route-66-a2.html">Route 66 A2</a>
+    <a href="route-66-b2.html">Route 66 B2</a>
+    <a href="teaching-english-b2.html">Teaching English B2</a>
+    <a href="teambuilder-b1.html">Teambuilder B1</a>
+    <a href="waylons-institute-of-personal-development-b2.html">Waylons Institute B2</a>
+    <a href="yoga-heaven-b1.html">Yoga Heaven B1</a>
+    <a href="yoga-hell-b1.html">Yoga Hell B1</a>
 
 </div>
-```
 
 </body>
 </html>
