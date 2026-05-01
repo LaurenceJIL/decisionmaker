@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Garden Maze — A B2 Branching Adventure</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green-dark: #2d5a27;
+    --green-mid: #4a7c44;
+    --green-light: #8fbc8f;
+    --danger: #c0392b;
+    --gold: #b08d2d;
+    --text: #2c3e50;
+    --bg: #f4f7f6;
+    --warn-bg: #fff8e1;
+    --warn-border: #f0c040;
+  }
+
+  * { box-sizing: border-box; }
+  body { font-family: 'Lato', sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; align-items: center; }
+
+  /* ── HEADER ── */
+  .header { background: var(--green-dark); color: white; width: 100%; padding: 14px 20px; text-align: center; position: sticky; top: 0; z-index: 10; }
+  .header h1 { margin: 0; font-family: 'Playfair Display', serif; font-size: 1.3rem; }
+
+  /* ── STATS BAR ── */
+  .stats-bar { display: flex; justify-content: space-around; flex-wrap: wrap; gap: 6px; background: #fff; width: 100%; padding: 10px 20px; border-bottom: 2px solid #ddd; font-weight: bold; font-size: 0.95rem; }
+  .stat-item { display: flex; align-items: center; gap: 5px; }
+  .stat-item .low { color: var(--danger); }
+
+  /* ── PROGRESS ── */
+  .progress-bar { width: 100%; height: 8px; background: #ddd; }
+  .progress-fill { height: 100%; background: var(--green-light); width: 0%; transition: width 0.6s ease; }
+
+  /* ── STEP COUNTER ── */
+  .step-counter { font-size: 0.78rem; color: #888; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px; }
+
+  /* ── GAME CONTAINER ── */
+  .game-container { max-width: 820px; width: 92%; margin: 22px auto; background: white; padding: 32px 34px; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.06); min-height: 420px; }
+
+  /* ── RANDOM EVENT BANNER ── */
+  .event-banner { background: var(--warn-bg); border: 2px solid var(--warn-border); border-radius: 10px; padding: 18px 22px; margin-bottom: 24px; display: none; }
+  .event-banner h3 { margin: 0 0 6px; color: #7d5a00; font-size: 1.05rem; }
+  .event-banner p { margin: 0; font-size: 0.97rem; line-height: 1.55; color: #5a4200; }
+  .event-cost { display: inline-block; margin-top: 8px; background: var(--danger); color: white; padding: 3px 10px; border-radius: 4px; font-weight: bold; font-size: 0.88rem; }
+
+  /* ── CHOICES ── */
+  .choice-list { display: flex; flex-direction: column; gap: 13px; margin-top: 22px; }
+  .choice-btn {
+    padding: 17px 18px; border: 2px solid #e8e8e8; border-radius: 10px; background: white;
+    cursor: pointer; font-size: 0.97rem; text-align: left; transition: border-color 0.18s, background 0.18s, transform 0.15s;
+    display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;
+  }
+  .choice-btn:hover:not(:disabled) { border-color: var(--green-mid); background: #f0f7f0; transform: translateX(4px); }
+  .choice-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+  .choice-btn .btn-label { flex: 1; line-height: 1.45; }
+  .price-tag { flex-shrink: 0; padding: 3px 10px; border-radius: 5px; font-size: 0.83rem; font-weight: bold; white-space: nowrap; align-self: flex-start; margin-top: 2px; }
+  .cost-tag { background: #f0f0f0; color: #333; }
+  .profit-tag { background: #d4edda; color: #155724; }
+  .free-tag { background: #e8f0fe; color: #1a56db; }
+
+  /* ── FEEDBACK ── */
+  .feedback {
+    margin-top: 22px; padding: 22px 24px; border-radius: 10px; display: none;
+    line-height: 1.7; border-left: 5px solid #ccc; font-size: 1.02rem;
+    background: #fafafa;
+  }
+  .feedback .vocab-note { margin-top: 12px; padding: 10px 14px; background: #f0f7f0; border-radius: 6px; font-size: 0.93rem; color: var(--green-dark); border-left: 3px solid var(--green-mid); }
+
+  /* ── NEXT BUTTON ── */
+  .btn-next { display: none; margin-top: 22px; padding: 15px 30px; background: var(--green-dark); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; font-size: 1.08rem; letter-spacing: 0.03em; transition: background 0.2s; }
+  .btn-next:hover { background: var(--green-mid); }
+
+  /* ── VOCAB REVIEW ── */
+  .vocab-section { margin-top: 32px; background: #f5f9f5; padding: 22px; border-radius: 12px; border-top: 4px solid var(--green-mid); }
+  .vocab-section h3 { margin: 0 0 14px; color: var(--green-dark); }
+  .vocab-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 24px; margin-top: 10px; }
+  .vocab-item { font-size: 0.93rem; line-height: 1.45; }
+  .vocab-item b { color: var(--green-dark); }
+
+  /* ── END SCREEN ── */
+  .end-outcome { padding: 20px; border-radius: 10px; margin: 18px 0; font-size: 1.05rem; line-height: 1.65; }
+  .end-outcome.great { background: #d4edda; border-left: 5px solid #28a745; }
+  .end-outcome.ok { background: #fff3cd; border-left: 5px solid var(--gold); }
+  .end-outcome.poor { background: #f8d7da; border-left: 5px solid var(--danger); }
+
+  /* ── LANDING PAGE ── */
+  #landingPage {
+    position: fixed; inset: 0; z-index: 100;
+    background: var(--green-dark);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 30px; overflow: hidden;
+  }
+  #landingPage::before {
+    content: ''; position: absolute; inset: 0;
+    background-image:
+      radial-gradient(ellipse at 20% 30%, rgba(143,188,143,0.18) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 70%, rgba(74,124,68,0.25) 0%, transparent 55%);
+    pointer-events: none;
+  }
+  .landing-inner { position: relative; z-index: 1; max-width: 700px; width: 100%; text-align: center; animation: fadeUp 1s ease both; }
+  @keyframes fadeUp { from { opacity:0; transform: translateY(28px); } to { opacity:1; transform:translateY(0); } }
+  .landing-badge { display: inline-block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--green-light); border: 1px solid var(--green-mid); border-radius: 20px; padding: 5px 16px; margin-bottom: 20px; animation: fadeUp 1s 0.1s ease both; }
+  .landing-title { font-family: 'Playfair Display', serif; font-size: clamp(2.3rem, 6vw, 3.9rem); color: #fff; line-height: 1.12; margin: 0 0 8px; animation: fadeUp 1s 0.2s ease both; }
+  .landing-subtitle { font-family: 'Playfair Display', serif; font-size: clamp(1rem, 2.5vw, 1.3rem); color: var(--green-light); font-style: italic; margin: 0 0 26px; animation: fadeUp 1s 0.3s ease both; }
+  .landing-divider { width: 55px; height: 2px; background: var(--gold); margin: 0 auto 26px; animation: fadeUp 1s 0.35s ease both; }
+  .landing-scenario { font-size: 1.03rem; line-height: 1.78; color: rgba(255,255,255,0.88); margin: 0 0 26px; animation: fadeUp 1s 0.4s ease both; }
+  .landing-scenario strong { color: #fff; }
+  .landing-meta { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 34px; animation: fadeUp 1s 0.5s ease both; }
+  .meta-pill { display: flex; align-items: center; gap: 7px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 30px; padding: 7px 16px; font-size: 0.88rem; color: rgba(255,255,255,0.85); }
+  .landing-btn { display: inline-block; padding: 16px 48px; background: var(--gold); color: #fff; font-weight: 700; font-size: 1rem; letter-spacing: 0.06em; text-transform: uppercase; border: none; border-radius: 7px; cursor: pointer; transition: background 0.2s, transform 0.15s, box-shadow 0.2s; box-shadow: 0 6px 24px rgba(0,0,0,0.25); animation: fadeUp 1s 0.6s ease both; }
+  .landing-btn:hover { background: #c9a043; transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+  .leaf-left, .leaf-right { position: absolute; bottom: -20px; opacity: 0.1; pointer-events: none; font-size: 160px; line-height: 1; }
+  .leaf-left { left: -10px; transform: rotate(-20deg); }
+  .leaf-right { right: -10px; transform: rotate(20deg); }
+</style>
+</head>
+<body>
+
+<div id="landingPage">
+  <div class="landing-inner">
+    <div class="landing-badge">🌿 B2 English · Decision-Making Game</div>
+    <h1 class="landing-title">The Garden Maze</h1>
+    <p class="landing-subtitle">A Seasonal Challenge</p>
+    <div class="landing-divider"></div>
+    <p class="landing-scenario">
+      It's the first day of spring. You have an empty plot of land, <strong>$120</strong>, and a season full of decisions ahead.
+      Will you grow vegetables for the table, flowers for the soul, or herbs for the kitchen?
+      <br><br>
+      Over ten decision points, you'll manage your <strong>budget</strong>, earn <strong>influence</strong>, and navigate <strong>random events</strong> — storms, market crashes, surprise costs — that no gardener can fully control. Spend wisely. Think carefully. Not everyone makes it to harvest.
+    </p>
+
+    <div class="landing-meta">
+      <div class="meta-pill">🔀 300+ possible paths</div>
+      <div class="meta-pill">💰 Tight budget management</div>
+      <div class="meta-pill">🎲 Unpredictable events</div>
+      <div class="meta-pill">📚 B2 vocabulary</div>
+    </div>
+
+    <button class="landing-btn" onclick="startGame()">Begin Your Season →</button>
+  </div>
+  <div class="leaf-left">🍃</div>
+  <div class="leaf-right">🍃</div>
+</div>
+
+<div class="header">
+  <h1>🌿 The Garden Maze: A Seasonal Challenge</h1>
+</div>
+
+<div class="stats-bar">
+  <div class="stat-item">🏆 Influence: <span id="scoreDisplay">0</span></div>
+  <div class="stat-item">💰 Budget: <span id="budgetDisplay">$120</span></div>
+</div>
+
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+<div class="game-container" id="gameWindow">
+  <div class="step-counter" id="stepCounter">Decision 1 of 10</div>
+  <h2 id="stepTitle" style="margin-top:0; font-family:'Playfair Display',serif">Choose Your Path</h2>
+  
+  <div class="event-banner" id="eventBanner">
+    <h3 id="eventTitle">⚠️ Unforeseen Circumstance</h3>
+    <p id="eventDesc"></p>
+    <div class="event-cost" id="eventCost"></div>
+  </div>
+
+  <p id="stepDesc" style="line-height:1.6">Welcome to the spring season. To begin your journey, you must decide what kind of gardener you want to be. Each path requires different skills and vocabulary.</p>
+  
+  <div class="choice-list" id="choiceList"></div>
+  
+  <div class="feedback" id="feedbackBox"></div>
+  
+  <button class="btn-next" id="nextBtn" onclick="nextStep()">Continue Journey →</button>
+</div>
+
+<script>
+let currentStepKey = "start";
+let stepCount = 1;
+let score = 0;
+let budget = 120;
+const totalSteps = 10;
+let path = ""; 
+let flags = { community_hero: false, organic_certified: false, bank_loan: false };
+
+/**
+ * Fisher-Yates Shuffle
+ * Ensures true mathematical randomness of array elements.
+ */
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+const gameData = {
+  "start": {
+    title: "The Direction",
+    desc: "How do you want to spend your spring? Your choice will change your entire budget and the equipment you need.",
+    choices: [
+      { text: "The Vegetable Patch: Focus on high yields and self-sufficiency.", cost: 35, pts: 5, next: "prep_veg", setPath: "veg", fb: "<b>The Edible Journey!</b> You've invested in heirloom seeds and heavy-duty tools. You'll need rich soil and plenty of sun.", vocab: "<b>Yield</b> is the amount of crop produced per unit of land." },
+      { text: "The Flower Meadow: Focus on biodiversity and aesthetics.", cost: 25, pts: 8, next: "prep_flower", setPath: "flower", fb: "<b>The Aesthetic Journey!</b> You've chosen a mix of perennials and annuals to attract local pollinators.", vocab: "<b>Biodiversity</b> refers to the variety of life in a particular habitat." },
+      { text: "The Herb Terrace: Focus on culinary versatility and small-scale precision.", cost: 20, pts: 4, next: "prep_herb", setPath: "herb", fb: "<b>The Culinary Journey!</b> You've selected aromatic herbs like rosemary and sage, perfect for a high-end kitchen terrace.", vocab: "<b>Aromatic</b> means having a pleasant and distinctive smell." }
+    ]
+  },
+
+  // --- VEG PATH ---
+  "prep_veg": {
+    title: "Soil Preparation",
+    desc: "Vegetables are 'heavy feeders.' They extract massive amounts of nutrients from the earth. How will you prepare the ground?",
+    choices: [
+      { text: "Amend the soil with premium organic compost.", cost: 30, pts: 10, next: "plant_veg", fb: "<b>Excellent!</b> High-quality compost provides essential nutrients for the growing season.", vocab: "To <b>amend</b> soil means to improve it by adding materials like compost." },
+      { text: "Apply high-nitrogen chemical fertilizer.", cost: 15, pts: 5, next: "plant_veg", fb: "<b>Effective but limited.</b> It boosts growth quickly, but it doesn't improve long-term soil structure.", vocab: "<b>Structure</b> in soil refers to how the particles are clumped together." },
+      { text: "Build raised beds for superior drainage.", cost: 50, pts: 12, next: "plant_veg", fb: "<b>A major investment.</b> Raised beds prevent soil compaction and look professional.", vocab: "<b>Compaction</b> happens when soil is pressed down so hard that air and water can't move through it." }
+    ]
+  },
+  "plant_veg": {
+    title: "The Planting Strategy",
+    desc: "It's time to sow your seeds. How will you arrange your crops?",
+    choices: [
+      { text: "Implement companion planting (marigolds with tomatoes).", cost: 10, pts: 15, next: "event_check", fb: "<b>Expert Level!</b> The marigolds act as a natural pest deterrent.", vocab: "A <b>deterrent</b> is something that discourages a particular behavior or action (like bugs eating your plants)." },
+      { text: "Stick to traditional, organized rows.", cost: 0, pts: 5, next: "event_check", fb: "<b>Organized.</b> This makes it much easier to identify and remove weeds.", vocab: "A <b>weed</b> is a wild plant growing where it is not wanted." },
+      { text: "Broadcast the seeds for a 'natural' dense growth.", cost: 0, pts: 2, next: "event_check", fb: "<b>Risky.</b> Overcrowded plants will compete for sunlight and water, leading to a smaller harvest.", vocab: "To <b>broadcast</b> seeds means to scatter them over a wide area." }
+    ]
+  },
+
+  // --- FLOWER PATH ---
+  "prep_flower": {
+    title: "Meadow Design",
+    desc: "A meadow requires a balance of species. How will you structure your floral display?",
+    choices: [
+      { text: "Focus on local wildflowers to support native bees.", cost: 20, pts: 12, next: "plant_flower", fb: "<b>Eco-Friendly!</b> Native species are more resilient to local weather patterns.", vocab: "<b>Resilient</b> means able to withstand or recover quickly from difficult conditions." },
+      { text: "Import exotic bulbs for a high-impact 'Show Garden'.", cost: 40, pts: 10, next: "plant_flower", fb: "<b>Bold!</b> These will look incredible, but they require much more delicate care.", vocab: "<b>Exotic</b> means originating in or characteristic of a distant foreign country." },
+      { text: "Plant a monochromatic 'Moon Garden' (all white flowers).", cost: 25, pts: 15, next: "plant_flower", fb: "<b>Sophisticated!</b> White flowers reflect the moonlight, making the garden beautiful at night.", vocab: "<b>Monochromatic</b> means using only one color." }
+    ]
+  },
+  "plant_flower": {
+    title: "Sowing Method",
+    desc: "The timing and method of sowing are critical for flowers. What is your approach?",
+    choices: [
+      { text: "Start seeds in a greenhouse to ensure survival.", cost: 20, pts: 8, next: "event_check", fb: "<b>Safe.</b> You've protected the seedlings from the 'damp-off' fungus.", vocab: "<b>Seedlings</b> are young plants, especially ones raised from seeds and not from a cutting." },
+      { text: "Direct-sow into the soil after the last frost.", cost: 0, pts: 10, next: "event_check", fb: "<b>Natural.</b> The plants will develop stronger root systems by growing in place.", vocab: "A <b>frost</b> is a deposit of small white ice crystals formed on the ground." },
+      { text: "Interplant with ornamental grasses for texture.", cost: 15, pts: 12, next: "event_check", fb: "<b>Artistic!</b> The grasses provide structural interest even after the flowers fade.", vocab: "<b>Ornamental</b> plants are grown for decoration rather than for food." }
+    ]
+  },
+
+  // --- HERB PATH ---
+  "prep_herb": {
+    title: "Terrace Containers",
+    desc: "Herbs are prone to 'wet feet.' Choosing the right container is essential.",
+    choices: [
+      { text: "Use porous terracotta pots for breathability.", cost: 20, pts: 12, next: "plant_herb", fb: "<b>Classic.</b> Terracotta allows moisture to evaporate through the walls.", vocab: "<b>Porous</b> means having minute spaces or holes through which liquid or air may pass." },
+      { text: "Install a vertical 'living wall' system.", cost: 55, pts: 10, next: "plant_herb", fb: "<b>Modern!</b> This saves space but requires a complex irrigation setup.", vocab: "<b>Irrigation</b> is the supply of water to land or crops to help growth." },
+      { text: "Repurpose wooden wine crates for a rustic look.", cost: 0, pts: 15, next: "plant_herb", fb: "<b>Eco-Smart!</b> Upcycling is great for your community influence.", vocab: "<b>Upcycling</b> is reusing discarded objects or material to create a product of higher quality or value." }
+    ]
+  },
+  "plant_herb": {
+    title: "Herb Selection",
+    desc: "Which herbs will define your terrace?",
+    choices: [
+      { text: "Mediterranean staples (Rosemary, Thyme, Oregano).", cost: 10, pts: 10, next: "event_check", fb: "<b>Durable.</b> These herbs are drought-tolerant and love the sun.", vocab: "<b>Drought-tolerant</b> plants can survive for long periods without water." },
+      { text: "Soft leafy herbs (Basil, Cilantro, Dill).", cost: 10, pts: 7, next: "event_check", fb: "<b>High Maintenance.</b> These need constant moisture and protection from the midday sun.", vocab: "<b>Moisture</b> refers to water or other liquid diffused in a small quantity as vapor, or within a solid." },
+      { text: "The 'Invasive' Mint Collection.", cost: 5, pts: 4, next: "event_check", fb: "<b>Careful!</b> Mint will take over the whole garden if not contained in its own pot.", vocab: "An <b>invasive</b> species tends to spread prolifically and can be harmful to the environment." }
+    ]
+  },
+
+  // --- MID-GAME EVENTS & SOCIAL ---
+  "event_check": {
+    title: "The Mid-Season Review",
+    desc: "You've survived the initial planting. Your garden is starting to take shape. How do you feel about your progress?",
+    choices: [
+      { text: "Document everything for a gardening blog.", cost: 5, pts: 15, next: "pest_crisis", fb: "<b>Influence Boost!</b> People are following your journey closely." },
+      { text: "Invite the neighbors for a garden tea party.", cost: 15, pts: 12, next: "pest_crisis", fb: "<b>Community Spirit!</b> You are becoming a local 'Green Thumb' legend.", vocab: "A <b>Green Thumb</b> is a natural talent for growing plants." },
+      { text: "Focus purely on the labor—no distractions.", cost: 0, pts: 5, next: "pest_crisis", fb: "<b>Dedicated.</b> Your plants are healthy, but you are a bit isolated." }
+    ]
+  },
+
+  "pest_crisis": {
+    title: "The Aphid Invasion",
+    desc: "You discover thousands of tiny insects sucking the sap from your prized stems!",
+    choices: [
+      { text: "Release 500 ladybugs into the garden.", cost: 15, pts: 20, next: "storm_prep", fb: "<b>Biological Control!</b> The ladybugs cleared the infestation in 48 hours.", vocab: "An <b>infestation</b> is the presence of an unusually large number of insects or animals in a place, typically causing damage." },
+      { text: "Use a homemade soap and neem oil spray.", cost: 5, pts: 12, next: "storm_prep", fb: "<b>Organic.</b> It took more work, but it kept the garden chemical-free.", vocab: "<b>Neem oil</b> is a vegetable oil pressed from the fruits and seeds of the neem tree, used as an organic pesticide." },
+      { text: "Apply a broad-spectrum chemical pesticide.", cost: 10, pts: -5, next: "storm_prep", fb: "<b>Controversial.</b> You killed the pests, but also the local bees. Your reputation suffered.", vocab: "<b>Broad-spectrum</b> pesticides are designed to kill a wide variety of pests." }
+    ]
+  },
+
+  "storm_prep": {
+    title: "The Approaching Gale",
+    desc: "A severe weather warning has been issued. 80km/h winds are expected tonight.",
+    choices: [
+      { text: "Stake every tall plant and secure the pots.", cost: 10, pts: 10, next: "final_choice", fb: "<b>Prepared.</b> Your hard work prevented the wind from snapping your stems.", vocab: "To <b>stake</b> a plant means to support it with a wooden or metal stick." },
+      { text: "Move everything into a makeshift shelter.", cost: 20, pts: 12, next: "final_choice", fb: "<b>Ultimate Protection.</b> Your garden is safe, though your back is sore!", vocab: "<b>Makeshift</b> means serving as a temporary substitute; sufficient for the time being." },
+      { text: "Trust in the resilience of nature.", cost: 0, pts: -15, next: "final_choice", fb: "<b>Devastating.</b> Several of your best plants were flattened by the storm.", vocab: "<b>Flattened</b> means made flat or flatter." }
+    ]
+  },
+
+  "final_choice": {
+    title: "The Harvest Festival",
+    desc: "It is the end of the season. How will you celebrate your success?",
+    choices: [
+      { text: "Donate the entire harvest to the local charity kitchen.", cost: 0, pts: 40, next: "end", fb: "<b>Local Hero!</b> You didn't make money, but your influence is at its peak." },
+      { text: "Sell your premium produce at the Farmers' Market.", cost: -80, pts: 10, next: "end", fb: "<b>Profitable!</b> You made a clean $80 profit from your hard work.", vocab: "<b>Produce</b> refers to things that have been produced or grown, especially by farming." },
+      { text: "Save the seeds for next year's maze.", cost: 0, pts: 15, next: "end", fb: "<b>Sustainable.</b> You've ensured the future of your garden maze.", vocab: "<b>Sustainable</b> means able to be maintained at a certain rate or level." }
+    ]
+  }
+};
+
+const randomEvents = [
+  { title: "Sudden Cold Snap", desc: "A late frost threatens your young plants.", cost: 15, trigger: 3 },
+  { title: "Water Shortage", desc: "A local drought means you must buy a water barrel.", cost: 20, trigger: 5 },
+  { title: "Tool Theft", desc: "Someone stole your favorite shovel. Replacement needed.", cost: 10, trigger: 7 },
+  { title: "Market Surplus", desc: "Prices for seeds dropped! You found a bargain.", cost: -15, trigger: 4 }
+];
+
+const vocabulary = [
+  { word: "Yield", def: "The amount of crop produced per unit of land." },
+  { word: "Biodiversity", def: "The variety of life in a particular habitat or ecosystem." },
+  { word: "Amend", def: "To improve soil by adding materials like compost or fertilizer." },
+  { word: "Drainage", def: "The natural or artificial removal of surface and sub-surface water from an area." },
+  { word: "Broad-spectrum", def: "Effective against a wide range of organisms." },
+  { word: "Heirloom", def: "A traditional variety of plant that has been passed down through generations." }
+];
+
+function startGame() {
+  document.getElementById("landingPage").style.display = "none";
+}
+
+function renderStep() {
+  const step = gameData[currentStepKey];
+  document.getElementById("stepCounter").innerText = `Decision ${stepCount} of ${totalSteps}`;
+  document.getElementById("stepTitle").innerText = step.title;
+  document.getElementById("stepDesc").innerText = step.desc;
+  
+  const list = document.getElementById("choiceList");
+  list.innerHTML = "";
+  
+  // Create a copy of the choices and shuffle them to prevent pattern recognition
+  const shuffledChoices = shuffleArray([...step.choices]);
+  
+  shuffledChoices.forEach((choice) => {
+    const btn = document.createElement("button");
+    btn.className = "choice-btn";
+    
+    const canAfford = budget >= choice.cost;
+    btn.disabled = !canAfford;
+
+    let tagClass = "cost-tag";
+    let tagText = `$${choice.cost}`;
+    if (choice.cost < 0) { tagClass = "profit-tag"; tagText = `+$${Math.abs(choice.cost)}`; }
+    if (choice.cost === 0) { tagClass = "free-tag"; tagText = "FREE"; }
+
+    btn.innerHTML = `
+      <div class="btn-label">
+        ${choice.text} ${!canAfford ? '<br><small style="color:var(--danger)">Not enough funds</small>' : ''}
+      </div>
+      <div class="price-tag ${tagClass}">${tagText}</div>
+    `;
+    
+    // Pass the actual choice object to keep score and feedback locked to the text
+    btn.onclick = () => selectChoice(choice);
+    list.appendChild(btn);
+  });
+
+  // Check for random events
+  const event = randomEvents.find(e => e.trigger === stepCount);
+  const banner = document.getElementById("eventBanner");
+  if (event) {
+    document.getElementById("eventTitle").innerText = `⚠️ ${event.title}`;
+    document.getElementById("eventDesc").innerText = event.desc;
+    document.getElementById("eventCost").innerText = event.cost > 0 ? `Cost: -$${event.cost}` : `Bonus: +$${Math.abs(event.cost)}`;
+    budget -= event.cost;
+    banner.style.display = "block";
+    updateStats();
+  } else {
+    banner.style.display = "none";
+  }
+
+  document.getElementById("feedbackBox").style.display = "none";
+  document.getElementById("nextBtn").style.display = "none";
+}
+
+function selectChoice(choice) {
+  budget -= choice.cost;
+  score += choice.pts;
+  if (choice.setPath) path = choice.setPath;
+  
+  updateStats();
+
+  const fbBox = document.getElementById("feedbackBox");
+  fbBox.innerHTML = `
+    <div>${choice.fb}</div>
+    ${choice.vocab ? `<div class="vocab-note">${choice.vocab}</div>` : ''}
+  `;
+  fbBox.style.display = "block";
+  fbBox.style.borderLeftColor = choice.pts >= 10 ? "var(--green-mid)" : "var(--gold)";
+
+  const btns = document.querySelectorAll(".choice-btn");
+  btns.forEach(b => b.disabled = true);
+
+  if (budget < 0) {
+    endGame("BANKRUPTCY", "You ran out of funds before the harvest. A gardener must always respect the budget.", "poor");
+  } else {
+    currentStepKey = choice.next;
+    document.getElementById("nextBtn").style.display = "block";
+  }
+
+  const progress = (stepCount / totalSteps) * 100;
+  document.getElementById("progressFill").style.width = progress + "%";
+}
+
+function nextStep() {
+  if (currentStepKey === "end") {
+    const title = score > 100 ? "MASTER GARDENER" : (score > 60 ? "SUCCESSFUL HARVEST" : "STALED GROWTH");
+    const msg = score > 100 ? "You have become a legend in the gardening community!" : "You completed the season and learned a lot along the way.";
+    const status = score > 100 ? "great" : (score > 60 ? "ok" : "poor");
+    endGame(title, msg, status);
+  } else {
+    stepCount++;
+    renderStep();
+  }
+}
+
+function updateStats() {
+  document.getElementById("scoreDisplay").innerText = score;
+  const bDisp = document.getElementById("budgetDisplay");
+  bDisp.innerText = "$" + budget;
+  bDisp.className = budget < 20 ? "low" : "";
+}
+
+function endGame(title, message, outcomeClass) {
+  let vocabHTML = `<div class="vocab-section"><h3>📚 B2 Vocabulary Review</h3><div class="vocab-grid">`;
+  vocabulary.forEach(v => {
+    vocabHTML += `<div class="vocab-item"><b>${v.word}:</b> ${v.def}</div>`;
+  });
+  vocabHTML += `</div></div>`;
+
+  document.getElementById("gameWindow").innerHTML = `
+    <h2 style="color:var(--green-dark); font-family:'Playfair Display',serif">${title}</h2>
+    <p>${message}</p>
+    <div class="end-outcome ${outcomeClass}">
+       Influence: <b>${score}</b> | Bank: <b>$${budget}</b>
+    </div>
+    <hr style="border:none;border-top:1px solid #eee;margin:20px 0">
+    ${vocabHTML}
+    <button class="btn-next" style="display:block;margin-top:20px" onclick="location.reload()">🌱 Start a New Season</button>
+  `;
+  document.getElementById("progressFill").style.width = "100%";
+}
+
+renderStep();
+</script>
+</body>
+</html>

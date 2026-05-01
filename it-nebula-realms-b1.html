@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Launch Day — English for Game Devs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0F1115; --surface:#1A1D23; --surface2:#252932; --surface3:#2E3440;
+  --ink:#FFFFFF; --ink2:#A0AEC0; --ink3:#718096;
+  --line:rgba(255,255,255,0.1); --accent:#7C3AED; --accent2:#6D28D9;
+  --green-bg:#1C3025;--green-bd:#48BB78;--green-tx:#9AE6B4;
+  --amber-bg:#2D2816;--amber-bd:#D69E2E;--amber-tx:#F6E05E;
+  --red-bg:#2D1B1B;--red-bd:#E53E3E;--red-tx:#FEB2B2;
+  --r:12px; --rs:8px; --shadow:0 4px 20px rgba(0,0,0,0.4);
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);line-height:1.6;display:flex;flex-direction:column;align-items:center;padding:2rem 1rem;}
+.shell{width:100%;max-width:680px;}
+
+/* INTRO */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:2.5rem;box-shadow:var(--shadow);}
+h1{font-size:32px;font-weight:500;margin-bottom:1rem;letter-spacing:-0.02em;}
+.intro-text{color:var(--ink2);margin-bottom:2rem;font-size:16px;}
+.btn-start{background:var(--accent);color:#fff;border:none;padding:1rem 2rem;border-radius:var(--rs);font-size:16px;font-weight:500;cursor:pointer;transition:0.2s;}
+.btn-start:hover{background:var(--accent2);transform:translateY(-2px);}
+
+/* GAME */
+.game-ui{display:none;width:100%;}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;padding:0 0.5rem;}
+.score-box{font-family:'DM Mono',monospace;background:var(--surface2);padding:0.5rem 1rem;border-radius:20px;border:1px solid var(--line);font-size:14px;}
+.step-indicator{color:var(--ink3);font-size:12px;text-transform:uppercase;letter-spacing:0.1em;}
+
+.scenario-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:2rem;margin-bottom:1.5rem;box-shadow:var(--shadow);}
+.emergency-tag{display:inline-block;background:var(--red-bg);color:var(--red-tx);border:1px solid var(--red-bd);padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;margin-bottom:1rem;text-transform:uppercase;}
+.scenario-text{font-size:17px;margin-bottom:1.5rem;}
+.vocab-box{background:var(--surface2);padding:1rem;border-radius:var(--rs);margin-bottom:1.5rem;font-size:13px;border-left:3px solid var(--accent);}
+.vocab-box b{color:var(--accent);margin-right:5px;}
+
+.options{display:grid;gap:12px;}
+.opt-btn{background:var(--surface2);border:1px solid var(--line);color:var(--ink);padding:1.25rem;border-radius:var(--rs);text-align:left;cursor:pointer;font-size:15px;transition:0.2s;display:flex;justify-content:space-between;align-items:center;}
+.opt-btn:hover:not(:disabled){background:var(--surface3);border-color:var(--ink3);}
+.opt-btn:disabled{cursor:default;opacity:0.7;}
+
+.feedback{margin-top:1.5rem;padding:1.5rem;border-radius:var(--rs);display:none;animation:fadeIn 0.3s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.fb-good{background:var(--green-bg);border:1px solid var(--green-bd);color:var(--green-tx);}
+.fb-mid{background:var(--amber-bg);border:1px solid var(--amber-bd);color:var(--amber-tx);}
+.fb-bad{background:var(--red-bg);border:1px solid var(--red-bd);color:var(--red-tx);}
+
+.next-btn{margin-top:1.5rem;background:var(--ink);color:var(--bg);border:none;padding:1rem 2rem;border-radius:var(--rs);font-weight:600;cursor:pointer;display:none;width:100%;}
+
+/* FINAL */
+.final-card{display:none;text-align:center;}
+.final-score{font-size:64px;font-family:'DM Mono',monospace;margin:1rem 0;}
+</style>
+</head>
+<body>
+
+<div class="shell" id="intro">
+  <div class="card">
+    <h1>Launch Day</h1>
+    <p class="intro-text">You are the Lead Producer for <b>Nebula Realms</b>, a massive multiplayer RPG. It's launch day. The servers are melting, the community is shouting, and the CEO is watching. Your choices will determine if the game becomes a masterpiece or a disaster.</p>
+    <button class="btn-start" onclick="startGame()">Initialize Launch Sequence</button>
+  </div>
+</div>
+
+<div class="shell game-ui" id="game">
+  <div class="header">
+    <div class="step-indicator" id="step-count">Decision 1 of 8</div>
+    <div class="score-box">Score: <span id="score">0</span></div>
+  </div>
+  
+  <div class="scenario-card">
+    <div id="emergency-tag"></div>
+    <div class="scenario-text" id="scenario-text"></div>
+    <div class="vocab-box" id="vocab-box"></div>
+    <div class="options" id="options"></div>
+    <div class="feedback" id="feedback"></div>
+    <button class="next-btn" id="next-btn" onclick="nextStep()">Continue Shift</button>
+  </div>
+</div>
+
+<div class="shell final-card" id="final">
+  <div class="card">
+    <h1>Launch Summary</h1>
+    <div class="final-score" id="fin-num">0</div>
+    <h2 id="fin-grade">Rank</h2>
+    <p class="intro-text" id="fin-body"></p>
+    <button class="btn-start" onclick="location.reload()">Reboot Project</button>
+  </div>
+</div>
+
+<script>
+const DECISIONS = [
+  {
+    text: "It's 08:00 AM. 500,000 players are trying to log in simultaneously. The login servers are beginning to <b>throttle</b>. Your lead engineer suggests opening all gates at once, but it might crash the database.",
+    vocab: "<b>Throttle:</b> To intentionally slow down a process to prevent a system crash.",
+    options: [
+      { t: "Implement a queuing system immediately to control the flow.", pts: 3, fb: "Correct! Queuing prevents a 'thundering herd' problem and keeps the database stable." },
+      { t: "Open all gates. Let the players in and pray the servers hold.", pts: 1, fb: "Disaster. The database crashed within 3 minutes. Total downtime: 2 hours." },
+      { t: "Increase server capacity manually, even though it's over budget.", pts: 2, fb: "Expensive, but effective. You stayed online but the CFO isn't happy about the 'cloud spend'." }
+    ]
+  },
+  {
+    text: "A major streamer discovers a <b>game-breaking exploit</b> that allows players to duplicate rare items. 100,000 people are watching live.",
+    vocab: "<b>Exploit:</b> Using a bug or flaw to gain an unfair advantage in a game.",
+    options: [
+      { t: "Perform an emergency hotfix and ban the players who used the exploit.", pts: 3, fb: "Proactive. You protected the game economy and showed a 'zero-tolerance' policy." },
+      { t: "Ignore it for now; fixing it would require taking the servers offline.", pts: 1, fb: "The economy is ruined. Rare items are now worthless. The community is furious." },
+      { t: "Issue a public warning that players using the bug will be punished later.", pts: 2, fb: "A middle ground. It stopped some people, but the 'damage' to the economy was already done." }
+    ]
+  },
+  {
+    text: "The community manager reports that the subreddit is <b>toxic</b>. Players are complaining about the 'Day 1 Patch' size (60GB).",
+    vocab: "<b>Toxic:</b> Very negative or harmful behavior in an online community.",
+    options: [
+      { t: "Publish a 'Dev Blog' explaining why the assets are so large and apologize.", pts: 3, fb: "Transparency builds trust. Players appreciate the honesty." },
+      { t: "Close the official forums temporarily until things calm down.", pts: 1, fb: "Censorship! The 'Streisand Effect' kicks in and the anger spreads to Twitter and YouTube." },
+      { t: "Offer a small in-game cosmetic item as a 'thank you' for their patience.", pts: 2, fb: "Bribery works, but some players see it as a 'distraction' from the actual problem." }
+    ]
+  },
+  {
+    text: "The 'Review Embargo' has lifted. Early <b>metacritic</b> scores are lower than expected because of performance issues on older hardware.",
+    vocab: "<b>Embargo:</b> A request by a source that information not be published until a certain time.",
+    options: [
+      { t: "Announce an immediate 'Performance Roadmap' for the next 4 weeks.", pts: 3, fb: "A roadmap gives players hope. You acknowledged the 'technical debt' and promised a fix." },
+      { t: "Argue with reviewers on social media, claiming they are 'playing it wrong'.", pts: 1, fb: "PR Nightmare. You've become a meme for all the wrong reasons." },
+      { t: "Pivot marketing to focus only on high-end PC players for now.", pts: 2, fb: "Niche, but safe. You ignored the 'outliers' but missed out on a huge portion of the market." }
+    ]
+  },
+  {
+    text: "A 'Whale' (a player who spends thousands) threatens to quit unless you restore their character, which was <b>corrupted</b> during a server blip.",
+    vocab: "<b>Corrupted:</b> When a computer file or data becomes unusable.",
+    options: [
+      { t: "Assign a senior dev to manually restore the data from a backup.", pts: 3, fb: "Excellent customer service. You kept your biggest 'revenue stream' happy." },
+      { t: "Tell them it's impossible and offer some 'Premium Currency' instead.", pts: 2, fb: "They took the currency, but they stopped spending as much as they used to." },
+      { t: "Tell them to submit a ticket and wait in the 48-hour queue.", pts: 1, fb: "They quit. They also took their 20,000-member clan with them to a rival game." }
+    ]
+  },
+  {
+    text: "The Lead Artist is <b>burnt out</b>. They've worked 100 hours this week and just made a major error in the UI. They want to go home.",
+    vocab: "<b>Burnt out:</b> Physical or mental collapse caused by overwork or stress.",
+    options: [
+      { t: "Force them to stay. 'Launch only happens once.'", pts: 1, fb: "Cruel. They quit the industry entirely next week. Morale is at an all-time low." },
+      { t: "Order them to go home and tell the team 'Health comes first'.", pts: 3, fb: "Leadership. The team respects you, and the 'crunch culture' is avoided." },
+      { t: "Let them sleep in the office 'Chill Room' for 4 hours then get back to work.", pts: 2, fb: "A temporary fix. You got the work done, but you're 'kicking the can down the road'." }
+    ]
+  },
+  {
+    text: "CRITICAL ALERT: A rogue employee has leaked the entire <b>Source Code</b> of the game onto the internet.",
+    vocab: "<b>Source Code:</b> The original human-readable version of a computer program.",
+    options: [
+      { t: "Call the legal team to issue DMCA 'Takedowns' and contact the police.", pts: 0, fb: "Correct. This is a legal and security matter, not a 'gameplay' issue." },
+      { t: "Try to 'buy back' the code from the leaker using Bitcoin.", pts: 0, fb: "Never negotiate with hackers. You lose the money and they keep the code." },
+      { t: "Panic and shut down all servers globally for 24 hours.", pts: 0, fb: "Overreaction. You killed your launch momentum and the code is still online." }
+    ]
+  },
+  {
+    text: "The day is ending. You have 10% of the budget left. You can either spend it on a 'Launch Party', a 'Server Upgrade', or a 'Marketing Push'.",
+    vocab: "<b>Budget:</b> The total amount of money available for a specific project.",
+    options: [
+      { t: "Server Upgrade. Stability is the most important thing for growth.", pts: 3, fb: "Smart. The game is now rock-solid. Word of mouth is carrying the game to #1." },
+      { t: "Marketing Push. We need more players to offset the launch costs.", pts: 2, fb: "More players arrived, but the lag increased. A 'double-edged sword'." },
+      { t: "Launch Party. The team deserves to celebrate after this 'Crunch'.", pts: 1, fb: "Fun night, but the servers crashed at midnight and no one was awake to fix it." }
+    ]
+  }
+];
+
+let S = { score: 0, step: 0, answered: false, inEmergency: false, shuffledOptions: [] };
+
+/* FISHER-YATES SHUFFLE ALGORITHM */
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+function startGame() {
+  document.getElementById('intro').style.display = 'none';
+  document.getElementById('game').style.display = 'block';
+  renderStep();
+}
+
+function renderStep() {
+  S.answered = false;
+  const data = DECISIONS[S.step];
+  
+  document.getElementById('step-count').textContent = `Decision ${S.step + 1} of ${DECISIONS.length}`;
+  document.getElementById('scenario-text').innerHTML = data.text;
+  document.getElementById('vocab-box').innerHTML = data.vocab;
+  document.getElementById('feedback').style.display = 'none';
+  document.getElementById('next-btn').style.display = 'none';
+  
+  const et = document.getElementById('emergency-tag');
+  if (S.step === 6) {
+    et.innerHTML = '<span class="emergency-tag">Emergency Crisis</span>';
+  } else {
+    et.innerHTML = '';
+  }
+
+  const optContainer = document.getElementById('options');
+  optContainer.innerHTML = '';
+
+  /* UPDATE: Shuffle the options before rendering */
+  S.shuffledOptions = shuffleArray([...data.options]);
+
+  S.shuffledOptions.forEach((opt, idx) => {
+    const b = document.createElement('button');
+    b.className = 'opt-btn';
+    b.innerHTML = `<span>${opt.t}</span>`;
+    b.onclick = () => handleChoice(idx);
+    optContainer.appendChild(b);
+  });
+}
+
+function handleChoice(idx) {
+  if (S.answered) return;
+  S.answered = true;
+  
+  const selectedOpt = S.shuffledOptions[idx];
+  S.score += selectedOpt.pts;
+  document.getElementById('score').textContent = S.score;
+  
+  const fb = document.getElementById('feedback');
+  fb.style.display = 'block';
+  fb.textContent = selectedOpt.fb;
+  
+  if (selectedOpt.pts === 3) fb.className = 'feedback fb-good';
+  else if (selectedOpt.pts === 2) fb.className = 'feedback fb-mid';
+  else fb.className = 'feedback fb-bad';
+
+  // If Decision 7 (Source Code leak) and they picked wrong
+  if (S.step === 6 && selectedOpt.t !== "Call the legal team to issue DMCA 'Takedowns' and contact the police.") {
+    showGameOver(selectedOpt.fb);
+    return;
+  }
+
+  document.getElementById('next-btn').style.display = 'block';
+  const btns = document.querySelectorAll('.opt-btn');
+  btns.forEach(b => b.disabled = true);
+}
+
+function nextStep() {
+  if (S.step < DECISIONS.length - 1) {
+    S.step++;
+    renderStep();
+  } else {
+    showFinal();
+  }
+}
+
+function showGameOver(msg) {
+  document.getElementById('game').style.display = 'none';
+  document.getElementById('final').style.display = 'block';
+  document.getElementById('fin-num').textContent = "❌";
+  document.getElementById('fin-grade').textContent = "Terminated";
+  document.getElementById('fin-body').textContent = msg;
+}
+
+function showFinal() {
+  document.getElementById('game').style.display = 'none';
+  document.getElementById('final').style.display = 'block';
+  document.getElementById('fin-num').textContent = S.score;
+  
+  let g, b;
+  if (S.score >= 20) {
+    g = "Studio Legend";
+    b = "You are a master of game development. You balanced technical stability, PR, and team morale perfectly. Your English proficiency in high-pressure scenarios is elite.";
+  } else if (S.score >= 14) {
+    g = "Solid Producer";
+    b = "A successful launch! You made some expensive mistakes, but the game is live and the community is happy. Good work.";
+  } else {
+    g = "Overwhelmed Lead";
+    b = "The game launched, but it's a buggy mess. The community is toxic and the team is exhausted. You'll need a lot of patches to save this one.";
+  }
+  document.getElementById('fin-grade').textContent = g;
+  document.getElementById('fin-body').textContent = b;
+}
+</script>
+
+</body>
+</html>

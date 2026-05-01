@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Riverside Manor: Inn Management Elite</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --navy: #1a3a5f;
+        --burgundy: #721c24;
+        --gold: #c5a059;
+        --cream: #fdfaf6;
+        --green: #2d5a27;
+        --error: #a94442;
+        --text: #2c3e50;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: var(--cream);
+        color: var(--text);
+        line-height: 1.6;
+    }
+
+    header {
+        background: var(--navy);
+        color: white;
+        padding: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        position: sticky; top: 0; z-index: 1000;
+    }
+
+    .tally-box {
+        background: rgba(255,255,255,0.1);
+        padding: 0.5rem 1.5rem;
+        border-radius: 30px;
+        border: 1px solid var(--gold);
+        text-align: center;
+    }
+    .tally-score { font-size: 1.5rem; font-weight: 700; color: var(--gold); }
+
+    .container { max-width: 850px; margin: 2rem auto; padding: 0 1.5rem; }
+
+    .card {
+        background: white;
+        padding: 2.5rem;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        display: none;
+        animation: fadeIn 0.4s ease-out;
+    }
+    .card.active { display: block; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    h1, h2 { font-family: 'Playfair Display', serif; color: var(--navy); margin-bottom: 1.2rem; }
+    p { margin-bottom: 1.5rem; font-size: 1.05rem; }
+
+    .choices-grid { display: grid; gap: 1rem; margin: 2rem 0; }
+    .choice-btn {
+        background: #f8f9fa;
+        border: 2px solid #e9ecef;
+        padding: 1rem;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: 0.3s;
+        text-align: left;
+        font-size: 0.95rem;
+        font-family: 'Poppins', sans-serif;
+    }
+    .choice-btn:hover:not(:disabled) { border-color: var(--gold); background: #fffcf5; }
+    .choice-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .feedback-area {
+        margin-top: 1.5rem;
+        padding: 1.5rem;
+        border-radius: 12px;
+        display: none;
+        border-left: 6px solid;
+    }
+    .fb-best { background: #f0f9eb; border-color: var(--green); color: #2d5a27; }
+    .fb-avg { background: #fdf6ec; border-color: var(--gold); color: #856404; }
+    .fb-poor { background: #f4f6f7; border-color: #90a4ae; color: #2c3e50; }
+    .fb-worst { background: #fdf2f2; border-color: var(--error); color: #721c24; }
+
+    .points-reveal { font-weight: 700; display: block; margin-bottom: 0.5rem; text-transform: uppercase; }
+
+    .next-btn {
+        margin-top: 1.5rem;
+        background: var(--navy);
+        color: white;
+        border: none;
+        padding: 0.8rem 2.5rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        display: none;
+        width: 100%;
+    }
+
+    .emergency-banner {
+        background: var(--burgundy);
+        color: white;
+        padding: 0.4rem 0.8rem;
+        border-radius: 5px;
+        display: inline-block;
+        font-weight: bold;
+        margin-bottom: 1rem;
+        font-size: 0.8rem;
+    }
+</style>
+</head>
+<body>
+
+<header>
+    <div>
+        <h2 style="color: white; margin: 0;">The Riverside Manor</h2>
+        <span style="font-size: 0.8rem; color: var(--gold);">Inn Management Elite</span>
+    </div>
+    <div class="tally-box">
+        <div class="tally-score" id="scoreDisplay">4.0 ⭐</div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="card active" id="screen-start">
+        <h1>Inn Manager Challenge</h1>
+        <p>You are the manager of a luxury countryside inn. Your success is measured by your **Star Rating**[cite: 5].</p>
+        <p>You begin with a **4.0 Star Rating**. Aim for 5.0 by making elite decisions. Avoid poor choices, as the worst options will force you to reconsider your strategy[cite: 5].</p>
+        <button class="next-btn" style="display:block;" onclick="startGame()">Start Season</button>
+    </div>
+
+    <div class="card" id="screen-game">
+        <div id="step-content"></div>
+        <div class="choices-grid" id="choices-grid"></div>
+        <div class="feedback-area" id="feedback-box">
+            <span class="points-reveal" id="points-text"></span>
+            <p id="feedback-content" style="margin:0;"></p>
+        </div>
+        <button class="next-btn" id="btn-next">Proceed to Next Case</button>
+    </div>
+
+    <div class="card" id="screen-final">
+        <h1>Season Review</h1>
+        <div id="final-stats"></div>
+        <div id="band-content" style="margin: 2rem 0; padding: 1.5rem; border-radius: 12px; background: #f8f9fa;"></div>
+        <button class="next-btn" style="display:block;" onclick="location.reload()">Start New Season</button>
+    </div>
+</div>
+
+<script>
+let currentStepId = "q1";
+let score = 4.0;
+
+const steps = {
+    "q1": {
+        title: "Early Check-In Request",
+        desc: "A VIP guest arrives at 10:00 AM. Their suite won't be ready for three hours. How do you manage this expectations gap?",
+        choices: [
+            { text: "Apologize and offer them a complimentary brunch and a private tour of the grounds.", type: "best", fb: "Excellent! You turned a delay into an experience." },
+            { text: "Check them into a lower-tier room temporarily until their suite is ready.", type: "avg", fb: "Good. It solves the immediate problem." },
+            { text: "Ask them to wait in the lobby and offer a free coffee.", type: "poor", fb: "Okay. It's the minimum professional standard." },
+            { text: "Tell them the rules are clear: 'Check-in is at 2:00 PM' and ask them to return later.", type: "worst", fb: "Poor. This is too rigid for luxury. Choose again." }
+        ],
+        next: "q2"
+    },
+    "q2": {
+        title: "The Local Sourcing Dilemma",
+        desc: "Your head chef wants to switch to a local farmer for produce, but it will increase food costs by 15%.",
+        choices: [
+            { text: "Approve the switch and update the menu to highlight 'Garden-to-Table' local ingredients.", type: "best", fb: "Excellent! Guests pay a premium for authenticity." },
+            { text: "Approve it for only the most expensive dishes on the menu.", type: "avg", fb: "Good. A safe middle ground for the budget." },
+            { text: "Decline the request and stay with the industrial supplier.", type: "poor", fb: "Okay. It protects the budget but misses a branding opportunity." },
+            { text: "Tell the chef to pay the difference out of the kitchen staff's bonus fund.", type: "worst", fb: "Poor. This destroys staff morale. Choose again." }
+        ],
+        next: "q3"
+    },
+    "q3": {
+        title: "Noise Complaint",
+        desc: "A guest complains that a wedding party in the ballroom is too loud.",
+        choices: [
+            { text: "Immediately move the guest to a quieter suite in the West Wing with an apology.", type: "best", fb: "Excellent. Decisive action prevents a negative review." },
+            { text: "Offer the guest premium noise-canceling headphones and a voucher for the spa.", type: "avg", fb: "Good. A creative, albeit temporary, solution." },
+            { text: "Send security to the ballroom to tell the wedding party to be silent.", type: "poor", fb: "Okay. You helped one guest but potentially annoyed another." },
+            { text: "Tell the guest that they should have expected noise during 'wedding season'.", type: "worst", fb: "Poor. Never blame the guest. Choose again." }
+        ],
+        next: "e1"
+    },
+    "e1": {
+        isEmergency: true,
+        title: "EMERGENCY: Kitchen Fire",
+        desc: "A small fire has broken out in the kitchen during dinner service.",
+        choices: [
+            { text: "Evacuate the building immediately and call the fire department.", type: "best", fb: "Correct. Safety is the absolute priority." },
+            { text: "Try to put it out yourself with a blanket while guests finish their starters.", type: "worst", fb: "FAILED. You risked lives to save dinner. Choose again." }
+        ],
+        next: "q10"
+    },
+    "q10": {
+        title: "The VIP Mystery Guest",
+        desc: "You suspect a guest in Room 12 is a professional hotel critic.",
+        choices: [
+            { text: "Brief the staff to provide their usual high standard to EVERY guest.", type: "best", fb: "Excellent. Consistency is what critics look for." },
+            { text: "Send a free bottle of the most expensive wine to their room.", type: "avg", fb: "Good, but a critic might see this as a bribe." },
+            { text: "Follow them around the hotel personally to ensure everything is perfect.", type: "poor", fb: "Okay, but this can feel stifling for the guest." },
+            { text: "Ask them directly if they are a critic so you can prepare.", type: "worst", fb: "Poor. This looks desperate. Choose again." }
+        ],
+        next: "final"
+    }
+};
+
+function startGame() {
+    score = 4.0;
+    currentStepId = "q1";
+    updateScore();
+    showScreen("game");
+    renderStep();
+}
+
+function updateScore() {
+    document.getElementById('scoreDisplay').innerText = score.toFixed(1) + " ⭐";
+}
+
+function showScreen(id) {
+    document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+    document.getElementById('screen-' + id).classList.add('active');
+}
+
+function renderStep() {
+    const data = steps[currentStepId];
+    const container = document.getElementById('step-content');
+    const grid = document.getElementById('choices-grid');
+    const fbBox = document.getElementById('feedback-box');
+    const nextBtn = document.getElementById('btn-next');
+
+    fbBox.style.display = "none";
+    nextBtn.style.display = "none";
+    grid.innerHTML = "";
+
+    container.innerHTML = `
+        ${data.isEmergency ? '<span class="emergency-banner">🚨 EMERGENCY SCENARIO</span>' : ''}
+        <h2>${data.title}</h2>
+        <p>${data.desc}</p>
+    `;
+
+    data.choices.forEach((choice, index) => {
+        const btn = document.createElement('button');
+        btn.className = "choice-btn";
+        btn.id = "opt-" + index;
+        btn.innerText = choice.text;
+        btn.onclick = () => handleChoice(choice, index);
+        grid.appendChild(btn);
+    });
+}
+
+function handleChoice(choice, btnIndex) {
+    const fbBox = document.getElementById('feedback-box');
+    const ptText = document.getElementById('points-text');
+
+    if (choice.type === "worst") {
+        score = Math.max(0, score - 0.4);
+        ptText.innerText = "-0.4 Stars";
+        fbBox.className = "feedback-area fb-worst";
+        document.getElementById("opt-" + btnIndex).disabled = true;
+    } else {
+        if (choice.type === "best") {
+            score = Math.min(5.0, score + 0.1);
+            ptText.innerText = "+0.1 Stars";
+            fbBox.className = "feedback-area fb-best";
+        } else if (choice.type === "avg") {
+            ptText.innerText = "No Change";
+            fbBox.className = "feedback-area fb-avg";
+        } else if (choice.type === "poor") {
+            score = Math.max(0, score - 0.2);
+            ptText.innerText = "-0.2 Stars";
+            fbBox.className = "feedback-area fb-poor";
+        }
+
+        document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
+        document.getElementById('btn-next').style.display = "block";
+    }
+
+    document.getElementById('feedback-content').innerText = choice.fb;
+    fbBox.style.display = "block";
+    updateScore();
+
+    document.getElementById('btn-next').onclick = () => {
+        currentStepId = steps[currentStepId].next;
+        if (currentStepId === "final") showFinal(); else renderStep();
+    };
+}
+
+function showFinal() {
+    showScreen("final");
+    document.getElementById('final-stats').innerHTML = `<h2 style="text-align:center">Final Rating: ${score.toFixed(1)} / 5.0 ⭐</h2>`;
+    const bc = document.getElementById('band-content');
+    
+    if (score >= 4.5) {
+        bc.innerHTML = `<h3>Diamond Manager</h3><p>A hospitality visionary. The manor is elite under your lead.</p>`;
+    } else if (score >= 3.5) {
+        bc.innerHTML = `<h3>Gold Standard Innkeeper</h3><p>Solid performance. You manage daily chaos well.</p>`;
+    } else {
+        bc.innerHTML = `<h3>The Trainee</h3><p>A bumpy road. Focus more on proactive guest service.</p>`;
+    }
+}
+</script>
+</body>
+</html>

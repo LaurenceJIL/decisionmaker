@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>London Adventure - English A2</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --london-red: #d11243;
+        --tube-blue: #0019a8;
+        --river-grey: #f4f4f4;
+        --success: #27ae60;
+        --error: #c0392b;
+        --text: #333;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        font-family: 'Open Sans', sans-serif;
+        background-color: var(--river-grey);
+        color: var(--text);
+        line-height: 1.5;
+    }
+
+    header {
+        background: var(--tube-blue);
+        color: white;
+        padding: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 5px solid var(--london-red);
+    }
+
+    .score-box { background: white; color: var(--tube-blue); padding: 0.5rem 1rem; border-radius: 5px; font-weight: 700; }
+
+    .container { max-width: 600px; margin: 2rem auto; padding: 0 1rem; }
+
+    .card { background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: none; }
+    .card.active { display: block; }
+
+    h1 { font-family: 'Montserrat', sans-serif; font-size: 1.5rem; margin-bottom: 1rem; color: var(--tube-blue); }
+    h2 { font-family: 'Montserrat', sans-serif; font-size: 1.2rem; margin-bottom: 1rem; }
+    p { margin-bottom: 1rem; }
+
+    .choices-grid { display: grid; gap: 10px; margin: 1.5rem 0; }
+    .choice-btn {
+        background: #fff;
+        border: 2px solid #ddd;
+        padding: 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 1rem;
+        text-align: left;
+    }
+    .choice-btn:hover:not(:disabled) { border-color: var(--london-red); background: #fff5f7; }
+    .choice-btn:disabled { opacity: 0.5; }
+
+    .feedback { margin-top: 1rem; padding: 1rem; border-radius: 8px; display: none; border-left: 5px solid; }
+    .fb-excellent { background: #e8f5e9; border-color: #2e7d32; }
+    .fb-poor { background: #ffebee; border-color: #c62828; }
+
+    .next-btn {
+        margin-top: 1.5rem;
+        background: var(--london-red);
+        color: white;
+        border: none;
+        padding: 1rem;
+        border-radius: 5px;
+        cursor: pointer;
+        width: 100%;
+        font-weight: 700;
+        display: none;
+    }
+
+    .emergency { background: var(--london-red); color: white; padding: 3px 8px; border-radius: 3px; font-size: 0.8rem; font-weight: bold; margin-bottom: 0.5rem; display: inline-block; }
+</style>
+</head>
+<body>
+
+<header>
+    <h1>London Trip</h1>
+    <div class="score-box">Points: <span id="score">0</span></div>
+</header>
+
+<div class="container">
+    <div class="card active" id="screen-start">
+        <h1>Welcome to London!</h1>
+        <p>This is a game for English learners. Explore the city and learn British culture!</p>
+        <p>Make 10 choices. Can you get <strong>30 points</strong>?</p>
+        <button class="next-btn" style="display:block;" onclick="startGame()">Start Game</button>
+    </div>
+
+    <div class="card" id="screen-game">
+        <div id="status-area"></div>
+        <h2 id="step-title"></h2>
+        <p id="step-desc"></p>
+        <div class="choices-grid" id="choices-container"></div>
+        
+        <div class="feedback" id="feedback-box">
+            <strong id="points-text"></strong>
+            <p id="feedback-content"></p>
+        </div>
+        
+        <button class="next-btn" id="btn-next">Next</button>
+    </div>
+
+    <div class="card" id="screen-final">
+        <h1>Finish!</h1>
+        <div id="final-stats" style="font-size: 1.5rem; text-align: center; margin-bottom: 1rem;"></div>
+        <div id="band-result" style="padding: 1.5rem; border-radius: 10px; text-align: center;"></div>
+        <button class="next-btn" style="display:block;" onclick="location.reload()">Play Again</button>
+    </div>
+</div>
+
+<script>
+const steps = {
+    d1: {
+        title: "1. The Airport",
+        desc: "You are at Heathrow Airport. How do you go to the hotel?",
+        choices: [
+            { text: "Take the train (Elizabeth Line). It is fast.", pts: 3, type: "excellent", fb: "Great! It is the best way to travel." },
+            { text: "Take a taxi. It is very expensive.", pts: 2, type: "good", fb: "Okay, but a taxi costs a lot of money in London." },
+            { text: "Take a bus. It is slow but cheap.", pts: 1, type: "good", fb: "Good for your budget, but you are tired." },
+            { text: "Walk to the center with my bags.", pts: -1, type: "poor", fb: "No! London is too big. You cannot walk from the airport. Choose again." }
+        ],
+        next: "d2"
+    },
+    d2: {
+        title: "2. The Weather",
+        desc: "It is raining. What do you do?",
+        choices: [
+            { text: "Buy an umbrella and go for a walk.", pts: 3, type: "excellent", fb: "Correct! London people walk in the rain every day." },
+            { text: "Go to a museum. It is dry inside.", pts: 2, type: "good", fb: "Smart! Most museums in London are free and dry." },
+            { text: "Go to a cafe and drink hot tea.", pts: 1, type: "good", fb: "Nice and cozy, but you are not seeing the city!" },
+            { text: "Stand in the middle of the street and cry.", pts: -1, type: "poor", fb: "Don't be sad! The rain is normal here. Choose again." }
+        ],
+        next: "d3"
+    },
+    d3: {
+        title: "3. Choose an Activity",
+        desc: "What do you want to see this afternoon?",
+        choices: [
+            { text: "History: I want to see Big Ben and the Queen's house.", pts: 3, type: "excellent", path: "pathHistory", fb: "Great! Let's see the famous buildings." },
+            { text: "Modern: I want to go to a market and buy clothes.", pts: 3, type: "excellent", path: "pathModern", fb: "Cool! London has great markets." },
+            { text: "Nothing: I want to go to the supermarket.", pts: 1, type: "good", next: "e1", fb: "Boring! You can do that at home. (Merging paths)." },
+            { text: "I want to stay in my hotel and watch TV.", pts: -1, type: "poor", fb: "No! Go outside and explore. Choose again." }
+        ]
+    },
+    pathHistory: {
+        title: "4. The King's Guard",
+        desc: "You see a soldier with a tall black hat. What do you do?",
+        choices: [
+            { text: "Look at the soldier and take a photo from a distance.", pts: 3, type: "excellent", fb: "Good. You are very polite." },
+            { text: "Try to touch the soldier's hat.", pts: -1, type: "poor", fb: "Bad idea! The soldiers are working. Do not touch them. Choose again." },
+            { text: "Ask the soldier 'Where is the toilet?'", pts: 1, type: "good", fb: "They usually do not speak, so he will not answer you." }
+        ],
+        next: "e1"
+    },
+    pathModern: {
+        title: "4. Street Food",
+        desc: "You are at a food market. Everything smells good!",
+        choices: [
+            { text: "Try a 'Pie'. It is a traditional British food.", pts: 3, type: "excellent", fb: "Yum! That is a very local choice." },
+            { text: "Buy a burger from a big global company.", pts: 1, type: "good", fb: "It's okay, but try something new next time!" },
+            { text: "Ask the worker: 'What do you recommend?'", pts: 2, type: "good", fb: "Good English! It is good to ask for help." }
+        ],
+        next: "e1"
+    },
+    e1: {
+        title: "EMERGENCY: Lost!",
+        isEmergency: true,
+        desc: "Your phone is dead. You don't have a map. You are lost!",
+        choices: [
+            { text: "Ask a person: 'Excuse me, where is the station?'", pts: 0, type: "excellent", next: "d5", fb: "Good Choice! Most London people are happy to help." },
+            { text: "Look for a big map on the street corner.", pts: 0, type: "excellent", next: "d5", fb: "Good Choice! London has many 'Legible London' street maps." },
+            { text: "Run in circles and scream for help.", pts: 0, type: "poor", gameOver: true, fb: "GAME OVER. People thought you were crazy and stayed away. You are still lost." }
+        ]
+    },
+    d5: {
+        title: "5. Afternoon Tea",
+        desc: "You are drinking tea. You have a 'scone' (a small cake).",
+        choices: [
+            { text: "Eat it with jam and cream.", pts: 3, type: "excellent", fb: "Perfect! That is the British way." },
+            { text: "Put salt and pepper on the cake.", pts: -1, type: "poor", fb: "No! That sounds terrible. A scone is sweet. Choose again." },
+            { text: "Dip the scone into your tea until it is wet.", pts: 1, type: "good", fb: "A bit messy, but some people like it!" }
+        ],
+        next: "d6"
+    },
+    d6: {
+        title: "6. The Red Bus",
+        desc: "You want to go to the shops. Do you take the bus?",
+        choices: [
+            { text: "Yes, I want to sit on the top floor at the front.", pts: 3, type: "excellent", fb: "The best seat! You can see everything." },
+            { text: "No, I want to walk. It is good exercise.", pts: 2, type: "good", fb: "Good, but London is very big. Your feet will hurt!" },
+            { text: "Yes, I will sit on the bottom and close my eyes.", pts: 1, type: "good", fb: "You are missing the view!" },
+            { text: "I will try to drive the bus myself.", pts: -1, type: "poor", fb: "You are not the driver! That is illegal. Choose again." }
+        ],
+        next: "d7"
+    },
+    d7: {
+        title: "7. The Pub",
+        desc: "You go to a pub for a drink. It is very busy.",
+        choices: [
+            { text: "Go to the bar and wait for the worker to see you.", pts: 3, type: "excellent", fb: "Correct. In a pub, you order at the bar." },
+            { text: "Sit at a table and wait for a waiter to come.", pts: 1, type: "good", fb: "In many London pubs, nobody will come to your table. You will be thirsty!" },
+            { text: "Shout 'HELLO! I WANT A DRINK NOW!'", pts: -1, type: "poor", fb: "That is very rude. The worker will be angry. Choose again." }
+        ],
+        next: "e2"
+    },
+    e2: {
+        title: "EMERGENCY: Full Bus!",
+        isEmergency: true,
+        desc: "The red bus arrives, but it is full. There is no space.",
+        choices: [
+            { text: "Wait 5 minutes for the next bus.", pts: 0, type: "excellent", next: "d8", fb: "Good Choice. London has buses every few minutes." },
+            { text: "Walk 10 minutes to the next station.", pts: 0, type: "excellent", next: "d8", fb: "Good Choice. Walking is often faster in London!" },
+            { text: "Try to jump on the back of the bus and hold on.", pts: 0, type: "poor", gameOver: true, fb: "GAME OVER. You fell off the bus. Very dangerous!" }
+        ]
+    },
+    d8: {
+        title: "8. Sunday Dinner",
+        desc: "It is Sunday. What do you eat for dinner?",
+        choices: [
+            { text: "Sunday Roast (Meat, potatoes, and vegetables).", pts: 3, type: "excellent", fb: "Correct! Every British person eats this on Sunday." },
+            { text: "Fish and Chips.", pts: 2, type: "good", fb: "Good, but people usually eat this on Friday." },
+            { text: "A bowl of cereal.", pts: 1, type: "good", fb: "That is breakfast food! Try the Roast." },
+            { text: "I want to eat a hot dog from a street bin.", pts: -1, type: "poor", fb: "Gross! Do not eat from a bin. Choose again." }
+        ],
+        next: "d9"
+    },
+    d9: {
+        title: "9. Souvenirs",
+        desc: "You want to buy a gift for your family.",
+        choices: [
+            { text: "A box of English Tea.", pts: 3, type: "excellent", fb: "Classic. Everyone likes tea!" },
+            { text: "A small red bus toy.", pts: 2, type: "good", fb: "Cute! It is a nice memory of London." },
+            { text: "A postcard.", pts: 1, type: "good", fb: "Simple and nice." },
+            { text: "A bag of trash from the street.", pts: -1, type: "poor", fb: "That is not a gift! Choose again." }
+        ],
+        next: "d10"
+    },
+    d10: {
+        title: "10. The Flight Home",
+        desc: "Your flight is today. When do you go to the airport?",
+        choices: [
+            { text: "3 hours before my flight.", pts: 3, type: "excellent", fb: "Smart. Heathrow is a very busy airport." },
+            { text: "30 minutes before my flight.", pts: -1, type: "poor", fb: "You will miss the plane! Traffic is bad. Choose again." },
+            { text: "1 hour before my flight.", pts: 1, type: "good", fb: "Risky! You need more time for security." }
+        ],
+        next: "final"
+    }
+};
+
+const bands = [
+    { min: -10, max: 15, title: "Lost Tourist 🎒", color: "#e67e22", text: "You had a difficult trip. Study more English and try again!" },
+    { min: 16, max: 26, title: "Good Traveler 🚇", color: "#2980b9", text: "Well done! you know a lot about London." },
+    { min: 27, max: 30, title: "London Expert 👑", color: "#27ae60", text: "Fantastic! You are a master of London culture." }
+];
+
+let score = 0;
+let currentStepId = "d1";
+
+/* FISHER-YATES SHUFFLE ALGORITHM */
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+function startGame() {
+    score = 0; currentStepId = "d1";
+    updateScore(); showScreen("game"); renderStep();
+}
+
+function updateScore() { document.getElementById('score').innerText = score; }
+
+function showScreen(id) {
+    document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+    document.getElementById('screen-' + id).classList.add('active');
+}
+
+function renderStep() {
+    const data = steps[currentStepId];
+    const container = document.getElementById('choices-container');
+    document.getElementById('step-title').innerText = data.title;
+    document.getElementById('step-desc').innerText = data.desc;
+    document.getElementById('status-area').innerHTML = data.isEmergency ? `<div class="emergency">EMERGENCY</div>` : "";
+    container.innerHTML = "";
+    document.getElementById('feedback-box').style.display = "none";
+    document.getElementById('btn-next').style.display = "none";
+
+    /* Create a copy of the choices and shuffle it using Fisher-Yates */
+    const shuffledChoices = shuffleArray([...data.choices]);
+
+    shuffledChoices.forEach(choice => {
+        const btn = document.createElement('button');
+        btn.className = "choice-btn";
+        btn.innerText = choice.text;
+        btn.onclick = () => handleChoice(choice, btn);
+        container.appendChild(btn);
+    });
+}
+
+function handleChoice(choice, btn) {
+    const fbBox = document.getElementById('feedback-box');
+    const data = steps[currentStepId];
+
+    document.getElementById('points-text').innerText = choice.pts >= 0 ? `+${choice.pts} Points` : `${choice.pts} Point`;
+    document.getElementById('feedback-content').innerText = choice.fb;
+    fbBox.className = "feedback fb-" + (choice.pts > 0 ? "excellent" : "poor");
+    fbBox.style.display = "block";
+
+    if (choice.gameOver) {
+        setTimeout(() => { alert(choice.fb); location.reload(); }, 3000);
+        return;
+    }
+
+    if (choice.pts === -1) {
+        score += choice.pts; updateScore();
+        btn.disabled = true; return;
+    }
+
+    score += choice.pts; updateScore();
+    document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
+    const nextBtn = document.getElementById('btn-next');
+    nextBtn.style.display = "block";
+    nextBtn.onclick = () => {
+        currentStepId = choice.path || choice.next || steps[currentStepId].next;
+        if (currentStepId === "final") showFinal(); else renderStep();
+    };
+}
+
+function showFinal() {
+    showScreen("final");
+    document.getElementById('final-stats').innerText = `Score: ${score} / 30`;
+    const band = bands.find(b => score >= b.min && score <= b.max) || bands[0];
+    const br = document.getElementById('band-result');
+    br.style.border = "2px solid " + band.color;
+    br.innerHTML = `<h2 style="color:${band.color}">${band.title}</h2><p>${band.text}</p>`;
+}
+</script>
+</body>
+</html>

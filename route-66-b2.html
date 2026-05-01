@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Route 66: The $1,000 Challenge</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --road-dark: #263238;
+    --road-blue: #0277bd;
+    --sand: #e0d7d3;
+    --danger: #c0392b;
+    --gold: #fbc02d;
+    --text: #2c3e50;
+    --bg: #f4f1ea; 
+  }
+
+  body { 
+    font-family: 'Lato', sans-serif; 
+    background-color: var(--bg); 
+    background-image: radial-gradient(#d7ccc8 1px, transparent 1px);
+    background-size: 20px 20px;
+    color: var(--text); 
+    margin: 0; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background Illustration: The Road */
+  body::after {
+    content: "";
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 150px;
+    background: 
+      linear-gradient(transparent, var(--bg)),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%23d7ccc8' fill-opacity='0.4' d='M0,224L120,202.7C240,181,480,139,720,138.7C960,139,1200,181,1320,202.7L1440,224L1440,320L1320,320C1200,320,960,320,720,320C480,320,240,320,120,320L0,320Z'%3E%3C/path%3E%3C/svg%3E");
+    background-size: cover;
+    z-index: -1;
+    opacity: 0.8;
+  }
+
+  .header { 
+    background: var(--road-dark); 
+    color: white; 
+    width: 100%; 
+    padding: 20px; 
+    text-align: center; 
+    position: sticky; 
+    top: 0; 
+    z-index: 10; 
+    border-bottom: 5px solid var(--road-blue);
+  }
+  
+  .stats-bar { 
+    display: flex; 
+    justify-content: space-around; 
+    background: rgba(255, 255, 255, 0.9); 
+    width: 100%; 
+    padding: 15px 0; 
+    border-bottom: 2px solid #ddd; 
+    font-weight: bold;
+    backdrop-filter: blur(5px);
+  }
+
+  .progress-bar { width: 100%; height: 8px; background: #e0e0e0; }
+  .progress-fill { height: 100%; background: var(--road-blue); width: 0%; transition: 0.8s; }
+
+  .game-container { 
+    max-width: 800px; 
+    width: 90%; 
+    margin: 40px auto; 
+    background: white; 
+    padding: 40px; 
+    border-radius: 4px;
+    box-shadow: 15px 15px 0px rgba(2, 119, 189, 0.1), 0 10px 30px rgba(0,0,0,0.05); 
+    position: relative;
+    border: 1px solid #ddd;
+  }
+
+  /* Postcard Stamp */
+  .game-container::before {
+    content: "ROUTE 66";
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    padding: 5px;
+    border: 2px solid #ccc;
+    color: #ccc;
+    font-size: 0.7rem;
+    font-weight: bold;
+    transform: rotate(15deg);
+  }
+
+  .choice-list { display: flex; flex-direction: column; gap: 15px; margin-top: 25px; }
+
+  .choice-btn { 
+    padding: 15px 20px; border: 2px solid #eee; border-radius: 8px; background: white; 
+    cursor: pointer; text-align: left; transition: 0.3s;
+    display: flex; flex-direction: column; gap: 5px;
+  }
+  .choice-btn:hover:not(:disabled) { border-color: var(--road-blue); background: #f1f8fe; transform: translateX(5px); }
+  
+  .choice-main-text { font-size: 1.05rem; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+  .choice-sub-text { font-size: 0.9rem; color: #666; font-style: italic; }
+
+  .price-tag { padding: 4px 10px; border-radius: 4px; font-size: 0.9rem; font-weight: 800; background: #f5f5f5; border: 1px solid #cfd8dc; }
+
+  .feedback { margin-top: 25px; padding: 25px; border-radius: 8px; display: none; line-height: 1.7; border-left: 8px solid var(--road-blue); background: #fcfcfc; color: #444; }
+  .btn-next { display: none; margin-top: 25px; padding: 20px; background: var(--road-blue); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; font-size: 1.2rem; text-transform: uppercase; }
+
+  #landingPage {
+    position: fixed; inset: 0; z-index: 100;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2c3e50 100%);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 30px; text-align: center; color: white;
+  }
+
+  .landing-title { font-family: 'Playfair Display', serif; font-size: 5rem; margin-bottom: 10px; color: var(--gold); }
+  .landing-btn { padding: 22px 60px; background: var(--gold); color: #000; font-weight: 900; border: none; border-radius: 4px; cursor: pointer; margin-top: 30px; text-transform: uppercase; font-size: 1.2rem; }
+</style>
+</head>
+<body>
+
+<div id="landingPage">
+  <h1 class="landing-title">Route 66</h1>
+  <h3 style="letter-spacing: 4px;">THE $1,000 HARDCORE CHALLENGE</h3>
+  <p style="max-width: 600px; font-size: 1.1rem; line-height: 1.6; color: #eee;">Welcome to the Mother Road. You have a razor-thin <strong>$1,000 budget</strong>. Every dollar spent on a steak is a dollar you don't have for gas in the Mojave. Can you survive the 2,448-mile journey?</p>
+  <button class="landing-btn" onclick="startGame()">Ignition →</button>
+</div>
+
+<div class="header">
+  <h1 style="margin:0; letter-spacing: 2px;">🛣️ ROUTE 66: THE THRIFTY TRAIL</h1>
+</div>
+
+<div class="stats-bar">
+  <div class="stat-item">⭐ SCORE: <span id="scoreDisplay">0</span></div>
+  <div class="stat-item">💰 BUDGET: <span id="budgetDisplay">$1,000</span></div>
+</div>
+
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+<div class="game-container" id="gameWindow">
+  <h2 id="stepTitle" style="font-family: 'Playfair Display', serif; color: var(--road-blue);"></h2>
+  <p id="stepDesc"></p>
+  <div class="choice-list" id="choiceList"></div>
+  <div class="feedback" id="feedbackBox"></div>
+  <button class="btn-next" id="nextBtn" onclick="nextStep()">Drive Forward →</button>
+</div>
+
+<script>
+let currentStepKey = "start";
+let score = 0;
+let budget = 1000;
+
+const gameData = {
+  "start": {
+    title: "1. The Chicago Departure",
+    desc: "Your funds are tight. Choose your iron horse wisely for the 2,400-mile stretch.",
+    choices: [
+      { text: "Rent a vintage 1960s Cadillac.", sub: "Ride in style with chrome and tailfins.", cost: 450, pts: 30, next: "illinois", fb: "It's gorgeous, but it's a gas-guzzling money pit. You've spent nearly half your budget on day one. You'll need to be extremely frugal from here on out." },
+      { text: "Lease a reliable compact car.", sub: "Efficiency meets comfort for the long haul.", cost: 200, pts: 10, next: "illinois", fb: "Smart move. It’s not flashy, but it’ll get you to California on a sip of fuel, leaving you plenty of cash for the roadside attractions." }
+    ]
+  },
+  "illinois": {
+    title: "2. The Gemini Giant",
+    desc: "Hunger strikes in Wilmington. The 30-foot astronaut beckons.",
+    choices: [
+      { text: "Indulge in a full 'Astronaut Burger' meal.", sub: "Savor the flavor of the space age.", cost: 35, pts: 15, next: "missouri_caverns", fb: "A true Route 66 classic! The burger is legendary, but that's a lot of money for one lunch when you're on a $1,000 budget." },
+      { text: "Take a quick photo and eat a granola bar.", sub: "Snap a memory and keep the tank full.", cost: 5, pts: 5, next: "missouri_caverns", fb: "Your wallet thanks you, even if your stomach doesn't. You've got $30 more for the desert." }
+    ]
+  },
+  "missouri_caverns": {
+    title: "3. Meramec Caverns",
+    desc: "Missouri's subterranean wonder. Will you see the outlaw's hideout?",
+    choices: [
+      { text: "Pay for the deep underground tour.", sub: "Uncover the secrets of the Jesse James gang.", cost: 80, pts: 25, next: "missouri_drivein", fb: "The cave is magnificent and the history is rich. You're living the dream, but your bank balance is dropping fast." },
+      { text: "Browse the free museum and gift shop.", sub: "Pick up a token of the road without the descent.", cost: 15, pts: 5, next: "missouri_drivein", fb: "You saw the entrance and grabbed a postcard. Efficient, but you missed the 'miracle' of the stalactites." }
+    ]
+  },
+  "missouri_drivein": {
+    title: "4. Sunset in Carthage",
+    desc: "The 66 Drive-In is glowing in the twilight. A movie or a motel?",
+    choices: [
+      { text: "Watch a double feature from your car.", sub: "Reclaim the magic of the silver screen under the stars.", cost: 40, pts: 20, next: "kansas", fb: "Nostalgia at its finest. Sitting in the cool Missouri air watching a movie is what this road is all about." },
+      { text: "Drive past and find a cheap motel early.", sub: "Trade showtime for some early shut-eye.", cost: 0, pts: 5, next: "kansas", fb: "You're rested and your budget is intact, but you missed a rare piece of Americana." }
+    ]
+  },
+  "kansas": {
+    title: "5. The Kansas Corner",
+    desc: "Thirteen miles of Kansas. Do you stop at the 'Rainbow' bridge?",
+    choices: [
+      { text: "Visit the historic Brush Creek Bridge.", sub: "Walk across a rainbow made of concrete.", cost: 0, pts: 15, next: "oklahoma_totem", fb: "Beautiful and free! This is the kind of stop a budget traveler dreams of." },
+      { text: "Speed through to reach Oklahoma faster.", sub: "The finish line is calling, keep the wheels turning.", cost: 0, pts: 2, next: "oklahoma_totem", fb: "You saved time, but you missed a beautiful photo op." }
+    ]
+  },
+  "oklahoma_totem": {
+    title: "6. Totem Pole Park",
+    desc: "The world's largest concrete totem pole stands in Chelsea.",
+    choices: [
+      { text: "Donate to the park and explore.", sub: "Invest in the preservation of American folk art.", cost: 20, pts: 20, next: "oklahoma_city", fb: "A small price to pay to help preserve a legend. The detail in the concrete is stunning." },
+      { text: "Look from the road and keep driving.", sub: "Admire the towering colors from your rearview.", cost: 0, pts: 5, next: "oklahoma_city", fb: "You saw it! It’s huge! You also kept your $20." }
+    ]
+  },
+  "oklahoma_city": {
+    title: "7. The Milk Bottle Grocery",
+    desc: "A giant milk bottle on a tiny building. Snack time?",
+    choices: [
+      { text: "Try a local specialty sandwich.", sub: "Bite into a local legend atop a giant bottle.", cost: 25, pts: 15, next: "texas_urop", fb: "Delicious. You're supporting a local landmark, though your 'per meal' average is creeping up." },
+      { text: "Eat some leftover snacks in your car.", sub: "Your cooler has all the fuel you need.", cost: 0, pts: 5, next: "texas_urop", fb: "Warm soda and crackers... the true taste of a budget road trip." }
+    ]
+  },
+  "texas_urop": {
+    title: "8. The Tower Station",
+    desc: "The U-Drop Inn in Shamrock is a neon Art Deco masterpiece.",
+    choices: [
+      { text: "Join a guided architectural tour.", sub: "Explore an Art Deco gem frozen in time.", cost: 30, pts: 25, next: "texas_cadillac", fb: "The interior is as stunning as the exterior. You feel like you've stepped back into 1936." },
+      { text: "Take a selfie outside and leave.", sub: "Catch the neon glow for the perfect social post.", cost: 0, pts: 10, next: "texas_cadillac", fb: "The building is the star of your photo album, and it didn't cost you a cent." }
+    ]
+  },
+  "texas_cadillac": {
+    title: "9. Cadillac Ranch",
+    desc: "Ten cars buried in the dirt. Will you leave your mark?",
+    choices: [
+      { text: "Buy spray paint and leave a mural.", sub: "Leave your vibrant mark on a graveyard of steel.", cost: 25, pts: 30, next: "midpoint", fb: "Exhilarating! You're officially part of the road's history now." },
+      { text: "Walk through the field and watch.", sub: "Wander through a kaleidoscope of history.", cost: 0, pts: 10, next: "midpoint", fb: "The colors are still beautiful even if you didn't add any yourself." }
+    ]
+  },
+  "midpoint": {
+    title: "10. The Midpoint Cafe",
+    desc: "Halfway there! 1,139 miles to go. Hungry for pie?",
+    choices: [
+      { text: "Order a slice of 'Ugly Crust Pie'.", sub: "A sweet reward for reaching the road's heart.", cost: 12, pts: 20, next: "newmexico_bluehole", fb: "The best pie you've ever had. A well-deserved halfway treat." },
+      { text: "Just take a photo of the sign.", sub: "Mark the milestone with a zero-dollar click.", cost: 0, pts: 5, next: "newmexico_bluehole", fb: "You’ve achieved the halfway mark! Your wallet is still looking okay." }
+    ]
+  },
+  "newmexico_bluehole": {
+    title: "11. Santa Rosa Blue Hole",
+    desc: "A sapphire lake in the desert. The heat is rising.",
+    choices: [
+      { text: "Pay for a swimming permit.", sub: "Plunge into an 80-foot sapphire oasis.", cost: 20, pts: 25, next: "newmexico_wigwam", fb: "The best $20 you've spent. That 62-degree water is pure bliss." },
+      { text: "Dip your feet in for free.", sub: "Cool your heels in the desert's hidden gem.", cost: 0, pts: 10, next: "newmexico_wigwam", fb: "Refreshing and free. You're a master of the budget." }
+    ]
+  },
+  "newmexico_wigwam": {
+    title: "12. The Wigwam Motel",
+    desc: "Sleep in a tipi! It's the ultimate Route 66 experience.",
+    choices: [
+      { text: "Book a night in a Tipi.", sub: "Sleep inside a piece of mid-century Americana.", cost: 140, pts: 35, next: "arizona_meteor", fb: "You'll never forget sleeping here. It’s iconic, but it’s a massive hit to your remaining funds." },
+      { text: "Stay at a modern chain hotel.", sub: "Reliable rest for the budget-conscious traveler.", cost: 75, pts: 5, next: "arizona_meteor", fb: "Clean, boring, and half the price. You're playing it safe for the final stretch." }
+    ]
+  },
+  "arizona_meteor": {
+    title: "13. Meteor Crater",
+    desc: "A giant hole from space. Do you take the rim tour?",
+    choices: [
+      { text: "Take the rim tour with a guide.", sub: "Stand on the edge of a cosmic impact zone.", cost: 45, pts: 25, next: "arizona_oatman", fb: "The scale is impossible to capture in photos. Seeing it in person is breathtaking." },
+      { text: "Visit the free museum area.", sub: "Peer into the mysteries from the lobby.", cost: 0, pts: 10, next: "arizona_oatman", fb: "You learned a lot, and you still have enough money for gas to California." }
+    ]
+  },
+  "arizona_oatman": {
+    title: "14. The Burros of Oatman",
+    desc: "Wild donkeys rule this ghost town. They look hungry.",
+    choices: [
+      { text: "Buy bags of 'burro chow' to feed them.", sub: "Make a fuzzy friend in a wild west ghost town.", cost: 10, pts: 20, next: "california_pier", fb: "They’re adorable and pushy! It’s a highlight of the trip for just ten bucks." },
+      { text: "Watch from the car window.", sub: "Witness the donkey parade from your dash.", cost: 0, pts: 5, next: "california_pier", fb: "They’re cute, but you’re keeping your snacks—and your money—to yourself." }
+    ]
+  },
+  "california_pier": {
+    title: "15. The Santa Monica Pier",
+    desc: "The end of the trail. The Pacific ocean is right there.",
+    choices: [
+      { text: "Buy a commemorative plaque.", sub: "Carry home a physical piece of your triumph.", cost: 60, pts: 30, next: "finish", fb: "A beautiful reward for a long journey. You did it!" },
+      { text: "Watch the sunset at the sign.", sub: "End your odyssey with a sunset over the Pacific.", cost: 0, pts: 15, next: "finish", fb: "The most beautiful things in life are free. What a journey." }
+    ]
+  }
+};
+
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+function startGame() {
+  document.getElementById("landingPage").style.display = "none";
+  renderStep();
+}
+
+function renderStep() {
+  const step = gameData[currentStepKey];
+  if (!step) return;
+
+  document.getElementById("stepTitle").textContent = step.title;
+  document.getElementById("stepDesc").textContent = step.desc;
+  
+  const list = document.getElementById("choiceList");
+  list.innerHTML = "";
+  document.getElementById("feedbackBox").style.display = "none";
+  document.getElementById("nextBtn").style.display = "none";
+
+  const shuffledChoices = shuffleArray([...step.choices]);
+
+  shuffledChoices.forEach(choice => {
+    const btn = document.createElement("button");
+    btn.className = "choice-btn";
+    btn.innerHTML = `
+      <div class="choice-main-text">
+        <span>${choice.text}</span>
+        <span class="price-tag">$${choice.cost}</span>
+      </div>
+      <div class="choice-sub-text">${choice.sub}</div>
+    `;
+    btn.onclick = () => makeChoice(choice, btn);
+    list.appendChild(btn);
+  });
+
+  const keys = Object.keys(gameData);
+  const currentIdx = keys.indexOf(currentStepKey);
+  document.getElementById("progressFill").style.width = ((currentIdx / keys.length) * 100) + "%";
+}
+
+function makeChoice(choice, btn) {
+  budget -= choice.cost;
+  score += choice.pts;
+  
+  document.getElementById("scoreDisplay").textContent = score;
+  document.getElementById("budgetDisplay").textContent = "$" + budget.toLocaleString();
+
+  const fb = document.getElementById("feedbackBox");
+  fb.innerHTML = `<strong>THE RESULT:</strong> ${choice.fb}`;
+  fb.style.display = "block";
+
+  document.querySelectorAll(".choice-btn").forEach(b => b.disabled = true);
+  btn.style.borderColor = "var(--road-blue)";
+  btn.style.background = "#e3f2fd";
+
+  currentStepKey = choice.next;
+  document.getElementById("nextBtn").style.display = "block";
+
+  if (budget < 0) {
+    gameOver("📉 BANKRUPT IN THE DESERT", "You ran out of money. You had to sell your car for scrap metal in Barstow and hitchhike the rest of the way. You reached the ocean, but you lost everything.");
+  }
+}
+
+function nextStep() {
+  if (currentStepKey === "finish") {
+    calculateFinalRank();
+  } else {
+    renderStep();
+  }
+}
+
+function gameOver(title, msg) {
+  document.getElementById("gameWindow").innerHTML = `<h2>${title}</h2><p>${msg}</p><button class="btn-next" style="display:block" onclick="location.reload()">Try Again</button>`;
+}
+
+function calculateFinalRank() {
+  let title, message;
+  if (score >= 320) {
+    title = "👑 LEVEL: ROUTE 66 ELITE";
+    message = "Masterful! You completed the most iconic experiences while staying under a tiny $1,000 budget. You are a legend of the Mother Road.";
+  } else if (score >= 200) {
+    title = "🚗 LEVEL: SAVVY VAGABOND";
+    message = "Well done. You made some tough compromises, but you experienced the heart of the road without going broke.";
+  } else {
+    title = "🌵 LEVEL: THE SURVIVOR";
+    message = "You made it to the coast, but you basically just looked at the road through a window. Next time, try to save up more!";
+  }
+  document.getElementById("gameWindow").innerHTML = `
+    <h2 style="color: var(--road-blue)">${title}</h2>
+    <p style="font-size: 1.2rem">${message}</p>
+    <hr>
+    <p>Final Score: <b>${score}</b></p>
+    <p>Remaining Funds: <b>$${budget.toLocaleString()}</b></p>
+    <button class="btn-next" style="display:block" onclick="location.reload()">Restart Journey</button>`;
+  document.getElementById("progressFill").style.width = "100%";
+}
+</script>
+
+</body>
+</html>

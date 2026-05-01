@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Village Kick-Off — Excellence Edition</title>
+    
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Source+Sans+3:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --pitch-green: #2d5a27;
+            --grass-light: #3a7532;
+            --line-white: #ffffff;
+            --card-yellow: #f1c40f;
+            --gold: #d4af37;
+            --dark: #1a1a1a;
+            --text: #f0f0f0;
+            --danger: #e74c3c;
+            --r: 12px;
+        }
+
+        body {
+            font-family: 'Source Sans 3', Arial, sans-serif;
+            background-color: var(--dark);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        #game-container {
+            width: 100%;
+            max-width: 800px;
+            background: var(--pitch-green);
+            border: 4px solid var(--line-white);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            background-image: linear-gradient(90deg, transparent 50%, rgba(255,255,255,0.05) 50%);
+            background-size: 100px 100%;
+        }
+
+        h1 {
+            font-family: 'Bangers', cursive;
+            font-size: clamp(2rem, 8vw, 3.5rem);
+            text-align: center;
+            color: var(--line-white);
+            text-shadow: 3px 3px 0px var(--dark);
+            margin-top: 0;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            background: rgba(0,0,0,0.4);
+            padding: 0.7rem 1rem;
+            border-radius: 5px;
+            margin-bottom: 1.5rem;
+            font-weight: bold;
+            border-bottom: 2px solid var(--line-white);
+        }
+
+        .vocab-strip {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 1rem;
+        }
+
+        .vpill {
+            font-size: 11px;
+            background: rgba(255,255,255,0.2);
+            padding: 2px 8px;
+            border-radius: 10px;
+            border: 1px solid var(--line-white);
+        }
+
+        .question-box {
+            background: rgba(255,255,255,0.1);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            font-size: 1.2rem;
+            border-left: 6px solid var(--card-yellow);
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .opt-btn {
+            background: var(--line-white);
+            color: var(--pitch-green);
+            border: none;
+            padding: 1rem;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s ease;
+            text-align: left;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .opt-btn:hover:not(:disabled) {
+            background: var(--card-yellow);
+            transform: translateX(5px);
+        }
+
+        .opt-letter {
+            background: var(--pitch-green);
+            color: white;
+            width: 25px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .feedback {
+            display: none;
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            border-radius: 8px;
+            background: var(--dark);
+            border: 2px solid var(--gold);
+        }
+
+        .fb-bad { border-color: var(--danger); color: #ff9999; }
+
+        .next-btn {
+            width: 100%;
+            margin-top: 15px;
+            padding: 12px;
+            background: var(--gold);
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        #result-screen { display: none; text-align: center; }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div id="start-screen">
+        <h1>THE VILLAGE KICK-OFF</h1>
+        <p style="text-align: center; font-size: 1.1rem; margin-bottom: 20px;">Lead the community sports tournament. Every choice matters. Max score: 30.</p>
+        <button class="opt-btn" style="justify-content: center; width: 100%;" onclick="startGame()">START TOURNAMENT</button>
+    </div>
+
+    <div id="game-play" style="display:none;">
+        <div class="stats-bar">
+            <span>Phase: <span id="stat-phase">1</span>/8</span>
+            <span id="stat-score">Budget Pts: 0 / 30</span>
+        </div>
+        <div class="vocab-strip" id="vocab"></div>
+        <div class="question-box" id="question"></div>
+        <div id="options" class="options-grid"></div>
+        
+        <div class="feedback" id="feedback">
+            <div id="fb-pts" style="font-weight: bold; margin-bottom: 5px; font-size: 0.9rem;"></div>
+            <p id="fb-text"></p>
+            <button class="next-btn" id="next-btn" onclick="nextStep()">CONTINUE →</button>
+        </div>
+    </div>
+
+    <div id="result-screen">
+        <h1 id="res-title"></h1>
+        <p id="res-desc" style="font-size: 1.2rem; margin-bottom: 20px;"></p>
+        <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+            <span id="math-box"></span>
+        </div>
+        <button class="opt-btn" style="justify-content: center; width: 100%;" onclick="location.reload()">RESTART</button>
+    </div>
+</div>
+
+<script>
+let score = 0;
+let step = 0;
+let inEmergency = false;
+
+const DECISIONS = [
+    {
+        q: "1. The Committee is planning the tournament. What is our primary goal?",
+        vocab: ["community", "outreach", "budget", "sustainable"],
+        opts: [
+            { t: "A Regional Amateur Cup for local villages.", pts: 3, fb: "Perfect! This is sustainable, popular, and brings the community together." },
+            { t: "A Youth Skills Workshop with local schools.", pts: 2, fb: "Good choice. It's great for outreach, though it brings in less revenue." },
+            { t: "A semi-pro league exhibition match.", pts: 1, fb: "Expensive. The insurance costs are high for such a small committee." },
+            { t: "A 'Celebrity' match with expensive hotel requirements.", pts: -1, fb: "BUDGET CRASH: We can't afford 5-star hotels! Try a more local plan." }
+        ]
+    },
+    {
+        q: "2. We need a venue for the matches. Where should we play?",
+        vocab: ["facility", "parking", "amenities", "maintenance"],
+        opts: [
+            { t: "The Local Secondary School fields.", pts: 3, fb: "Excellent. They have toilets, parking, and the grass is well-maintained." },
+            { t: "The Farmers Paddock (cleared of cows).", pts: 2, fb: "Authentic! A bit bumpy, but the locals love the atmosphere." },
+            { t: "The Public Common (open park space).", pts: 1, fb: "It's free, but dog walkers and lack of fences make it difficult to manage." },
+            { t: "A Professional City Stadium (2 hours away).", pts: -1, fb: "LOGISTICS FAILURE: No one wants to drive that far for a village game. Stay local!" }
+        ]
+    },
+    {
+        q: "3. How are we handling registration and entry fees?",
+        vocab: ["registration", "volunteer", "revenue", "cash-only"],
+        opts: [
+            { t: "Online sign-up with a small card fee.", pts: 3, fb: "Smart. This ensures we know the numbers exactly before the day." },
+            { t: "Volunteer parents collecting cash at the gate.", pts: 2, fb: "Classic and simple, though it's harder to track the exact revenue." },
+            { t: "Physical paper tickets sold at the bakery.", pts: 1, fb: "Reliable, but the printing costs reduce our profit." },
+            { t: "A high-tech biometric entry system.", pts: -1, fb: "OVER-ENGINEERED: The system doesn't work without stable WiFi. Use a simpler method." }
+        ]
+    },
+    {
+        q: "4. Marketing! How do we get a high turnout on Saturday?",
+        vocab: ["promotion", "noticeboard", "engagement", "broadcast"],
+        opts: [
+            { t: "Facebook groups and the Town Noticeboard.", pts: 3, fb: "The best ROI! Almost everyone in town now knows about the event." },
+            { t: "Putting posters in every shop window.", pts: 2, fb: "Effective and personal. Mrs. Higgins even put a poster on her till." },
+            { t: "Handing out flyers at the train station.", pts: 1, fb: "A lot of work for very little engagement. Most flyers ended up in the bin." },
+            { t: "Paying for a TV commercial on a regional channel.", pts: -1, fb: "BUDGET BLOWN: You spent the whole trophy fund on a 3:00 AM TV slot. Try local!" }
+        ]
+    },
+    {
+        q: "5. Half-time! What are we serving at the food stall?",
+        vocab: ["catering", "inventory", "vendor", "profit-margin"],
+        opts: [
+            { t: "Meat pies and tea from the local bakery.", pts: 3, fb: "A massive success! Low cost, high profit, and the fans love it." },
+            { t: "A BBQ run by committee volunteers.", pts: 2, fb: "Great atmosphere, though managing the raw meat inventory was stressful." },
+            { t: "Cold sandwiches and bottled water.", pts: 1, fb: "Safe, but boring. People went to the pub across the road to find real food." },
+            { t: "Artisan seafood and oysters.", pts: -1, fb: "SPOILED: In the summer heat, the food went bad and people got sick. Offer hot, simple food!" }
+        ]
+    },
+    {
+        q: "6. The sun is setting but the final match is tied. What's the plan?",
+        vocab: ["schedule", "overtime", "floodlights", "safety"],
+        opts: [
+            { t: "Move the final to Sunday morning.", pts: 3, fb: "Professional. Players are rested and we get a second day of tea sales!" },
+            { t: "Go straight to a Penalty Shootout.", pts: 2, fb: "Exciting! It's over quickly while there is still enough light to see." },
+            { t: "Pay the school for emergency floodlights.", pts: 1, fb: "The 'late fee' for the lights ate all of our profit for the day." },
+            { t: "Play in the dark using car headlights.", pts: -1, fb: "DANGEROUS: A player hit a goalpost they couldn't see. Health and Safety nightmare!" }
+        ]
+    },
+    {
+        q: "7. A parent is screaming at the referee. How do you respond?",
+        vocab: ["conduct", "conflict-resolution", "official", "etiquette"],
+        opts: [
+            { t: "Ask the parent to leave the touchline politely.", pts: 3, fb: "Well handled. It sets a good standard for the kids and respects the official." },
+            { t: "Ignore it and hope the game ends quickly.", pts: 1, fb: "The referee felt unsupported and threatened to quit mid-game." },
+            { t: "Let the referee argue back with the parent.", pts: 2, fb: "Messy, but at least you didn't have to get involved directly." },
+            { t: "Cancel the whole tournament immediately.", pts: -1, fb: "OVER-REACTION: You ruined the day for 100 people because of one loud parent." }
+        ]
+    },
+    {
+        q: "8. The event is over. What is the lasting legacy?",
+        vocab: ["contribution", "infrastructure", "surplus", "reinvestment"],
+        opts: [
+            { t: "Donate the surplus to the local youth club.", pts: 3, fb: "Heroic. The town council has already approved next year's date!" },
+            { t: "Buy a new mower for the community pitches.", pts: 2, fb: "Practical. The playing surface will be much better next year." },
+            { t: "Keep the cash in a locked box for 'emergencies'.", pts: 1, fb: "Safe, but the community is asking where the money went." },
+            { t: "Take the committee out for an expensive steak dinner.", pts: -1, fb: "UNETHICAL: The parents found out and are demanding their donations back!" }
+        ]
+    }
+];
+
+const EMERGENCY = {
+    q: "🚨 EMERGENCY: A massive thunderstorm is predicted in 10 minutes, just before the trophy presentation!",
+    opts: [
+        { t: "Quickly move everyone into the school hall for the ceremony.", pts: 6, fb: "Excellence! You prevented a panic and kept everyone dry. The community praises your quick thinking." },
+        { t: "Ignore the clouds and try to finish the ceremony on the pitch.", pts: -99, fb: "GAME OVER: Lightning struck a goalpost. People panicked and fled in the rain. You are fired for negligence. Good luck in your search for a new job." }
+    ]
+};
+
+/**
+ * Fisher-Yates Shuffle Algorithm
+ * Randomizes an array in-place with true mathematical randomness.
+ */
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+function startGame() {
+    document.getElementById('start-screen').style.display = 'none';
+    document.getElementById('game-play').style.display = 'block';
+    renderStep();
+}
+
+function renderStep() {
+    const node = inEmergency ? EMERGENCY : DECISIONS[step];
+    document.getElementById('stat-phase').textContent = inEmergency ? "!!!" : step + 1;
+    document.getElementById('vocab').innerHTML = (node.vocab || []).map(v => `<span class="vpill">${v}</span>`).join('');
+    document.getElementById('question').innerHTML = node.q;
+    document.getElementById('feedback').style.display = 'none';
+    
+    const optCont = document.getElementById('options');
+    optCont.innerHTML = '';
+
+    // Use Fisher-Yates to shuffle a copy of the options array
+    const shuffled = shuffleArray([...node.opts]);
+
+    shuffled.forEach((opt, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'opt-btn';
+        btn.innerHTML = `<span class="opt-letter">${['A','B','C','D'][i]}</span><span>${opt.t}</span>`;
+        btn.onclick = () => handleChoice(opt);
+        optCont.appendChild(btn);
+    });
+}
+
+function handleChoice(opt) {
+    if (opt.pts === -99) {
+        showGameOver(opt.fb);
+        return;
+    }
+    if (opt.pts === -1) {
+        score -= 1;
+        updateScore();
+        const fb = document.getElementById('feedback');
+        fb.style.display = 'block'; fb.className = 'feedback fb-bad';
+        document.getElementById('fb-pts').textContent = "-1 POINT & RETRY";
+        document.getElementById('fb-text').textContent = opt.fb;
+        document.getElementById('next-btn').style.display = 'none';
+        return;
+    }
+    score += opt.pts;
+    updateScore();
+    const fb = document.getElementById('feedback');
+    fb.style.display = 'block'; fb.className = 'feedback';
+    document.getElementById('fb-pts').textContent = `${opt.pts} POINTS AWARDED`;
+    document.getElementById('fb-text').textContent = opt.fb;
+    document.getElementById('next-btn').style.display = 'block';
+    document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+}
+
+function updateScore() {
+    document.getElementById('stat-score').textContent = `Budget Pts: ${score} / 30`;
+}
+
+function nextStep() {
+    if (inEmergency) { inEmergency = false; step++; renderStep(); }
+    else if (step === 6) { inEmergency = true; renderStep(); }
+    else if (step < DECISIONS.length - 1) { step++; renderStep(); }
+    else { showResults(); }
+}
+
+function showGameOver(msg) {
+    document.getElementById('game-play').style.display = 'none';
+    document.getElementById('result-screen').style.display = 'block';
+    document.getElementById('res-title').textContent = "❌ COMMITTEE DISMISSED";
+    document.getElementById('res-desc').textContent = msg;
+}
+
+function showResults() {
+    document.getElementById('game-play').style.display = 'none';
+    document.getElementById('result-screen').style.display = 'block';
+    const title = document.getElementById('res-title');
+    const desc = document.getElementById('res-desc');
+    if (score >= 26) { title.textContent = "🏆 COMMUNITY LEGEND"; desc.textContent = "Incredible work! A masterclass in organization."; }
+    else if (score >= 18) { title.textContent = "🥈 LOCAL SUCCESS"; desc.textContent = "A solid tournament despite the hurdles."; }
+    else { title.textContent = "🥉 BARELY BROKE EVEN"; desc.textContent = "The event finished, but the logistics were a mess."; }
+    document.getElementById('math-box').textContent = `Final Score: ${score} / 30`;
+}
+</script>
+</body>
+</html>

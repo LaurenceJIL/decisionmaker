@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Waylon's Institute: The EQ Architect</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F4F7F6;--surface:#FFFFFF;--surface2:#F1F3F5;
+  --ink:#101828;--ink2:#475467;--accent:#0066FF;--accent2:#0052CC;
+  --green-bg:#ECFDF3;--green-tx:#027A48;--red-bg:#FFF1F0;--red-tx:#B42318;
+  --amber-bg:#FFFAEB;--amber-tx:#B54708;--r:12px;--shadow:0 12px 20px -5px rgba(0,0,0,0.1);
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);margin:0;padding:2rem 1rem;display:flex;flex-direction:column;align-items:center}
+.shell{width:100%;max-width:850px; transition: background-color 0.4s ease;}
+.card{background:var(--surface);border-radius:var(--r);padding:2.5rem;box-shadow:var(--shadow);border:1px solid #E4E7EB;margin-bottom:2rem;transition:0.3s}
+h1{font-size:30px;font-weight:700;margin-bottom:1rem;color:var(--accent); letter-spacing: -0.5px;}
+p{line-height:1.7;color:var(--ink2);font-size:16px}
+.btn{background:var(--accent);color:#fff;border:none;padding:15px 30px;border-radius:8px;font-weight:600;cursor:pointer;transition:0.2s;font-size:16px}
+.btn:hover{background:var(--accent2)}
+.btn:disabled{background:#D0D5DD; cursor:not-allowed}
+.options{display:flex;flex-direction:column;gap:15px;margin-top:2rem}
+.opt{background:var(--surface);border:1px solid #D0D5DD;padding:20px;border-radius:10px;text-align:left;cursor:pointer;transition:0.1s;font-size:15px;line-height:1.5}
+.opt:hover{border-color:var(--accent);background:var(--surface2)}
+.opt.selected{border-color:var(--accent);background:var(--green-bg);font-weight:500}
+.opt.wrong{border-color:var(--red-tx);background:var(--red-bg)}
+.feedback{margin-top:1.5rem;padding:20px;border-radius:8px;display:none;font-size:15px;line-height:1.6;border:1px solid transparent}
+.fb-good{background:var(--green-bg);color:var(--green-tx);border-color:#ABEFC6}
+.fb-avg{background:var(--amber-bg);color:var(--amber-tx);border-color:#FEDF89}
+.fb-bad{background:var(--red-bg);color:var(--red-tx);border-color:#FECDCA}
+.score-box{font-family:'DM Mono',monospace;font-size:14px;font-weight:600;margin-bottom:1rem;background:#fff;padding:10px 20px;border-radius:24px;display:inline-block;box-shadow:0 2px 4px rgba(0,0,0,0.05); border:1px solid #E4E7EB}
+.sysbox{background:var(--surface2);border-left:4px solid var(--accent);padding:22px;margin:1.5rem 0;font-size:15px;color:var(--ink2)}
+.hidden{display:none}
+.vpill{display:inline-block;font-size:12px;background:#E4E7EB;padding:5px 12px;border-radius:6px;margin:4px;color:var(--ink2);font-weight:600}
+
+@keyframes emergency-flash {
+  0% { background-color: #F4F7F6; }
+  50% { background-color: #ffe4e1; }
+  100% { background-color: #F4F7F6; }
+}
+.emergency-alert { animation: emergency-flash 0.8s infinite; }
+.emergency-card { border: 3px solid var(--red-tx) !important; }
+</style>
+</head>
+<body id="body-main">
+
+<div class="shell" id="intro">
+  <div class="card">
+    <h1>Waylon's Institute: Executive Simulator</h1>
+    <p>Managing human potential is high-stakes work. At Waylon's Institute of Personal Development, the line between a "breakthrough" and a "lawsuit" is razor-thin.</p>
+    <p>You must navigate 10 critical scenarios. Poor choices will penalize your EQ/Trust score and force you to rethink your approach. In Crisis events, one wrong move can trigger an immediate legal shutdown.</p>
+    <button class="btn" onclick="start()">Initiate Simulation</button>
+  </div>
+</div>
+
+<div class="shell hidden" id="game">
+  <div class="score-box">Stage: <span id="q-count">1</span>/10 | Trust Rating: <span id="score">0</span></div>
+  <div class="card" id="main-card">
+    <h2 id="stage-title" style="margin-top:0;font-size:22px"></h2>
+    <div id="scene-text"></div>
+    <div class="options" id="options-container"></div>
+    <div class="feedback" id="feedback-box"></div>
+    <button class="btn hidden" id="next-btn" style="margin-top:2rem" onclick="nextStage()">Proceed to Next Phase</button>
+  </div>
+</div>
+
+<div class="shell hidden" id="result">
+  <div class="card">
+    <h1 id="result-header">Final Evaluation</h1>
+    <p id="final-score-text"></p>
+    <div class="sysbox" id="final-feedback"></div>
+    <button class="btn" onclick="location.reload()" style="margin-top:1.5rem">Restart Simulation</button>
+  </div>
+</div>
+
+<script>
+let state = {
+  score: 0,
+  turn: 1,
+  arrested: false,
+  currentStage: 1
+};
+
+const content = {
+  1: {
+    title: "Stage 1: The 'Processed' Student",
+    scene: "A veteran student complains that the new curriculum feels like 'brainwashing' rather than personal growth. They are threatening to post their concerns on social media.",
+    opts: [
+      { text: "Immediately refund their tuition and bar them from the premises to prevent a digital PR disaster.", pts: 1, fb: "By choosing avoidance over dialogue, you've missed a chance to improve the curriculum, leaving the student feeling unheard and potentially more likely to complain elsewhere.", next: 2 },
+      { text: "Invite them to a private dinner with the curriculum designers to explain the scientific 'logic' behind every module.", pts: 2, fb: "Engaging in high-level intellectual defense can build rapport, but it risks sounding like an elitist justification for methodologies that the student clearly finds emotionally alienating.", next: 2 },
+      { text: "Listen to their feedback without interruption, then offer them a role as a 'Beta Reviewer' for future workshop updates.", pts: 3, fb: "Transforming a critic into a collaborator is a masterclass in EQ. You've validated their perspective while gaining an internal perspective to prevent future complaints or PR leaks.", next: 2 },
+      { text: "Publicly label the student as 'unready for higher levels of growth' in the institute's newsletter.", pts: -1, fb: "This is a classic 'Us vs. Them' tactic used by coercive groups. Publicly shaming critics destroys psychological safety. Re-evaluate your leadership style and choose a different approach.", next: 2 }
+    ]
+  },
+  2: {
+    title: "Stage 2: Instructor Burnout",
+    scene: "Your most popular facilitator is clearly exhausted, frequently snapping at students and skipping the mandatory 'Decompression' sessions after workshops.",
+    opts: [
+      { text: "Remind them that at Waylon's, 'The Mission' comes before personal comfort and demand they fulfill their contract.", pts: 1, fb: "Prioritizing the institution's goals over individual human limits is the fastest way to trigger a total staff collapse and a public mental health crisis for students.", next: 3 },
+      { text: "Quietly reduce their workload by 50% without a pay cut, telling them it's a 'gift' for their hard work.", pts: 3, fb: "This proactive empathy prevents burnout while fostering deep organizational loyalty. You've demonstrated that your institute values the well-being of the humans who make it run.", next: 3 },
+      { text: "Hire a second instructor to shadow them and take over their classes without their explicit consent.", pts: 2, fb: "While you've mitigated the immediate workload, the lack of transparency can lead to professional insecurity and paranoia within the facilitator's rank-and-file, damaging internal trust.", next: 3 },
+      { text: "Tell the facilitator to use our 'Mind Over Matter' technique to manifest more energy.", pts: -1, fb: "Using spiritual or psychological platitudes to bypass legitimate clinical exhaustion is gaslighting. Your team deserves a real management solution, not a philosophical deflection. Try another path.", next: 3 }
+    ]
+  },
+  3: { // EMERGENCY 1
+    title: "CRISIS: The Sect Accusation",
+    scene: "A local news van is outside. They claim a former student’s family has filed a report alleging 'coercive control' and 'unlawful detention' during an intensive retreat.",
+    opts: [
+      { text: "Lock the doors, call the legal team, and release a statement calling the family 'delusional.'", pts: 0, fb: "Refusal to cooperate combined with aggressive insults provides the media with the perfect 'Sect' narrative. Your legal jeopardy has increased significantly due to your defensive posturing.", next: 4, triggerArrest: true },
+      { text: "Invite the reporter inside immediately for a live-streamed, unedited tour of the facilities and the retreat materials.", pts: 3, fb: "Radical transparency is the only antidote to accusations of secrecy. By opening your doors, you've stripped the narrative of its mystery and demonstrated absolute institutional confidence.", next: 4 },
+      { text: "Attempt to pay off the news station's editor to kill the story before it airs tonight.", pts: 1, fb: "Bribery is not only illegal but serves as an admission of guilt. If this attempt leaks—and it likely will—the institute's public credibility will be permanently destroyed.", next: 4 },
+      { text: "Send a group of students out to surround the news van and chant institute slogans.", pts: -1, fb: "This behavior is the ultimate confirmation of 'cult-like' activity for any bystander. You are making the situation worse for your legal team. Choose a more professional response.", next: 4 }
+    ]
+  },
+  4: {
+    title: "Stage 4: Financial Disclosure",
+    scene: "Staff are asking for more transparency regarding where the high 'Mastery Fees' are going, as rumor suggests they fund Waylon's luxury lifestyle.",
+    opts: [
+      { text: "Fire the staff member who started the rumor to send a clear message about institutional loyalty.", pts: 1, fb: "Using fear to silence financial inquiries confirms the suspicion of wrongdoing. You have effectively turned a simple HR issue into a potential whistleblower investigation and staff revolt.", next: 5 },
+      { text: "Publish an annual 'Impact Report' detailing exactly how funds are allocated for student services and expansion.", pts: 3, fb: "Transparency is the bedrock of trust. By showing exactly where the money goes, you have neutralized the rumors and reinforced your image as a mission-driven organization.", next: 5 },
+      { text: "Give the entire staff a 5% raise and tell them that 'wealth is a mindset' they should all embrace.", pts: 1, fb: "Throwing money at a trust issue is a temporary fix that doesn't address the underlying demand for accountability. It eventually leaves staff feeling bribed rather than respected.", next: 5 },
+      { text: "Mandate a 'Vow of Silence' regarding all internal business matters for everyone on the payroll.", pts: -1, fb: "Forced secrecy regarding finances is a massive red flag for regulatory bodies and labor boards. This strategy will invite a forensic audit. Please rethink your management approach.", next: 5 }
+    ]
+  },
+  5: {
+    title: "Stage 5: High-Risk Enrollment",
+    scene: "A person with a history of severe clinical depression wants to enroll in the 'Deep Trauma Excavation' seminar. It’s a $10,000 sale.",
+    opts: [
+      { text: "Process the payment immediately; the seminar is designed to help exactly these types of people.", pts: 1, fb: "Prioritizing profit over the clinical safety of a vulnerable individual is ethically bankrupt and leaves the institute legally exposed if the student experiences a psychological crisis.", next: 6 },
+      { text: "Politely decline the enrollment and refer them to a licensed clinical therapist, offering a free 'Light' course instead.", pts: 3, fb: "This shows high EQ and ethical integrity. You have protected the student's health and the institute's reputation by recognizing the limits of your own educational scope.", next: 6 },
+      { text: "Accept them, but require them to sign a 20-page liability waiver and provide a doctor's note first.", pts: 2, fb: "While you've covered your legal bases, you are still entering a high-risk situation without the proper clinical support, which could still lead to an avoidable tragedy in your classroom.", next: 6 },
+      { text: "Tell them that clinical diagnoses are just 'stories' that they need to unlearn with us.", pts: -1, fb: "Dismissing mental health diagnoses is dangerous and professionally irresponsible. You are playing with people's lives for profit. This approach is unacceptable; choose another response.", next: 6 }
+    ]
+  },
+  6: { // EMERGENCY 2
+    title: "CRISIS: The Undercover Agent",
+    scene: "You discover one of your 'Diamond Tier' students is an undercover detective investigating reports of psychological abuse and financial fraud.",
+    opts: [
+      { text: "Inform your legal team and prepare for a full-scale audit and interview process immediately.", pts: 3, fb: "Cooperation and preparation are your only shields. By meeting the law head-on, you prove that your operations can withstand the highest level of professional scrutiny.", next: 7 },
+      { text: "Confront the agent during a class to show the other students how 'the system' tries to suppress them.", pts: 0, fb: "This is an aggressive escalation that marks you as a threat to public order. It will fast-track an arrest warrant and further alienate the local community.", next: 7, triggerArrest: true },
+      { text: "Try to turn the agent into a true believer by assigning them the most charismatic coach in the school.", pts: 1, fb: "Attempting to manipulate a trained investigator is foolish. It will be documented as a further attempt at coercive psychological influence, worsening your legal standing considerably.", next: 7 },
+      { text: "Expel the student and destroy all their personal files and enrollment records instantly.", pts: -1, fb: "Destruction of evidence is a felony. This action would turn a simple investigation into a criminal prosecution for obstruction of justice. Re-evaluate your strategy immediately.", next: 7 }
+    ]
+  },
+  7: {
+    title: "Stage 7: Marketing Ethics",
+    scene: "Your marketing team wants to use the slogan: 'Waylon's Institute: The Only Cure for a Broken Life.' It's proven to double sales.",
+    opts: [
+      { text: "Approve it; the results our students get are real, and the growth in sales helps more people.", pts: 1, fb: "Using 'The Only' is a exclusionary, cult-like claim. It invites skepticism from regulators and sets expectations that are impossible to meet for every single individual.", next: 8 },
+      { text: "Reject the slogan and replace it with: 'Waylon's Institute: Practical Tools for Personal Transformation.'", pts: 3, fb: "This is honest, grounded, and professional. It promises growth without the grandiose, dangerous overtones of being a 'cure' for the complexities of life.", next: 8 },
+      { text: "Use the slogan but only in private email campaigns, not on public social media or billboards.", pts: 2, fb: "While you've reduced public heat, you are still using manipulative, hyperbolic marketing that undermines the actual professional value of the tools you are teaching.", next: 8 },
+      { text: "Add a disclaimer that 'Results are guaranteed' if the student follows our 'Law of Success.'", pts: -1, fb: "Guarantees in personal development are predatory and legally fraudulent in many jurisdictions. You are inviting a massive consumer protection lawsuit. Choose a different marketing strategy.", next: 8 }
+    ]
+  },
+  8: {
+    title: "Stage 8: The Celebrity Exit",
+    scene: "A high-profile celebrity student is leaving the institute and intends to write a 'tell-all' book about their 'horrible' experience.",
+    opts: [
+      { text: "Sue the celebrity for defamation and breach of their Non-Disclosure Agreement (NDA) immediately.", pts: 1, fb: "Aggressively suing a famous client ensures a massive media circus. It frames the institute as a litigious, secretive organization that punishes those who dare to leave.", next: 9 },
+      { text: "Release a warm public statement wishing them well and thanking them for their time at the institute.", pts: 3, fb: "By taking the high road, you've neutered their narrative. A 'tell-all' book loses its punch when the subject responds with kindness and professional grace.", next: 9 },
+      { text: "Leak 'embarrassing' details from their private coaching sessions to discredit their upcoming book.", pts: 0, fb: "This is a gross violation of privacy and ethics. It confirms the student's narrative of abuse and will lead to an immediate professional and legal backlash.", next: 9, triggerArrest: true },
+      { text: "Organize a protest of current students outside the celebrity's house to 'speak the truth.'", pts: -1, fb: "Harassing former members is a hallmark of coercive groups. This will be front-page news and may result in stalking charges. Please choose a more civilized path.", next: 9 }
+    ]
+  },
+  9: {
+    title: "Stage 9: Community Integration",
+    scene: "The local town council is voting on whether to grant Waylon's a permanent 'Education Center' permit or label it a 'Restricted Assembly.'",
+    opts: [
+      { text: "Attend the meeting with a team of lawyers and demand the permit based on property rights.", pts: 2, fb: "While legally sound, this approach alienates your neighbors. You might win the permit but lose the community support required for long-term operational peace.", next: 10 },
+      { text: "Host a community 'Free Skills Day' where locals can take classes on stress management and communication for free.", pts: 3, fb: "Demonstrating public utility is the best way to win over a community. You've shown that the institute is a benefit to the town, not a threat.", next: 10 },
+      { text: "Bypass the council and use a high-level political connection to force the permit through.", pts: 1, fb: "Political pressure creates deep-seated local resentment. Expect constant noise complaints, inspections, and bureaucratic hurdles from a community that feels ignored and bullied.", next: 10 },
+      { text: "Tell students that the town council is 'threatened by their enlightenment.'", pts: -1, fb: "Instilling an 'enemy' mindset in your students is dangerous and isolates them from society. This is exactly why councils deny permits. Choose a better way to engage.", next: 10 }
+    ]
+  },
+  10: {
+    title: "Stage 10: The Vision",
+    scene: "Waylon wants to expand globally. What is the core guiding principle for this new 'Global Network'?",
+    opts: [
+      { text: "Decentralized Leadership: Every country operates its own school with local oversight and cultural adaptations.", pts: 3, fb: "This prevents a 'centralized power' narrative and ensures that the institute evolves with its students rather than being a rigid cult of personality.", next: 'end' },
+      { text: "The Waylon Doctrine: Every student in every country follows the exact same rules, diet, and schedule.", pts: 1, fb: "Rigidity at this scale is unsustainable and invites extreme scrutiny. It looks less like an education center and more like a global ideological movement.", next: 'end' },
+      { text: "Profit Optimization: The curriculum is stripped down to the most 'viral' modules to maximize international growth.", pts: 2, fb: "You might grow fast, but your lack of depth will lead to high student turnover and a reputation as a shallow 'get-enlightened-quick' scheme.", next: 'end' },
+      { text: "Total Loyalty: Students must pledge allegiance to Waylon to access the international network.", pts: -1, fb: "Demanding personal allegiance is the final step into total sect behavior. This vision will end in a global crackdown. Choose a more professional legacy.", next: 'end' }
+    ]
+  }
+};
+
+/**
+ * Fisher-Yates Shuffle Algorithm
+ * Randomizes choices array in-place for true mathematical randomness.
+ */
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
+function start() {
+  document.getElementById('intro').classList.add('hidden');
+  document.getElementById('game').classList.remove('hidden');
+  renderStage();
+}
+
+function renderStage() {
+  const s = content[state.currentStage];
+  const body = document.getElementById('body-main');
+  const card = document.getElementById('main-card');
+  
+  if (s.title.includes("CRISIS")) {
+    body.classList.add('emergency-alert');
+    card.classList.add('emergency-card');
+  } else {
+    body.classList.remove('emergency-alert');
+    card.classList.remove('emergency-card');
+  }
+
+  document.getElementById('stage-title').innerText = s.title;
+  document.getElementById('scene-text').innerHTML = `<p>${s.scene}</p>`;
+  document.getElementById('score').innerText = state.score;
+  document.getElementById('q-count').innerText = state.turn;
+  
+  const container = document.getElementById('options-container');
+  container.innerHTML = '';
+  document.getElementById('feedback-box').style.display = 'none';
+  document.getElementById('next-btn').classList.add('hidden');
+
+  // Clone and shuffle choices to maintain data integrity and randomize position
+  const shuffledChoices = [...s.opts];
+  shuffleArray(shuffledChoices);
+
+  shuffledChoices.forEach((o) => {
+    const div = document.createElement('div');
+    div.className = 'opt';
+    div.innerText = o.text;
+    // Data integrity: the choice object 'o' passed here contains the correct pts and fb
+    div.onclick = () => selectOption(o, div);
+    container.appendChild(div);
+  });
+}
+
+function selectOption(o, el) {
+  const allOpts = document.querySelectorAll('.opt');
+  
+  if (o.pts === -1) {
+    state.score -= 1;
+    document.getElementById('score').innerText = state.score;
+    const fb = document.getElementById('feedback-box');
+    fb.innerHTML = `<strong>Critical Error:</strong> ${o.fb}`;
+    fb.style.display = 'block';
+    fb.className = 'feedback fb-bad';
+    el.classList.add('wrong');
+    return;
+  }
+
+  state.score += o.pts;
+  if (o.triggerArrest) state.arrested = true;
+  
+  const fb = document.getElementById('feedback-box');
+  fb.innerHTML = `<strong>Insight (${o.pts} pts):</strong> ${o.fb}`;
+  fb.style.display = 'block';
+  fb.className = 'feedback ' + (o.pts >= 3 ? 'fb-good' : (o.pts === 0 ? 'fb-bad' : 'fb-avg'));
+  
+  allOpts.forEach(opt => {
+      opt.style.opacity = '0.4';
+      opt.onclick = null;
+  });
+  el.style.opacity = '1';
+  el.classList.add('selected');
+  
+  state.nextPath = o.next;
+  document.getElementById('next-btn').classList.remove('hidden');
+}
+
+function nextStage() {
+  if (state.arrested) {
+    showResult();
+    return;
+  }
+  
+  if (state.nextPath === 'end' || state.turn >= 10) {
+    showResult();
+  } else {
+    state.turn++;
+    state.currentStage = state.nextPath;
+    renderStage();
+  }
+}
+
+function showResult() {
+  document.getElementById('game').classList.add('hidden');
+  document.getElementById('result').classList.remove('hidden');
+  document.getElementById('body-main').classList.remove('emergency-alert');
+  
+  const s = state.score;
+  document.getElementById('final-score-text').innerText = `Trust & Ethics Score: ${s}`;
+  
+  let msg = "";
+  let header = "Simulation Concluded";
+
+  if (state.arrested) {
+      header = "INSTITUTIONAL COLLAPSE";
+      msg = "ARRESTED: Your combative and secretive responses during legal and media crises triggered a multi-agency raid. Waylon's Institute has been shut down, and you are facing multiple felony charges for obstruction and fraud.";
+  } else if (s >= 25) {
+    header = "ETHICAL VISIONARY";
+    msg = "You have successfully grown Waylon's into a global powerhouse while maintaining radical transparency and ethical integrity. You have proven that personal development doesn't need to be secretive to be successful.";
+  } else if (s >= 15) {
+    header = "PRAGMATIC MANAGER";
+    msg = "The Institute remains open, though your reputation is somewhat tarnished by minor scandals and a lack of transparency. You survived the investigations, but the public still views your methods with suspicion.";
+  } else {
+    header = "SUSPICIOUS OPERATOR";
+    msg = "While you avoided jail, the Institute is a shadow of its former self. Constant lawsuits and a 'cult' label have driven students away. You have failed to build a sustainable, trust-based organization.";
+  }
+  
+  document.getElementById('result-header').innerText = header;
+  document.getElementById('final-feedback').innerText = msg;
+}
+</script>
+</body>
+</html>

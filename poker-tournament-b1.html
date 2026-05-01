@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Royal Flush Manager — Poker Tournament</title>
+    <style>
+        :root {
+            --felt-green: #0a5c2e;
+            --felt-dark: #074422;
+            --gold: #d4af37;
+            --white: #ffffff;
+            --black: #1a1a1a;
+            --danger: #c0392b;
+            --success: #27ae60;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #222;
+            color: #eee;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        #game-container {
+            width: 100%;
+            max-width: 700px;
+            background: var(--felt-green);
+            border: 8px solid #5d4037;
+            border-radius: 50px; /* Oval poker table shape */
+            padding: 40px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            position: relative;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            background: rgba(0,0,0,0.4);
+            padding: 10px 25px;
+            border-radius: 20px;
+            margin-bottom: 25px;
+            font-weight: bold;
+            color: var(--gold);
+            border: 1px solid var(--gold);
+        }
+
+        .story-box {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            line-height: 1.5;
+            border-left: 5px solid var(--gold);
+        }
+
+        .question {
+            font-size: 1.25rem;
+            margin-bottom: 20px;
+            font-weight: bold;
+            color: var(--white);
+        }
+
+        .options-grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        .opt-btn {
+            background: var(--white);
+            color: var(--black);
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            transition: 0.2s;
+        }
+
+        .opt-btn:hover:not(:disabled) {
+            background: var(--gold);
+            transform: scale(1.02);
+        }
+
+        .letter {
+            background: var(--black);
+            color: var(--gold);
+            width: 25px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            margin-right: 15px;
+        }
+
+        .feedback {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 15px;
+            display: none;
+        }
+
+        .fb-good { background: var(--success); color: white; }
+        .fb-bad { background: var(--danger); color: white; }
+
+        .sudden-death {
+            background: #000 !important;
+            border-color: var(--danger) !important;
+        }
+
+        .next-btn {
+            width: 100%;
+            padding: 15px;
+            background: var(--gold);
+            color: var(--black);
+            border: none;
+            border-radius: 10px;
+            margin-top: 15px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        #result-screen { text-align: center; display: none; }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div id="start-screen">
+        <h1 style="text-align:center; color: var(--gold);">♠️ ROYAL FLUSH MANAGER</h1>
+        <div class="story-box">
+            <strong>The Situation:</strong><br>
+            The "Grand Hotel" wants to host a big Charity Poker Tournament. You are the Tournament Director. You must choose the right cards, the right rules, and the right prizes. 
+            <br><br>
+            Make the players feel like high-rollers! Can you finish with 30 points?
+        </div>
+        <button class="next-btn" onclick="startGame()">OPEN THE TABLE</button>
+    </div>
+
+    <div id="game-play" style="display:none;">
+        <div class="stats-bar">
+            <span>Level: <span id="step-num">1</span>/10</span>
+            <span id="score-val">Chips: 0</span>
+        </div>
+        <div id="q-text" class="question"></div>
+        <div id="options-cont" class="options-grid"></div>
+        
+        <div id="fb-box" class="feedback">
+            <p id="fb-text" style="margin:0;"></p>
+            <button id="cont-btn" class="next-btn" onclick="nextStep()">Next Round →</button>
+            <button id="retry-btn" class="next-btn" style="display:none;" onclick="location.reload()">TRY AGAIN</button>
+        </div>
+    </div>
+
+    <div id="result-screen">
+        <h1 id="res-title"></h1>
+        <p id="res-desc" style="font-size: 1.2rem;"></p>
+        <h2 id="res-score" style="color: var(--gold);"></h2>
+        <button class="next-btn" onclick="location.reload()">RE-SHUFFLE & PLAY AGAIN</button>
+    </div>
+</div>
+
+<script>
+let score = 0;
+let currentStep = 0;
+let inSuddenDeath = false;
+
+const DECISIONS = [
+    {
+        q: "1. What type of playing cards will you buy?",
+        opts: [
+            { t: "Cheap paper cards that tear easily.", pts: 1, fb: "Okay, but the players find it hard to shuffle." },
+            { t: "100% plastic professional cards.", pts: 3, fb: "Excellent! These last a long time and feel expensive." },
+            { t: "Used cards from an old casino.", pts: 2, fb: "Good choice. They have a nice history." },
+            { t: "Big cards for children.", pts: -1, fb: "No! These are too big for the players' hands. Try again!" }
+        ]
+    },
+    {
+        q: "2. How many players should sit at each table?",
+        opts: [
+            { t: "50 players at one table.", pts: -1, fb: "That is impossible! Nobody can reach the center. Try again." },
+            { t: "Only 2 players per table.", pts: 1, fb: "A bit slow. We need 100 tables for the whole crowd!" },
+            { t: "8 to 10 players per table.", pts: 3, fb: "Perfect! This is the standard for a great tournament." },
+            { t: "4 players per table.", pts: 2, fb: "Nice and fast, but we need more dealers." }
+        ]
+    },
+    {
+        q: "3. What are we using for 'chips'?",
+        opts: [
+            { t: "Actual money (coins and notes).", pts: 2, fb: "Exciting, but very difficult to count and keep safe." },
+            { t: "Heavy ceramic poker chips.", pts: 3, fb: "Perfect! Players love the sound of ceramic chips." },
+            { t: "Plastic bottle caps.", pts: 1, fb: "Cheap, but the players feel like they are at a picnic." },
+            { t: "Small pieces of chocolate.", pts: -1, fb: "The 'chips' are melting in the players' hands! Try again." }
+        ]
+    },
+    {
+        q: "4. Who will be the dealers for the game?",
+        opts: [
+            { t: "The players deal the cards themselves.", pts: 1, fb: "It's free, but it's very slow and people argue." },
+            { t: "The hotel kitchen staff.", pts: -1, fb: "They are good at cooking, but they don't know poker! Try again." },
+            { t: "A group of professional dealers.", pts: 3, fb: "Excellent! The game is fast, fair, and professional." },
+            { t: "Volunteers who studied a poker book.", pts: 2, fb: "Good! They make a few mistakes, but they are helpful." }
+        ]
+    },
+    {
+        q: "5. What is the prize for the 1st place winner?",
+        opts: [
+            { t: "A beautiful trophy and a cash prize.", pts: 3, fb: "Fantastic! Everyone wants to win that." },
+            { t: "A free dinner at the hotel.", pts: 2, fb: "Nice, but a bit small for a big tournament." },
+            { t: "A brand new house.", pts: -1, fb: "The entry fee was only £20! We can't afford a house. Try again." },
+            { t: "A deck of cards.", pts: 1, fb: "The winner looks very disappointed!" }
+        ]
+    },
+    {
+        q: "6. How long are the 'rounds' (before the blinds increase)?",
+        opts: [
+            { t: "Every 2 minutes.", pts: -1, fb: "Too fast! Players have no time to think. Try again." },
+            { t: "Every 20 minutes.", pts: 3, fb: "Perfect. This gives players time to play but keeps the game moving." },
+            { t: "Every hour.", pts: 2, fb: "A very long game! The tournament will take 2 days." },
+            { t: "Whenever you feel like changing it.", pts: 1, fb: "A bit confusing for the players, but okay." }
+        ]
+    },
+    {
+        q: "7. It's the middle of the night. What food do you serve?",
+        opts: [
+            { t: "Hot pizza and sandwiches.", pts: 3, fb: "Perfect! Easy to eat while playing." },
+            { t: "A bucket of chicken wings with extra sauce.", pts: 1, fb: "Messy! Now all the cards are greasy and dirty." },
+            { t: "Cold soup.", pts: 2, fb: "It's okay, but players prefer finger food." },
+            { t: "Nothing. Keep them hungry.", pts: -1, fb: "The players are leaving because they are starving! Try again." }
+        ]
+    },
+    {
+        q: "8. A player thinks another person is cheating. What do you do?",
+        opts: [
+            { t: "Tell them to fight it out.", pts: -1, fb: "No! No fighting in the hotel. Try again." },
+            { t: "Call the 'Floor Manager' to check the cameras.", pts: 3, fb: "Very professional. You kept the game fair." },
+            { t: "Ignore it and hope it stops.", pts: 1, fb: "The players are getting angry now." },
+            { t: "Ask the player to leave without proof.", pts: 2, fb: "Safe, but maybe a bit unfair if they were innocent." }
+        ]
+    },
+    {
+        q: "9. Two players are talking loudly during a hand. How do you respond?",
+        opts: [
+            { t: "Shout 'BE QUIET' into a microphone.", pts: 1, fb: "Everyone was scared, but they are quiet now." },
+            { t: "Ask them to leave the hotel immediately.", pts: -1, fb: "Too extreme for just talking! Try again." },
+            { t: "Give them a polite warning about the rules.", pts: 3, fb: "Perfect. You are a calm and respected director." },
+            { t: "Let them talk; it's a social game.", pts: 2, fb: "Fine, but some serious players are annoyed." }
+        ]
+    },
+    {
+        q: "10. The final two players are tired. They want to split the prize.",
+        opts: [
+            { t: "Force them to play until 5 AM.", pts: 1, fb: "They are falling asleep at the table!" },
+            { t: "Tell them it is against the rules; keep playing.", pts: 2, fb: "Strict, but it's a traditional way to finish." },
+            { t: "Take the money for yourself.", pts: -1, fb: "That is stealing! Try again." },
+            { t: "Let them 'deal' (split the money) and share the trophy.", pts: 3, fb: "Excellent. Everyone goes home happy and safe." }
+        ]
+    }
+];
+
+const SUDDEN_DEATHS = [
+    {
+        after: 6,
+        q: "💀 SUDDEN DEATH: A player spills a large drink all over the Final Table!",
+        opts: [
+            { t: "Quickly move the game to a new table and get a new deck of cards!", fail: false, fb: "Amazing! You saved the tournament with your speed! Let's continue." },
+            { t: "End the tournament and say 'it's a draw'.", fail: true, fb: "Game Over! The players wanted to finish the game. Better luck next time!" }
+        ]
+    },
+    {
+        after: 9,
+        q: "💀 SUDDEN DEATH: The fire alarm goes off! It's a false alarm, but everyone is outside.",
+        opts: [
+            { t: "Tell everyone to go home and sleep.", fail: true, fb: "Game Over! You were so close to the end. Better luck next time!" },
+            { t: "Count the chips carefully and bring everyone back inside to finish!", fail: false, fb: "Incredible! You saved the tournament! The final cards are being dealt." }
+        ]
+    }
+];
+
+/**
+ * Fisher-Yates Shuffle Algorithm
+ * Randomizes the order of elements in an array in-place.
+ */
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+function startGame() {
+    document.getElementById('start-screen').style.display = 'none';
+    document.getElementById('game-play').style.display = 'block';
+    renderStep();
+}
+
+function renderStep() {
+    const fbBox = document.getElementById('fb-box');
+    fbBox.style.display = 'none';
+    
+    const sd = SUDDEN_DEATHS.find(s => s.after === (currentStep - 1) && !inSuddenDeath);
+    const container = document.getElementById('options-cont');
+    container.innerHTML = '';
+
+    if (sd && !sd.done) {
+        inSuddenDeath = true;
+        sd.done = true;
+        document.getElementById('game-container').classList.add('sudden-death');
+        document.getElementById('q-text').textContent = sd.q;
+        document.getElementById('step-num').textContent = "!!!";
+        
+        // Shuffle the sudden death options before rendering
+        const shuffledSdOpts = shuffleArray([...sd.opts]);
+        
+        shuffledSdOpts.forEach((opt, i) => {
+            const btn = createBtn(String.fromCharCode(65+i), opt.t);
+            btn.onclick = () => handleSuddenDeath(opt);
+            container.appendChild(btn);
+        });
+    } else {
+        inSuddenDeath = false;
+        document.getElementById('game-container').classList.remove('sudden-death');
+        const data = DECISIONS[currentStep];
+        document.getElementById('step-num').textContent = currentStep + 1;
+        document.getElementById('q-text').textContent = data.q;
+        
+        // Shuffle the decision options before rendering
+        const shuffledOpts = shuffleArray([...data.opts]);
+
+        shuffledOpts.forEach((opt, i) => {
+            const btn = createBtn(String.fromCharCode(65+i), opt.t);
+            btn.onclick = () => handleChoice(opt);
+            container.appendChild(btn);
+        });
+    }
+}
+
+function createBtn(letter, text) {
+    const btn = document.createElement('button');
+    btn.className = 'opt-btn';
+    btn.innerHTML = `<span class="letter">${letter}</span><span>${text}</span>`;
+    return btn;
+}
+
+function handleChoice(opt) {
+    const fbBox = document.getElementById('fb-box');
+    const fbMsg = document.getElementById('fb-text');
+    const contBtn = document.getElementById('cont-btn');
+    fbBox.style.display = 'block';
+
+    if (opt.pts === -1) {
+        score -= 1;
+        fbBox.className = "feedback fb-bad";
+        fbMsg.textContent = opt.fb + " (-1 Chip)";
+        contBtn.style.display = 'none';
+    } else {
+        score += opt.pts;
+        fbBox.className = "feedback fb-good";
+        fbMsg.textContent = opt.fb + " (+" + opt.pts + " Chips)";
+        contBtn.style.display = 'block';
+        document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+    }
+    document.getElementById('score-val').textContent = `Chips: ${score}`;
+}
+
+function handleSuddenDeath(opt) {
+    const fbBox = document.getElementById('fb-box');
+    const fbMsg = document.getElementById('fb-text');
+    fbBox.style.display = 'block';
+
+    if (opt.fail) {
+        fbBox.className = "feedback fb-bad";
+        fbMsg.textContent = opt.fb;
+        document.getElementById('cont-btn').style.display = 'none';
+        document.getElementById('retry-btn').style.display = 'block';
+    } else {
+        fbBox.className = "feedback fb-good";
+        fbMsg.textContent = opt.fb + " The game is still on!";
+        document.getElementById('cont-btn').style.display = 'block';
+    }
+    document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+}
+
+function nextStep() {
+    if (!inSuddenDeath) {
+        if (currentStep < DECISIONS.length - 1) {
+            currentStep++;
+            renderStep();
+        } else {
+            showResults();
+        }
+    } else {
+        inSuddenDeath = false;
+        renderStep();
+    }
+}
+
+function showResults() {
+    document.getElementById('game-play').style.display = 'none';
+    document.getElementById('result-screen').style.display = 'block';
+    const title = document.getElementById('res-title');
+    const desc = document.getElementById('res-desc');
+    
+    if (score >= 27) {
+        title.textContent = "🏆 ALL-IN LEGEND";
+        desc.textContent = "You are the best Poker Director in the world! The tournament was perfect and everyone wants to come back next year.";
+    } else if (score >= 20) {
+        title.textContent = "🥈 FULL HOUSE SUCCESS";
+        desc.textContent = "Great job! You managed the room well and the players enjoyed the night.";
+    } else if (score >= 12) {
+        title.textContent = "🥉 SMALL BLIND FINISH";
+        desc.textContent = "You finished the tournament, but there were many problems. Practice your management skills!";
+    } else {
+        title.textContent = "🃏 BUSTED OUT";
+        desc.textContent = "The tournament was a mess. You need to learn the rules before you host another game!";
+    }
+    document.getElementById('res-score').textContent = `Final Chips: ${score} / 30`;
+}
+</script>
+
+</body>
+</html>

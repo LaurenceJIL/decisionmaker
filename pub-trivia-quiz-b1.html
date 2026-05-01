@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pub Trivia Master: Competition Edition</title>
+    <style>
+        :root {
+            --pub-wood: #3d2b1f;
+            --amber: #ffbf00;
+            --chalk-white: #f5f5f5;
+            --felt-red: #8b0000;
+            --success: #27ae60;
+            --danger: #c0392b;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1a1a1a;
+            color: var(--chalk-white);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        #game-container {
+            width: 100%;
+            max-width: 700px;
+            background: var(--pub-wood);
+            border: 6px solid var(--amber);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            background: rgba(0,0,0,0.3);
+            padding: 10px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            color: var(--amber);
+            border: 1px solid #555;
+        }
+
+        .story-box {
+            background: rgba(255,255,255,0.05);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            line-height: 1.6;
+            border-left: 5px solid var(--amber);
+            font-style: italic;
+        }
+
+        .question {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .options-grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        .opt-btn {
+            background: var(--chalk-white);
+            color: #222;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            transition: 0.2s;
+        }
+
+        .opt-btn:hover:not(:disabled) {
+            background: var(--amber);
+            transform: translateX(5px);
+        }
+
+        .letter {
+            background: #222;
+            color: var(--amber);
+            width: 25px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            margin-right: 15px;
+        }
+
+        .feedback {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .fb-good { background: var(--success); color: white; }
+        .fb-bad { background: var(--danger); color: white; }
+
+        .sudden-death {
+            background: #000 !important;
+            border-color: var(--felt-red) !important;
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 15px;
+            background: var(--amber);
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1.1rem;
+        }
+
+        #result-screen { text-align: center; display: none; }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div id="start-screen">
+        <h1 style="text-align:center; color: var(--amber);">🍻 Pub Trivia Master</h1>
+        <div class="story-box">
+            "The 'Golden Lion' pub wants to host the biggest trivia competition in town! You are the host. You need to write the questions, manage the teams, and keep the night fun. If people have a good time, the pub will be famous. Are you ready for the challenge?"
+        </div>
+        <button class="action-btn" onclick="startGame()">START THE QUIZ</button>
+    </div>
+
+    <div id="game-play" style="display:none;">
+        <div class="stats">
+            <span>Round: <span id="step-num">1</span>/10</span>
+            <span id="score-display">Points: 0</span>
+        </div>
+        <div id="q-text" class="question"></div>
+        <div id="options-cont" class="options-grid"></div>
+        
+        <div id="fb-box" class="feedback">
+            <p id="fb-text" style="margin:0;"></p>
+            <button id="cont-btn" class="action-btn" onclick="nextStep()">Next Decision →</button>
+            <button id="retry-btn" class="action-btn" style="display:none; background: #555; color: white;" onclick="tryAgain()">CHOOSE AGAIN</button>
+        </div>
+    </div>
+
+    <div id="result-screen">
+        <h1 id="res-title"></h1>
+        <p id="res-desc" style="font-size: 1.2rem;"></p>
+        <h2 id="res-score" style="color: var(--amber);"></h2>
+        <button class="action-btn" onclick="location.reload()">START AGAIN</button>
+    </div>
+</div>
+
+<script>
+let score = 0;
+let currentStep = 0;
+let inSuddenDeath = false;
+
+// 10 Questions with balanced 3, 2, 1, -1 scoring
+const DECISIONS = [
+    {
+        q: "1. How difficult should the first round of questions be?",
+        opts: [
+            { t: "Very easy, so everyone feels smart.", pts: 3, fb: "Great! The teams are happy and excited." },
+            { t: "Medium, to challenge them immediately.", pts: 2, fb: "Good choice. It's a fair start." },
+            { t: "Only questions about advanced physics.", pts: -1, fb: "Too hard! People are leaving already. Pick a different approach!" },
+            { t: "Mostly local news and sport.", pts: 1, fb: "Okay, but people from other towns are confused." }
+        ]
+    },
+    {
+        q: "2. What should be the maximum number of people in a team?",
+        opts: [
+            { t: "Exactly 100 people per team.", pts: -1, fb: "That's not a team, that's a crowd! Try a smaller number." },
+            { t: "Between 4 and 6 people.", pts: 3, fb: "Perfect! It's social but not too loud." },
+            { t: "Teams of 2 only.", pts: 1, fb: "It's a bit quiet, but the competition is focused." },
+            { t: "Up to 10 people.", pts: 2, fb: "Nice, but some tables are getting very crowded." }
+        ]
+    },
+    {
+        q: "3. How do teams submit their answers?",
+        opts: [
+            { t: "They whisper to you individually.", pts: 1, fb: "This takes way too long!" },
+            { t: "They shout the answers out loud.", pts: -1, fb: "Now everyone can hear! The quiz is ruined. Choose a more private method." },
+            { t: "On a paper answer sheet for each round.", pts: 3, fb: "Excellent! The classic and best way." },
+            { t: "Using a mobile phone app.", pts: 2, fb: "Modern and fast, but some older players are confused." }
+        ]
+    },
+    {
+        q: "4. What is the entry fee for each team?",
+        opts: [
+            { t: "£20.00 per team.", pts: 2, fb: "Good. This covers the cost of the host and prizes." },
+            { t: "Free for everyone.", pts: 1, fb: "The pub is full, but you have no money for prizes!" },
+            { t: "£500.00 per person.", pts: -1, fb: "Nobody wants to pay that for a quiz! Try a more reasonable price." },
+            { t: "£5.00 per team.", pts: 3, fb: "Wonderful! It's cheap and everyone wants to play." }
+        ]
+    },
+    {
+        q: "5. How do you prevent people from using their phones to cheat?",
+        opts: [
+            { t: "Ask everyone to leave phones in their cars.", pts: 1, fb: "People are worried about their expensive phones!" },
+            { t: "Lock all the doors and windows.", pts: -1, fb: "That is scary! People want to feel safe. Try a different rule." },
+            { t: "Walk around the room and watch carefully.", pts: 2, fb: "Good job. Your presence stops the cheaters." },
+            { t: "Ask teams to put phones in a box on the table.", pts: 3, fb: "Perfect. It's fair and easy for everyone." }
+        ]
+    },
+    {
+        q: "6. What is the prize for the winning team?",
+        opts: [
+            { t: "A 50% discount on their next car.", pts: -1, fb: "We can't afford that! Pick a more realistic prize." },
+            { t: "A £50 bar tab or a cash prize.", pts: 3, fb: "Brilliant! Teams will fight hard for this." },
+            { t: "A packet of peanuts.", pts: 1, fb: "The winners feel a bit disappointed." },
+            { t: "A 'winner' certificate and a free drink.", pts: 2, fb: "Nice and simple. People like the glory!" }
+        ]
+    },
+    {
+        q: "7. It is half-time! What should you do?",
+        opts: [
+            { t: "Read the correct answers for the first rounds.", pts: 3, fb: "Perfect! Everyone loves checking their scores." },
+            { t: "Play very loud techno music.", pts: -1, fb: "People can't talk to their friends! Try a different activity." },
+            { t: "Do a quick bonus round for a small prize.", pts: 2, fb: "Fun! This keeps the energy high." },
+            { t: "Take a 40-minute break.", pts: 1, fb: "People are getting bored and going home." }
+        ]
+    },
+    {
+        q: "8. A player is arguing about an answer you gave. What do you do?",
+        opts: [
+            { t: "The host's word is final; move on politely.", pts: 3, fb: "Excellent. You stayed in control of the room." },
+            { t: "Change the answer to make them happy.", pts: 1, fb: "Now every other team is angry! Bad move." },
+            { t: "Ignore them and keep talking.", pts: 2, fb: "A bit rude, but at least the quiz continues." },
+            { t: "Start a physical fight with the player.", pts: -1, fb: "The pub owner is looking concerned. Try a professional response!" }
+        ]
+    },
+    {
+        q: "9. How do you announce the final results?",
+        opts: [
+            { t: "Put a list on the door and run away.", pts: 1, fb: "That's not very exciting!" },
+            { t: "Read them backwards (from last place to first).", pts: 3, fb: "Perfect! It builds the excitement for the winner." },
+            { t: "Read only the winner's name.", pts: 2, fb: "Good, but the other teams wanted to know their rank." },
+            { t: "Tell each team their score in private.", pts: -1, fb: "This takes 2 hours! Everyone is asleep. Choose a faster way." }
+        ]
+    },
+    {
+        q: "10. The quiz is finished. What is the last thing you do?",
+        opts: [
+            { t: "Take all the pens and leave.", pts: -1, fb: "The pub owner is angry that you didn't say thanks! Try being polite." },
+            { t: "Throw the rubbish on the floor.", pts: 1, fb: "The staff are unhappy with you." },
+            { t: "Thank the staff and the players.", pts: 3, fb: "Excellent. Everyone wants you to come back next week!" },
+            { t: "Announce the date for the next quiz.", pts: 2, fb: "Good! You are already planning the future." }
+        ]
+    }
+];
+
+const SUDDEN_DEATHS = [
+    {
+        after: 6,
+        q: "💀 SUDDEN DEATH: The microphone has stopped working!",
+        opts: [
+            { t: "Stand on a chair and shout the questions clearly!", fail: false, fb: "Amazing! You saved the tournament with your loud voice!" },
+            { t: "Cancel the quiz and go home.", fail: true, fb: "The players were very disappointed. You can't give up that easily!" }
+        ]
+    },
+    {
+        after: 9,
+        q: "💀 SUDDEN DEATH: There is a tie for first place between two teams!",
+        opts: [
+            { t: "Flip a coin and pick a winner randomly.", fail: true, fb: "The teams thought that was unfair and started a protest. Try a more skill-based tie-break!" },
+            { t: "Ask a 'Tie-Break' question (closest number wins)!", fail: false, fb: "Incredible! The room is silent... the answer is given... We have a winner!" }
+        ]
+    }
+];
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+function startGame() {
+    document.getElementById('start-screen').style.display = 'none';
+    document.getElementById('game-play').style.display = 'block';
+    renderStep();
+}
+
+function renderStep() {
+    const fbBox = document.getElementById('fb-box');
+    fbBox.style.display = 'none';
+    
+    const sd = SUDDEN_DEATHS.find(s => s.after === (currentStep - 1) && !inSuddenDeath);
+    const container = document.getElementById('options-cont');
+    container.innerHTML = '';
+
+    if (sd && !sd.done) {
+        inSuddenDeath = true;
+        sd.done = true;
+        document.getElementById('game-container').classList.add('sudden-death');
+        document.getElementById('q-text').textContent = sd.q;
+        document.getElementById('step-num').textContent = "!!!";
+
+        const shuffledSdOpts = shuffleArray([...sd.opts]);
+        shuffledSdOpts.forEach((opt, i) => {
+            const btn = createBtn(String.fromCharCode(65+i), opt.t);
+            btn.onclick = () => handleSuddenDeath(opt);
+            container.appendChild(btn);
+        });
+    } else {
+        inSuddenDeath = false;
+        document.getElementById('game-container').classList.remove('sudden-death');
+        const data = DECISIONS[currentStep];
+        document.getElementById('step-num').textContent = currentStep + 1;
+        document.getElementById('q-text').textContent = data.q;
+
+        const shuffledOpts = shuffleArray([...data.opts]);
+        shuffledOpts.forEach((opt, i) => {
+            const btn = createBtn(String.fromCharCode(65+i), opt.t);
+            btn.onclick = () => handleChoice(opt);
+            container.appendChild(btn);
+        });
+    }
+}
+
+function createBtn(letter, text) {
+    const btn = document.createElement('button');
+    btn.className = 'opt-btn';
+    btn.innerHTML = `<span class="letter">${letter}</span><span>${text}</span>`;
+    return btn;
+}
+
+function handleChoice(opt) {
+    const fbBox = document.getElementById('fb-box');
+    const fbMsg = document.getElementById('fb-text');
+    const contBtn = document.getElementById('cont-btn');
+    const retryBtn = document.getElementById('retry-btn');
+    fbBox.style.display = 'block';
+
+    if (opt.pts === -1) {
+        fbBox.className = "feedback fb-bad";
+        fbMsg.textContent = opt.fb;
+        contBtn.style.display = 'none';
+        retryBtn.style.display = 'block';
+        // Buttons are NOT disabled so player can choose again
+    } else {
+        score += opt.pts;
+        fbBox.className = "feedback fb-good";
+        fbMsg.textContent = opt.fb + " (+" + opt.pts + " Points)";
+        contBtn.style.display = 'block';
+        retryBtn.style.display = 'none';
+        // Only disable buttons once a valid choice is made
+        document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+    }
+    document.getElementById('score-display').textContent = `Points: ${score}`;
+}
+
+function handleSuddenDeath(opt) {
+    const fbBox = document.getElementById('fb-box');
+    const fbMsg = document.getElementById('fb-text');
+    const contBtn = document.getElementById('cont-btn');
+    const retryBtn = document.getElementById('retry-btn');
+    fbBox.style.display = 'block';
+
+    if (opt.fail) {
+        fbBox.className = "feedback fb-bad";
+        fbMsg.textContent = opt.fb;
+        contBtn.style.display = 'none';
+        retryBtn.style.display = 'block';
+    } else {
+        fbBox.className = "feedback fb-good";
+        fbMsg.textContent = opt.fb;
+        contBtn.style.display = 'block';
+        retryBtn.style.display = 'none';
+        document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+    }
+}
+
+function tryAgain() {
+    document.getElementById('fb-box').style.display = 'none';
+}
+
+function nextStep() {
+    if (!inSuddenDeath) {
+        if (currentStep < DECISIONS.length - 1) {
+            currentStep++;
+            renderStep();
+        } else {
+            showResults();
+        }
+    } else {
+        inSuddenDeath = false;
+        renderStep();
+    }
+}
+
+function showResults() {
+    document.getElementById('game-play').style.display = 'none';
+    document.getElementById('result-screen').style.display = 'block';
+    const title = document.getElementById('res-title');
+    const desc = document.getElementById('res-desc');
+    
+    if (score >= 27) {
+        title.textContent = "🏆 LEGENDARY HOST";
+        desc.textContent = "Incredible! The pub was full, the questions were perfect, and everyone had the best night ever.";
+    } else if (score >= 20) {
+        title.textContent = "🥈 MASTER OF TRIVIA";
+        desc.textContent = "Great job! You organized a very successful night and people are asking for more.";
+    } else if (score >= 12) {
+        title.textContent = "🥉 QUIZ BEGINNER";
+        desc.textContent = "You finished the night. It was a bit messy, but at least someone won!";
+    } else {
+        title.textContent = "🍺 PUB REGULAR";
+        desc.textContent = "The night was a bit of a disaster. Maybe you should just play the quiz instead of hosting!";
+    }
+    document.getElementById('res-score').textContent = `Final Score: ${score} / 30`;
+}
+</script>
+</body>
+</html>

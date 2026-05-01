@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HR Hero: Precision Engineering Edition</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto+Mono&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EEF2F6;--surface:#FFFFFF;--accent:#2563EB;--accent-hover:#1D4ED8;
+  --ink:#1E293B;--ink-light:#64748B;--success-bg:#F0FDF4;--success-tx:#166534;
+  --warning-bg:#FFFBEB;--warning-tx:#92400E;--danger-bg:#FEF2F2;--danger-tx:#991B1B;
+  --radius:12px;--shadow:0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--ink);margin:0;padding:20px;display:flex;justify-content:center}
+.container{width:100%;max-width:700px;transition: background-color 0.4s;}
+.card{background:var(--surface);padding:32px;border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:20px;border:1px solid #E2E8F0}
+h1{font-size:24px;margin-bottom:16px;color:var(--accent)}
+p{line-height:1.6;font-size:16px}
+.btn{background:var(--accent);color:#fff;border:none;padding:12px 24px;border-radius:8px;font-weight:600;cursor:pointer;font-size:16px}
+.btn:hover{background:var(--accent-hover)}
+.options{display:flex;flex-direction:column;gap:12px;margin-top:24px}
+.option-btn{background:#fff;border:1px solid #CBD5E1;padding:16px;border-radius:8px;text-align:left;cursor:pointer;transition:0.2s;font-size:15px}
+.option-btn:hover:not(:disabled){border-color:var(--accent);background:#F8FAFC}
+.option-btn.selected{border-color:var(--accent);background:var(--success-bg);font-weight:600}
+.option-btn:disabled{cursor: default;}
+.feedback{margin-top:20px;padding:16px;border-radius:8px;display:none;font-size:15px;border-left:4px solid}
+.fb-high{background:var(--success-bg);color:var(--success-tx);border-color:#22C55E}
+.fb-mid{background:var(--warning-bg);color:var(--warning-tx);border-color:#F59E0B}
+.fb-low{background:var(--danger-bg);color:var(--danger-tx);border-color:#EF4444}
+.status-bar{font-family:'Roboto Mono',monospace;font-size:13px;margin-bottom:12px;display:flex;justify-content:space-between}
+.hidden{display:none}
+
+@keyframes flash-red {
+  0% { background-color: #EEF2F6; }
+  50% { background-color: #FEE2E2; }
+  100% { background-color: #EEF2F6; }
+}
+.emergency-mode { animation: flash-red 1s infinite; }
+.emergency-card { border: 3px solid #DC2626 !important; position: relative; }
+.emergency-card::before { content: "⚠️ DANGER: CRISIS SITUATION"; color: #DC2626; font-weight: 800; position: absolute; top: -15px; left: 20px; background: #fff; padding: 0 10px; font-size: 12px; }
+
+.vpill{display:inline-block;background:#E2E8F0;padding:4px 8px;border-radius:4px;margin:2px;font-size:12px;font-weight:600}
+</style>
+</head>
+<body id="main-body">
+
+<div class="container" id="intro">
+  <div class="card">
+    <h1>Precision Engineering: HR Manager Simulator</h1>
+    <p>Welcome to <strong>Precision Engineering Ltd</strong>. Engineers are smart, but sometimes they are difficult to manage! In this game, you are the new HR Assistant.</p>
+    <p>You need to use your <strong>Soft Skills</strong> (how you talk to people) and <strong>Cultural Awareness</strong> (how you respect different habits) to keep the office happy.</p>
+    <div style="background:#F1F5F9; padding:15px; border-radius:8px; font-size:14px; color:#475569">
+      <strong>How to play:</strong> 10 stages. Some are normal, some are <strong>CRISIS</strong> events. All feedback is helpful to help you learn English.
+    </div>
+    <br>
+    <button class="btn" onclick="startGame()">Start Working</button>
+  </div>
+</div>
+
+<div class="container hidden" id="game-ui">
+  <div class="status-bar">
+    <span>Stage: <span id="stage-num">1</span>/10</span>
+    <span>HR Reputation: <span id="rep-val">0</span></span>
+  </div>
+  
+  <div class="card" id="q-card">
+    <h2 id="q-title" style="margin-top:0; font-size:20px"></h2>
+    <p id="q-text"></p>
+    <div class="options" id="opt-box"></div>
+    <div id="fb-box" class="feedback"></div>
+    <button class="btn hidden" id="next-btn" style="margin-top:20px; width:100%" onclick="nextQuestion()">Continue</button>
+  </div>
+</div>
+
+<div class="container hidden" id="results">
+  <div class="card">
+    <h1>Shift Over: Evaluation</h1>
+    <p id="final-msg"></p>
+    <div id="vocab-list" style="margin-top:20px"><p><strong>Key Terms Practised:</strong></p></div>
+    <button class="btn" onclick="location.reload()" style="margin-top:20px">Start New Shift</button>
+  </div>
+</div>
+
+<script>
+let score = 0;
+let current = 0;
+
+const stages = [
+  {
+    title: "Stage 1: The Literal Mind",
+    text: "An engineer, Klaus, asks: 'Do you have a minute?' You say: 'Sure, I'll be there in a second.' Klaus gets angry when you arrive 5 minutes later. He says: 'You lied. You said one second.'",
+    opts: [
+      { t: "Apologise: 'I'm sorry, I was being figurative. I should have said 5 minutes.'", pts: 3, fb: "Excellent! Engineers often think literally. Clear, exact communication is better than 'idioms' or 'figures of speech'." },
+      { t: "Get annoyed: 'It's just an expression, Klaus! Don't be so sensitive.'", pts: 1, fb: "Poor choice. This causes 'friction' (conflict). It's better to adapt to their communication style than to argue." },
+      { t: "Ignore it: Just start talking about the work.", pts: 0, fb: "Klaus will stay frustrated. Acknowledging a communication 'mismatch' helps build trust." }
+    ]
+  },
+  {
+    title: "Stage 2: The Open Plan Office",
+    text: "The engineering team is complaining about the marketing team. 'They are too loud and they laugh all day,' says the Lead Dev. 'We cannot concentrate on the code.'",
+    opts: [
+      { t: "Mediate: Create 'Quiet Hours' (10am-12pm) where no one talks loudly.", pts: 3, fb: "Great! This is 'mediation'. You found a solution that respects the engineers' need for deep focus." },
+      { t: "Tell them to buy headphones: 'If it's too loud, wear noise-cancelling gear.'", pts: 1, fb: "Fair, but it doesn't fix the 'company culture' problem. It feels like you don't care about their work environment." },
+      { t: "Move Marketing to the basement.", pts: 0, fb: "Too extreme! This will cause a 'silo' effect where departments hate each other." }
+    ]
+  },
+  {
+    title: "CRISIS: The Server Meltdown",
+    emergency: true,
+    text: "The main server is down. The CEO is screaming. The Lead Engineer is silent and staring at the screen. The CEO asks you to 'Go make him work faster!'",
+    opts: [
+      { t: "Protect the Engineer: Tell the CEO to wait in the lounge and let the expert work.", pts: 3, fb: "Brilliant. During a 'crisis', engineers need 'buffer time'. Removing pressure actually makes them solve the problem faster." },
+      { t: "Go stand behind the engineer and ask 'Is it fixed yet?' every 2 minutes.", pts: 0, fb: "Terrible. This is 'micro-management' and it causes 'cognitive load'. He will likely quit." },
+      { t: "Bring the engineer coffee and stay quiet.", pts: 2, fb: "Good. You are providing 'support' without being a 'distraction'." }
+    ]
+  },
+  {
+    title: "Stage 4: The Performance Review",
+    text: "You are reviewing Sarah's work. She is a genius coder but she never says 'Good morning' to her colleagues. Some people think she is 'rude'.",
+    opts: [
+      { t: "Focus on output: 'Your code is perfect. Let's discuss how we can make the team communication more efficient.'", pts: 3, fb: "Smart. You focused on 'Technical Excellence' first, which makes her listen to your 'Soft Skills' feedback." },
+      { t: "Tell her she needs to be 'nicer' and 'more bubbly'.", pts: 0, fb: "Ineffective. 'Bubbly' is a vague personality trait. Engineers prefer 'actionable' feedback." },
+      { t: "Force her to go to a 'mandatory' Happy Hour at a loud bar.", pts: 1, fb: "This is a nightmare for many introverts. This will lower her 'morale'." }
+    ]
+  },
+  {
+    title: "Stage 5: The Requirement Gap",
+    text: "A client wants a 'pretty button' on the website. The engineer says: 'What does pretty mean? Give me the hex code and the pixel dimensions.'",
+    opts: [
+      { t: "Translate: Ask the designer for the 'Specs' (specifications) to give to the engineer.", pts: 3, fb: "Correct. You acted as a 'bridge'. Engineers need 'quantifiable' data, not 'subjective' adjectives." },
+      { t: "Tell the engineer to 'Use your imagination.'", pts: 0, fb: "They hate that. Imagination is for art; engineering is about 'logic' and 'precision'." },
+      { t: "Tell the client they are being difficult.", pts: 1, fb: "Avoid this. You are HR—you should be the 'peacemaker'." }
+    ]
+  },
+  {
+    title: "Stage 6: The Remote Work Debate",
+    text: "The engineers want to work 100% from home. The CEO wants everyone in the office for 'synergy'.",
+    opts: [
+      { t: "Suggest a 'Hybrid' model: 2 days in office for meetings, 3 days home for 'Deep Work'.", pts: 3, fb: "The perfect 'compromise'. You balanced 'collaboration' with 'productivity'." },
+      { t: "Side with the CEO: 'If you aren't in the office, you aren't working.'", pts: 0, fb: "Very old-fashioned. You will lose your best talent to competitors who offer 'flexibility'." },
+      { t: "Let them do whatever they want with no rules.", pts: 1, fb: "Chaos. You need some 'framework' to keep the company running." }
+    ]
+  },
+  {
+    title: "CRISIS: The Security Leak",
+    emergency: true,
+    text: "A junior dev posted code on a public forum. It contains an 'API Key' (a secret password). It's a huge security risk!",
+    opts: [
+      { t: "Stay calm: 'Let's revoke the key first, then we can have a post-mortem to see how to prevent this.'", pts: 3, fb: "Perfect. A 'post-mortem' is a non-blame meeting to learn from mistakes. It keeps the 'psychological safety' high." },
+      { t: "Fire the junior dev immediately in front of everyone.", pts: 0, fb: "Disastrous. Now every other engineer will be too 'scared' to admit their own mistakes." },
+      { t: "Scream: 'WE ARE GOING TO BE BANKRUPT!'", pts: 0, fb: "Panic is the enemy of 'resolution'. HR must be the 'anchor' in a storm." }
+    ]
+  },
+  {
+    title: "Stage 8: The Intercultural Lunch",
+    text: "The team has engineers from 5 different countries. One engineer always eats at his desk alone. Some team members feel he is 'not a team player'.",
+    opts: [
+      { t: "Respect his 'Autonomy': Some cultures value 'solitude' during breaks. It's not a sign of being unfriendly.", pts: 3, fb: "Great 'Intercultural Sensitivity'. Don't force 'socializing' if they don't want it." },
+      { t: "Force him to sit at the big table and talk about his weekend.", pts: 0, fb: "This is 'awkward' and stressful. You are breaking his 'flow'." },
+      { t: "Ban eating at desks.", pts: 1, fb: "Too 'authoritarian'. Rules should have a logical reason, not just for 'forced fun'." }
+    ]
+  },
+  {
+    title: "Stage 9: The Non-Disclosure (NDA)",
+    text: "An engineer wants to start a personal blog about his work. The Legal department says: 'No, he might reveal secrets.'",
+    opts: [
+      { t: "Review the NDA: Help him understand what is 'proprietary' (secret) and what is 'Open Source' (public).", pts: 3, fb: "Smart. You are helping his 'Professional Development' while protecting the company's 'IP' (Intellectual Property)." },
+      { t: "Tell him: 'Legal said no. Stop asking.'", pts: 1, fb: "Lazy. HR should help find a 'middle ground'." },
+      { t: "Tell him to ignore Legal and blog anyway.", pts: 0, fb: "You are an HR professional! You cannot encourage 'contractual breaches'." }
+    ]
+  },
+  {
+    title: "Stage 10: The Big Launch",
+    text: "The project is finished. It was a huge success. How do you reward the engineering team?",
+    opts: [
+      { t: "Practicality: Give them a high-quality technical gadget or an extra day of leave.", pts: 3, fb: "Yes! Engineers often prefer 'tangible' (real) rewards or 'time' over a big, loud party." },
+      { t: "Publicity: Make them stand on a stage while 200 people clap for them.", pts: 1, fb: "For many engineers, this is 'torture'. They prefer 'recognition' from their peers, not a public spectacle." },
+      { t: "Pizza: Just buy 5 pizzas and call it a day.", pts: 1, fb: "A bit 'cliché'. It feels like you aren't putting in much effort." }
+    ]
+  }
+];
+
+/**
+ * Fisher-Yates Shuffle Algorithm
+ * Ensures true mathematical randomness.
+ */
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+function startGame() {
+  document.getElementById('intro').classList.add('hidden');
+  document.getElementById('game-ui').classList.remove('hidden');
+  showQuestion();
+}
+
+function showQuestion() {
+  const stage = stages[current];
+  const main = document.getElementById('main-body');
+  const card = document.getElementById('q-card');
+  
+  if (stage.emergency) {
+    main.classList.add('emergency-mode');
+    card.classList.add('emergency-card');
+  } else {
+    main.classList.remove('emergency-mode');
+    card.classList.remove('emergency-card');
+  }
+
+  document.getElementById('stage-num').innerText = current + 1;
+  document.getElementById('q-title').innerText = stage.title;
+  document.getElementById('q-text').innerText = stage.text;
+  
+  const box = document.getElementById('opt-box');
+  box.innerHTML = '';
+  document.getElementById('fb-box').style.display = 'none';
+  document.getElementById('next-btn').classList.add('hidden');
+
+  // Create a shuffled copy of the options array
+  const shuffledOptions = shuffleArray([...stage.opts]);
+
+  shuffledOptions.forEach(opt => {
+    const b = document.createElement('button');
+    b.className = 'option-btn';
+    b.innerText = opt.t;
+    // Pass the original choice object to ensure data integrity (points/feedback)
+    b.onclick = () => selectOption(opt, b);
+    box.appendChild(b);
+  });
+}
+
+function selectOption(choice, btn) {
+  // Points and Feedback are tied to the 'choice' object passed from the click event
+  score += choice.pts;
+  document.getElementById('rep-val').innerText = score;
+  
+  const fb = document.getElementById('fb-box');
+  fb.innerText = choice.fb;
+  fb.style.display = 'block';
+  fb.className = 'feedback ' + (choice.pts === 3 ? 'fb-high' : (choice.pts >= 1 ? 'fb-mid' : 'fb-low'));
+
+  document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+  btn.classList.add('selected');
+  document.getElementById('next-btn').classList.remove('hidden');
+}
+
+function nextQuestion() {
+  current++;
+  if (current < stages.length) {
+    showQuestion();
+  } else {
+    showResults();
+  }
+}
+
+function showResults() {
+  document.getElementById('game-ui').classList.add('hidden');
+  document.getElementById('results').classList.remove('hidden');
+  document.getElementById('main-body').classList.remove('emergency-mode');
+
+  let msg = "";
+  if (score >= 26) msg = "<strong>EXPERT HR PARTNER:</strong> You are amazing! You understand that engineers are different, and you use your soft skills to help them. You are ready for a big promotion!";
+  else if (score >= 18) msg = "<strong>GOOD ASSISTANT:</strong> You are doing well. You are kind and you follow the rules. Try to think more about 'Cultural Awareness' to get a higher score next time.";
+  else msg = "<strong>TRAINEE:</strong> You are learning! Engineering is a difficult industry. Focus on staying calm during a CRISIS and listening more to your staff.";
+
+  document.getElementById('final-msg').innerHTML = `Final Score: ${score} / 30<br><br>${msg}`;
+  
+  const vocab = ["Conflict Resolution", "NDA (Non-Disclosure)", "Literal Mind", "Soft Skills", "Intercultural Sensitivity", "Performance Review", "Safety Protocol", "Mediation", "Company Culture", "Professionalism"];
+  document.getElementById('vocab-list').innerHTML += vocab.map(v => `<span class="vpill">${v}</span>`).join('');
+}
+</script>
+
+</body>
+</html>

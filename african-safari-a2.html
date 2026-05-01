@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>African Safari: 3-Day Ranger Challenge</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --safari-green: #556b2f;
+    --safari-orange: #e67e22;
+    --safari-khaki: #c3b091;
+    --danger: #c0392b;
+    --text: #2c3e50;
+    --bg: #fdf5e6;
+  }
+
+  body { font-family: 'Lato', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; align-items: center; }
+  .header { background: var(--safari-green); color: white; width: 100%; padding: 15px; text-align: center; position: sticky; top: 0; z-index: 10; border-bottom: 5px solid var(--safari-orange); }
+  
+  .stats-bar { display: flex; justify-content: space-around; background: #fff; width: 100%; padding: 10px 0; border-bottom: 2px solid #ddd; font-weight: bold; }
+  .stat-item { display: flex; align-items: center; gap: 5px; }
+
+  .progress-bar { width: 100%; height: 8px; background: #ddd; }
+  .progress-fill { height: 100%; background: var(--safari-orange); width: 0%; transition: 0.5s; }
+
+  .game-container { max-width: 800px; width: 90%; margin: 20px auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); min-height: 400px; }
+  .choice-list { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+
+  .choice-btn { 
+    padding: 18px; border: 2px solid #eee; border-radius: 8px; background: white; 
+    cursor: pointer; font-size: 1rem; text-align: left; transition: 0.2s;
+  }
+  .choice-btn:hover:not(:disabled) { border-color: var(--safari-green); background: #f9f1e7; transform: translateX(5px); }
+  .choice-btn:disabled { opacity: 0.8; cursor: not-allowed; }
+  
+  .day-tag { color: var(--safari-orange); font-weight: bold; text-transform: uppercase; font-size: 0.8rem; margin-bottom: 5px; display: block; }
+
+  .feedback { margin-top: 20px; padding: 20px; border-radius: 8px; display: none; line-height: 1.6; border-left: 5px solid var(--safari-orange); font-size: 1.05rem; }
+  .fb-2 { border-left-color: var(--safari-green); background-color: #f0f9eb; }
+  .fb-1 { border-left-color: var(--safari-orange); background-color: #fff9f0; }
+  .fb-0 { border-left-color: var(--danger); background-color: #fdf2f2; }
+
+  .btn-next { display: none; margin-top: 20px; padding: 15px 30px; background: var(--safari-green); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; font-size: 1.1rem; }
+
+  #landingPage {
+    position: fixed; inset: 0; z-index: 100;
+    background: var(--safari-green);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 30px;
+  }
+
+  .landing-inner { max-width: 680px; width: 100%; text-align: center; color: white; }
+  .landing-title { font-family: 'Playfair Display', serif; font-size: 3.5rem; margin-bottom: 10px; color: var(--safari-khaki); }
+  .landing-btn { padding: 17px 48px; background: var(--safari-orange); color: white; font-weight: 700; border: none; border-radius: 6px; cursor: pointer; margin-top: 20px; text-transform: uppercase; }
+</style>
+</head>
+<body>
+
+<div id="landingPage">
+  <div class="landing-inner">
+    <h1 class="landing-title">Safari Ranger</h1>
+    <p>Welcome! You are the head ranger for a 3-day expedition.</p>
+    <p>Keep your guests safe and happy to earn <b>Safari Points</b>!</p>
+    <button class="landing-btn" onclick="startGame()">Begin Expedition →</button>
+  </div>
+</div>
+
+<div class="header">
+  <h1>🦁 3-Day African Safari</h1>
+</div>
+
+<div class="stats-bar">
+  <div class="stat-item">⭐ Safari Points: <span id="scoreDisplay">0</span></div>
+  <div class="stat-item">📅 Progress: <span id="stepCounter">1 / 14</span></div>
+</div>
+
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+<div class="game-container" id="gameWindow">
+  <span class="day-tag" id="dayLabel">Day 1</span>
+  <h2 id="stepTitle">Expedition Start</h2>
+  <p id="stepDesc">The guests have arrived. How do you welcome them?</p>
+  <div class="choice-list" id="choiceList"></div>
+  <div class="feedback" id="feedbackBox"></div>
+  <button class="btn-next" id="nextBtn" onclick="nextStep()">Continue Journey →</button>
+</div>
+
+<script>
+/**
+ * SCENARIO POOL: 36 Scenarios organized into 12 chronological slots[cite: 2]
+ */
+const scenarioPool = [
+  // SLOT 1: DAY 1 ARRIVAL
+  [
+    { title: "The Welcome Drink", desc: "Your guests arrive at the camp after a long, dusty flight. They look tired.", day: 1, choices: [
+      { text: "Give them cold fruit juice and a wet towel.", pts: 2, fb: "<b>Excellent!</b> They feel cool and happy immediately." },
+      { text: "Show them to their rooms and tell them where the water is.", pts: 1, fb: "<b>Okay.</b> It is helpful, but a bit cold for a first meeting." },
+      { text: "Tell them to wait at the desk for check-in.", pts: 0, fb: "<b>Poor.</b> They are very tired and want to sit down." }
+    ]},
+    { title: "The Heavy Bags", desc: "A family arrives with many heavy suitcases for their safari.", day: 1, choices: [
+      { text: "Call a porter to carry the bags to their tents.", pts: 2, fb: "<b>Perfect!</b> The guests can relax while their things move." },
+      { text: "Tell them they can leave the bags in the car for now.", pts: 1, fb: "<b>Good.</b> It saves effort, but they might need their things." },
+      { text: "Point at the tents and ask them to carry their bags.", pts: 0, fb: "<b>Rude.</b> Good service means helping with heavy luggage." }
+    ]},
+    { title: "The First Meeting", desc: "The guests ask about the animals they will see today.", day: 1, choices: [
+      { text: "Show them a colorful book of local animals and smile.", pts: 2, fb: "<b>Great!</b> This makes them very excited for the trip." },
+      { text: "Say 'I don't know, it depends on the luck'.", pts: 1, fb: "<b>Honest.</b> But it is not very exciting for the guests." },
+      { text: "Tell them there are no animals near the camp.", pts: 0, fb: "<b>Boring!</b> Even small birds are exciting for tourists." }
+    ]}
+  ],
+  // SLOT 2: DAY 1 ORIENTATION
+  [
+    { title: "Safety Rules", desc: "It is time for the safety talk. How do you explain the rules?", day: 1, choices: [
+      { text: "Tell them 'Never leave the tent at night alone'.", pts: 2, fb: "<b>Safe!</b> You must be very clear about wild animals at night." },
+      { text: "Give them a long paper with 50 rules to read.", pts: 1, fb: "<b>Safe but boring.</b> They might not read it all." },
+      { text: "Tell them to do whatever they want.", pts: 0, fb: "<b>Dangerous!</b> The bush is full of predators." }
+    ]},
+    { title: "The Water Bottle", desc: "The guests are going on their first drive. They have no water.", day: 1, choices: [
+      { text: "Give everyone a reusable cold bottle of water.", pts: 2, fb: "<b>Smart!</b> It keeps them healthy and helps the environment." },
+      { text: "Tell them there is a tap in the bathroom.", pts: 1, fb: "<b>Okay.</b> But they can't take the bathroom on the drive!" },
+      { text: "Don't say anything about water.", pts: 0, fb: "<b>Danger.</b> The sun is very hot and they will get thirsty." }
+    ]},
+    { title: "Binocular Lessons", desc: "A guest is holding their binoculars backwards.", day: 1, choices: [
+      { text: "Smile and show them the correct way to hold them.", pts: 2, fb: "<b>Helpful!</b> Now they can actually see the lions." },
+      { text: "Laugh at them with the other rangers.", pts: 0, fb: "<b>Mean!</b> Guests will feel embarrassed and sad." },
+      { text: "Ignore it and let them figure it out.", pts: 1, fb: "<b>Okay.</b> But they will miss the view." }
+    ]}
+  ],
+  // SLOT 3: DAY 1 FIRST DRIVE
+  [
+    { title: "The Lion Sighting", desc: "You find a lion sleeping far away under a tree.", day: 1, choices: [
+      { text: "Stop the car and wait quietly for it to wake up.", pts: 2, fb: "<b>Wonderful!</b> Guests love to watch animals being natural." },
+      { text: "Drive very close and honk the horn to wake it up.", pts: 0, fb: "<b>Dangerous!</b> Never annoy a wild predator." },
+      { text: "Say 'Look, a lion' and drive away after 10 seconds.", pts: 1, fb: "<b>Too fast.</b> Guests want time to take photos." }
+    ]},
+    { title: "The Noisy Guest", desc: "A guest is shouting very loudly because they are excited.", day: 1, choices: [
+      { text: "Whisper 'Please be quiet so we don't scare the animals'.", pts: 2, fb: "<b>Professional.</b> You kept the peace and the animals stayed." },
+      { text: "Shout back at them to be quiet.", pts: 0, fb: "<b>Irony!</b> You are being as loud as the guest." },
+      { text: "Do nothing and let them keep shouting.", pts: 1, fb: "<b>Poor.</b> All the animals will run away from the car." }
+    ]},
+    { title: "The Flat Tire", desc: "The car hits a rock and the tire goes flat.", day: 1, choices: [
+      { text: "Tell the guests to stay in the car while you check the area.", pts: 2, fb: "<b>Safety First!</b> You must check for lions before getting out." },
+      { text: "Ask the guests to get out and help you change it.", pts: 0, fb: "<b>Bad!</b> You are putting the guests in danger on the ground." },
+      { text: "Start crying because the car is broken.", pts: 0, fb: "<b>Unprofessional.</b> You are the ranger! Stay calm." }
+    ]}
+  ],
+  // SLOT 4: DAY 1 NIGHTFALL
+  [
+    { title: "Campfire Stories", desc: "The sun is down. Guests are sitting around the fire.", day: 1, choices: [
+      { text: "Tell a story about the history of the park.", pts: 2, fb: "<b>Magical.</b> Guests love the culture and history." },
+      { text: "Check your phone and don't talk to anyone.", pts: 0, fb: "<b>Boring.</b> Part of your job is to entertain." },
+      { text: "Ask the guests to tell their own stories.", pts: 1, fb: "<b>Good.</b> It builds a community feeling." }
+    ]},
+    { title: "The Strange Noise", desc: "A guest hears a 'whoop' sound from the bushes.", day: 1, choices: [
+      { text: "Explain that it is a hyena and it is far away.", pts: 2, fb: "<b>Calm.</b> Knowledge stops people from being scared." },
+      { text: "Say 'Oh no! Run to your tents!'", pts: 0, fb: "<b>Panic!</b> You just scared everyone for no reason." },
+      { text: "Say 'I didn't hear anything'.", pts: 1, fb: "<b>Dismissive.</b> The guest wants to learn about sounds." }
+    ]},
+    { title: "Dinner Service", desc: "One guest says they are a vegetarian.", day: 1, choices: [
+      { text: "Provide a fresh salad and grilled vegetables.", pts: 2, fb: "<b>Great.</b> You are ready for all types of guests." },
+      { text: "Tell them to just eat the bread.", pts: 1, fb: "<b>Okay.</b> But they will be very hungry tomorrow." },
+      { text: "Say 'We only serve meat in the bush'.", pts: 0, fb: "<b>Inflexible.</b> Modern safaris must have options." }
+    ]}
+  ],
+  // SLOT 5: DAY 2 MORNING DRIVE
+  [
+    { title: "Early Start", desc: "It is 5:00 AM. One guest is still sleeping.", day: 2, choices: [
+      { text: "Knock gently and offer a hot coffee.", pts: 2, fb: "<b>Great Service.</b> Morning is the best time for animals." },
+      { text: "Leave without them.", pts: 1, fb: "<b>Fair.</b> But they will be sad they missed the leopards." },
+      { text: "Blow a loud whistle outside their tent.", pts: 0, fb: "<b>Too loud!</b> You will wake up the whole camp." }
+    ]},
+    { title: "The Leopard", desc: "You spot a leopard in a tree with its lunch.", day: 2, choices: [
+      { text: "Stop the engine and let everyone use binoculars.", pts: 2, fb: "<b>Perfect.</b> This is a very rare and beautiful sight." },
+      { text: "Throw a rock at the tree to make it move.", pts: 0, fb: "<b>Cruel!</b> Never touch or bother the animals." },
+      { text: "Keep driving because you already saw a lion.", pts: 1, fb: "<b>No!</b> Leopards are special. Stop the car!" }
+    ]},
+    { title: "The Cold Wind", desc: "The morning air is very cold in the open car.", day: 2, choices: [
+      { text: "Give everyone a thick blanket.", pts: 2, fb: "<b>Thoughtful.</b> They can enjoy the drive without shivering." },
+      { text: "Tell them to 'be tough like a ranger'.", pts: 0, fb: "<b>Rude.</b> Guests pay for comfort." },
+      { text: "Suggest they put their hands in their pockets.", pts: 1, fb: "<b>Basic.</b> Not very helpful." }
+    ]}
+  ],
+  // SLOT 6: DAY 2 BUSH WALK
+  [
+    { title: "Small Wonders", desc: "You are walking. A guest asks about a pile of poop.", day: 2, choices: [
+      { text: "Explain which animal made it and how old it is.", pts: 2, fb: "<b>Expert!</b> Tracking is a very interesting skill." },
+      { text: "Say 'Ew, don't look at that'.", pts: 0, fb: "<b>Silly.</b> Nature includes everything, even poop." },
+      { text: "Kick it away and keep walking.", pts: 1, fb: "<b>Okay.</b> But you missed a chance to teach." }
+    ]},
+    { title: "The Ant Hill", desc: "You see a massive termite mound.", day: 2, choices: [
+      { text: "Stop and explain how the insects build it.", pts: 2, fb: "<b>Interesting!</b> Guests love the 'small' safari too." },
+      { text: "Let a guest stand on top of it for a photo.", pts: 0, fb: "<b>Destructive!</b> Protect the park and the animals." },
+      { text: "Walk past it without saying anything.", pts: 1, fb: "<b>Boring.</b> It is a great thing to see." }
+    ]},
+    { title: "Following Tracks", desc: "You find fresh tracks of a cheetah.", day: 2, choices: [
+      { text: "Follow them slowly and look at the bushes.", pts: 2, fb: "<b>Exciting!</b> This makes the guests feel like hunters." },
+      { text: "Run as fast as you can to find the cat.", pts: 0, fb: "<b>Dangerous.</b> Never run in the bush." },
+      { text: "Say 'We can't find it' and go back to camp.", pts: 1, fb: "<b>Lazy.</b> Try a little bit first." }
+    ]}
+  ],
+  // SLOT 7: DAY 2 MIDDAY HEAT
+  [
+    { title: "Pool Time", desc: "It is 40 degrees. The guests want to swim.", day: 2, choices: [
+      { text: "Show them the camp pool and give them towels.", pts: 2, fb: "<b>Refreshing.</b> A great way to wait for the sunset." },
+      { text: "Tell them to swim in the river.", pts: 0, fb: "<b>Fatal!</b> Rivers have crocodiles and hippos." },
+      { text: "Tell them to stay in their tents with the fan.", pts: 1, fb: "<b>Safe.</b> But the pool is more fun." }
+    ]},
+    { title: "The Sunburn", desc: "A guest is very red and looks painful.", day: 2, choices: [
+      { text: "Give them some aloe vera cream and a hat.", pts: 2, fb: "<b>Kind.</b> You are looking after their health." },
+      { text: "Laugh and call them 'Mr. Tomato'.", pts: 0, fb: "<b>Unkind.</b> Don't make fun of your guests." },
+      { text: "Tell them to sit in the shade.", pts: 1, fb: "<b>Good advice.</b> Simple but helpful." }
+    ]},
+    { title: "Midday Nap", desc: "The camp is very quiet. Guests are resting.", day: 2, choices: [
+      { text: "Check that everyone has enough drinking water.", pts: 2, fb: "<b>Proactive.</b> Heat can be dangerous." },
+      { text: "Play loud music in the bar.", pts: 0, fb: "<b>Disturbing.</b> Guests want to sleep now." },
+      { text: "Take a nap yourself and forget the guests.", pts: 1, fb: "<b>Risky.</b> A ranger should always be ready." }
+    ]}
+  ],
+  // SLOT 8: DAY 2 AFTERNOON
+  [
+    { title: "The Elephant Herd", desc: "A family of elephants is crossing the road.", day: 2, choices: [
+      { text: "Stop the car far away and turn off the engine.", pts: 2, fb: "<b>Respectful.</b> Give the elephants space." },
+      { text: "Drive fast to get past them before they block you.", pts: 0, fb: "<b>Aggressive.</b> This can make a mother elephant angry." },
+      { text: "Keep the engine running so you can move fast.", pts: 1, fb: "<b>Loud.</b> The noise bothers the animals." }
+    ]},
+    { title: "The Bird Watcher", desc: "A guest wants to see a specific tiny blue bird.", day: 2, choices: [
+      { text: "Stop the car and help them find it with the book.", pts: 2, fb: "<b>Patient.</b> Small animals are important too." },
+      { text: "Say 'Birds are boring, let's find a rhino'.", pts: 0, fb: "<b>Opinionated.</b> The guest's interests come first." },
+      { text: "Point at a random tree and say 'It's there'.", pts: 1, fb: "<b>Dishonest.</b> Don't lie to your guests." }
+    ]},
+    { title: "Dusty Roads", desc: "The road is very dusty and the guests are coughing.", day: 2, choices: [
+      { text: "Drive more slowly to make less dust.", pts: 2, fb: "<b>Comfortable.</b> They will appreciate the clean air." },
+      { text: "Tell them to close their eyes.", pts: 0, fb: "<b>Useless.</b> They want to see the view!" },
+      { text: "Give them a scarf to cover their mouths.", pts: 1, fb: "<b>Helpful.</b> A good solution." }
+    ]}
+  ],
+  // SLOT 9: DAY 3 BREAKFAST
+  [
+    { title: "The Hippo View", desc: "Breakfast is near the water. Hippos are splashing.", day: 3, choices: [
+      { text: "Tell the guests to stay 10 meters away from the water.", pts: 2, fb: "<b>Safety!</b> Hippos are very dangerous animals." },
+      { text: "Let a guest feed the hippo some bread.", pts: 0, fb: "<b>Terrible!</b> Never feed wild animals." },
+      { text: "Ignore the hippos and eat.", pts: 1, fb: "<b>Missing out.</b> They are cool to watch from a distance." }
+    ]},
+    { title: "The Monkey Thief", desc: "A monkey is trying to steal a guest's toast.", day: 3, choices: [
+      { text: "Move the food inside and clap your hands at the monkey.", pts: 2, fb: "<b>Smart.</b> You protected the food without hurting the animal." },
+      { text: "Let the monkey take the toast for a photo.", pts: 0, fb: "<b>Bad.</b> Monkeys will become aggressive if they get human food." },
+      { text: "Try to catch the monkey.", pts: 1, fb: "<b>Funny but hard.</b> You will probably fail." }
+    ]},
+    { title: "The Surprise", desc: "It is the last day. You have some extra champagne.", day: 3, choices: [
+      { text: "Have a 'Bush Breakfast' with a toast to the trip.", pts: 2, fb: "<b>Classy.</b> A perfect way to say goodbye." },
+      { text: "Drink it yourself in the kitchen.", pts: 0, fb: "<b>Selfish!</b> Share the joy with the guests." },
+      { text: "Ask the guests to pay double for it.", pts: 1, fb: "<b>Greedy.</b> Gifts should be free." }
+    ]}
+  ],
+  // SLOT 10: DAY 3 LOCAL CULTURE
+  [
+    { title: "The Village Visit", desc: "You take the guests to meet the local community.", day: 3, choices: [
+      { text: "Ask the guests to ask questions about the local language.", pts: 2, fb: "<b>Educational.</b> This connects people together." },
+      { text: "Tell the guests to take photos of everyone without asking.", pts: 0, fb: "<b>Disrespectful.</b> Always ask before taking photos of people." },
+      { text: "Wait in the car while the guests walk around.", pts: 1, fb: "<b>Unhelpful.</b> You should be the bridge." }
+    ]},
+    { title: "The Souvenir Shop", desc: "Guests want to buy wood carvings to take home.", day: 3, choices: [
+      { text: "Show them the shop where the money goes to the carvers.", pts: 2, fb: "<b>Ethical.</b> Supporting the community is great." },
+      { text: "Take them to a big plastic factory shop.", pts: 1, fb: "<b>Okay.</b> But it is not very authentic." },
+      { text: "Tell them 'Don't buy anything, it's all trash'.", pts: 0, fb: "<b>Mean.</b> They want a memory of Africa." }
+    ]},
+    { title: "Traditional Dance", desc: "The villagers want to perform a dance.", day: 3, choices: [
+      { text: "Encourage the guests to join in and dance too.", pts: 2, fb: "<b>Joyful!</b> Everyone is laughing and having fun." },
+      { text: "Tell the guests to sit and be quiet.", pts: 1, fb: "<b>Formal.</b> A bit boring." },
+      { text: "Say 'We don't have time for this'.", pts: 0, fb: "<b>Rude.</b> This is a gift from the community." }
+    ]}
+  ],
+  // SLOT 11: DAY 3 PACKING
+  [
+    { title: "Late Checkout", desc: "A guest asks to stay in the room for 2 more hours.", day: 3, choices: [
+      { text: "Say 'Yes, of course' and help them with their bags later.", pts: 2, fb: "<b>Kind.</b> They can relax before the airport." },
+      { text: "Say 'No, leave now' and stand at their door.", pts: 0, fb: "<b>Aggressive.</b> Give them a little time." },
+      { text: "Charge them $50 for the extra time.", pts: 1, fb: "<b>Business-like.</b> A bit strict." }
+    ]},
+    { title: "The Tip", desc: "A guest wants to give you a tip for your hard work.", day: 3, choices: [
+      { text: "Say 'Thank you so much' and share it with the team.", pts: 2, fb: "<b>Professional.</b> Teamwork makes the safari work." },
+      { text: "Ask for more money.", pts: 0, fb: "<b>Greedy.</b> Never ask for a tip." },
+      { text: "Refuse the money and look angry.", pts: 1, fb: "<b>Awkward.</b> It makes the guest feel bad." }
+    ]},
+    { title: "Forgot Something", desc: "You find a expensive camera in a room after checkout.", day: 3, choices: [
+      { text: "Drive to the airport immediately to return it.", pts: 2, fb: "<b>Hero!</b> You just saved their holiday memories." },
+      { text: "Keep it for yourself.", pts: 0, fb: "<b>Criminal.</b> That is stealing." },
+      { text: "Leave it at the desk and wait for a call.", pts: 1, fb: "<b>Okay.</b> But they might be in another country soon." }
+    ]}
+  ],
+  // SLOT 12: DAY 3 DEPARTURE
+  [
+    { title: "The Final Goodbye", desc: "The car is leaving for the airport.", day: 3, choices: [
+      { text: "Wave and say 'We hope to see you again soon!'", pts: 2, fb: "<b>Warm.</b> They leave with a smile." },
+      { text: "Turn your back and go to lunch.", pts: 0, fb: "<b>Cold.</b> The end is as important as the start." },
+      { text: "Ask them 'Did you write a review yet?'", pts: 1, fb: "<b>Annoying.</b> Let them enjoy the last minute." }
+    ]},
+    { title: "The Gift Bag", desc: "You have some small wooden animal toys.", day: 3, choices: [
+      { text: "Give one to each guest as a parting gift.", pts: 2, fb: "<b>Sweet.</b> A small gift means a lot." },
+      { text: "Try to sell them for $10 each.", pts: 1, fb: "<b>Okay.</b> But a gift is nicer." },
+      { text: "Keep them in the box.", pts: 0, fb: "<b>Waste.</b> They are better as memories for guests." }
+    ]},
+    { title: "Safe Travels", desc: "The road to the airport is very bumpy.", day: 3, choices: [
+      { text: "Drive slowly and tell stories about the animals.", pts: 2, fb: "<b>Great.</b> One last bit of entertainment." },
+      { text: "Drive like a race car driver.", pts: 0, fb: "<b>Scary.</b> Guests might get sick before the flight." },
+      { text: "Be completely silent for the whole hour.", pts: 1, fb: "<b>Awkward.</b> Say a few words." }
+    ]}
+  ]
+];
+
+const emergencies = [
+  { title: "🚨 EMERGENCY: Elephant on the Road!", isEmergency: true, desc: "A massive bull elephant is standing in the middle of the road. He looks grumpy!", day: 1, choices: [
+    { text: "Turn off the engine and wait quietly.", pts: 2, fb: "<b>Wise Choice.</b> The elephant stays calm and walks away. You are safe!" },
+    { text: "Honk your horn to make him move.", pts: 0, fb: "<b>Bad Idea!</b> This makes elephants very angry and dangerous." },
+    { text: "Get out of the car to see him better.", pts: 0, fb: "<b>Death Wish!</b> Never get out of the car near a wild elephant." }
+  ]},
+  { title: "🚨 EMERGENCY: The Storm", isEmergency: true, desc: "A massive rain storm starts and the car gets stuck in the mud!", day: 2, choices: [
+    { text: "Use the radio to call for help and give guests snacks.", pts: 2, fb: "<b>Excellent.</b> You kept them safe and fed while help came." },
+    { text: "Tell the guests to push the car while you drive.", pts: 0, fb: "<b>Dangerous.</b> Lions love it when humans get stuck in the mud." },
+    { text: "Leave the guests in the car and walk to the camp alone.", pts: 0, fb: "<b>Abandonment.</b> Never leave your guests alone in the bush." }
+  ]}
+];
+
+const bands = [
+  { min: 0, max: 10, title: "Safari Scout", color: "#e67e22", text: "You are learning! Next time, think more about guest safety and comfort." },
+  { min: 11, max: 22, title: "Professional Ranger", color: "#2980b9", text: "Good job! You know how to run a great safari. Your guests had a wonderful time." },
+  { min: 23, max: 28, title: "Legend of the Savannah", color: "#27ae60", text: "Incredible! You are the perfect guide. Every guest wants to travel with you!" }
+];
+
+let score = 0;
+let currentGameSteps = [];
+let currentStepIndex = 0;
+
+/**
+ * Fisher-Yates Shuffle Function[cite: 2]
+ */
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+function startGame() {
+  score = 0;
+  currentStepIndex = 0;
+  
+  // Choose 1 scenario from each of the 12 chronological slots[cite: 2]
+  currentGameSteps = scenarioPool.map(slot => {
+    return {...slot[Math.floor(Math.random() * slot.length)]};
+  });
+
+  // Insert emergencies at logical intervals[cite: 2]
+  currentGameSteps.splice(4, 0, emergencies[0]); // After slot 4
+  currentGameSteps.splice(9, 0, emergencies[1]); // After slot 8 + 1st emergency
+  
+  document.getElementById("landingPage").style.display = "none";
+  updateStats();
+  renderStep();
+}
+
+function updateStats() {
+  document.getElementById("scoreDisplay").innerText = score;
+  document.getElementById("stepCounter").innerText = `${currentStepIndex + 1} / 14`;
+  const progress = ((currentStepIndex) / 14) * 100;
+  document.getElementById("progressFill").style.width = progress + "%";
+}
+
+function renderStep() {
+  const data = currentGameSteps[currentStepIndex];
+  document.getElementById("dayLabel").innerText = `Day ${data.day}`;
+  document.getElementById("stepTitle").innerText = data.title;
+  document.getElementById("stepDesc").innerHTML = data.desc;
+  
+  const list = document.getElementById("choiceList");
+  list.innerHTML = "";
+  
+  // Shuffle options so the best answer isn't always in the same place[cite: 2]
+  const shuffledChoices = shuffleArray([...data.choices]);
+  
+  shuffledChoices.forEach((c) => {
+    const btn = document.createElement("button");
+    btn.className = "choice-btn";
+    btn.innerHTML = c.text;
+    btn.onclick = () => selectChoice(c);
+    list.appendChild(btn);
+  });
+  
+  document.getElementById("feedbackBox").style.display = "none";
+  document.getElementById("nextBtn").style.display = "none";
+}
+
+function selectChoice(choice) {
+  const fb = document.getElementById("feedbackBox");
+  score += choice.pts;
+  updateStats();
+  
+  fb.innerHTML = `⭐ +${choice.pts} Points<br>${choice.fb}`;
+  fb.className = `feedback fb-${choice.pts}`;
+  fb.style.display = "block";
+  
+  document.querySelectorAll(".choice-btn").forEach(b => b.disabled = true);
+  document.getElementById("nextBtn").style.display = "block";
+}
+
+function nextStep() {
+  currentStepIndex++;
+  if (currentStepIndex < currentGameSteps.length) {
+    renderStep();
+  } else {
+    renderFinalScreen();
+  }
+}
+
+function renderFinalScreen() {
+  const band = bands.find(b => score >= b.min && score <= b.max) || bands[0];
+  document.getElementById("progressFill").style.width = "100%";
+  
+  document.getElementById("gameWindow").innerHTML = `
+    <h2 style="color:${band.color}">${band.title}</h2>
+    <p>Final Score: <b>${score} / 28</b></p>
+    <p>${band.text}</p>
+    <hr style="margin:20px 0; border:0; border-top:1px solid #ddd">
+    <button class="landing-btn" style="width:100%" onclick="location.reload()">New Expedition</button>
+  `;
+}
+</script>
+</body>
+</html>

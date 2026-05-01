@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>New York City Expedition — B1/B2 Level</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ny-yellow: #fbc02d;
+    --ny-blue: #0d47a1;
+    --ny-grey: #37474f;
+    --danger: #c0392b;
+    --text: #2c3e50;
+    --bg: #f0f2f5;
+  }
+
+  body { font-family: 'Lato', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; align-items: center; }
+  .header { background: var(--ny-grey); color: white; width: 100%; padding: 15px; text-align: center; position: sticky; top: 0; z-index: 10; border-bottom: 5px solid var(--ny-yellow); }
+  
+  .stats-bar { display: flex; justify-content: space-around; background: #fff; width: 100%; padding: 10px 0; border-bottom: 2px solid #ddd; font-weight: bold; }
+  .stat-item { display: flex; align-items: center; gap: 5px; }
+
+  .progress-bar { width: 100%; height: 8px; background: #ddd; }
+  .progress-fill { height: 100%; background: var(--ny-yellow); width: 0%; transition: 0.5s; }
+
+  .game-container { max-width: 800px; width: 90%; margin: 20px auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); min-height: 400px; }
+  .choice-list { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+
+  .choice-btn { 
+    padding: 18px; border: 2px solid #eee; border-radius: 8px; background: white; 
+    cursor: pointer; font-size: 1rem; text-align: left; transition: 0.2s;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .choice-btn:hover:not(:disabled) { border-color: var(--ny-yellow); background: #fffde7; transform: translateX(5px); }
+  .choice-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+  
+  .price-tag { padding: 2px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: bold; }
+  .cost-tag { background: #eee; color: #333; }
+
+  .feedback { margin-top: 20px; padding: 20px; border-radius: 8px; display: none; line-height: 1.6; border-left: 5px solid var(--ny-yellow); font-size: 1.05rem; }
+  .feedback.error { border-left-color: var(--danger); background-color: #fdf2f2; }
+  .btn-next { display: none; margin-top: 20px; padding: 15px 30px; background: var(--ny-grey); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; font-size: 1.1rem; }
+
+  .vocab-section { margin-top: 30px; background: #f9f9f9; padding: 20px; border-radius: 10px; text-align: left; border-top: 4px solid var(--ny-yellow); }
+  .vocab-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px; }
+  .vocab-item { font-size: 0.95rem; line-height: 1.4; }
+  .vocab-item b { color: var(--ny-grey); }
+
+  #landingPage {
+    position: fixed; inset: 0; z-index: 100;
+    background: var(--ny-blue);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 30px;
+  }
+
+  .landing-inner { max-width: 680px; width: 100%; text-align: center; color: white; }
+  .landing-title { font-family: 'Playfair Display', serif; font-size: 3.5rem; margin-bottom: 10px; color: var(--ny-yellow); }
+  .landing-btn { padding: 17px 48px; background: var(--ny-yellow); color: #000; font-weight: 700; border: none; border-radius: 6px; cursor: pointer; margin-top: 20px; text-transform: uppercase; }
+</style>
+</head>
+<body>
+
+<div id="landingPage">
+  <div class="landing-inner">
+    <h1 class="landing-title">NYC Expedition</h1>
+    <p>Welcome to the "Big Apple"! You have been allocated a budget of <strong>$100</strong> for your urban excursion.</p>
+    <p>Your objective is to accumulate the maximum number of <b>Satisfaction Points</b> while maintaining financial solvency!</p>
+    <button class="landing-btn" onclick="startGame()">Commence Journey →</button>
+  </div>
+</div>
+
+<div class="header">
+  <h1>🗽 A Day in the Metropolis</h1>
+</div>
+
+<div class="stats-bar">
+  <div class="stat-item">⭐ Satisfaction: <span id="scoreDisplay">0</span></div>
+  <div class="stat-item">💰 Funds: <span id="budgetDisplay">$100</span></div>
+</div>
+
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+<div class="game-container" id="gameWindow">
+  <h2 id="stepTitle">Navigating the City</h2>
+  <p id="stepDesc">Which mode of transportation will you utilize to reach your destination?</p>
+  <div class="choice-list" id="choiceList"></div>
+  <div class="feedback" id="feedbackBox"></div>
+  <button class="btn-next" id="nextBtn" onclick="nextStep()">Proceed →</button>
+</div>
+
+<script>
+let currentStepKey = "transport";
+let score = 0;
+let budget = 100;
+
+const gameData = {
+  "transport": {
+    title: "Phase 1: Urban Logistics",
+    desc: "Grand Central Terminal is bustling with commuters! How do you intend to navigate the city today?",
+    choices: [
+      { text: "Utilize the Subway system. Efficient and economical.", cost: 3, pts: 10, fb: "<b>A strategic choice!</b> You successfully navigate the turnstiles with your MetroCard. Although the carriage is somewhat congested, you reach Times Square in record time." },
+      { text: "Hail an iconic Yellow Taxi for a quintessential experience.", cost: 35, pts: 15, fb: "<b>Spectacular views!</b> You enjoy a panoramic perspective of the skyscrapers, though the notorious midtown traffic makes this a costly and time-consuming endeavor." },
+      { text: "Traverse the streets on foot to absorb the atmosphere.", cost: 0, pts: 5, fb: "<b>Ambitious!</b> You encounter a variety of eccentric street performers and aromatic food stands, though you quickly realize that New York blocks are longer than they appear." },
+      { text: "Attempt to hitch a ride on the exterior of a delivery vehicle.", cost: 0, pts: 0, type: "poor", fb: "<b>Hazardous!</b> Not only is that incredibly reckless, but it is also a violation of local ordinances. Safety should be your priority. Please reconsider!" }
+    ]
+  },
+  "morning": {
+    title: "Phase 2: Morning Exploration",
+    desc: "The sun is glistening off the glass towers. Which landmark will you prioritize?",
+    choices: [
+      { text: "Ascend to the Top of the Rock Observation Deck.", cost: 45, pts: 25, fb: "<b>Breathtaking!</b> Upon reaching the 70th floor, you are greeted by an unparalleled view of the skyline. It’s a significant investment, but the perspective is truly unforgettable." },
+      { text: "Stroll through the scenic landscapes of Central Park.", cost: 0, pts: 15, fb: "<b>Serene!</b> You wander through Strawberry Fields and admire the Bethesda Fountain. It serves as a tranquil oasis amidst the urban chaos—and it’s entirely complimentary." },
+      { text: "Explore the architectural grandeur of the Public Library.", cost: 5, pts: 12, fb: "<b>Sophisticated!</b> You are greeted by the majestic stone lions before entering the Rose Main Reading Room. You even pick up a literary memento from the gift shop." },
+      { text: "Spend four hours queuing for a 'viral' boutique donut.", cost: 15, pts: 0, type: "poor", fb: "<b>Unwise allocation of time!</b> You've squandered your entire morning standing on a sidewalk for a pastry. Your time in the city is limited; don't spend it in line!" }
+    ]
+  },
+  "lunch": {
+    title: "Phase 3: Culinary Choices",
+    desc: "You've worked up quite an appetite. What's on the gastronomic agenda?",
+    choices: [
+      { text: "A quintessential New York 'Slice' of Pizza.", cost: 5, pts: 15, fb: "<b>Authentic!</b> You consume it while standing on the sidewalk, just like a seasoned local. It is arguably the most cost-effective meal in the city." },
+      { text: "A gourmet burger and shake at a nostalgic 50s Diner.", cost: 25, pts: 12, fb: "<b>Vintage vibes!</b> You settle into a vinyl booth while hits from the jukebox play in the background. The milkshake is decadent, if a bit indulgent." },
+      { text: "Sample a diverse dish from a local Halal street cart.", cost: 10, pts: 10, fb: "<b>Flavorful!</b> The aroma of seasoned chicken and rice is irresistible. It’s a hearty, satisfying meal that provides the energy needed for further exploration." },
+      { text: "Attempt to share a meal with the local pigeon population.", cost: 0, pts: 0, type: "poor", fb: "<b>Unsanitary!</b> That is neither hygienic nor particularly nutritious. You require a proper meal to sustain your energy levels. Try again!" }
+    ]
+  },
+  "emergency": {
+    title: "🚨 CRISIS: Battery Depleted!",
+    desc: "Your smartphone has died, leaving you without GPS. You appear to be disoriented in the labyrinth of Soho!",
+    choices: [
+      { text: "Consult a local shopkeeper for navigational assistance.", cost: 0, pts: 10, fb: "<b>Resourceful!</b> A boutique employee provides clear directions, steering you back toward the nearest subway station with a friendly smile." },
+      { text: "Purchase a portable power bank to revive your device.", cost: 20, pts: 5, fb: "<b>Crisis averted!</b> It requires a financial sacrifice, but your digital lifeline is restored, allowing you to navigate with confidence once more." },
+      { text: "Surrender to exhaustion and occupy a park bench indefinitely.", cost: 0, pts: 0, type: "gameover", fb: "<b>EXPEDITION TERMINATED!</b> Overwhelmed by the situation, you ceased your exploration. You missed the city's evening charm and had to rely on a stranger to help you get home. Game Over!" },
+      { text: "Wander aimlessly and hope to stumble upon a landmark.", cost: 0, pts: 0, type: "poor", fb: "<b>Ineffective!</b> Hope is not a strategy. You are merely becoming more lost. You need to take decisive action to rectify your situation!" }
+    ]
+  },
+  "evening": {
+    title: "Phase 5: The Grand Finale",
+    desc: "Your stay is drawing to a close. How will you commemorate your final evening?",
+    choices: [
+      { text: "Attend a prestigious Broadway theatrical production.", cost: 65, pts: 30, fb: "<b>Exhilarating!</b> The choreography, the lighting, and the raw talent on stage are mesmerizing. You feel as though you’ve truly captured the spirit of the city." },
+      { text: "Witness the neon brilliance of Times Square after dark.", cost: 0, pts: 15, fb: "<b>Dazzling!</b> You don’t need a fortune to appreciate the electrifying atmosphere. It’s a sensory overload in the best possible way." },
+      { text: "Take a sunset ferry to admire the Statue of Liberty.", cost: 18, pts: 20, fb: "<b>Picturesque!</b> As you sail past Lady Liberty, the city lights shimmer on the harbor. It is a profoundly moving and cinematic conclusion to your trip." },
+      { text: "Attempt to swim across the East River to Brooklyn.", cost: 0, pts: 0, type: "poor", fb: "<b>Absolutely not!</b> The currents are treacherous and the water quality is questionable. This would be a disastrous end to your holiday. Choose a safer alternative!" }
+    ]
+  }
+};
+
+const vocabulary = [
+  { word: "Commuter", def: "A person who travels some distance to work on a regular basis." },
+  { word: "Quintessential", def: "Representing the most perfect or typical example of a quality or class." },
+  { word: "Oasis", def: "A peaceful or pleasant place that is very different from the surrounding area." },
+  { word: "Gastronomic", def: "Relating to the practice of choosing, cooking, and eating good food." },
+  { word: "Disoriented", def: "Feeling confused and unable to determine one's location." },
+  { word: "Mesmerizing", def: "Capturing one's attention as if by magic; fascinating." }
+];
+
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
+function loadStep() {
+  const step = gameData[currentStepKey];
+  document.getElementById("stepTitle").innerText = step.title;
+  document.getElementById("stepDesc").innerHTML = step.desc;
+  const list = document.getElementById("choiceList");
+  list.innerHTML = "";
+  
+  const shuffledChoices = [...step.choices];
+  shuffleArray(shuffledChoices);
+  
+  shuffledChoices.forEach((c) => {
+    const btn = document.createElement("button");
+    btn.className = "choice-btn";
+    const canAfford = budget >= c.cost;
+    
+    if (!canAfford && c.type !== "poor" && c.type !== "gameover") {
+        btn.disabled = true;
+    }
+
+    btn.innerHTML = `<span>${c.text} ${(!canAfford && c.type !== "poor" && c.type !== "gameover") ? '<b style="color:red">(Insufficient Funds)</b>' : ''}</span>
+      <span class="price-tag cost-tag">$${c.cost}</span>`;
+    
+    btn.onclick = () => selectChoice(c);
+    list.appendChild(btn);
+  });
+  document.getElementById("feedbackBox").style.display = "none";
+  document.getElementById("nextBtn").style.display = "none";
+}
+
+function selectChoice(choice) {
+  const fb = document.getElementById("feedbackBox");
+  
+  if (choice.type === "gameover") {
+    fb.innerHTML = choice.fb;
+    fb.className = "feedback error";
+    fb.style.display = "block";
+    const btns = document.querySelectorAll(".choice-btn");
+    btns.forEach(b => b.disabled = true);
+    document.getElementById("nextBtn").innerText = "Restart Expedition ↩";
+    document.getElementById("nextBtn").onclick = () => location.reload();
+    document.getElementById("nextBtn").style.display = "block";
+    return;
+  }
+
+  if (choice.type === "poor") {
+    fb.innerHTML = choice.fb;
+    fb.className = "feedback error";
+    fb.style.display = "block";
+    return;
+  }
+
+  budget -= choice.cost;
+  score += choice.pts;
+  document.getElementById("scoreDisplay").innerText = score;
+  document.getElementById("budgetDisplay").innerText = "$" + budget;
+  
+  fb.innerHTML = choice.fb;
+  fb.className = "feedback";
+  fb.style.display = "block";
+  
+  const btns = document.querySelectorAll(".choice-btn");
+  btns.forEach(b => b.disabled = true);
+
+  const keys = Object.keys(gameData);
+  const currentIndex = keys.indexOf(currentStepKey);
+  if (currentIndex < keys.length - 1) {
+    currentStepKey = keys[currentIndex + 1];
+    document.getElementById("nextBtn").style.display = "block";
+  } else {
+    currentStepKey = "end";
+    document.getElementById("nextBtn").style.display = "block";
+  }
+
+  const progress = ((currentIndex + 1) / keys.length) * 100;
+  document.getElementById("progressFill").style.width = progress + "%";
+}
+
+function nextStep() {
+  if (currentStepKey === "end") {
+    renderFinalScreen();
+  } else {
+    loadStep();
+  }
+}
+
+function renderFinalScreen() {
+  let title, message;
+  
+  if (score >= 90) {
+    title = "🥇 New York Connoisseur";
+    message = "Your expedition was a resounding success! You balanced your budget with precision and witnessed the most iconic sights the city has to offer.";
+  } else if (score >= 60) {
+    title = "🥈 Seasoned Traveler";
+    message = "Bravo! You navigated the metropolis with confidence. You've gained a genuine appreciation for the New York lifestyle.";
+  } else {
+    title = "🥉 Urban Survivor";
+    message = "You successfully completed your day! While you may have missed a few landmarks, you've gained invaluable experience for your next visit.";
+  }
+
+  let vocabHTML = `<div class="vocab-section"><h3>Glossary of Sophisticated Terms:</h3><div class="vocab-grid">`;
+  vocabulary.forEach(v => { vocabHTML += `<div class="vocab-item"><b>${v.word}:</b> ${v.def}</div>`; });
+  vocabHTML += `</div></div>`;
+
+  document.getElementById("gameWindow").innerHTML = `
+    <h2 style="color:var(--ny-blue)">${title}</h2>
+    <p>${message}</p>
+    <hr>
+    <div style="font-size: 1.2rem; margin: 20px 0;">
+      <p>Satisfaction Points: <b>${score}</b></p>
+      <p>Remaining Budget: <b>$${budget}</b></p>
+    </div>
+    ${vocabHTML}
+    <button class="btn-next" style="display:block" onclick="location.reload()">Begin a New Journey</button>
+  `;
+  document.getElementById("progressFill").style.width = "100%";
+}
+
+function startGame() { document.getElementById("landingPage").style.display = "none"; }
+loadStep();
+</script>
+</body>
+</html>

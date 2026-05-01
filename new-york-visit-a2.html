@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>New York City Adventure — A2 Level (Updated)</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ny-yellow: #fbc02d;
+    --ny-blue: #0d47a1;
+    --ny-grey: #37474f;
+    --danger: #c0392b;
+    --text: #2c3e50;
+    --bg: #f0f2f5;
+  }
+
+  body { font-family: 'Lato', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; align-items: center; }
+  .header { background: var(--ny-grey); color: white; width: 100%; padding: 15px; text-align: center; position: sticky; top: 0; z-index: 10; border-bottom: 5px solid var(--ny-yellow); }
+  
+  .stats-bar { display: flex; justify-content: space-around; background: #fff; width: 100%; padding: 10px 0; border-bottom: 2px solid #ddd; font-weight: bold; }
+  .stat-item { display: flex; align-items: center; gap: 5px; }
+
+  .progress-bar { width: 100%; height: 8px; background: #ddd; }
+  .progress-fill { height: 100%; background: var(--ny-yellow); width: 0%; transition: 0.5s; }
+
+  .game-container { max-width: 800px; width: 90%; margin: 20px auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); min-height: 400px; }
+  .choice-list { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+
+  .choice-btn { 
+    padding: 18px; border: 2px solid #eee; border-radius: 8px; background: white; 
+    cursor: pointer; font-size: 1rem; text-align: left; transition: 0.2s;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .choice-btn:hover:not(:disabled) { border-color: var(--ny-yellow); background: #fffde7; transform: translateX(5px); }
+  .choice-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+  
+  .price-tag { padding: 2px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: bold; }
+  .cost-tag { background: #eee; color: #333; }
+
+  .feedback { margin-top: 20px; padding: 20px; border-radius: 8px; display: none; line-height: 1.6; border-left: 5px solid var(--ny-yellow); font-size: 1.05rem; }
+  .feedback.error { border-left-color: var(--danger); background-color: #fdf2f2; }
+  .btn-next { display: none; margin-top: 20px; padding: 15px 30px; background: var(--ny-grey); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; font-size: 1.1rem; }
+
+  .vocab-section { margin-top: 30px; background: #f9f9f9; padding: 20px; border-radius: 10px; text-align: left; border-top: 4px solid var(--ny-yellow); }
+  .vocab-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px; }
+  .vocab-item { font-size: 0.95rem; line-height: 1.4; }
+  .vocab-item b { color: var(--ny-grey); }
+
+  #landingPage {
+    position: fixed; inset: 0; z-index: 100;
+    background: var(--ny-blue);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 30px;
+  }
+
+  .landing-inner { max-width: 680px; width: 100%; text-align: center; color: white; }
+  .landing-title { font-family: 'Playfair Display', serif; font-size: 3.5rem; margin-bottom: 10px; color: var(--ny-yellow); }
+  .landing-btn { padding: 17px 48px; background: var(--ny-yellow); color: #000; font-weight: 700; border: none; border-radius: 6px; cursor: pointer; margin-top: 20px; text-transform: uppercase; }
+</style>
+</head>
+<body>
+
+<div id="landingPage">
+  <div class="landing-inner">
+    <h1 class="landing-title">NYC Adventure</h1>
+    <p>Welcome to the "Big Apple"! You have <strong>$100</strong> for your trip.</p>
+    <p>Try to gain the most <b>Fun Points</b> without running out of money!</p>
+    <button class="landing-btn" onclick="startGame()">Start Trip →</button>
+  </div>
+</div>
+
+<div class="header">
+  <h1>🗽 My New York Day</h1>
+</div>
+
+<div class="stats-bar">
+  <div class="stat-item">⭐ Fun Points: <span id="scoreDisplay">0</span></div>
+  <div class="stat-item">💰 Money: <span id="budgetDisplay">$100</span></div>
+</div>
+
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+<div class="game-container" id="gameWindow">
+  <h2 id="stepTitle">Getting Around</h2>
+  <p id="stepDesc">How do you want to travel to your hotel?</p>
+  <div class="choice-list" id="choiceList"></div>
+  <div class="feedback" id="feedbackBox"></div>
+  <button class="btn-next" id="nextBtn" onclick="nextStep()">Continue →</button>
+</div>
+
+<script>
+let currentStepKey = "transport";
+let score = 0;
+let budget = 100;
+
+const gameData = {
+  "transport": {
+    title: "Step 1: Transport",
+    desc: "Grand Central is busy! How will you travel today?",
+    choices: [
+      { text: "Take the Subway. Fast and cheap.", cost: 3, pts: 10, fb: "<b>Excellent!</b> You buy a MetroCard. The train is crowded, but you arrive at Times Square in only 10 minutes." },
+      { text: "Take a Yellow Taxi. The classic experience.", cost: 35, pts: 15, fb: "<b>Iconic!</b> You get a great view of the skyscrapers, but the traffic is terrible and it's very expensive." },
+      { text: "Walk through the streets. It's free!", cost: 0, pts: 5, fb: "<b>Energetic!</b> You see many interesting street performers and hot dog stands, but your legs are getting tired." },
+      { text: "Try to ride on the back of a delivery truck.", cost: 0, pts: 0, type: "poor", fb: "<b>Danger!</b> That is very unsafe and against the law. You should use the subway or a taxi instead. Try again!" }
+    ]
+  },
+  "morning": {
+    title: "Step 2: Morning Sightseeing",
+    desc: "The sun is shining. Where to first?",
+    choices: [
+      { text: "Top of the Rock Observation Deck.", cost: 45, pts: 25, fb: "<b>Wow!</b> You go to the 70th floor. You can see the whole skyline and Central Park. It costs a lot, but it is unforgettable." },
+      { text: "Walk through Central Park.", cost: 0, pts: 15, fb: "<b>Peaceful!</b> You visit Strawberry Fields and see the lake. It is beautiful, quiet, and doesn't cost a cent." },
+      { text: "Visit the Public Library.", cost: 5, pts: 12, fb: "<b>Quiet!</b> You see the famous lion statues and the beautiful Reading Room. You buy a small souvenir in the shop." },
+      { text: "Wait in a 4-hour line for a famous donut.", cost: 15, pts: 0, type: "poor", fb: "<b>Bad move!</b> You spend your whole morning standing on a sidewalk. You are a tourist, go see the sights! Pick something else." }
+    ]
+  },
+  "lunch": {
+    title: "Step 3: Lunch Time",
+    desc: "You are very hungry. What's on the menu?",
+    choices: [
+      { text: "A classic NY 'Slice' of Pizza.", cost: 5, pts: 15, fb: "<b>Delicious!</b> You eat it while standing on the street like a real New Yorker. It's the best $5 you've ever spent." },
+      { text: "A Burger and Shake at a 50s Diner.", cost: 25, pts: 12, fb: "<b>Retro!</b> You sit in a red booth and listen to the jukebox. The milkshake is huge and very sweet!" },
+      { text: "A Halal food cart on the corner.", cost: 10, pts: 10, fb: "<b>Tasty!</b> You get chicken and rice with white sauce. It smells amazing and fills you up for the afternoon." },
+      { text: "Eat a handful of pigeon food.", cost: 0, pts: 0, type: "poor", fb: "<b>Gross!</b> That is for the birds, not for people. You need a real lunch to keep exploring. Choose again!" }
+    ]
+  },
+  "emergency": {
+    title: "🚨 EMERGENCY: Phone Dead!",
+    desc: "Your phone died and you don't have a map. You are lost in Soho!",
+    choices: [
+      { text: "Ask a shopkeeper for directions.", cost: 0, pts: 10, fb: "<b>Smart!</b> The person in the clothing store is very friendly and points you toward the nearest subway station." },
+      { text: "Buy a portable battery charger.", cost: 20, pts: 5, fb: "<b>Problem Solved!</b> It costs some money, but now your phone is back on and you can find your way easily." },
+      { text: "Give up and sleep on a park bench.", cost: 0, pts: 0, type: "gameover", fb: "<b>TRIP OVER!</b> You were too tired to keep going. You missed the rest of your day and had to call a friend to come save you. Game Over!" },
+      { text: "Walk in circles and hope for the best.", cost: 0, pts: 0, type: "poor", fb: "<b>Not helpful!</b> You are just getting more lost. You need a plan or help from a local. Pick a better option!" }
+    ]
+  },
+  "evening": {
+    title: "Step 5: The Last Night",
+    desc: "It's your final night in the city. How do you end it?",
+    choices: [
+      { text: "See a Broadway Show (Wicked).", cost: 65, pts: 30, fb: "<b>Spectacular!</b> The music, the lights, and the acting are incredible. You feel like you've truly experienced NYC." },
+      { text: "Times Square at Night.", cost: 0, pts: 15, fb: "<b>Bright!</b> You don't need money to enjoy the neon lights and the energy. It's crowded, but the atmosphere is electric!" },
+      { text: "A Ferry ride to see the Statue of Liberty.", cost: 18, pts: 20, fb: "<b>Beautiful!</b> You see the Lady Liberty lit up at night and the city lights reflecting on the water. Very romantic!" },
+      { text: "Try to swim across the East River.", cost: 0, pts: 0, type: "poor", fb: "<b>No!</b> The water is cold and dangerous. That is not a fun way to end a trip. Choose a safer activity!" }
+    ]
+  }
+};
+
+const vocabulary = [
+  { word: "MetroCard", def: "The card used to pay for the subway and buses." },
+  { word: "Skyscraper", def: "A very tall building with many floors." },
+  { word: "Observation Deck", def: "A high place where people go to see the view." },
+  { word: "Souvenir", def: "Something you buy to remember a place." },
+  { word: "Sidewalk", def: "The path on the side of the road where people walk." },
+  { word: "Spectacular", def: "Very beautiful or impressive to watch." }
+];
+
+/**
+ * Fisher-Yates Shuffle Algorithm
+ * Randomly shuffles the choices in place.
+ */
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
+function loadStep() {
+  const step = gameData[currentStepKey];
+  document.getElementById("stepTitle").innerText = step.title;
+  document.getElementById("stepDesc").innerHTML = step.desc;
+  const list = document.getElementById("choiceList");
+  list.innerHTML = "";
+  
+  // Create a copy to shuffle while maintaining data integrity of the original object
+  const shuffledChoices = [...step.choices];
+  shuffleArray(shuffledChoices);
+  
+  shuffledChoices.forEach((c) => {
+    const btn = document.createElement("button");
+    btn.className = "choice-btn";
+    const canAfford = budget >= c.cost;
+    
+    if (!canAfford && c.type !== "poor" && c.type !== "gameover") {
+        btn.disabled = true;
+    }
+
+    btn.innerHTML = `<span>${c.text} ${(!canAfford && c.type !== "poor" && c.type !== "gameover") ? '<b style="color:red">(Too expensive!)</b>' : ''}</span>
+      <span class="price-tag cost-tag">$${c.cost}</span>`;
+    
+    // We pass the specific choice object to handleChoice to keep pts/fb locked
+    btn.onclick = () => selectChoice(c);
+    list.appendChild(btn);
+  });
+  document.getElementById("feedbackBox").style.display = "none";
+  document.getElementById("nextBtn").style.display = "none";
+}
+
+function selectChoice(choice) {
+  const fb = document.getElementById("feedbackBox");
+  
+  if (choice.type === "gameover") {
+    fb.innerHTML = choice.fb;
+    fb.className = "feedback error";
+    fb.style.display = "block";
+    const btns = document.querySelectorAll(".choice-btn");
+    btns.forEach(b => b.disabled = true);
+    document.getElementById("nextBtn").innerText = "Restart Adventure ↩";
+    document.getElementById("nextBtn").onclick = () => location.reload();
+    document.getElementById("nextBtn").style.display = "block";
+    return;
+  }
+
+  if (choice.type === "poor") {
+    fb.innerHTML = choice.fb;
+    fb.className = "feedback error";
+    fb.style.display = "block";
+    return;
+  }
+
+  budget -= choice.cost;
+  score += choice.pts;
+  document.getElementById("scoreDisplay").innerText = score;
+  document.getElementById("budgetDisplay").innerText = "$" + budget;
+  
+  fb.innerHTML = choice.fb;
+  fb.className = "feedback";
+  fb.style.display = "block";
+  
+  const btns = document.querySelectorAll(".choice-btn");
+  btns.forEach(b => b.disabled = true);
+
+  const keys = Object.keys(gameData);
+  const currentIndex = keys.indexOf(currentStepKey);
+  if (currentIndex < keys.length - 1) {
+    currentStepKey = keys[currentIndex + 1];
+    document.getElementById("nextBtn").style.display = "block";
+  } else {
+    currentStepKey = "end";
+    document.getElementById("nextBtn").style.display = "block";
+  }
+
+  const progress = ((currentIndex + 1) / keys.length) * 100;
+  document.getElementById("progressFill").style.width = progress + "%";
+}
+
+function nextStep() {
+  if (currentStepKey === "end") {
+    renderFinalScreen();
+  } else {
+    loadStep();
+  }
+}
+
+function renderFinalScreen() {
+  let title, message;
+  
+  if (score >= 90) {
+    title = "🥇 King of New York!";
+    message = "You had an incredible trip! You saw the best views, ate the best food, and managed your money like a local boss.";
+  } else if (score >= 60) {
+    title = "🥈 Professional Tourist";
+    message = "Well done! You had a classic New York experience. You saw the big sights and had a lot of fun.";
+  } else {
+    title = "🥉 NYC Survivor";
+    message = "You made it through the day! You didn't see everything, but you learned your way around the Big Apple.";
+  }
+
+  let vocabHTML = `<div class="vocab-section"><h3>New Words:</h3><div class="vocab-grid">`;
+  vocabulary.forEach(v => { vocabHTML += `<div class="vocab-item"><b>${v.word}:</b> ${v.def}</div>`; });
+  vocabHTML += `</div></div>`;
+
+  document.getElementById("gameWindow").innerHTML = `
+    <h2 style="color:var(--ny-blue)">${title}</h2>
+    <p>${message}</p>
+    <hr>
+    <div style="font-size: 1.2rem; margin: 20px 0;">
+      <p>Fun Points: <b>${score}</b></p>
+      <p>Money Left: <b>$${budget}</b></p>
+    </div>
+    ${vocabHTML}
+    <button class="btn-next" style="display:block" onclick="location.reload()">New Adventure</button>
+  `;
+  document.getElementById("progressFill").style.width = "100%";
+}
+
+function startGame() { document.getElementById("landingPage").style.display = "none"; }
+loadStep();
+</script>
+</body>
+</html>

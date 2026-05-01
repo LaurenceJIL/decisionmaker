@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A Full Day's Teaching — English Language Trainer (France)</title>
+<meta name="description" content="An interactive English language exercise for B2 learners. Play the role of a freelance English language trainer working in France — navigating a demanding day of sessions, admin, and professional decisions.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Mulish:ital,wght@0,300;0,400;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F7F4EE;--surface:#FFFFFF;--surface2:#F0ECE3;--surface3:#E6E1D6;
+  --ink:#1A1916;--ink2:#5A5750;--ink3:#9A9790;
+  --rule:rgba(26,25,22,0.10);--rule2:rgba(26,25,22,0.18);
+  --green-bg:#E6F2DC;--green-bd:#7EB83E;--green-tx:#22480A;
+  --amber-bg:#FAF0DC;--amber-bd:#D8980A;--amber-tx:#5A3606;
+  --red-bg:#FAEBEB;--red-bd:#D87878;--red-tx:#680E0E;
+  --fatal-bd:#C02828;--fatal-tx:#450A0A;
+  --blue-bg:#E4EDF8;--blue-bd:#6098D0;--blue-tx:#0A3568;
+  --teal-bg:#E0EEEC;--teal-bd:#50ADAA;--teal-tx:#0C4542;
+  --terracotta:#C0623A;
+  --r:12px;--rs:8px;--rxl:18px;
+  --shadow:0 3px 16px rgba(0,0,0,0.07),0 1px 4px rgba(0,0,0,0.04);
+  --shadow-sm:0 1px 5px rgba(0,0,0,0.08);
+}
+html{scroll-behavior:smooth}
+body{font-family:'Mulish',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;line-height:1.6}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.5}
+.shell{max-width:720px;margin:0 auto;padding:2.5rem 1.25rem 5rem;position:relative;z-index:1}
+.masthead{display:flex;align-items:center;justify-content:space-between;margin-bottom:2.25rem;padding-bottom:1.25rem;border-bottom:1px solid var(--rule)}
+.masthead-eyebrow{display:flex;align-items:center;gap:10px}
+.masthead-flag{font-size:18px;line-height:1}
+.masthead-title{font-family:'Playfair Display',Georgia,serif;font-size:19px;font-weight:500;color:var(--ink);letter-spacing:-0.01em}
+.masthead-sub{font-size:12px;color:var(--ink3);margin-top:2px}
+.level-badge{font-family:'DM Mono',monospace;font-size:11px;font-weight:500;background:var(--blue-bg);color:var(--blue-tx);border:1px solid var(--blue-bd);border-radius:20px;padding:4px 12px;letter-spacing:0.04em;flex-shrink:0}
+.card{background:var(--surface);border:1px solid var(--rule);border-radius:var(--rxl);box-shadow:var(--shadow);overflow:hidden}
+.card-bar{display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.5rem;border-bottom:1px solid var(--rule);background:var(--surface);gap:1rem}
+.char-name{font-family:'Playfair Display',Georgia,serif;font-size:16px;font-weight:500;color:var(--ink)}
+.char-role{font-size:12px;color:var(--ink2);margin-top:1px}
+.bar-right{display:flex;align-items:center;gap:12px;flex-shrink:0}
+.progress-track{display:flex;gap:4px;align-items:center}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--surface3);border:1px solid var(--rule2);transition:background .35s,border-color .35s;flex-shrink:0}
+.dot.done{background:#7EB83E;border-color:#5A9018}
+.dot.active{background:#3D7AC0;border-color:#255EA8}
+.dot.emg{background:#C83838;border-color:#A01818}
+.score-chip{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;background:var(--green-bg);color:var(--green-tx);border:1px solid var(--green-bd);border-radius:20px;padding:4px 14px;min-width:64px;text-align:center;transition:all .25s}
+.card-body{padding:1.75rem;animation:slideIn .22s ease}
+@keyframes slideIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+.time-label{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--terracotta);margin-bottom:.65rem;display:flex;align-items:center;gap:6px}
+.time-label::before{content:'';display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--terracotta);flex-shrink:0}
+.emg-banner{background:var(--red-bg);border:1px solid var(--red-bd);border-radius:var(--rs);padding:10px 14px;font-size:13px;color:var(--red-tx);font-weight:600;margin-bottom:1rem;display:flex;align-items:center;gap:10px}
+.emg-dot{width:18px;height:18px;flex-shrink:0;background:var(--red-tx);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff}
+.vocab-row{display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin-bottom:1.1rem}
+.vocab-label{font-size:12px;color:var(--ink3);flex-shrink:0}
+.vpill{font-family:'DM Mono',monospace;font-size:11px;background:var(--blue-bg);color:var(--blue-tx);border:1px solid var(--blue-bd);border-radius:20px;padding:2px 9px}
+.scenario{font-size:15px;line-height:1.82;color:var(--ink);margin-bottom:1.5rem}
+.scenario strong{font-weight:600}
+.scenario em{font-style:italic;color:var(--ink2)}
+.options{display:flex;flex-direction:column;gap:10px;margin-bottom:1.25rem}
+.opt{width:100%;text-align:left;padding:14px 16px;background:var(--surface);border:1px solid var(--rule2);border-radius:var(--rs);cursor:pointer;font-family:'Mulish',sans-serif;font-size:14px;color:var(--ink);line-height:1.65;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;transition:background .14s,border-color .14s,transform .1s,box-shadow .14s}
+.opt:hover:not(:disabled){background:var(--surface2);transform:translateY(-1px);box-shadow:var(--shadow-sm)}
+.opt:active:not(:disabled){transform:translateY(0)}
+.opt:disabled{cursor:default;transform:none;box-shadow:none}
+.opt.sel-g{background:var(--green-bg);border-color:var(--green-bd);color:var(--green-tx)}
+.opt.sel-o{background:var(--amber-bg);border-color:var(--amber-bd);color:var(--amber-tx)}
+.opt.sel-p{background:var(--red-bg);border-color:var(--red-bd);color:var(--red-tx)}
+.opt.sel-s{background:var(--amber-bg);border-color:var(--amber-bd);color:var(--amber-tx)}
+.opt.sel-f{background:var(--red-bg);border-color:var(--fatal-bd);color:var(--fatal-tx)}
+.opt-text{flex:1}
+.ptag{flex-shrink:0;font-family:'DM Mono',monospace;font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px;white-space:nowrap;margin-top:3px;opacity:0;transition:opacity .2s}
+.ptag.vis{opacity:1}
+.pt3{background:var(--green-bg);color:var(--green-tx);border:1px solid var(--green-bd)}
+.pt2{background:var(--amber-bg);color:var(--amber-tx);border:1px solid var(--amber-bd)}
+.pt1,.pt0{background:var(--red-bg);color:var(--red-tx);border:1px solid var(--red-bd)}
+.fbox{border-radius:var(--rs);font-size:14px;line-height:1.75;padding:14px 16px;margin-bottom:1.25rem;display:none;animation:fadeIn .25s ease}
+.fbox.show{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.fb-g{background:var(--green-bg);border:1px solid var(--green-bd);color:var(--green-tx)}
+.fb-o{background:var(--amber-bg);border:1px solid var(--amber-bd);color:var(--amber-tx)}
+.fb-p{background:var(--red-bg);border:1px solid var(--red-bd);color:var(--red-tx)}
+.fb-f{background:var(--red-bg);border:2px solid var(--fatal-bd);color:var(--fatal-tx)}
+.nxt-wrap{display:flex;justify-content:flex-end}
+.nxt{padding:10px 22px;background:var(--ink);color:#fff;border:none;border-radius:var(--rs);font-family:'Mulish',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:background .14s,transform .1s;display:none;letter-spacing:.01em}
+.nxt:hover{background:#2E2D26}
+.nxt:active{transform:scale(.98)}
+.nxt.show{display:inline-block}
+.intro{padding:2.25rem 1.75rem}
+.intro-kicker{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:.75rem}
+.intro-title{font-family:'Playfair Display',Georgia,serif;font-size:32px;font-weight:700;letter-spacing:-.02em;line-height:1.18;color:var(--ink);margin-bottom:.75rem}
+.intro-title em{font-style:italic;color:var(--terracotta)}
+.intro-sub{font-size:15px;color:var(--ink2);line-height:1.75;margin-bottom:1.5rem}
+.intro-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:1.75rem}
+.chip{font-size:12px;color:var(--ink2);background:var(--surface2);border:1px solid var(--rule2);border-radius:20px;padding:4px 12px}
+.intro-divider{height:1px;background:var(--rule);margin-bottom:1.5rem}
+.char-card{background:var(--surface2);border:1px solid var(--rule);border-radius:var(--rs);padding:1rem 1.25rem;display:flex;align-items:flex-start;gap:1rem;margin-bottom:1.5rem}
+.char-avatar{width:44px;height:44px;flex-shrink:0;background:var(--blue-bg);border:1px solid var(--blue-bd);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--blue-tx)}
+.char-info-name{font-family:'Playfair Display',Georgia,serif;font-size:15px;font-weight:500;margin-bottom:2px}
+.char-info-role{font-size:12px;color:var(--ink2);margin-bottom:.5rem}
+.char-info-desc{font-size:13px;color:var(--ink2);line-height:1.68}
+.how-box{background:var(--surface2);border:1px solid var(--rule);border-radius:var(--rs);padding:1rem 1.25rem;margin-bottom:1.5rem}
+.how-label{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin-bottom:.5rem}
+.how-text{font-size:14px;line-height:1.78;color:var(--ink2)}
+.start-btn{width:100%;padding:15px 24px;background:var(--ink);color:#fff;border:none;border-radius:var(--rs);font-family:'Mulish',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:background .14s;letter-spacing:.01em}
+.start-btn:hover{background:#2E2D26}
+.final-screen{padding:2rem 1.75rem}
+.final-kicker{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:1.5rem;text-align:center}
+.score-block{text-align:center;margin-bottom:1.5rem}
+.score-num{font-family:'Playfair Display',Georgia,serif;font-size:80px;font-weight:700;letter-spacing:-.03em;line-height:1;color:var(--ink)}
+.score-denom{font-family:'DM Mono',monospace;font-size:17px;color:var(--ink3);margin-top:6px}
+.bar-track{height:8px;background:var(--surface3);border-radius:20px;overflow:hidden;margin:1.25rem 0}
+.bar-fill{height:8px;border-radius:20px;background:linear-gradient(90deg,#7EB83E,#52920E);width:0%;transition:width 1s cubic-bezier(.34,1.4,.64,1)}
+.final-band-row{text-align:center;margin-bottom:1.5rem}
+.band{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:5px 14px;border-radius:20px;display:inline-block}
+.b5{background:var(--green-bg);color:var(--green-tx);border:1px solid var(--green-bd)}
+.b4{background:var(--teal-bg);color:var(--teal-tx);border:1px solid var(--teal-bd)}
+.b3{background:var(--blue-bg);color:var(--blue-tx);border:1px solid var(--blue-bd)}
+.b2{background:var(--amber-bg);color:var(--amber-tx);border:1px solid var(--amber-bd)}
+.b1{background:var(--red-bg);color:var(--red-tx);border:1px solid var(--red-bd)}
+.final-grade{font-family:'Playfair Display',Georgia,serif;font-size:22px;font-weight:700;letter-spacing:-.01em;color:var(--ink);text-align:center;margin-bottom:1.25rem}
+.final-body{font-size:15px;line-height:1.82;color:var(--ink);margin-bottom:1rem}
+.final-body em{font-style:italic;font-weight:600}
+.tips-box{background:var(--surface2);border:1px solid var(--rule2);border-radius:var(--rs);padding:1rem 1.25rem;margin-bottom:1.5rem}
+.tips-label{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin-bottom:.5rem}
+.tips-text{font-size:14px;line-height:1.78;color:var(--ink2)}
+.tips-text em{font-style:italic;color:var(--ink)}
+.vocab-section{padding-top:1.25rem;border-top:1px solid var(--rule);margin-bottom:1.5rem}
+.vocab-sec-label{font-size:12px;color:var(--ink3);margin-bottom:.6rem}
+.vocab-grid{display:flex;flex-wrap:wrap;gap:5px}
+.replay-btn{width:100%;padding:13px 24px;background:var(--surface);color:var(--ink);border:1px solid var(--rule2);border-radius:var(--rs);font-family:'Mulish',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:background .14s;letter-spacing:.01em}
+.replay-btn:hover{background:var(--surface2)}
+.site-footer{text-align:center;margin-top:2rem;font-size:12px;color:var(--ink3);padding-bottom:3rem}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <header class="masthead">
+    <div class="masthead-eyebrow">
+      <span class="masthead-flag">🇫🇷</span>
+      <div>
+        <div class="masthead-title">Full Day Language Training</div>
+        <div class="masthead-sub">B2 Interaction Simulation</div>
+      </div>
+    </div>
+    <div class="level-badge">B2 UPPER-INT</div>
+  </header>
+
+  <div class="card" id="gc">
+    </div>
+
+  <footer class="site-footer">
+    Professional English Series • L'Escale Française
+  </footer>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════════
+   DATA
+══════════════════════════════════════════════════════════ */
+const STEPS = {
+  s1: {
+    time: "08:15",
+    scenario: "You arrive at a tech company for a 3-hour morning session. The HR manager, <strong>Claire</strong>, informs you that the group size has suddenly doubled from 4 to 8, and two participants are significantly lower level than the others. How do you handle the start of the session?",
+    vocab: ["to accommodate","logistics","disparity"],
+    choices: [
+      { text: "Briefly welcome everyone, then run the planned session but provide extra 'scaffolded' worksheets and pair the weaker students with the strongest ones.", pts: 3, fb: "Excellent. You showed flexibility and used 'peer-teaching' to manage the level disparity without delaying the start.", type: "g" },
+      { text: "Ask the two lower-level students to observe today and promise to bring easier materials for the next session.", pts: 1, fb: "Poor. This is demotivating for the new arrivals and fails to 'accommodate' their needs immediately.", type: "p" },
+      { text: "Take 15 minutes to interview the new students while the others work on a warm-up, then adjust your lesson plan on the fly.", pts: 2, fb: "Good. Identifying their needs is professional, though it eats into the group's valuable contact time.", type: "o" }
+    ],
+    next: "s2"
+  },
+  s2: {
+    time: "11:45",
+    scenario: "Morning session over. You're in the breakroom when a student asks, <em>'Should I use \"regards\" or \"sincerely\" in this email to a client I've met twice?'</em> You have a lunch meeting across town in 20 minutes.",
+    vocab: ["register","formality","nuance"],
+    choices: [
+      { text: "Give a quick rule of thumb: 'Kind regards' for known contacts, 'Sincerely' for formal first-time letters, then excuse yourself for your meeting.", pts: 3, fb: "Perfect. You provided immediate value while maintaining your professional boundaries (and your schedule).", type: "g" },
+      { text: "Tell them you can't talk now but will email them a full guide on email etiquette later tonight.", pts: 2, fb: "Acceptable. It solves the problem eventually, but misses the chance for a quick, helpful 'on-the-spot' teaching moment.", type: "o" },
+      { text: "Stay and spend 10 minutes explaining the historical nuances of British vs American email sign-offs.", pts: 1, fb: "Risky. You're being helpful, but you're now likely to be late for your next professional commitment. Time management is key.", type: "o" }
+    ],
+    next: "s3"
+  },
+  s3: {
+    time: "13:30",
+    scenario: "Lunch was a 'needs analysis' with a potential new corporate client. They want a 20% discount on your standard rate because they're a 'start-up with high growth potential'.",
+    vocab: ["to negotiate","overhead","volume discount"],
+    choices: [
+      { text: "Agree immediately to secure the contract, hoping they provide more volume later.", pts: 1, fb: "Weak negotiation. Start-ups are volatile; you've lowered your 'market value' without a guaranteed return.", type: "p" },
+      { text: "Politely decline the discount but offer a 5% 'introductory' reduction if they book a block of 40 hours upfront.", pts: 3, fb: "Strong professional stance. You protected your rate while offering a 'volume discount' that helps your cash flow.", type: "g" },
+      { text: "Explain that your rates are fixed due to your high overheads and suggest they find a less experienced trainer.", pts: 2, fb: "Honest, but potentially too blunt. You might have missed a future partnership by not being slightly more flexible.", type: "o" }
+    ],
+    next: "em1"
+  },
+  em1: {
+    time: "15:00",
+    scenario: "<strong>CRISIS:</strong> You are halfway through an afternoon session when the company's Wi-Fi goes down. Your entire lesson plan was based on an interactive online quiz and a YouTube video case study.",
+    isEmg: true,
+    vocab: ["redundancy","contingency","to pivot"],
+    choices: [
+      { text: "Apologize and end the session early since the materials are inaccessible.", pts: 0, fb: "FATAL ERROR. A professional trainer always has a 'plan B'. This hurts your reputation.", type: "f", fatal: true },
+      { text: "Pivot to a 'unplugged' speaking activity using the whiteboard to brainstorm the key themes of the video instead.", pts: 3, fb: "Great recovery. You showed that your value comes from your teaching skills, not just your tech tools.", type: "g" },
+      { text: "Spend 15 minutes trying to fix the router and asking the IT department for help while the students wait.", pts: 1, fb: "Poor. You aren't the IT guy. Your job is to keep the students engaged, not fix the building's infrastructure.", type: "p" }
+    ],
+    next: "s4"
+  },
+  s4: {
+    time: "17:30",
+    scenario: "Final session done. You're exhausted. You've received an urgent email from a client asking for a progress report for 5 students by tomorrow morning. It wasn't in your calendar.",
+    vocab: ["administrative burden","deadline","deliverable"],
+    choices: [
+      { text: "Work until 9 PM tonight to finish the reports. The client's needs always come first.", pts: 2, fb: "Dedicated, but risks 'burnout'. You need to manage your personal time to stay effective in the long run.", type: "o" },
+      { text: "Reply immediately stating you'll have them ready by midday tomorrow, citing the short notice.", pts: 3, fb: "Professional. You acknowledged the 'deliverable' but set a realistic 'deadline' based on the late request.", type: "g" },
+      { text: "Ignore the email until tomorrow morning. If it wasn't scheduled, it's not your problem.", pts: 1, fb: "Unprofessional. Clear communication is essential, even if you can't meet the immediate request.", type: "p" }
+    ],
+    next: "s5"
+  },
+  s5: {
+    time: "19:00",
+    scenario: "You're at home. You realize you forgot to log your hours for the month on a client's complex online portal. If you don't do it by midnight, your payment will be delayed by 30 days.",
+    vocab: ["billing cycle","compliance","to rectify"],
+    choices: [
+      { text: "Log in immediately and complete the admin, despite the fatigue. Cash flow is the lifeblood of a freelancer.", pts: 3, fb: "Correct. Admin is the 'unseen' part of the job that ensures you can keep working.", type: "g" },
+      { text: "Decide to do it tomorrow and just accept the 30-day delay in payment.", pts: 1, fb: "Poor financial management. A freelancer must be 'compliant' with billing cycles to survive.", type: "p" },
+      { text: "Email the accountant directly tomorrow morning asking for an exception to be made.", pts: 2, fb: "Possible, but creates extra work for others and shows a lack of organization on your part.", type: "o" }
+    ],
+    next: "final"
+  }
+};
+
+/* ══════════════════════════════════════════════════════════
+   LOGIC
+══════════════════════════════════════════════════════════ */
+let s = 0, curr = "s1";
+const dots = ["s1","s2","s3","em1","s4","s5"];
+
+/**
+ * Fisher-Yates Shuffle Algorithm
+ * Ensures true mathematical randomness for answer positions.
+ */
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+function init() {
+  document.getElementById('gc').innerHTML = `
+    <div class="intro">
+      <div class="intro-kicker">Freelance Career Sim</div>
+      <h1 class="intro-title">A Full Day's <em>Teaching</em></h1>
+      <p class="intro-sub">Navigate a 12-hour day as an English Language Trainer in France. Manage classroom dynamics, difficult negotiations, and technical crises.</p>
+      <div class="intro-chips">
+        <span class="chip">6 Scenarios</span>
+        <span class="chip">B2+ Vocabulary</span>
+        <span class="chip">Decision Based</span>
+      </div>
+      <div class="intro-divider"></div>
+      <div class="char-card">
+        <div class="char-avatar">TR</div>
+        <div class="char-info">
+          <div class="char-info-name">The Trainer</div>
+          <div class="char-info-role">Freelance Consultant</div>
+          <div class="char-info-desc">Expert in Business English. Currently juggling three different corporate contracts across the city.</div>
+        </div>
+      </div>
+      <div class="how-box">
+        <div class="how-label">Mission</div>
+        <div class="how-text">Maintain your professional reputation and maximize your daily score (Max 18). Watch out for 'Fatal' professional errors.</div>
+      </div>
+      <button class="start-btn" onclick="renderStep()">Start the Day — 08:00</button>
+    </div>`;
+}
+
+function renderStep() {
+  const d = STEPS[curr];
+  // Shuffle the choices array before rendering buttons
+  const shuffledChoices = shuffleArray([...d.choices]);
+  
+  const dotsHtml = dots.map(id => {
+    let cls = "dot";
+    if(id === curr) cls += " active";
+    else if(dots.indexOf(id) < dots.indexOf(curr)) cls += " done";
+    if(STEPS[id].isEmg) cls += " emg";
+    return `<div class="${cls}"></div>`;
+  }).join('');
+
+  document.getElementById('gc').innerHTML = `
+    <div class="card-bar">
+      <div>
+        <div class="char-name">Alex Rivera</div>
+        <div class="char-role">Current Session</div>
+      </div>
+      <div class="bar-right">
+        <div class="progress-track">${dotsHtml}</div>
+        <div class="score-chip">${s} pts</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="time-label">${d.time}</div>
+      ${d.isEmg ? `<div class="emg-banner"><div class="emg-dot">!</div><span>URGENT SITUATION</span></div>` : ''}
+      <div class="vocab-row">
+        <span class="vocab-label">Key Vocabulary:</span>
+        ${d.vocab.map(v => `<span class="vpill">${v}</span>`).join('')}
+      </div>
+      <div class="scenario">${d.scenario}</div>
+      <div class="options" id="opts">
+        ${shuffledChoices.map((c, i) => `
+          <button class="opt" onclick="handle('${curr}', ${d.choices.indexOf(c)}, this)">
+            <span class="opt-text">${c.text}</span>
+            <span class="ptag" id="tag${i}">+${c.pts}</span>
+          </button>
+        `).join('')}
+      </div>
+      <div class="fbox" id="fb"></div>
+      <div class="nxt-wrap">
+        <button class="nxt" id="nb" onclick="next()">Continue →</button>
+      </div>
+    </div>`;
+}
+
+function handle(stepId, idx, btn) {
+  const d = STEPS[stepId];
+  const c = d.choices[idx];
+  if(btn.disabled) return;
+
+  s += c.pts;
+  document.querySelectorAll('.opt').forEach(b => {
+    b.disabled = true;
+    b.style.opacity = "0.6";
+  });
+  
+  btn.style.opacity = "1";
+  btn.classList.add('sel-' + c.type);
+  
+  const tag = btn.querySelector('.ptag');
+  tag.classList.add('vis', 'pt' + c.pts);
+
+  const fb = document.getElementById('fb');
+  fb.innerHTML = c.fb;
+  fb.className = `fbox show fb-${c.type}`;
+
+  if(c.fatal) {
+    document.getElementById('nb').style.display = "none";
+    setTimeout(() => {
+      alert("PROFESSIONAL REPUTATION LOST: " + c.fb);
+      restartGame();
+    }, 3000);
+  } else {
+    document.getElementById('nb').classList.add('show');
+  }
+}
+
+function next() {
+  curr = STEPS[curr].next;
+  if(curr === "final") renderFinal();
+  else renderStep();
+}
+
+function renderFinal() {
+  let grade, body, tips, bClass, bLabel;
+  const pct = (s / 18) * 100;
+
+  if(s >= 16) {
+    bLabel = "Elite Consultant"; bClass = "b5"; grade = "Master of the Market";
+    body = "Outstanding. You navigated the day with the poise of a seasoned professional. You managed to balance student needs, technical failures, and business growth without breaking a sweat.";
+    tips = "At this level, you should focus on <em>scaling</em> your business. Consider raising your hourly rates by 15% or developing your own proprietary materials.";
+  } else if(s >= 12) {
+    bLabel = "Solid Professional"; bClass = "b3"; grade = "Reliable & Effective";
+    body = "A very successful day. You made smart decisions in the classroom and generally protected your business interests. A few minor slips in negotiation or time management, but nothing serious.";
+    tips = "Try to be more assertive during <em>rate negotiations</em>. Remember, your specialized experience in Business English is a high-value asset.";
+  } else {
+    bLabel = "Struggling Freelancer"; bClass = "b1"; grade = "Survival Mode";
+    body = "You survived the day, but your professional boundaries and business processes are weak. You are at risk of burnout or financial instability if you don't tighten your operations.";
+    tips = "Work on your <em>Plan B</em> contingencies for technology. Also, ensure your administrative tasks are automated or scheduled to avoid late-night stress.";
+  }
+
+  const vocab = [...new Set(Object.values(STEPS).flatMap(x => x.vocab || []))];
+
+  document.getElementById('gc').innerHTML = `
+    <div class="final-screen">
+      <div class="final-kicker">End of Day — 21:00</div>
+      <div class="score-block">
+        <div class="score-num" id="snum">0</div>
+        <div class="score-denom">out of 18</div>
+      </div>
+      <div class="bar-track"><div class="bar-fill" id="bfill"></div></div>
+      <div class="final-band-row"><span class="band ${bClass}">${bLabel}</span></div>
+      <div class="final-grade">${grade}</div>
+      <div class="final-body">${body}</div>
+      <div class="tips-box">
+        <div class="tips-label">Professional Development</div>
+        <div class="tips-text">${tips}</div>
+      </div>
+      <div class="vocab-section">
+        <div class="vocab-sec-label">Vocabulary Practised</div>
+        <div class="vocab-grid">${vocab.map(v=>`<span class="vpill">${v}</span>`).join('')}</div>
+      </div>
+      <button class="replay-btn" onclick="restartGame()">Restart Simulation</button>
+    </div>`;
+
+  let c = 0;
+  const el = document.getElementById('snum');
+  const t = setInterval(() => {
+    c++;
+    if(el) el.textContent = c;
+    if(c >= s) clearInterval(t);
+  }, 80);
+  setTimeout(() => { document.getElementById('bfill').style.width = pct + '%'; }, 200);
+}
+
+function restartGame() {
+  s = 0; curr = "s1";
+  init();
+}
+
+init();
+</script>
+</body>
+</html>

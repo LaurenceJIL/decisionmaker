@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Build-It Center: Cashier Challenge</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@600&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --safety-orange: #ff6b00;
+        --steel-grey: #343a40;
+        --caution-yellow: #ffc107;
+        --concrete: #e9ecef;
+        --error-red: #dc3545;
+        --success-green: #28a745;
+        --text: #212529;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        font-family: 'Roboto', sans-serif;
+        background-color: #dee2e6;
+        color: var(--text);
+        line-height: 1.6;
+    }
+
+    header {
+        background: var(--steel-grey);
+        color: white;
+        padding: 1rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 5px solid var(--safety-orange);
+    }
+
+    .tally-box {
+        background: #000;
+        padding: 0.5rem 1.5rem;
+        border-radius: 5px;
+        border: 2px solid var(--safety-orange);
+    }
+    .tally-score { font-size: 1.5rem; font-weight: 700; color: var(--safety-orange); }
+
+    .container { max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+
+    .card {
+        background: white;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        display: none;
+    }
+    .card.active { display: block; }
+
+    h1, h2 { font-family: 'Oswald', sans-serif; text-transform: uppercase; margin-bottom: 1rem; }
+    h1 { color: var(--safety-orange); }
+
+    .choices-grid { display: grid; gap: 0.8rem; margin: 1.5rem 0; }
+    .choice-btn {
+        background: var(--concrete);
+        border: 1px solid #ced4da;
+        padding: 1rem;
+        border-radius: 4px;
+        cursor: pointer;
+        text-align: left;
+        font-size: 1rem;
+        font-weight: 500;
+    }
+    .choice-btn:hover:not(:disabled) { background: #f1f3f5; border-color: var(--safety-orange); }
+    .choice-btn:disabled { opacity: 0.5; }
+
+    .feedback-area {
+        margin-top: 1rem;
+        padding: 1.2rem;
+        border-radius: 4px;
+        display: none;
+        border-left: 8px solid;
+    }
+    .fb-excellent { background: #d4edda; border-color: var(--success-green); color: #155724; }
+    .fb-good { background: #fff3cd; border-color: var(--caution-yellow); color: #856404; }
+    .fb-okay { background: #e2e3e5; border-color: #6c757d; color: #383d41; }
+    .fb-poor { background: #f8d7da; border-color: var(--error-red); color: #721c24; }
+
+    .points-reveal { font-weight: 700; display: block; margin-bottom: 0.3rem; }
+
+    .next-btn {
+        margin-top: 1rem;
+        background: var(--safety-orange);
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 700;
+        text-transform: uppercase;
+        display: none;
+        width: 100%;
+    }
+
+    .emergency-banner {
+        background: var(--error-red);
+        color: white;
+        padding: 0.5rem;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+</style>
+</head>
+<body>
+
+<header>
+    <div>
+        <h2 style="color: white; margin: 0;">BUILD-IT CENTER</h2>
+        <span style="font-size: 0.8rem;">Cashier Training Sim</span>
+    </div>
+    <div class="tally-box">
+        <div class="tally-score" id="scoreDisplay">0</div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="card active" id="screen-start">
+        <h1>Cashier Challenge</h1>
+        <p>Welcome to the team! Working at a construction store is busy. You must be fast, safe, and helpful to our customers.</p>
+        <p>Can you handle the morning rush and keep the warehouse safe?</p>
+        <button class="next-btn" style="display:block;" onclick="startGame()">Start Shift</button>
+    </div>
+
+    <div class="card" id="screen-game">
+        <div id="status-container"></div>
+        <h2 id="step-title"></h2>
+        <p id="step-desc"></p>
+        <div class="choices-grid" id="choices-container"></div>
+        
+        <div class="feedback-area" id="feedback-box">
+            <span class="points-reveal" id="points-text"></span>
+            <div id="feedback-content"></div>
+        </div>
+        
+        <button class="next-btn" id="btn-next">Next Task</button>
+    </div>
+
+    <div class="card" id="screen-final">
+        <h1>Shift Report</h1>
+        <div id="final-stats"></div>
+        <div id="band-content" style="padding: 2rem; border-radius: 8px; text-align: center; margin-top: 1rem;"></div>
+        <button class="next-btn" style="display:block; margin-top: 2rem;" onclick="location.reload()">Restart Training</button>
+    </div>
+</div>
+
+<script>
+const steps = {
+    d1: {
+        title: "Decision 1: The Long Line",
+        desc: "It is 7:00 AM. There are ten builders in line. They are in a hurry. What do you do?",
+        choices: [
+            { text: "Smile and scan items quickly. Call for another cashier to help.", pts: 3, type: "excellent", 
+              fb: "Excellent work! Builders are busy people. By calling for help, you show you care about their time. Moving fast and staying friendly is the best way to start the morning shift. You are a natural professional!" },
+            { text: "Work at your normal speed and ignore the angry faces.", pts: 2, type: "good", 
+              fb: "This is okay, but not great. You are doing your job, but you aren't helping the problem. In a construction store, speed is very important because the workers need to get to their building sites." },
+            { text: "Apologize to every guest for the wait for five minutes.", pts: 1, type: "okay", 
+              fb: "You are kind, but you are making the line slower! A quick 'Sorry for the wait' is enough. Don't stop working to talk, or the builders will become more frustrated with the delay. Keep moving!" },
+            { text: "Tell the customers to be quiet or leave the store.", pts: -1, type: "poor", 
+              fb: "That is very rude. Customers have a right to be in a hurry. You must stay calm and professional even when people are stressed. Never argue with a line of customers. Please try a more helpful answer." }
+        ],
+        next: "d2"
+    },
+    d2: {
+        title: "Decision 2: Heavy Lifting",
+        desc: "An elderly customer buys five heavy bags of cement. He looks tired. How do you help?",
+        choices: [
+            { text: "Ask a warehouse worker to help him load the bags into his car.", pts: 3, type: "excellent", 
+              fb: "Perfect! This is great customer service. You recognized that the customer needed help and you found a safe way to provide it. This prevents injuries and makes the customer feel very happy with our store." },
+            { text: "Tell him where the loading zone is and wish him luck.", pts: 2, type: "good", 
+              fb: "This is professional, but it isn't very helpful. The customer might hurt his back. In this business, we should always try to offer physical help for heavy items like cement or large pieces of timber." },
+            { text: "Try to lift all five bags yourself while leaving the register.", pts: 1, type: "okay", 
+              fb: "You are helpful, but this is unsafe! You might hurt yourself, and you left the cash register alone. Always follow safety rules and stay at your station. Ask a colleague to do the heavy lifting instead." },
+            { text: "Tell him he is too old to do DIY projects alone.", pts: -1, type: "poor", 
+              fb: "Wow, that is very insulting! Never judge a customer's ability or age. Your job is to support their project, not criticize their life. This will definitely result in a complaint to the manager. Try to be kinder." }
+        ],
+        next: "d3"
+    },
+    d3: {
+        title: "Decision 3: The Project Choice",
+        desc: "A customer wants to buy supplies for a new project. What do they need?",
+        choices: [
+            { text: "They want to build a wooden deck. Send them to the Timber Yard.", pts: 3, type: "excellent", path: "pathTimber", 
+              fb: "Great choice. Our Timber Yard has the best wood for outdoor decks. By sending them to the experts, you ensure they get the right materials. This leads you into the Timber Path of the game." },
+            { text: "They want to paint their kitchen. Send them to the Paint Desk.", pts: 3, type: "excellent", path: "pathPaint", 
+              fb: "Excellent. The Paint Desk can mix any color they want. Helping a customer find the right department is a key part of your job. This leads you into the Interior Design Path of the game." },
+            { text: "Tell them to look at the signs on the ceiling.", pts: 1, type: "okay", next: "e1",
+              fb: "This is a bit lazy. A good cashier knows the store layout and gives clear directions. It makes the customer feel welcome. We will move back to the main tasks now. Try to be more specific!" },
+            { text: "Tell them that building things is too difficult and they should quit.", pts: -1, type: "poor", 
+              fb: "We want to sell materials, not stop people from buying them! You just lost the store a lot of money. Always encourage customers with their DIY projects. Pick a more professional response for the store." }
+        ]
+    },
+    pathTimber: {
+        title: "Decision 4: Outdoor Wood",
+        desc: "The customer asks: 'Why is this wood green?' (It is pressure-treated wood).",
+        choices: [
+            { text: "Explain that the 'green' treatment protects the wood from rot and bugs.", pts: 3, type: "excellent", 
+              fb: "Spot on! This is basic product knowledge. Explaining 'pressure-treated' wood helps the customer understand why it is better for the outdoors. It builds trust and shows you know your materials well. Great job explaining technical facts simply!" },
+            { text: "Tell them it is green because it is fresh from the forest.", pts: 2, type: "good", 
+              fb: "That is not correct, but it sounds nice. You should learn about our products. The green color is from chemicals that stop the wood from rotting in the rain. It's a safe answer, but try to learn more." },
+            { text: "Say: 'I don't know, I just scan the items.'", pts: 1, type: "okay", 
+              fb: "This is honest, but not very professional. If you don't know, you should ask a manager or a colleague. Customers expect you to have some basic knowledge about the things you are selling every day." },
+            { text: "Tell them the wood is sick and they should not touch it.", pts: -1, type: "poor", 
+              fb: "That is a lie and it is very confusing! You are scaring the customer for no reason. Pressure-treated wood is very common. You need to study the staff handbook about timber. Please choose a real answer." }
+        ],
+        next: "e1"
+    },
+    pathPaint: {
+        title: "Decision 5: The Right Finish",
+        desc: "The customer wants paint for a bathroom. What do you suggest?",
+        choices: [
+            { text: "Suggest 'Gloss' or 'Semi-Gloss' because it is water-resistant.", pts: 3, type: "excellent", 
+              fb: "Excellent advice! Bathrooms are wet, so they need paint that can handle steam. Suggesting the right 'finish' is a sign of a great cashier who understands interior projects. The customer will be very happy with this tip!" },
+            { text: "Tell them to pick the prettiest color and don't worry about the type.", pts: 2, type: "good", 
+              fb: "Color is important, but the type of paint matters more in a bathroom. If they use the wrong paint, it will peel off in a month. It's an okay answer, but technical advice is much better for customers." },
+            { text: "Show them the most expensive paint in the whole store.", pts: 1, type: "okay", 
+              fb: "Selling expensive items is good for the store, but it might not be what the customer needs. Always try to find the best solution for their specific room first. Honesty creates loyal customers who come back." },
+            { text: "Tell them to use markers instead of paint to save money.", pts: -1, type: "poor", 
+              fb: "That is ridiculous! You cannot paint a bathroom with markers. You are a cashier in a hardware store, not a comedy club. Please take your job and the customer's home seriously. Try again with a real product." }
+        ],
+        next: "e1"
+    },
+    e1: {
+        title: "EMERGENCY: The Paint Spill",
+        isEmergency: true,
+        desc: "A customer drops a large bucket of white paint. It is spreading across the floor near your register!",
+        choices: [
+            { text: "Block the area with 'Caution' signs and call for a cleanup kit immediately.", pts: 0, type: "excellent", next: "d6",
+              fb: "Perfect emergency response! Safety is the number one rule. By blocking the area, you stop people from slipping. You stayed calm and followed the correct store procedure. The shift continues safely!" },
+            { text: "Grab some paper towels and try to wipe it up while still serving customers.", pts: 0, type: "okay", next: "d6",
+              fb: "You are trying to help, but this is messy and slow. A big spill needs a proper chemical cleanup kit and 'wet floor' signs. But at least you didn't ignore it. The shift continues, but be careful!" },
+            { text: "Ignore the spill and keep scanning items for the next person.", pts: 0, type: "poor", gameOver: true,
+              fb: "GAME OVER. A customer slipped on the paint and hurt themselves. This is a major safety failure. The store is now in legal trouble because of your mistake. You must always prioritize safety over sales. Restart." }
+        ]
+    },
+    d6: {
+        title: "Decision 6: The Discount Demand",
+        desc: "A regular contractor demands a 20% discount but he doesn't have his trade card today.",
+        choices: [
+            { text: "Look up his account in the computer to verify his trade status.", pts: 3, type: "excellent", 
+              fb: "Very smart! Using the computer system is professional and solves the problem without an argument. The contractor gets his discount, and you follow the store rules. This is how you handle 'Pro' customers correctly." },
+            { text: "Politely explain you need the card to give the discount today.", pts: 2, type: "good", 
+              fb: "This is a safe and fair answer. You are following the rules. The contractor might be a little annoyed, but you are protecting the store's money. It's a professional way to handle a difficult situation." },
+            { text: "Give him the discount anyway because he looks like a builder.", pts: 1, type: "okay", 
+              fb: "This is risky. If the manager sees you giving random discounts, you might get in trouble. We have rules for a reason! You should always try to verify the customer's status before changing the price." },
+            { text: "Laugh and tell him he is lying about being a builder.", pts: -1, type: "poor", 
+              fb: "Never call a customer a liar! Even if you think they are wrong, you must be polite. This contractor spends thousands of dollars at our store every year. You just lost us a big client. Try again." }
+        ],
+        next: "d7"
+    },
+    d7: {
+        title: "Decision 7: The Dirty Return",
+        desc: "A guest wants to return a shovel. It is covered in mud and the handle is broken.",
+        choices: [
+            { text: "Explain that we cannot accept returns for items used and broken by the user.", pts: 3, type: "excellent", 
+              fb: "Correct. Our return policy is for new items or factory defects. If a customer breaks a tool while working, they cannot get their money back. You were firm but polite. This protects the store's profits!" },
+            { text: "Offer to sell them a stronger, professional-grade shovel at a small discount.", pts: 2, type: "good", 
+              fb: "This is a clever 'save.' You didn't give them money back, but you tried to help them get a better tool for their job. It shows you want to help them finish their project. Good sales thinking!" },
+            { text: "Give them a full refund and throw the dirty shovel in the trash.", pts: 1, type: "okay", 
+              fb: "You are being too 'nice' with the store's money. We cannot sell a muddy, broken shovel. This is a loss for the company. You should follow the return policy more strictly next time to be a better cashier." },
+            { text: "Throw the muddy shovel back at the customer.", pts: -1, type: "poor", 
+              fb: "That is assault! You can never be physical or aggressive with a customer, no matter how dirty their return is. This is a terrible way to behave. You must stay professional at all times. Try again." }
+        ],
+        next: "e2"
+    },
+    e2: {
+        title: "EMERGENCY: The Forklift",
+        isEmergency: true,
+        desc: "A forklift driver accidentally hits a shelf near your register. Bricks are falling!",
+        choices: [
+            { text: "Shout 'WATCH OUT!' and move customers away from the shelf.", pts: 0, type: "excellent", next: "d8", 
+              fb: "Heroic! You acted fast to protect people's lives. In a warehouse environment, falling objects are a major danger. Your quick thinking saved the customers from a bad accident. The game continues for your last task." },
+            { text: "Call the manager on the radio to report the accident.", pts: 0, type: "okay", next: "d8", 
+              fb: "This is important, but you should move the people first! Reporting is good, but human safety is the priority in the first few seconds. The manager is coming now, and luckily nobody was hurt. The game continues." },
+            { text: "Run out of the store and leave the customers behind.", pts: 0, type: "poor", gameOver: true, 
+              fb: "GAME OVER. You abandoned your post and your customers during a danger. A cashier is a leader on the floor. You must help guide people to safety during an emergency. Please restart and be more brave." }
+        ]
+    },
+    d8: {
+        title: "Decision 8: The Final Upsell",
+        desc: "A customer is buying bricks and wood. They are ready to pay and leave.",
+        choices: [
+            { text: "Ask if they have enough nails, screws, or safety gloves for the job.", pts: 3, type: "excellent", 
+              fb: "Fantastic! This is called 'suggestive selling.' It helps the customer because they won't have to drive back later for small items like nails. It also increases the store's sales. You are a star employee!" },
+            { text: "Remind them about our weekend sale on power tools.", pts: 2, type: "good", 
+              fb: "Good job. Mentioning sales is a great way to make customers come back to the store. It shows you are thinking about the business. It’s a solid, professional way to end a transaction." },
+            { text: "Just say 'Have a nice day' and give them the receipt.", pts: 1, type: "okay", 
+              fb: "This is fine, but you missed a chance to help the customer more. Most people forget the small things like screws or glue. Always try to ask one more question before they leave the store." },
+            { text: "Ask them to give you a tip for your hard work.", pts: -1, type: "poor", 
+              fb: "No! Retail cashiers do not ask for tips. This is very unprofessional and makes the customer feel uncomfortable. We pay you a salary to do your job. Please never ask for extra money from customers. Try again." }
+        ],
+        next: "final"
+    }
+};
+
+const bands = [
+    { min: -10, max: 12, title: "The New Trainee", color: "#e67e22", text: "You are learning, but you need to be more careful. Focus on safety rules and try to learn more about the building materials. Keep practicing your English and store knowledge!" },
+    { min: 13, max: 21, title: "The Reliable Clerk", color: "#2980b9", text: "Great job! You are a good cashier. You are fast, polite, and you know how to handle basic problems. With a little more focus on 'upselling,' you will be a manager soon!" },
+    { min: 22, max: 24, title: "The Warehouse Legend", color: "#28a745", text: "Incredible! You are the best cashier in the company. You handle emergencies like a pro and your customer service is perfect. Every builder in town wants to use your register!" }
+];
+
+let score = 0;
+let currentStepId = "d1";
+
+// Proper Fisher-Yates Shuffle Implementation
+function fisherYatesShuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+function startGame() {
+    score = 0;
+    currentStepId = "d1";
+    updateScore();
+    showScreen("game");
+    renderStep();
+}
+
+function updateScore() { document.getElementById('scoreDisplay').innerText = score; }
+
+function showScreen(id) {
+    document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+    document.getElementById('screen-' + id).classList.add('active');
+}
+
+function renderStep() {
+    const data = steps[currentStepId];
+    const container = document.getElementById('choices-container');
+    const status = document.getElementById('status-container');
+    
+    document.getElementById('step-title').innerText = data.title;
+    document.getElementById('step-desc').innerText = data.desc;
+    
+    status.innerHTML = data.isEmergency ? `<div class="emergency-banner">⚠️ HAZARD / EMERGENCY</div>` : "";
+    container.innerHTML = "";
+    document.getElementById('feedback-box').style.display = "none";
+    document.getElementById('btn-next').style.display = "none";
+
+    // Create a copy and apply Fisher-Yates Shuffle every time a step is rendered
+    const shuffledChoices = fisherYatesShuffle([...data.choices]);
+    
+    shuffledChoices.forEach(choice => {
+        const btn = document.createElement('button');
+        btn.className = "choice-btn";
+        btn.innerText = choice.text;
+        btn.onclick = () => handleChoice(choice, btn);
+        container.appendChild(btn);
+    });
+}
+
+function handleChoice(choice, btn) {
+    const fbBox = document.getElementById('feedback-box');
+    const fbContent = document.getElementById('feedback-content');
+    const ptText = document.getElementById('points-text');
+
+    ptText.innerText = choice.pts >= 0 ? `+${choice.pts} Points` : `${choice.pts} Point`;
+    fbContent.innerText = choice.fb;
+    fbBox.className = "feedback-area fb-" + choice.type;
+    fbBox.style.display = "block";
+
+    if (choice.gameOver) {
+        setTimeout(() => { alert("TERMINATED: " + choice.fb); location.reload(); }, 4000);
+        return;
+    }
+
+    score += choice.pts;
+    updateScore();
+
+    if (choice.pts === -1) {
+        btn.disabled = true;
+        btn.style.opacity = "0.3";
+        return;
+    }
+
+    document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
+    btn.style.borderColor = "var(--safety-orange)";
+    btn.style.background = "white";
+
+    const nextBtn = document.getElementById('btn-next');
+    nextBtn.style.display = "block";
+    nextBtn.onclick = () => {
+        if (choice.path) currentStepId = choice.path;
+        else if (choice.next) currentStepId = choice.next;
+        else currentStepId = steps[currentStepId].next;
+
+        if (currentStepId === "final") showFinal();
+        else renderStep();
+    };
+}
+
+function showFinal() {
+    showScreen("final");
+    document.getElementById('final-stats').innerHTML = `<h2 style="text-align:center">Total Points: ${score} / 24</h2>`;
+    const band = bands.find(b => score >= b.min && score <= b.max) || bands[0];
+    const bc = document.getElementById('band-content');
+    bc.style.backgroundColor = band.color + "15";
+    bc.style.border = "2px solid " + band.color;
+    bc.innerHTML = `<h2 style="color:${band.color}">${band.title}</h2><p>${band.text}</p>`;
+}
+</script>
+</body>
+</html>

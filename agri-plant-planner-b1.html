@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Plant Planner: Chemical Maintenance Challenge</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --industrial-grey: #2f3542;
+        --hazard-orange: #ff9f43;
+        --safety-blue: #0984e3;
+        --acid-green: #2ecc71;
+        --emergency-red: #d63031;
+        --background: #f1f2f6;
+        --text: #2d3436;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--background);
+        color: var(--text);
+        line-height: 1.6;
+    }
+
+    header {
+        background: var(--industrial-grey);
+        color: white;
+        padding: 1rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 5px solid var(--hazard-orange);
+        position: sticky; top: 0; z-index: 1000;
+    }
+
+    .tally-box { text-align: right; }
+    .tally-label { font-size: 0.7rem; text-transform: uppercase; color: var(--hazard-orange); font-weight: 800; }
+    .tally-score { font-family: 'Roboto Mono', monospace; font-size: 1.8rem; }
+
+    .container { max-width: 850px; margin: 2rem auto; padding: 0 1rem; }
+
+    .card {
+        background: white;
+        padding: 2.5rem;
+        border-radius: 4px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        display: none;
+        border-left: 10px solid var(--safety-blue);
+    }
+    .card.active { display: block; animation: slideIn 0.3s ease-out; }
+
+    @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    h1, h2 { font-weight: 800; text-transform: uppercase; margin-bottom: 1rem; }
+    .emergency-card { border-left-color: var(--emergency-red); }
+
+    .choices-grid { display: grid; gap: 0.8rem; margin: 1.5rem 0; }
+    .choice-btn {
+        background: #f8f9fa;
+        border: 1px solid #dfe6e9;
+        padding: 1.2rem;
+        cursor: pointer;
+        text-align: left;
+        font-size: 0.95rem;
+        font-weight: 600;
+        transition: 0.2s;
+    }
+    .choice-btn:hover:not(:disabled) { border-color: var(--safety-blue); background: #ebf5fb; }
+    .choice-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .feedback-box {
+        margin-top: 1.5rem;
+        padding: 1.5rem;
+        display: none;
+        background: #fdfdfd;
+        border: 1px dashed #ccc;
+    }
+    .badge {
+        display: inline-block;
+        padding: 4px 12px;
+        color: white;
+        font-weight: 800;
+        font-size: 0.75rem;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+    }
+
+    .btn-next {
+        margin-top: 1.5rem;
+        background: var(--industrial-grey);
+        color: white;
+        border: none;
+        padding: 1rem;
+        cursor: pointer;
+        width: 100%;
+        font-weight: 700;
+        text-transform: uppercase;
+        display: none;
+    }
+</style>
+</head>
+<body>
+
+<header>
+    <div>
+        <h2 style="margin:0; font-size: 1.2rem;">FERTI-CHEM S.A.</h2>
+        <span style="font-size: 0.7rem; opacity: 0.8;">MAINTENANCE PLANNING UNIT</span>
+    </div>
+    <div class="tally-box">
+        <div class="tally-label">Safety & Efficiency</div>
+        <div class="tally-score" id="scoreDisplay">0</div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="card active" id="screen-start">
+        <h1>Plant Planner Simulation</h1>
+        <p>You are the <strong>Maintenance Planner</strong>. Your job is to prepare interventions on pumps, reactors, and piping systems within a chemical facility.</p>
+        <p><strong>Goal:</strong> Complete 10 tasks and survive 2 emergencies. Max score: 30.</p>
+        <button class="btn-next" style="display:block;" onclick="startGame()">Initialize Shift</button>
+    </div>
+
+    <div class="card" id="screen-game">
+        <div id="type-indicator"></div>
+        <h2 id="step-title"></h2>
+        <p id="step-desc" style="font-style: italic; color: #555;"></p>
+        <div class="choices-grid" id="choices-container"></div>
+        
+        <div class="feedback-box" id="feedback-box">
+            <span id="badge-reveal" class="badge"></span>
+            <div id="feedback-text"></div>
+        </div>
+        
+        <button class="btn-next" id="btn-next">Confirm & Proceed</button>
+    </div>
+
+    <div class="card" id="screen-final">
+        <h1>Performance Review</h1>
+        <div id="final-stats" style="font-size: 2rem; text-align: center; margin: 1rem 0;"></div>
+        <div id="band-info" style="padding: 1.5rem; border: 2px solid var(--industrial-grey); text-align: center;"></div>
+        <button class="btn-next" style="display:block;" onclick="location.reload()">New Shift</button>
+    </div>
+</div>
+
+<script>
+const steps = {
+    d1: {
+        title: "D1: Centrifugal Pump Leak",
+        desc: "Pump P-102 (Sulfuric Acid) has a mechanical seal leak. Production needs it back in 4 hours.",
+        choices: [
+            { text: "Tell the technician to 'tighten the bolts' and see if the leak stops.", pts: 1, type: "okay", fb: "Risky. Tightening bolts rarely fixes a mechanical seal failure." },
+            { text: "Rush to the workshop to find a 'similar' seal from another pump model.", pts: 2, type: "good", fb: "Fast, but risky. If the material (Viton/EPDM) is wrong, it will fail again." },
+            { text: "Tell Production to keep running until it fails completely.", pts: -1, type: "poor", fb: "Safety Hazard! Acid leaks are critical. Choose a safer option." },
+            { text: "Check spare parts for the exact seal, prepare a Lockout/Tagout (LOTO) plan, and assign two technicians.", pts: 3, type: "excellent", fb: "Perfect preparation! You secured the area and verified parts before starting." }
+        ],
+        next: "d2"
+    },
+    d2: {
+        title: "D2: Piping Flange Mismatch",
+        desc: "You are preparing a piping replacement. The P&ID says PN16, but the technician says the existing flange looks like PN40.",
+        choices: [
+            { text: "Go to the field, measure the bolt circle diameter and thickness personally.", pts: 3, type: "excellent", fb: "Field verification is the mark of a great planner. Never trust old drawings 100%." },
+            { text: "Trust the P&ID and order the PN16; documentation is usually right.", pts: 1, type: "okay", fb: "If it's wrong, the crane and crew will wait for hours while you find the right part." },
+            { text: "Tell them to weld the pipes directly together with no flange.", pts: -1, type: "poor", fb: "Unprofessional! This makes future maintenance impossible." },
+            { text: "Order both PN16 and PN40 parts just in case.", pts: 2, type: "good", fb: "Safe, but expensive for the warehouse budget." }
+        ],
+        next: "d3"
+    },
+    d3: {
+        title: "D3: Major Maintenance Choice",
+        desc: "The annual shutdown is coming. Do you focus on the Reactor Fleet or the Agitator Systems?",
+        choices: [
+            { text: "I can't choose; let's just do a bit of both randomly.", pts: 1, next: "e1", fb: "Poor planning. You'll lack focus and parts for both." },
+            { text: "Focus on Reactor Fleet (Internal liners and glass coating).", pts: 3, path: "pathReactor", fb: "Strategic. Reactors are the 'heart' of the plant." },
+            { text: "Cancel the maintenance to save money.", pts: -1, type: "poor", fb: "Disastrous. The plant will break down in a month." },
+            { text: "Focus on Agitator Systems (Gearboxes and motor alignment).", pts: 3, path: "pathAgitator", fb: "Smart. Mechanical failures in agitators cause massive production downtime." }
+        ]
+    },
+    pathReactor: {
+        title: "D4: Reactor Internal Inspection",
+        desc: "The inspector found a crack in the reactor lining. It needs a specialized welder who is only available in two days.",
+        choices: [
+            { text: "Ask a standard maintenance welder to try a 'quick fix' today.", pts: 1, type: "poor", fb: "Dangerous! Specialized linings require specific certifications." },
+            { text: "Put a temporary patch on the outside of the reactor.", pts: 2, type: "good", fb: "Acceptable for a very short time, but the root cause remains." },
+            { text: "Extend the shutdown by 48 hours and inform the Production Manager immediately.", pts: 3, type: "excellent", fb: "Honesty is key. Fixing it right is better than a chemical disaster." }
+        ],
+        next: "e1"
+    },
+    pathAgitator: {
+        title: "D4: Agitator Vibration",
+        desc: "Agitator A-405 has high vibrations. The team identifies the bearing is failing.",
+        choices: [
+            { text: "Tell the team to grease it heavily to hide the noise.", pts: 1, type: "okay", fb: "Grease won't fix a broken bearing. You are just delaying the crash." },
+            { text: "Prepare a laser alignment tool and a new set of bearings for the next window.", pts: 3, type: "excellent", fb: "Precise. Laser alignment ensures the new bearing lasts for years." },
+            { text: "Lower the speed of the agitator by 20% to reduce stress.", pts: 2, type: "good", fb: "A good temporary operational fix until parts arrive." }
+        ],
+        next: "e1"
+    },
+    e1: {
+        title: "EMERGENCY: Ammonia Leak",
+        isEmergency: true,
+        desc: "A gasket on the main ammonia feed line has blown. A cloud is forming.",
+        choices: [
+            { text: "Try to tighten the flange bolts while wearing a standard dust mask.", pts: 0, type: "poor", gameOver: true, fb: "GAME OVER. Standard masks don't stop ammonia. You have been hospitalized." },
+            { text: "Activate the emergency shower, isolate the upstream valve, and evacuate the area.", pts: 0, type: "excellent", next: "d5", fb: "Good Choice! Safety and isolation are the priority." },
+            { text: "Put on full SCBA (Breathing Apparatus) and heavy chemical suit to inspect.", pts: 0, type: "excellent", next: "d5", fb: "Good Choice! You are using the correct PPE for the hazard." }
+        ]
+    },
+    d5: {
+        title: "D5: Work Permit Validation",
+        desc: "A contractor wants to start 'Hot Work' (grinding) near the phosphoric acid tanks. The tank is empty but not cleaned.",
+        choices: [
+            { text: "Give the permit but tell them to 'be careful'.", pts: 1, type: "okay", fb: "Vague instructions lead to accidents. You need hard safety data." },
+            { text: "Tell them to work at night so no one sees the sparks.", pts: -1, type: "poor", fb: "Illegal and dangerous. Choose again!" },
+            { text: "Allow the work if they have a fire extinguisher nearby.", pts: 2, type: "good", fb: "Better, but cleaning the tank is the only way to be 100% sure." },
+            { text: "Refuse the permit until the tank is cleaned and an Explosivity Test (LEL) is done.", pts: 3, type: "excellent", fb: "Safe! Empty tanks often contain residual gases that can explode." }
+        ],
+        next: "d6"
+    },
+    d6: {
+        title: "D6: Tooling Logistics",
+        desc: "You are planning a heavy lift of a 5-ton motor. The crane is ready, but your slings are missing their inspection tags.",
+        choices: [
+            { text: "Stop the lift and go to the warehouse to get certified, tagged slings.", pts: 3, type: "excellent", fb: "Proper compliance. An untagged sling is a deadly risk." },
+            { text: "Use the slings anyway; they 'look' strong enough.", pts: 1, type: "poor", fb: "Never guess with load weights." },
+            { text: "Ask the crane operator to use his own chains if he has them.", pts: 2, type: "good", fb: "Practical, as long as you verify his certificates first." }
+        ],
+        next: "d7"
+    },
+    d7: {
+        title: "D7: The High-Pressure Seal",
+        desc: "A reactor seal needs 400 Nm of torque. The technician wants to use an impact wrench instead of a torque wrench.",
+        choices: [
+            { text: "Tell them to just make it 'really tight'.", pts: 1, type: "okay", fb: "Unprofessional. Over-tightening can snap bolts or crush gaskets." },
+            { text: "Ignore them; you have too much paperwork to do.", pts: -1, type: "poor", fb: "You are responsible for the quality of the work." },
+            { text: "Insist on the torque wrench and provide the specific torque sequence (Star pattern).", pts: 3, type: "excellent", fb: "Technical excellence! Even tightening prevents flange deformation." },
+            { text: "Let them use the impact wrench but 'check' it with a hand wrench after.", pts: 2, type: "good", fb: "Better than nothing, but not accurate for high pressure." }
+        ],
+        next: "e2"
+    },
+    e2: {
+        title: "EMERGENCY: Agitator Jam",
+        isEmergency: true,
+        desc: "The reactor is full of product. The agitator has stopped. If the product cools, it will turn into a solid block of stone.",
+        choices: [
+            { text: "Wait for the morning shift to look at the electrical drawings.", pts: 0, type: "poor", gameOver: true, fb: "GAME OVER. The reactor is now a 20-ton block of solid fertilizer. You are fired." },
+            { text: "Immediately add a chemical solvent to keep the mixture liquid.", pts: 0, type: "excellent", next: "d8", fb: "Good Choice! Chemical intervention bought you time to fix the motor." },
+            { text: "Manually rotate the motor shaft with a pipe wrench to keep it moving while fixing the fuse.", pts: 0, type: "excellent", next: "d8", fb: "Good Choice! You saved the batch from solidifying." }
+        ]
+    },
+    d8: {
+        title: "D8: CMMS Documentation",
+        desc: "The job is finished. The technician just writes 'Fixed' in the report. You need better data for the CMMS.",
+        choices: [
+            { text: "Write the details yourself based on what you saw.", pts: 2, type: "good", fb: "Helpful, but the technician should be the one reporting the technical reality." },
+            { text: "Require the technician to list the specific parts used, the hours spent, and the failure cause.", pts: 3, type: "excellent", fb: "Data-driven. This allows you to track MTBF (Mean Time Between Failures)." },
+            { text: "Leave it as 'Fixed'. At least the machine is running.", pts: 1, type: "okay", fb: "Lazy. You will have no history the next time it breaks." },
+            { text: "Delete the work order so it looks like it never broke.", pts: -1, type: "poor", fb: "Fraudulent reporting!" }
+        ],
+        next: "d9"
+    },
+    d9: {
+        title: "D9: Preventive vs. Corrective",
+        desc: "The budget is tight. You need to choose which preventive tasks to skip this month.",
+        choices: [
+            { text: "Keep all 'Statutory/Legal' inspections and skip cosmetic painting jobs.", pts: 3, type: "excellent", fb: "Perfect prioritization. Safety and Law always come first." },
+            { text: "Skip the pressure relief valve (PSV) testing.", pts: -1, type: "poor", fb: "Fatal mistake! A blocked PSV can lead to a plant explosion." },
+            { text: "Skip the oil changes on the small pumps.", pts: 2, type: "good", fb: "Minor risk, but manageable for a month." }
+        ],
+        next: "d10"
+    },
+    d10: {
+        title: "D10: Final Inspection",
+        desc: "A contractor has finished a huge piping job. It's Friday at 4 PM.",
+        choices: [
+            { text: "Ask them if they are sure it's correct and sign the paper.", pts: 1, type: "okay", fb: "Weak management. Contractors make mistakes too." },
+            { text: "Perform a 'Walk-down' with the P&ID and check every support and valve direction.", pts: 3, type: "excellent", fb: "Professional finish. Finding one upside-down check valve now saves a disaster on Monday." },
+            { text: "Check only the main welds and ignore the small supports.", pts: 2, type: "good", fb: "Okay, but vibration from poor supports will break the pipes later." }
+        ],
+        next: "final"
+    }
+};
+
+const bands = [
+    { min: -10, max: 15, title: "The Hazard 🏗️", color: "#d63031", text: "Your preparation is messy. The plant is barely standing. You need more training in safety and technical standards." },
+    { min: 16, max: 26, title: "The Reliable Planner 🔧", color: "#0984e3", text: "Good job! You keep the machines running and the technicians busy. Just a few more checks needed to be elite." },
+    { min: 27, max: 30, title: "The Asset Manager 🌟", color: "#2ecc71", text: "Incredible! Your preparation is world-class. You manage risks, budgets, and technical details like a master." }
+];
+
+let score = 0;
+let currentStepId = "d1";
+
+/**
+ * Fisher-Yates Shuffle Algorithm
+ * Randomizes an array in-place with true mathematical randomness.
+ */
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+function startGame() {
+    score = 0;
+    currentStepId = "d1";
+    updateScore();
+    showScreen("game");
+    renderStep();
+}
+
+function updateScore() { document.getElementById('scoreDisplay').innerText = score; }
+
+function showScreen(id) {
+    document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+    document.getElementById('screen-' + id).classList.add('active');
+}
+
+function renderStep() {
+    const data = steps[currentStepId];
+    const container = document.getElementById('choices-container');
+    const indicator = document.getElementById('type-indicator');
+    
+    document.getElementById('step-title').innerText = data.title;
+    document.getElementById('step-desc').innerText = data.desc;
+    
+    indicator.innerHTML = data.isEmergency ? `<div class="badge" style="background:var(--emergency-red)">CRITICAL EMERGENCY</div>` : `<div class="badge" style="background:var(--safety-blue)">PLANNING TASK</div>`;
+    
+    container.innerHTML = "";
+    document.getElementById('feedback-box').style.display = "none";
+    document.getElementById('btn-next').style.display = "none";
+
+    // Implement Fisher-Yates shuffle on a copy of the choices
+    const shuffledChoices = shuffleArray([...data.choices]);
+
+    shuffledChoices.forEach(choice => {
+        const btn = document.createElement('button');
+        btn.className = "choice-btn";
+        btn.innerText = choice.text;
+        btn.onclick = () => handleChoice(choice, btn);
+        container.appendChild(btn);
+    });
+}
+
+function handleChoice(choice, btn) {
+    const badge = document.getElementById('badge-reveal');
+    const fbBox = document.getElementById('feedback-box');
+    const data = steps[currentStepId];
+
+    if (data.isEmergency) {
+        badge.innerText = choice.type === "poor" ? "FAILED" : "GOOD CHOICE";
+    } else {
+        badge.innerText = choice.pts >= 0 ? `+${choice.pts} Points` : `${choice.pts} Point`;
+    }
+    badge.style.backgroundColor = (choice.pts > 0 || (data.isEmergency && choice.type !== "poor")) ? "var(--acid-green)" : "var(--emergency-red)";
+    
+    document.getElementById('feedback-text').innerText = choice.fb;
+    fbBox.style.display = "block";
+
+    if (choice.gameOver) {
+        setTimeout(() => { alert("TERMINATED: " + choice.fb); location.reload(); }, 4000);
+        return;
+    }
+
+    if (choice.pts === -1) {
+        score += choice.pts;
+        updateScore();
+        btn.disabled = true;
+        btn.style.opacity = "0.3";
+        return;
+    }
+
+    score += choice.pts;
+    updateScore();
+    document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
+    btn.style.borderColor = "var(--hazard-orange)";
+    
+    const nextBtn = document.getElementById('btn-next');
+    nextBtn.style.display = "block";
+    nextBtn.onclick = () => {
+        currentStepId = choice.path || choice.next || steps[currentStepId].next;
+        if (currentStepId === "final") showFinal(); else renderStep();
+    };
+}
+
+function showFinal() {
+    showScreen("final");
+    document.getElementById('final-stats').innerHTML = `Final Score: ${score} / 30`;
+    const band = bands.find(b => score >= b.min && score <= b.max) || bands[0];
+    const bi = document.getElementById('band-info');
+    bi.style.borderColor = band.color;
+    bi.innerHTML = `<h2 style="color:${band.color}">${band.title}</h2><p>${band.text}</p>`;
+}
+</script>
+</body>
+</html>

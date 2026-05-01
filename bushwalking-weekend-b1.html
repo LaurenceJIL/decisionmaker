@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>NSW Ultimate Bushwalk Challenge</title>
+    <style>
+        :root { --forest: #1b3022; --moss: #395734; --clay: #7d5c49; --stone: #d9d9d9; --leaf: #a3c585; }
+        body { background-color: #0f1a13; font-family: 'Trebuchet MS', sans-serif; color: var(--stone); display: flex; justify-content: center; padding: 20px; }
+        #game-container { background: linear-gradient(to bottom, #243b29, #1b261d); max-width: 750px; width: 100%; border: 4px solid var(--clay); border-radius: 20px; padding: 35px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
+        h1 { color: var(--leaf); text-align: center; text-transform: uppercase; letter-spacing: 2px; margin-top: 0; }
+        .score-box { background: rgba(0,0,0,0.4); padding: 12px; border-radius: 10px; font-size: 1.2em; color: #ffd700; border: 1px solid var(--moss); margin-bottom: 20px; text-align: center; }
+        .scene-text { line-height: 1.7; font-size: 1.2em; margin-bottom: 25px; border-left: 4px solid var(--leaf); padding-left: 15px; }
+        .choice-btn { display: block; width: 100%; padding: 16px; margin: 12px 0; background: var(--moss); border: 1px solid var(--leaf); color: white; border-radius: 12px; cursor: pointer; text-align: left; font-size: 1.1em; transition: all 0.2s ease; }
+        .choice-btn:hover { background: #4a7043; transform: translateX(8px); }
+        #feedback-screen { display: none; text-align: center; animation: fadeIn 0.5s; }
+        .points-earn { color: #ffd700; font-weight: bold; font-size: 1.3em; margin: 15px 0; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .death { color: #ff4d4d; font-weight: bold; border: 2px solid #ff4d4d; padding: 20px; border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <h1>🥾 NSW Survival: 36 Point Challenge</h1>
+    <div class="score-box">Expedition Points: <span id="score">0</span></div>
+
+    <div id="main-ui">
+        <div id="scene-desc" class="scene-text"></div>
+        <div id="choices-area"></div>
+    </div>
+
+    <div id="feedback-screen">
+        <h3 id="fb-title">Decision Analysis</h3>
+        <p id="fb-text" style="font-style: italic; color: #ced4da;"></p>
+        <p class="points-earn" id="fb-points"></p>
+        <button class="choice-btn" id="continue-btn" style="text-align:center">Step Forward ➔</button>
+    </div>
+</div>
+
+<script>
+    let score = 0;
+    let step = 0;
+
+    const stages = [
+        {
+            text: "Select your destination for this 3-day trek. This choice sets your environment but yields no points.",
+            choices: [
+                { text: "Blue Mountains National Park (Rugged Canyons)", pts: 0, fb: "You have chosen the stunning Blue Mountains. This area is famous for steep stairs, misty valleys, and unpredictable mountain weather. Ensure your navigation skills are sharp for these sandstone tracks!" },
+                { text: "Royal National Park (Coastal Cliffs)", pts: 0, fb: "You are heading to the coast! This park offers beautiful ocean views and whale watching, but the sun is very strong here. You will need to manage your hydration carefully on the sand." },
+                { text: "Kosciuszko National Park (Alpine Peaks)", pts: 0, fb: "A high-altitude adventure! You will be walking among Australia's highest peaks. The air is thin and the weather can turn from sun to snow in minutes. Preparation is absolutely vital here." }
+            ]
+        },
+        {
+            text: "Decision 1: You are packing your supplies. Your bag is getting quite heavy. What do you decide to prioritize?",
+            choices: [
+                { text: "Pack extra water and a high-quality first aid kit.", pts: 3, fb: "This is a very wise decision. In the Australian bush, medical emergencies and dehydration are common risks. Prioritizing safety over extra comfort shows you are a responsible and prepared hiker. Well done!" },
+                { text: "Pack more food and a heavy, comfortable pillow.", pts: 2, fb: "A comfortable sleep is helpful, but the extra weight of a heavy pillow might cause back pain. You have enough food, which is good, but remember that water is usually more important." },
+                { text: "Pack a heavy camera and a thick book to read at night.", pts: 1, fb: "You will have beautiful photos, but your bag is now dangerously heavy. On a 3-day trip, every kilogram counts. This weight will slow you down and make the steep climbs very difficult." },
+                { text: "Leave the map behind because you have a phone.", pts: -1, retry: true, fb: "Dangerous choice! Phone batteries die and GPS signals fail in deep valleys. You must always carry a physical map in the NSW wilderness. Please reconsider your packing strategy." }
+            ]
+        },
+        {
+            text: "Decision 2: Before leaving, you notice the weather forecast predicts a 'high wind' warning. How do you respond?",
+            choices: [
+                { text: "Check your route for areas protected from the wind.", pts: 3, fb: "Excellent planning. High winds can make ridge-walking dangerous and cause falling branches. By identifying safer, lower-ground paths, you are proactively managing risk. This is the mark of a skilled, intelligent trekker." },
+                { text: "Pack extra tent pegs and a sturdier windbreaker jacket.", pts: 2, fb: "Good practical thinking. This will help you survive the conditions, but it doesn't change the fact that walking on high cliffs in high winds is still risky. Always stay alert to your surroundings." },
+                { text: "Stick to your original plan and hope the wind stops.", pts: 1, fb: "This is a passive approach. The Australian weather can be very stubborn and extreme. Depending on luck rather than a plan can lead to difficult situations if the wind gets stronger. Be careful!" },
+                { text: "Ignore the forecast; weather apps are usually wrong.", pts: -1, retry: true, fb: "Incorrect. Modern meteorological data is very accurate for NSW parks. Ignoring a professional warning is a major safety error. Please try to make a more informed decision for your safety." }
+            ]
+        },
+        {
+            text: "🚨 EMERGENCY 1: You hear a loud rustle. A large Red-Bellied Black Snake is coiled on the path 1 meter away!",
+            emergency: true,
+            choices: [
+                { text: "Freeze immediately, then slowly back away several meters.", pts: 3, fb: "Perfect! You stayed calm and gave the snake space. Snakes only strike when they feel trapped. By backing away slowly, you allowed the snake to feel safe enough to eventually leave the path." },
+                { text: "Stomp your feet loudly and shout to scare it away.", pts: 0, death: "The snake feels threatened by your aggression! It strikes your leg before you can move. You are miles from help. A goanna watches as the venom takes hold. GAME OVER." },
+                { text: "Try to run past it quickly before it can react.", pts: 0, death: "You startled the snake! It strikes out of reflex. You fall into the scrub, bitten and alone. The goannas are already moving closer. GAME OVER." }
+            ]
+        },
+        {
+            text: "Decision 3: You reach a river crossing. The water is moving fast after last night's rain. What is your plan?",
+            choices: [
+                { text: "Search upstream for a wider, shallower point to cross.", pts: 3, fb: "A very smart move! Shallow, wider sections have slower currents. Taking the time to find a safer crossing point prevents you from being swept away. Patience is a vital skill in the bush." },
+                { text: "Unclip your bag's waist belt and walk across carefully.", pts: 2, fb: "Good safety technique. Unclipping the belt means you can ditch the heavy bag if you fall. However, crossing fast water is still dangerous. Always look for the safest path first if possible." },
+                { text: "Walk across in your boots to ensure you have better grip.", pts: 1, fb: "You will have grip, but now your boots are soaking wet. Walking in wet boots for two more days will cause severe blisters and foot pain. Consider the long-term comfort of your feet!" },
+                { text: "Try to jump across the rocks to stay completely dry.", pts: -1, retry: true, fb: "Too risky! River rocks are incredibly slippery (like ice). A fall here could result in a broken bone or head injury. Please find a more stable way to cross the water." }
+            ]
+        },
+        {
+            text: "Decision 4: It is midday and the temperature is rising. You are feeling very thirsty but your water is half-gone.",
+            choices: [
+                { text: "Rest in the shade and take small, frequent sips.", pts: 3, fb: "This is the best way to manage heat. Resting during the hottest part of the day reduces your sweat rate, and small sips hydrate you more effectively than gulping. Very sensible!" },
+                { text: "Drink a large amount now to 'pre-hydrate' your body.", pts: 2, fb: "Hydration is good, but drinking too much at once can lead to a 'full' stomach feeling without lasting hydration. You should try to conserve your water for the long afternoon walk." },
+                { text: "Keep walking fast to reach the next stream sooner.", pts: 1, fb: "This is dangerous. Pushing your body harder in the heat will make you sweat more and increase your thirst. If the next stream is dry, you will be in a very serious situation!" },
+                { text: "Drink from a stagnant pond you found near the trail.", pts: -1, retry: true, fb: "No! Stagnant water in Australia often contains dangerous bacteria or parasites. This could make you violently ill within hours. You must find a safer way to manage your thirst." }
+            ]
+        },
+        {
+            text: "Decision 5: You are choosing a spot to pitch your tent for the night. Where is the safest place?",
+            choices: [
+                { text: "Clear, flat ground away from large, overhanging trees.", pts: 3, fb: "Excellent! You are avoiding 'widow-makers' (falling branches). Eucalyptus trees can drop large limbs without warning, even in good weather. Sleeping in the open is the safest choice for a bushcamper." },
+                { text: "In a soft, sandy dry creek bed near the water.", pts: 2, fb: "It is comfortable and flat, but dry creek beds are dangerous if it rains in the mountains. A flash flood could arrive while you sleep. Always check the sky before choosing a low spot." },
+                { text: "On the highest ridge to see the sunrise in the morning.", pts: 1, fb: "A beautiful view, but you are exposed to high winds and lightning. Ridges are much colder and more difficult to secure a tent on. Consider the weather before the scenery!" },
+                { text: "Under a massive Gum tree to protect you from the rain.", pts: -1, retry: true, fb: "Stay away! Large Gum trees are famous for dropping heavy branches unexpectedly. This is a very common cause of injury in the NSW bush. Choose a clearer area for your tent." }
+            ]
+        },
+        {
+            text: "Decision 6: You want to cook dinner, but there is a 'Total Fire Ban' today. How do you proceed?",
+            choices: [
+                { text: "Eat a cold meal and do not use any flame at all.", pts: 3, fb: "Perfectly responsible. During a Total Fire Ban, any spark can start a catastrophe. By following the law and eating cold food, you are protecting the forest and the community. Great job!" },
+                { text: "Check your permit to see if gas stoves are allowed.", pts: 2, fb: "A good legal step. In some parks, gas is okay, but in others, it is strictly forbidden during bans. Always double-check, but remember that 'no flame' is always the safest option." },
+                { text: "Build a very small fire inside a circle of stones.", pts: 1, fb: "Extremely risky and illegal. Even a small fire can throw sparks into dry grass. You are risking a massive bushfire and a very large fine from the National Parks rangers." },
+                { text: "Light a large fire to keep the mosquitoes away.", pts: -1, retry: true, fb: "Absolutely not! This is the most dangerous thing you could do during a fire ban. You could destroy the entire park and put lives at risk. Please rethink your cooking plan." }
+            ]
+        },
+        {
+            text: "🚨 EMERGENCY 2: A sudden storm arrives. Lightning is striking the ridges and it's pouring rain!",
+            emergency: true,
+            choices: [
+                { text: "Move to a mid-slope area, avoid tall trees and water.", pts: 3, fb: "Superb safety logic. You avoided the high points (lightning) and the low points (flooding). By finding a neutral, mid-slope position away from tall trees, you maximized your survival chances. Well played!" },
+                { text: "Run to the highest peak to signal for an emergency rescue.", pts: 0, death: "A bolt of lightning strikes the peak while you are standing there. You are instantly fried. A goanna arrives early for the feast. GAME OVER." },
+                { text: "Take shelter in a small cave at the bottom of a gully.", pts: 0, death: "The gully suddenly fills with a wall of water from the mountain runoff. You are trapped in the cave as it floods. The goannas wait downstream. GAME OVER." }
+            ]
+        },
+        {
+            text: "Decision 7: Day 3. You find a tick attached to your arm. It is small and dark. How do you remove it?",
+            choices: [
+                { text: "Use fine-tipped tweezers to pull it out by the head.", pts: 3, fb: "Correct medical procedure. Removing the tick cleanly without squeezing the body prevents toxins from entering your blood. You have handled this common NSW bush nuisance perfectly. Stay healthy!" },
+                { text: "Apply a drop of peppermint oil to make it release.", pts: 2, fb: "This is a common 'home remedy,' but it can actually cause the tick to vomit into your skin, increasing the risk of infection. Tweezers are always the professionally recommended tool." },
+                { text: "Pull it out quickly with your fingernails.", pts: 1, fb: "You got it out, but you probably left the head inside your skin. This can cause a painful infection or a small lump that lasts for weeks. Use a tool for a cleaner result next time." },
+                { text: "Burn it with a match so it drops off naturally.", pts: -1, retry: true, fb: "Don't do that! Burning the tick is dangerous for your skin and makes the tick inject more 'poison' into you. It is a very old and unsafe method. Try a more modern approach." }
+            ]
+        },
+        {
+            text: "Decision 8: You see a group of tourists trying to feed a wild Wallaby. What is your reaction?",
+            choices: [
+                { text: "Explain politely that human food makes the animals sick.", pts: 3, fb: "Excellent advocacy. Most people don't know that bread and snacks can kill native animals. By educating them politely, you are helping to keep the NSW wildlife wild and healthy. Top marks!" },
+                { text: "Ignore them and keep walking to save your energy.", pts: 2, fb: "This is fine, as it's not your job to police others. However, as a member of the hiking community, a small word of advice can sometimes save an animal's life. Keep moving!" },
+                { text: "Take a video to post on social media and complain.", pts: 1, fb: "While you are right to be annoyed, complaining online doesn't help the wallaby in the moment. Direct, polite communication is usually much more effective for conservation. Think about the animal!" },
+                { text: "Give the Wallaby some of your trail mix too.", pts: -1, retry: true, fb: "Stop! Never feed wildlife. Human food causes 'Lumpy Jaw' and other fatal diseases in wallabies. You must protect the environment, not feed it. Please choose a better action." }
+            ]
+        },
+        {
+            text: "Decision 9: You are very tired and your knees hurt. You still have 4km to go. How do you finish?",
+            choices: [
+                { text: "Take a 10-minute break and use your walking poles.", pts: 3, fb: "Very smart. Short breaks prevent total exhaustion, and poles reduce the impact on your knees by 25%. You are managing your physical resources perfectly to reach the finish line safely." },
+                { text: "Push through the pain and run to the finish line.", pts: 2, fb: "You will finish faster, but you are risking a trip or a fall. When you are tired, your coordination is lower. Be very careful on the uneven track as you move quickly." },
+                { text: "Discard some of your heavy gear to lighten the load.", pts: 1, fb: "This is a desperate move. Leaving gear in the park is littering and you might need those supplies if you have another delay. It is better to rest and move slowly than to leave items." },
+                { text: "Stop and wait for a helicopter to see you and help.", pts: -1, retry: true, fb: "No! Sore knees are not a life-threatening emergency. Rescues are for people in real danger. You need to find the mental strength to walk out. Try a different strategy." }
+            ]
+        },
+        {
+            text: "Decision 10: You reached the trailhead! Your car is in sight. What is the very last thing you do?",
+            choices: [
+                { text: "Check yourself for more ticks and log your return.", pts: 3, fb: "Perfect ending! Letting others know you are back safely is the final step of a professional hike. Checking for ticks again ensures you don't bring any 'hitchhikers' home. Congratulations on a great trip!" },
+                { text: "Get in the car and drive to the nearest burger shop.", pts: 2, fb: "You certainly earned that burger! However, don't forget to tell your emergency contact that you are safe. It prevents unnecessary worry and potential false alarms for the rescue services." },
+                { text: "Throw your dirty boots in the bin and drive home.", pts: 1, fb: "You made it! But boots can usually be cleaned and reused. Also, checking your body for leeches or ticks before driving is a much more comfortable way to end your adventure. Well done!" },
+                { text: "Leave your leftover trash in the parking lot.", pts: -1, retry: true, fb: "Absolutely not! You must 'Leave No Trace.' Take your rubbish home with you to keep the National Parks beautiful for the next hiker. Please finish your trip with respect for nature." }
+            ]
+        }
+    ];
+
+    function renderNode() {
+        if (step >= stages.length) return showFinal();
+        
+        const stage = stages[step];
+        document.getElementById('main-ui').style.display = "block";
+        document.getElementById('feedback-screen').style.display = "none";
+        document.getElementById('scene-desc').innerText = stage.text;
+        
+        const area = document.getElementById('choices-area');
+        area.innerHTML = '';
+
+        let shuffled = [...stage.choices].sort(() => Math.random() - 0.5);
+
+        shuffled.forEach(c => {
+            const btn = document.createElement('button');
+            btn.className = 'choice-btn';
+            btn.innerText = c.text;
+            btn.onclick = () => handleChoice(c);
+            area.appendChild(btn);
+        });
+    }
+
+    function handleChoice(c) {
+        if (c.retry) {
+            score -= 1;
+            updateScore();
+            alert("⚠️ " + c.fb);
+            return;
+        }
+
+        if (c.death) {
+            document.getElementById('main-ui').innerHTML = `<div class="death">💀 EXPEDITION TERMINATED<br><br>${c.death}</div><button class="choice-btn" onclick="location.reload()" style="text-align:center">Restart from the Trailhead</button>`;
+            return;
+        }
+
+        score += c.pts;
+        updateScore();
+        
+        document.getElementById('main-ui').style.display = "none";
+        document.getElementById('feedback-screen').style.display = "block";
+        document.getElementById('fb-text').innerText = c.fb;
+        document.getElementById('fb-points').innerText = c.pts > 0 ? `+${c.pts} Points` : "Adventure Starts Now!";
+        
+        document.getElementById('continue-btn').onclick = () => {
+            step++;
+            renderNode();
+        };
+    }
+
+    function updateScore() {
+        document.getElementById('score').innerText = score;
+    }
+
+    function showFinal() {
+        document.getElementById('main-ui').style.display = "none";
+        document.getElementById('feedback-screen').style.display = "block";
+        document.getElementById('continue-btn').style.display = "none";
+        
+        let msg = "";
+        if (score >= 30) {
+            msg = `Incredible performance! With ${score} points, you are a Master of the NSW Bush. You navigated through emergencies and difficult choices with the wisdom of a professional ranger. Your respect for nature and safety is outstanding. You are fully prepared for any adventure the Australian wilderness can offer. Truly world-class!`;
+        } else if (score >= 18) {
+            msg = `Well done! You finished with ${score} points, showing you are a steady and capable hiker. You understood the core concepts of bush safety and successfully managed two major emergencies. With a little more focus on packing and environment details, you'll be a pro in no time. A very successful expedition!`;
+        } else {
+            msg = `You survived the trip with ${score} points, but it was a rocky journey. You made it back to the car, but several of your decisions put you or the environment at risk. The Australian bush is a wonderful place, but it requires more study and preparation. Review the feedback and try again to improve!`;
+        }
+        
+        document.getElementById('fb-title').innerText = "Final Expedition Report";
+        document.getElementById('fb-text').innerHTML = `<div style="font-style:normal; color:white; font-size:1.1em;">${msg}</div>`;
+        document.getElementById('fb-points').innerHTML = `Final Score: ${score}/36<br><button class="choice-btn" onclick="location.reload()" style="text-align:center">Start a New Trip</button>`;
+    }
+
+    renderNode();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grandmaster Challenge: Chess Tournament Manager</title>
+    <style>
+        :root {
+            --wood-dark: #5d4037;
+            --wood-light: #d7ccc8;
+            --board-black: #795548;
+            --board-white: #f5f5f5;
+            --success: #2e7d32;
+            --danger: #c62828;
+            --text: #212121;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #e0e0e0;
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        #game-container {
+            width: 100%;
+            max-width: 700px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border: 4px solid var(--wood-dark);
+            overflow: hidden;
+        }
+
+        .header {
+            background: var(--wood-dark);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 25px;
+            background: var(--wood-light);
+            font-weight: bold;
+            border-bottom: 2px solid #bcaaa4;
+        }
+
+        .content { padding: 30px; }
+
+        .story-box {
+            background: #fdfdfd;
+            border-left: 5px solid var(--board-black);
+            padding: 20px;
+            margin-bottom: 25px;
+            font-style: italic;
+            line-height: 1.6;
+        }
+
+        .question {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .options-grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        .option-btn {
+            background: var(--board-white);
+            border: 2px solid #ccc;
+            padding: 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            transition: 0.2s;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background: #fff;
+            border-color: var(--wood-dark);
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .letter {
+            background: var(--wood-dark);
+            color: white;
+            width: 28px;
+            height: 28px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            margin-right: 15px;
+            font-weight: bold;
+        }
+
+        .feedback {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .fb-positive { background: #e8f5e9; border: 1px solid var(--success); color: var(--success); }
+        .fb-negative { background: #ffebee; border: 1px solid var(--danger); color: var(--danger); }
+
+        .sudden-death {
+            background: #212121 !important;
+            color: white !important;
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 15px;
+            background: var(--wood-dark);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            margin-top: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1.1rem;
+        }
+
+        .action-btn:hover { opacity: 0.9; }
+
+        #result-screen { text-align: center; display: none; padding: 40px; }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div id="start-screen" class="content">
+        <h1 style="text-align:center; color: var(--wood-dark);">♟️ The Grandmaster Challenge</h1>
+        <div class="story-box">
+            "Welcome, Organizer! Our city's old library is famous for its quiet rooms. We want to host the biggest Chess Tournament of the year here. People are coming from many different towns. They expect focus, silence, and good games. Can you make the right choices and lead us to a checkmate victory?"
+        </div>
+        <button class="action-btn" onclick="startGame()">START TOURNAMENT</button>
+    </div>
+
+    <div id="game-play" style="display:none;">
+        <div class="stats-bar">
+            <span>Decision: <span id="step-count">1</span>/10</span>
+            <span id="score-display">Points: 0</span>
+        </div>
+        <div class="content">
+            <div id="q-text" class="question"></div>
+            <div id="options-container" class="options-grid"></div>
+            
+            <div id="feedback-box" class="feedback">
+                <p id="feedback-msg" style="margin:0; font-weight: bold;"></p>
+                <button id="next-btn" class="action-btn" onclick="nextStep()">Next Decision →</button>
+                <button id="restart-btn" class="action-btn" style="display:none; background: #555;" onclick="location.reload()">START AGAIN</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="result-screen">
+        <h1 id="res-title"></h1>
+        <p id="res-desc" style="font-size: 1.2rem;"></p>
+        <h2 id="res-score"></h2>
+        <button class="action-btn" onclick="location.reload()">START AGAIN</button>
+    </div>
+</div>
+
+<script>
+let score = 0;
+let currentStep = 0;
+let isSuddenDeath = false;
+
+const DECISIONS = [
+    {
+        q: "1. What is the most important thing for a chess room?",
+        opts: [
+            { t: "Perfect silence and good lighting.", pts: 3, fb: "Excellent! Chess players need to focus." },
+            { t: "Comfortable chairs for everyone.", pts: 2, fb: "Good! Players often sit for many hours." },
+            { t: "A big clock on the wall.", pts: 1, fb: "Okay, but players usually have their own small clocks." },
+            { t: "Loud music to make it exciting.", pts: -1, fb: "Oh no! Chess players hate loud noise. Try again!" }
+        ]
+    },
+    {
+        q: "2. How should we set up the chess boards?",
+        opts: [
+            { t: "Put them all in one big, messy pile.", pts: -1, fb: "No! Players can't find their games. Try again." },
+            { t: "On long tables with lots of space between them.", pts: 3, fb: "Perfect! Players don't want to hit each other's elbows." },
+            { t: "On small coffee tables.", pts: 1, fb: "It's a bit tight, but it works for a small game." },
+            { t: "In neat rows with numbers for each table.", pts: 2, fb: "Very organized! This helps people find their seats." }
+        ]
+    },
+    {
+        q: "3. What entry fee should we charge the players?",
+        opts: [
+            { t: "£2.00 per person.", pts: 1, fb: "It's cheap, but we might not have money for prizes." },
+            { t: "£1,000.00 per person.", pts: -1, fb: "Too expensive! Nobody will come. Try again." },
+            { t: "£10.00 per person.", pts: 3, fb: "Excellent. This is fair and pays for the room." },
+            { t: "£20.00 per person.", pts: 2, fb: "A bit high, but players get a free pen and paper." }
+        ]
+    },
+    {
+        q: "4. Which chess sets should we use?",
+        opts: [
+            { t: "Expensive glass sets that break easily.", pts: 1, fb: "They look pretty, but they are not practical." },
+            { t: "Standard plastic sets (white and black).", pts: 2, fb: "Good. These are the most common sets in the world." },
+            { t: "No sets. Players must bring their own.", pts: -1, fb: "Many people forgot theirs! The room is empty. Try again." },
+            { t: "High-quality wooden sets.", pts: 3, fb: "Beautiful! The players feel like professionals." }
+        ]
+    },
+    {
+        q: "5. What refreshments (food/drink) should we provide?",
+        opts: [
+            { t: "Bottled water and quiet snacks like bananas.", pts: 3, fb: "Perfect! These don't make noise when people eat." },
+            { t: "Hot coffee and tea.", pts: 2, fb: "Nice, but be careful not to spill on the boards!" },
+            { t: "Crunchy crisps in loud plastic bags.", pts: -1, fb: "The 'crunch' sound is disturbing the players! Try again." },
+            { t: "A small chocolate bar for energy.", pts: 1, fb: "Okay, but some players get sticky fingers!" }
+        ]
+    },
+    {
+        q: "6. How do we keep the time for each game?",
+        opts: [
+            { t: "The players use their phones.", pts: 1, fb: "Phones are a bit distracting, but it's better than nothing." },
+            { t: "Professional digital chess clocks.", pts: 3, fb: "Brilliant! These are the best for tournaments." },
+            { t: "The players count out loud to ten.", pts: -1, fb: "That is way too loud and annoying! Try again." },
+            { t: "Old mechanical 'ticking' clocks.", pts: 2, fb: "Classic! Some players like the old style." }
+        ]
+    },
+    {
+        q: "7. A player is using their phone during a game. What do you do?",
+        opts: [
+            { t: "Tell them to put it away immediately.", pts: 2, fb: "Good. Phones are usually not allowed to prevent cheating." },
+            { t: "Take the phone and throw it away.", pts: -1, fb: "That is too aggressive! Be professional. Try again." },
+            { t: "Explain the 'No Phone' rule calmly.", pts: 3, fb: "Excellent. You are a very fair manager." },
+            { t: "Ignore it and walk away.", pts: 1, fb: "The other player is unhappy because it's not fair." }
+        ]
+    },
+    {
+        q: "8. What should the winner of the tournament receive?",
+        opts: [
+            { t: "A small rock from the garden.", pts: 1, fb: "The winner looks very confused. It's a boring prize." },
+            { t: "A silver trophy and a cash prize.", pts: 3, fb: "Fantastic! This is what everyone is playing for." },
+            { t: "A chess book signed by a master.", pts: 2, fb: "Very cool! Players love to learn more." },
+            { t: "The keys to the library.", pts: -1, fb: "We can't give the building away! Try again." }
+        ]
+    },
+    {
+        q: "9. How do we decide who plays against whom?",
+        opts: [
+            { t: "The oldest people play the youngest.", pts: 1, fb: "A bit strange, but the games are starting." },
+            { t: "Pair people with the same number of points.", pts: 3, fb: "Perfect! This makes the games very even and exciting." },
+            { t: "Let people choose their own friends.", pts: 2, fb: "Friendly, but it's not very professional." },
+            { t: "Toss a coin for every single player.", pts: -1, fb: "This takes too long! Everyone is waiting. Try again." }
+        ]
+    },
+    {
+        q: "10. The tournament is over. What is your final task?",
+        opts: [
+            { t: "Say 'goodbye' and leave the mess.", pts: 1, fb: "The library is dirty, but the games were good." },
+            { t: "Help clean the room and thank the players.", pts: 3, fb: "Perfect! You are a world-class organizer." },
+            { t: "Lock everyone inside the library.", pts: -1, fb: "That is a crime! Let them go home. Try again." },
+            { t: "Post the final scores on the library board.", pts: 2, fb: "Good job. Everyone wants to see the results." }
+        ]
+    }
+];
+
+const SUDDEN_DEATHS = [
+    {
+        triggerAfter: 6,
+        q: "💀 SUDDEN DEATH: A group of children starts a loud birthday party in the next room!",
+        opts: [
+            { t: "Politely ask them to move to the garden to save the peace.", fail: false, fb: "Great work! You saved the tournament with your kindness! The players can focus again." },
+            { t: "Start shouting at the children.", fail: true, fb: "Game Over! You were too loud and everyone left. Better luck next time!" }
+        ]
+    },
+    {
+        triggerAfter: 9,
+        q: "💀 SUDDEN DEATH: The main light in the room breaks and it is dark!",
+        opts: [
+            { t: "Cancel the final and go home.", fail: true, fb: "Game Over! You gave up too soon. Better luck next time!" },
+            { t: "Use the small reading lamps on every table to finish the game.", fail: false, fb: "Incredible! The players love the atmosphere. You saved the final match!" }
+        ]
+    }
+];
+
+// Fisher-Yates Shuffle Function
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+function startGame() {
+    document.getElementById('start-screen').style.display = 'none';
+    document.getElementById('game-play').style.display = 'block';
+    renderStep();
+}
+
+function renderStep() {
+    document.getElementById('feedback-box').style.display = 'none';
+    const container = document.getElementById('options-container');
+    container.innerHTML = '';
+    
+    const death = SUDDEN_DEATHS.find(d => d.triggerAfter === currentStep && !isSuddenDeath);
+    
+    if (death && !death.done) {
+        isSuddenDeath = true;
+        death.done = true;
+        document.getElementById('game-container').classList.add('sudden-death');
+        document.getElementById('q-text').textContent = death.q;
+        document.getElementById('step-count').textContent = "!!!";
+        
+        // Shuffle Sudden Death Options
+        const shuffledDeathOpts = shuffleArray([...death.opts]);
+        shuffledDeathOpts.forEach((opt, i) => {
+            const btn = createOptionBtn(String.fromCharCode(65 + i), opt.t);
+            btn.onclick = () => handleDeathChoice(opt);
+            container.appendChild(btn);
+        });
+    } else {
+        isSuddenDeath = false;
+        document.getElementById('game-container').classList.remove('sudden-death');
+        const data = DECISIONS[currentStep];
+        document.getElementById('step-count').textContent = currentStep + 1;
+        document.getElementById('q-text').textContent = data.q;
+        
+        // Shuffle Standard Decision Options
+        const shuffledOpts = shuffleArray([...data.opts]);
+        shuffledOpts.forEach((opt, i) => {
+            const btn = createOptionBtn(String.fromCharCode(65 + i), opt.t);
+            btn.onclick = () => handleChoice(opt);
+            container.appendChild(btn);
+        });
+    }
+}
+
+function createOptionBtn(letter, text) {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `<span class="letter">${letter}</span><span>${text}</span>`;
+    return btn;
+}
+
+function handleChoice(opt) {
+    const fbBox = document.getElementById('feedback-box');
+    const fbMsg = document.getElementById('feedback-msg');
+    const nextBtn = document.getElementById('next-btn');
+    
+    fbBox.style.display = 'block';
+    
+    if (opt.pts === -1) {
+        score -= 1;
+        fbBox.className = "feedback fb-negative";
+        fbMsg.textContent = opt.fb + " (-1 point)";
+        nextBtn.style.display = 'none';
+    } else {
+        score += opt.pts;
+        fbBox.className = "feedback fb-positive";
+        fbMsg.textContent = opt.fb + " (+" + opt.pts + " points)";
+        nextBtn.style.display = 'block';
+        document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+    }
+    document.getElementById('score-display').textContent = `Points: ${score}`;
+}
+
+function handleDeathChoice(opt) {
+    const fbBox = document.getElementById('feedback-box');
+    const fbMsg = document.getElementById('feedback-msg');
+    fbBox.style.display = 'block';
+
+    if (opt.fail) {
+        fbBox.className = "feedback fb-negative";
+        fbMsg.textContent = opt.fb;
+        document.getElementById('next-btn').style.display = 'none';
+        document.getElementById('restart-btn').style.display = 'block';
+    } else {
+        fbBox.className = "feedback fb-positive";
+        fbMsg.textContent = opt.fb;
+        document.getElementById('next-btn').style.display = 'block';
+    }
+    document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+}
+
+function nextStep() {
+    if (!isSuddenDeath) {
+        if (currentStep < DECISIONS.length - 1) {
+            currentStep++;
+            renderStep();
+        } else {
+            showFinalResults();
+        }
+    } else {
+        renderStep();
+    }
+}
+
+function showFinalResults() {
+    document.getElementById('game-play').style.display = 'none';
+    const screen = document.getElementById('result-screen');
+    screen.style.display = 'block';
+    
+    const title = document.getElementById('res-title');
+    const desc = document.getElementById('res-desc');
+    
+    if (score >= 27) {
+        title.textContent = "🏆 GRANDMASTER STATUS";
+        desc.textContent = "You are a genius! The tournament was perfect. The Library Committee wants you to work here forever!";
+    } else if (score >= 20) {
+        title.textContent = "🥈 INTERNATIONAL MASTER";
+        desc.textContent = "Great job! Everyone enjoyed the games and the library is still standing.";
+    } else if (score >= 12) {
+        title.textContent = "🥉 CLUB PLAYER";
+        desc.textContent = "Good effort. It was a bit messy, but we finished the games.";
+    } else {
+        title.textContent = "♟️ NOVICE PLAYER";
+        desc.textContent = "That was a hard day. You need more practice to manage a quiet room!";
+    }
+    document.getElementById('res-score').textContent = `Final Score: ${score} / 30`;
+}
+</script>
+</body>
+</html>

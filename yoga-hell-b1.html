@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Nightmare Studio: B1 Survival Challenge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F9FAFB;--surface:#FFFFFF;--ink:#111827;--ink2:#4B5563;
+  --accent:#6366F1;--danger:#DC2626;--success:#059669;--warn:#D97706;
+  --r:16px;--shadow:0 10px 15px -3px rgba(0,0,0,0.1);
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);line-height:1.6;padding:1rem;display:flex;flex-direction:column;align-items:center;}
+.shell{width:100%;max-width:650px;margin-top:2rem;}
+.hidden{display:none !important;}
+.card{background:var(--surface);border-radius:var(--r);padding:2rem;box-shadow:var(--shadow);border:1px solid #E5E7EB;}
+h1{font-size:26px;margin-bottom:0.5rem;text-align:center;font-weight:700;}
+.day-label{display:block;text-align:center;color:var(--accent);font-weight:700;text-transform:uppercase;font-size:12px;margin-bottom:1.5rem;letter-spacing:1px;}
+.ui-bar{display:flex;justify-content:space-between;margin-bottom:1rem;font-family:'DM Mono',monospace;font-size:13px;color:var(--ink2);}
+.options-list{display:grid;gap:12px;margin-top:1.5rem;}
+.opt-btn{background:white;border:1px solid #D1D5DB;padding:14px;border-radius:10px;text-align:left;cursor:pointer;font-size:15px;transition:0.2s;color:var(--ink);}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:#F5F3FF;}
+.opt-btn:disabled{opacity:0.6;cursor:default;}
+.feedback{margin-top:1.5rem;padding:1.25rem;border-radius:10px;display:none;font-size:15px;border-left:5px solid transparent;}
+.fb-1{background:#ECFDF5;color:#065F46;border-color:var(--success);}
+.fb-0{background:#F9FAFB;color:var(--ink2);border-color:#D1D5DB;}
+.fb-neg1{background:#FFFBEB;color:#92400E;border-color:var(--warn);}
+.fb-62{background:#FEF2F2;color:#991B1B;border-color:var(--danger);animation:shake 0.4s ease;}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.next-btn{margin-top:1.5rem;width:100%;background:var(--ink);color:white;border:none;padding:14px;border-radius:10px;font-weight:600;cursor:pointer;display:none;}
+.emerg-tag{background:var(--danger);color:white;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;display:inline-block;margin-bottom:10px;}
+</style>
+</head>
+<body>
+
+<div class="shell" id="screen-intro">
+  <div class="card">
+    <h1>Owner's Dream or Manager's Nightmare?</h1>
+    <p style="color:var(--ink2); margin-bottom:1.5rem;">Congratulations! You are the proud owner of a new wellness studio. It's time to find your inner peace... if the rest of the world lets you. Good luck, you'll need it!</p>
+    <button class="opt-btn" style="width:100%; text-align:center; background:var(--accent); color:white; font-weight:700;" onclick="startGame()">Open for Business (Help me...)</button>
+  </div>
+</div>
+
+<div class="shell hidden" id="screen-game">
+  <div class="ui-bar">
+    <div id="stat-progress">Day 1: Scenario 1/14</div>
+    <div id="stat-score">Sanity Score: 0</div>
+  </div>
+  <div class="card">
+    <span class="day-label" id="ui-day-text">Day 1</span>
+    <div id="ui-emerg-box"></div>
+    <p id="ui-scenario-text" style="font-size:17px;"></p>
+    <div class="options-list" id="ui-options"></div>
+    <div id="ui-feedback" class="feedback"></div>
+    <button class="next-btn" id="ui-btn-next" onclick="handleNext()">Deep Breath & Continue</button>
+  </div>
+</div>
+
+<div class="shell hidden" id="screen-result">
+  <div class="card" style="text-align:center;">
+    <h1>Performance Review</h1>
+    <div id="res-score" style="font-size:48px; font-weight:700; color:var(--accent); margin:10px 0;"></div>
+    <p id="res-msg" style="color:var(--ink2); margin-bottom:2rem;"></p>
+    <button class="opt-btn" style="width:100%; text-align:center;" onclick="location.reload()">Start New Nightmare</button>
+  </div>
+</div>
+
+<script>
+/**
+ * Logic: 12 Slots, 3 variants per slot = 36 total[cite: 3, 4].
+ * 2 Emergencies injected at slot 5 and 11.
+ */
+const POOL = [
+  // Slot 1: Neighbors
+  [
+    { t: "Mr. Higgins, the neighbor, is banging on your wall because your 'healing crystal music' is vibrating his tea cups.", choices: [
+      { text: "Politely offer him noise-cancelling headphones and a free tea.", pts: 1, fb: "Nice. You managed the nuisance professionally." },
+      { text: "Ignore him and turn the music up to drown out his banging.", pts: 0, fb: "He's calling the council now. Expect a letter." },
+      { text: "Scream through the wall that his tea is 'unspiritual'.", pts: -1, fb: "Immature. Your reputation is dropping." },
+      { text: "Drill a hole through the wall to see what kind of tea he's drinking.", pts: 62, fb: "PRISON TIME: This is 'criminal damage' and 'harassment'. Your business is closed by the police." }
+    ]},
+    { t: "The neighbor's cat keeps entering the studio and sleeping on students' faces.", choices: [
+      { text: "Ask the neighbor to keep the cat inside during business hours.", pts: 1, fb: "Reasonable. You are setting boundaries." },
+      { text: "Charge the cat a membership fee.", pts: 0, fb: "Funny, but the students are still sneezing." },
+      { text: "Throw a bucket of water at the cat.", pts: -1, fb: "Cruel! The neighbor is filming you for the local news." },
+      { text: "Declare the cat your new 'Supreme Instructor' and stop teaching.", pts: 62, fb: "BANKRUPTCY: Your students realize you've lost your mind and stop paying fees." }
+    ]},
+    { t: "The neighbors have started a 'No Chanting' protest outside your front door.", choices: [
+      { text: "Invite them in for a calm discussion about noise levels.", pts: 1, fb: "De-escalation at its best." },
+      { text: "Buy a megaphone and chant louder.", pts: -1, fb: "You are making the conflict much worse." },
+      { text: "Call the police immediately.", pts: 0, fb: "They aren't breaking laws, so the police are annoyed with you." },
+      { text: "Release a hive of bees to disperse the crowd.", pts: 62, fb: "PRISON: That is 'assault with a deadly weapon'. See you in court!" }
+    ]}
+  ],
+  // Slot 2: Religious Zealots
+  [
+    { t: "A group of zealots is claiming your 'Downward Dog' pose is actually a secret ritual to summon a demon.", choices: [
+      { text: "Explain that it is just a physical stretch for flexibility.", pts: 1, fb: "Patient. You are educating the public." },
+      { text: "Tell them the demon's name is 'Gary' to annoy them.", pts: -1, fb: "They are now throwing holy water at your windows." },
+      { text: "Close the curtains and ignore the noise.", pts: 0, fb: "Passive, but safe." },
+      { text: "Put on a scary mask and try to chase them away.", pts: 62, fb: "PRISON: You have been arrested for 'menacing behavior' and 'public disturbance'." }
+    ]}
+  ],
+  // Slot 3: Vexatious Litigants
+  [
+    { t: "A student is suing you for 'emotional distress' because you didn't say 'Namaste' to them specifically.", choices: [
+      { text: "Forward the claim to your legal representative immediately.", pts: 1, fb: "Smart. Let the professionals handle the nonsense." },
+      { text: "Try to negotiate with them using free yoga mats.", pts: 0, fb: "They want $50,000, not a mat. This won't work." },
+      { text: "Laugh in their face and tear up the legal papers.", pts: -1, fb: "That counts as 'failure to respond'. You're in trouble." },
+      { text: "Hide in the storage closet and pretend the studio is empty forever.", pts: 62, fb: "BANKRUPTCY: You missed your court date and lost your entire bank account." }
+    ]}
+  ],
+  // Slot 4: Protection Racket
+  [
+    { t: "A man named 'Big Tony' visits. He says it would be a 'shame' if your windows accidentally broke tonight.", choices: [
+      { text: "Contact the police and report the attempted extortion.", pts: 1, fb: "Brave. You are following legal protocols." },
+      { text: "Pay him the 'insurance' money to stay safe.", pts: -1, fb: "Now he will come back every week for more money." },
+      { text: "Offer him a free 'Inner Peace' session.", pts: 0, fb: "He laughed and broke a vase. Try again." },
+      { text: "Challenge him to a bare-knuckle fight in the parking lot.", pts: 62, fb: "HOSPITAL/PRISON: Tony has friends. Many friends. Your studio is now a rubble pile." }
+    ]}
+  ],
+  // Slot 5: Drug Dealer Student
+  [
+    { t: "You notice 'Yoga-Dose Gary' is selling strange 'herbal supplements' in the locker room.", choices: [
+      { text: "Banish him from the studio and report him to the authorities.", pts: 1, fb: "Correct. You must protect your legal jurisdiction." },
+      { text: "Ask for a 10% commission on his sales.", pts: -1, fb: "Now you are a criminal accomplice. Very risky." },
+      { text: "Tell him to do it outside on the sidewalk instead.", pts: 0, fb: "Lazy. It's still your problem." },
+      { text: "Try the 'supplements' yourself to see if they work.", pts: 62, fb: "PRISON/HEALTH: You woke up 3 days later in a jail cell. The studio is gone." }
+    ]}
+  ],
+  // Slot 6: Creepy Watcher
+  [
+    { t: "Staring Stan never joins the class. He just sits in the corner, staring at everyone and breathing loudly.", choices: [
+      { text: "Explain that non-participants are not allowed and ask him to leave.", pts: 1, fb: "Good. You are protecting the 'safe space' of your students." },
+      { text: "Charge him a 'Watcher's Fee'.", pts: 0, fb: "The students are still uncomfortable and leaving." },
+      { text: "Put a cardboard box over his head.", pts: -1, fb: "That's technically 'unlawful restraint'. Careful." },
+      { text: "Hire him as your new security guard.", pts: 62, fb: "BANKRUPTCY: Every single student quit within an hour. You have zero income." }
+    ]}
+  ],
+  // Slot 7: Fried Chicken Shop
+  [
+    { t: "A shop called 'Grease Lightning' opens next door. The smell of old oil is ruining your meditation.", choices: [
+      { text: "Invest in high-quality air filtration and seal the windows.", pts: 1, fb: "Expensive, but your business continuity is saved." },
+      { text: "Hand out 'chicken-scented' incense to hide the smell.", pts: -1, fb: "Now everyone is just hungry and confused." },
+      { text: "Spray cleaning chemicals under their door at night.", pts: -1, fb: "That's illegal and unprofessional." },
+      { text: "Burn the chicken shop down.", pts: 62, fb: "PRISON: Arson is a very serious crime. Your studio is now a crime scene." }
+    ]}
+  ],
+  // Slot 8: Sex Worker Suspicions
+  [
+    { t: "You suspect 'Networking Nina' is using your classes to find clients for her 'private services'.", choices: [
+      { text: "Monitor the situation and enforce a 'No Soliciting' policy.", pts: 1, fb: "Professional. You are maintaining studio standards." },
+      { text: "Ask her for a discount on her services.", pts: -1, fb: "Highly unethical. You have lost all professional integrity." },
+      { text: "Tell everyone in the class what you think she is doing.", pts: -1, fb: "That is 'defamation'. Expect a lawsuit." },
+      { text: "Change the business name to 'Susan's Dating & Yoga'.", pts: 62, fb: "BANKRUPTCY: Your insurance was cancelled and your landlord evicted you immediately." }
+    ]}
+  ],
+  // Slot 9: Copyright Infringement
+  [
+    { t: "A lawyer claims your 'Downward Dog' is actually a 'Copyrighted Movement' owned by a billionaire.", choices: [
+      { text: "Ask for proof of trademark and consult your own lawyer.", pts: 1, fb: "Calm. Most of these threats are scams." },
+      { text: "Rename the pose 'Pointy Triangle' to avoid trouble.", pts: 0, fb: "A bit silly, but it works." },
+      { text: "Pay the $10,000 'licensing fee' immediately.", pts: -1, fb: "You just got scammed. That money was for your rent." },
+      { text: "Bite the lawyer's hand.", pts: 62, fb: "PRISON/LAWSUIT: Assaulting a legal professional is a terrible career move." }
+    ]}
+  ],
+  // Slot 10: Landlord Trouble
+  [
+    { t: "The landlord says your 'excessive chanting' is bothering the ghosts in the building.", choices: [
+      { text: "Request a formal meeting to discuss 'noise disturbance' clauses in your lease.", pts: 1, fb: "Business-like. Ghost complaints aren't in the contract." },
+      { text: "Hire an exorcist to prove there are no ghosts.", pts: 0, fb: "A waste of money, but at least the landlord is happy." },
+      { text: "Tell him he's crazy.", pts: -1, fb: "He's looking for a reason to evict you now." },
+      { text: "Stop paying rent until the ghosts leave.", pts: 62, fb: "EVICTION: You have been kicked out. Your equipment is now on the sidewalk." }
+    ]}
+  ],
+  // Slot 11: Police Interruption
+  [
+    { t: "The police enter the class because they are looking for a stolen 'sacred incense burner'.", choices: [
+      { text: "Cooperatively show them your receipts and inventory.", pts: 1, fb: "Transparency prevents further trouble." },
+      { text: "Try to hide your incense burners in your pockets.", pts: -1, fb: "That makes you look extremely guilty." },
+      { text: "Demand a search warrant and block the door.", pts: 0, fb: "Technically your right, but now they will stay for hours." },
+      { text: "Try to 'arrest' the police officers for interrupting your flow.", pts: 62, fb: "PRISON: 'Obstruction of justice' and 'impersonating an officer'. You are in handcuffs." }
+    ]}
+  ],
+  // Slot 12: The Cult Leader
+  [
+    { t: "A student is handing out flyers for a new cult called 'The Church of the Infinite Stretch'.", choices: [
+      { text: "Explain that your studio is for exercise only and ban the flyers.", pts: 1, fb: "Good. You are keeping the studio focused." },
+      { text: "Join the cult because the robes look comfortable.", pts: -1, fb: "You are no longer the boss. The cult leader is." },
+      { text: "Charge the cult leader a 'Marketing Fee'.", pts: 0, fb: "Unethical, but at least you got some cash." },
+      { text: "Give the cult leader the keys to the studio.", pts: 62, fb: "BANKRUPTCY: They sold all your mats and moved to a farm in the mountains." }
+    ]}
+  ]
+];
+
+const EMERGENCIES = [
+  { t: "EMERGENCY: A fire has started in the storage room! Smoke is filling the studio!", isEmerg: true, choices: [
+    { text: "Evacuate everyone immediately and call the fire brigade.", pts: 3, fb: "HERO! You saved lives and your insurance will cover the damage." },
+    { text: "Try to finish the 'Sun Salutation' before leaving.", pts: -100, fb: "GAME OVER: You and your students are in the hospital. The studio is ash." },
+    { text: "Throw a yoga mat on the fire to smother it.", pts: -100, fb: "GAME OVER: Yoga mats are flammable. You made the fire much bigger." },
+    { text: "Blame the neighbor and run away.", pts: -100, fb: "GAME OVER: You have been arrested for arson and negligence." }
+  ]},
+  { t: "EMERGENCY: A student collapses. They are not breathing!", isEmerg: true, choices: [
+    { text: "Call an ambulance and perform CPR immediately.", pts: 3, fb: "SAVED THE DAY! Your quick action saved a life." },
+    { text: "Wait for the class to end to check on them.", pts: -100, fb: "PRISON: This is 'gross negligence'. Your license is revoked forever." },
+    { text: "Ask the class if anyone has a 'healing crystal' for breathing.", pts: -100, fb: "BANKRUPTCY/PRISON: The student died because you didn't call 911. Lawsuits everywhere." },
+    { text: "Run to the fried chicken shop to find help.", pts: -100, fb: "GAME OVER: You left the victim alone. Total failure of duty of care." }
+  ]}
+];
+
+let state = { score: 0, idx: 0, activeSet: [] };
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function startGame() {
+  state.score = 0;
+  state.idx = 0;
+  // Get 12 random from pool slots[cite: 3, 4]
+  state.activeSet = POOL.map(slot => slot[Math.floor(Math.random() * slot.length)]);
+  // Inject Emergencies
+  state.activeSet.splice(5, 0, EMERGENCIES[0]);
+  state.activeSet.splice(11, 0, EMERGENCIES[1]);
+
+  document.getElementById('screen-intro').classList.add('hidden');
+  document.getElementById('screen-game').classList.remove('hidden');
+  render();
+}
+
+function render() {
+  const current = state.activeSet[state.idx];
+  document.getElementById('stat-progress').innerText = `Scenario ${state.idx + 1} / 14`;
+  document.getElementById('stat-score').innerText = `Sanity Score: ${state.score}`;
+  document.getElementById('ui-scenario-text').innerText = current.t;
+  document.getElementById('ui-day-text').innerText = `Day ${Math.floor(state.idx/5) + 1}`;
+  
+  const emerg = document.getElementById('ui-emerg-box');
+  emerg.innerHTML = current.isEmerg ? `<span class="emerg-tag">CRITICAL INCIDENT</span>` : "";
+
+  const box = document.getElementById('ui-options');
+  box.innerHTML = "";
+  
+  const opts = shuffle([...current.choices]);
+  opts.forEach(o => {
+    const b = document.createElement('button');
+    b.className = "opt-btn";
+    b.innerText = o.text;
+    b.onclick = () => handleChoice(o);
+    box.appendChild(b);
+  });
+
+  document.getElementById('ui-feedback').style.display = 'none';
+  document.getElementById('ui-btn-next').style.display = 'none';
+}
+
+function handleChoice(o) {
+  const fb = document.getElementById('ui-feedback');
+  fb.innerText = o.fb;
+  fb.style.display = 'block';
+
+  if (o.pts === -100) {
+    fb.className = "feedback fb-62";
+    document.getElementById('ui-btn-next').innerText = "Game Over - View Results";
+    state.score = -50;
+    state.idx = 99; // Force end
+  } else if (o.pts === 62) {
+    fb.className = "feedback fb-62";
+    fb.innerText += " (Try a different choice if you want to survive!)";
+    return; // Don't advance
+  } else {
+    state.score += o.pts;
+    fb.className = `feedback fb-${o.pts === 1 ? '1' : (o.pts === 0 ? '0' : 'neg1')}`;
+  }
+
+  document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+  document.getElementById('ui-btn-next').style.display = 'block';
+}
+
+function handleNext() {
+  state.idx++;
+  if (state.idx < state.activeSet.length) {
+    render();
+  } else {
+    showResults();
+  }
+}
+
+function showResults() {
+  document.getElementById('screen-game').classList.add('hidden');
+  document.getElementById('screen-result').classList.remove('hidden');
+  
+  const msg = document.getElementById('res-msg');
+  const score = document.getElementById('res-score');
+  score.innerText = state.score;
+
+  if (state.score >= 12) {
+    msg.innerText = "ZEN MASTER: You survived the nightmare with grace! You managed the police, the zealots, and the smelly chicken shop like a professional. Your studio is a success!";
+  } else if (state.score >= 5) {
+    msg.innerText = "TOUGH SURVIVOR: You are still standing! You made some mistakes, but the studio is still open and you aren't in jail. That is a huge win!";
+  } else {
+    msg.innerText = "STRESS-TESTED HERO: It was a very hard road, but you kept going! You have learned many lessons about business law and neighbor relations. Time for a long holiday!";
+  }
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Route 66 Adventure — The Grand Tour</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --road-grey: #34495e;
+    --road-white: #fafafa;
+    --sign-blue: #2980b9;
+    --danger: #e74c3c;
+    --success: #27ae60;
+    --accent: #f1c40f;
+    --text: #2c3e50;
+    --bg: #f4f7f6;
+  }
+
+  body { font-family: 'Lato', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; align-items: center; }
+  .header { background: var(--road-grey); color: white; width: 100%; padding: 20px; text-align: center; border-bottom: 6px solid var(--sign-blue); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+  
+  .stats-bar { display: flex; justify-content: space-around; background: #fff; width: 100%; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-weight: bold; position: sticky; top: 0; z-index: 100; }
+  .stat-item { display: flex; align-items: center; gap: 8px; font-size: 1.1rem; }
+
+  .container { max-width: 850px; width: 90%; margin: 30px auto; background: white; padding: 40px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
+  
+  .story-box { background: #fdfdfd; border-left: 6px solid var(--sign-blue); padding: 25px; margin-bottom: 30px; line-height: 1.8; font-size: 1.1rem; border-radius: 0 10px 10px 0; }
+  
+  .choices { display: flex; flex-direction: column; gap: 18px; }
+  .choice-btn { 
+    background: white; border: 2px solid #ecf0f1; padding: 18px 25px; border-radius: 12px; 
+    cursor: pointer; text-align: left; font-size: 1.05rem; transition: all 0.2s ease; display: flex; align-items: center; gap: 20px;
+  }
+  .choice-btn:hover:not(:disabled) { border-color: var(--sign-blue); background: #f0f7ff; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
+  .choice-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+  .choice-num { background: var(--sign-blue); color: white; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border-radius: 50%; flex-shrink: 0; font-weight: bold; }
+
+  .feedback { margin-top: 30px; padding: 25px; border-radius: 12px; display: none; line-height: 1.6; font-size: 1.1rem; }
+  .fb-good { background: #eafaf1; border: 2px solid var(--success); color: #196f3d; }
+  .fb-bad { background: #fdedec; border: 2px solid var(--danger); color: #943126; }
+
+  .btn-next { background: var(--sign-blue); color: white; border: none; padding: 18px 35px; border-radius: 10px; font-size: 1.1rem; cursor: pointer; margin-top: 25px; width: 100%; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+  .btn-next:hover { background: #1f6391; }
+
+  .sudden-death-ui { border: 5px solid var(--danger) !important; background: #fff5f5 !important; animation: pulse-red 2s infinite; }
+  @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(231, 76, 60, 0); } 100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); } }
+
+  .vocab-section { margin-top: 40px; background: #2c3e50; color: white; padding: 25px; border-radius: 15px; }
+  .vocab-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px; }
+  .vocab-item b { color: var(--accent); }
+
+  #start-screen { text-align: center; }
+  .start-img { width: 100%; border-radius: 15px; margin: 25px 0; max-height: 350px; object-fit: cover; border: 4px solid #ddd; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>ROUTE 66: THE MOTHER ROAD</h1>
+  <p>An Interactive Adventure from Chicago to LA</p>
+</div>
+
+<div class="stats-bar" id="statsBar" style="display:none;">
+  <div class="stat-item">⭐ Points: <span id="score">0</span></div>
+  <div class="stat-item">💰 Budget: $<span id="money">500</span></div>
+  <div class="stat-item">📍 Milestone: <span id="progress">0</span>/12</div>
+</div>
+
+<div class="container">
+  <div id="startScreen">
+    <h2>Welcome to the Great American Road Trip!</h2>
+    <p>It is time to drive across the United States. You have a vintage car, $500, and 2,448 miles of highway ahead. Every choice matters. Will you arrive in Santa Monica a legend, or get stuck in the desert?</p>
+    <img src="https://images.unsplash.com/photo-1511226493327-023a1a47738e?auto=format&fit=crop&q=80&w=1000" class="start-img" alt="Classic Route 66">
+    <button class="btn-next" onclick="startGame()">Start Your Engines</button>
+  </div>
+
+  <div id="gameWindow" style="display:none;">
+    <div class="story-box">
+      <p id="description"></p>
+    </div>
+    <div class="choices" id="choicesCont"></div>
+    <div id="feedback" class="feedback"></div>
+    <button id="nextBtn" class="btn-next" style="display:none;" onclick="nextStep()">Drive Forward →</button>
+  </div>
+</div>
+
+<script>
+// --- GLOBAL STATE ---
+let score = 0;
+let money = 500;
+let currentStepIndex = 0;
+let activeJourney = [];
+let inSuddenDeath = false;
+
+// --- DATA: 36 SCENARIOS GROUPED GEOGRAPHICALLY (12 CLUSTERS) ---
+// Each cluster ensures the game picks one scenario per "region" to keep the order correct.
+const scenarioPool = [
+  // Cluster 1: Illinois (Start)
+  [
+    { stop: "Chicago, IL", desc: "You stand at Adams Street, the official start! The wind is cold. You need supplies before leaving the city.", choices: [
+      { t: "Buy a GPS and a heavy cooler.", cost: 120, pts: 10, fb: "Smart! A GPS prevents wrong turns, and the cooler will save you a fortune on snacks across 8 states." },
+      { t: "Buy a paper map and a box of donuts.", cost: 15, pts: 5, fb: "Classic style! You saved money, but reading a map while driving is going to be difficult." },
+      { t: "Buy a luxury leather driving cap.", cost: 200, pts: 2, fb: "You look like a professional racer, but now your wallet is dangerously light before you even leave Chicago!" }
+    ]},
+    { stop: "Chicago, IL", desc: "Before leaving, you visit Lou Mitchell’s for breakfast. It is crowded and famous.", choices: [
+      { t: "Order the 'World's Finest' Coffee and eggs.", cost: 25, pts: 10, fb: "Delicious! You feel full of energy and ready to drive for hours." },
+      { t: "Just grab a quick black coffee to go.", cost: 5, pts: 6, fb: "Efficient! You are on the road quickly, though you'll be hungry soon." },
+      { t: "Buy a souvenir 'Lou's' mug and a hat.", cost: 50, pts: 3, fb: "Nice souvenirs, but a bit pricey for a morning stop." }
+    ]},
+    { stop: "Joliet, IL", desc: "You see the statues of the Blues Brothers! Your car tire looks a little low on air.", choices: [
+      { t: "Pay for a full tire inspection.", cost: 40, pts: 10, fb: "Excellent choice. They found a nail in the tire and fixed it. You avoided a disaster!" },
+      { t: "Use a gas station pump to fill it yourself.", cost: 2, pts: 7, fb: "It looks better now. Hopefully, it stays full until Missouri." },
+      { t: "Ignore it; it probably just looks that way.", cost: 0, pts: -5, fb: "The car is pulling to the left. This might cause trouble later." }
+    ]}
+  ],
+  // Cluster 2: Illinois (Small Towns)
+  [
+    { stop: "Wilmington, IL", desc: "The 'Gemini Giant' rocket man statue is huge! A local offers to wash your car for a tip.", choices: [
+      { t: "Pay the local to clean the car.", cost: 10, pts: 8, fb: "The car shines! It makes for better photos, and the local gave you a tip about a speed trap ahead." },
+      { t: "Politely decline and take a photo.", cost: 0, pts: 5, fb: "A great photo for free. The Gemini Giant is a Route 66 icon!" },
+      { t: "Buy a miniature rocket man toy.", cost: 20, pts: 4, fb: "A fun toy for the dashboard, but your windshield is still covered in bugs." }
+    ]},
+    { stop: "Pontiac, IL", desc: "There are many murals (wall paintings) here. A tour guide offers a private history walk.", choices: [
+      { t: "Pay for the private walking tour.", cost: 30, pts: 12, fb: "Incredible! You learned about the history of the road and saw hidden art." },
+      { t: "Walk around by yourself for free.", cost: 0, pts: 7, fb: "You saw the main murals, but you aren't sure what they all represent." },
+      { t: "Skip the art and find a fast food joint.", cost: 15, pts: 2, fb: "The burger was okay, but you missed the culture of this beautiful town." }
+    ]},
+    { stop: "Springfield, IL", desc: "You visit Abraham Lincoln’s home. You can take a guided tour or visit the gift shop.", choices: [
+      { t: "Take the full historical tour.", cost: 20, pts: 10, fb: "Very educational! You understand more about American history now." },
+      { t: "Just take a selfie outside the house.", cost: 0, pts: 5, fb: "Fast and free. It's a nice memory, but you didn't see the inside." },
+      { t: "Buy a 'Lincoln' stovepipe hat.", cost: 40, pts: 1, fb: "It's funny, but it keeps hitting the roof of your car while you drive!" }
+    ]}
+  ],
+  // Cluster 3: Missouri (The Gateway)
+  [
+    { stop: "St. Louis, MO", desc: "The Gateway Arch is massive! There is a long line for the tram to the top.", choices: [
+      { t: "Wait 2 hours and pay for the tram.", cost: 20, pts: 10, fb: "Amazing! You can see for 30 miles. It's the highlight of Missouri." },
+      { t: "Visit the museum under the Arch instead.", cost: 5, pts: 8, fb: "Very interesting history of the Wild West, and you saved time!" },
+      { t: "Buy a fake 'fast-pass' from a guy outside.", cost: 40, pts: -10, fb: "Total scam! The ticket was invalid. You lost money and your pride." }
+    ]},
+    { stop: "St. Louis, MO", desc: "Time for dessert! You arrive at Ted Drewes Frozen Custard. It is famous.", choices: [
+      { t: "Buy a 'Concrete' shake (thick custard).", cost: 10, pts: 10, fb: "So thick you can hold it upside down! A true Route 66 tradition." },
+      { t: "Buy a small vanilla cone.", cost: 3, pts: 5, fb: "Nice and cheap, but you missed the 'Concrete' experience everyone talks about." },
+      { t: "Buy a Ted Drewes t-shirt instead of food.", cost: 25, pts: 4, fb: "You have a shirt, but you are still hungry and have a long drive ahead." }
+    ]},
+    { stop: "Cuba, MO", desc: "You reach the Wagon Wheel Motel, the oldest on the route. It looks very cozy.", choices: [
+      { t: "Stay the night in a historic stone cabin.", cost: 90, pts: 12, fb: "Perfect rest. You feel refreshed and your car is safe in the courtyard." },
+      { t: "Keep driving into the night to save money.", cost: 0, pts: -5, fb: "You are exhausted. Driving tired is dangerous, and you missed the town's murals." },
+      { t: "Sleep in the car at a nearby rest stop.", cost: 0, pts: 2, fb: "You saved money, but your back hurts and you didn't sleep well at all." }
+    ]}
+  ],
+  // Cluster 4: Missouri/Kansas (The Short Stretch)
+  [
+    { stop: "Lebanon, MO", desc: "You see the Munger Moss Motel neon sign. It is beautiful. You need gas.", choices: [
+      { t: "Buy premium gas and a car wash.", cost: 60, pts: 8, fb: "The car is running smoothly and looks great for the Kansas border." },
+      { t: "Buy just $10 of gas to get to the next town.", cost: 10, pts: 4, fb: "Risky! Gas stations are getting farther apart as you move West." },
+      { t: "Buy gas and a 'Route 66' neon clock.", cost: 100, pts: 9, fb: "The clock is beautiful, but where will you put it in the car?" }
+    ]},
+    { stop: "Carthage, MO", desc: "The 66 Drive-In Theater is showing a classic movie. What's your plan?", choices: [
+      { t: "Pay for a ticket and watch from your car.", cost: 20, pts: 10, fb: "Pure magic. Watching a movie under the stars is a true 1950s experience." },
+      { t: "Just park outside the fence and watch.", cost: 0, pts: -5, fb: "The owner asked you to move. It was awkward and you didn't hear the audio." },
+      { t: "Skip the movie and go to bed early.", cost: 0, pts: 6, fb: "A boring choice, but you will be the first person on the road tomorrow." }
+    ]},
+    { stop: "Galena, KS", desc: "You see 'Tow Tater,' the truck that inspired the movie 'Cars'. It looks old.", choices: [
+      { t: "Donate to the restoration fund and take photos.", cost: 10, pts: 12, fb: "The owners were so happy they told you the best place for BBQ in Kansas!" },
+      { t: "Take a quick photo and leave.", cost: 0, pts: 6, fb: "A nice photo, but you didn't get to hear the stories about the movie." },
+      { t: "Try to climb on the truck for a better photo.", cost: 0, pts: -10, fb: "Hey! That's a piece of history. You almost broke the mirror. Very disrespectful." }
+    ]}
+  ],
+  // Cluster 5: Oklahoma (The Heart)
+  [
+    { stop: "Tulsa, OK", desc: "The 'Golden Driller' is a giant statue of an oil worker. He is 75 feet tall!", choices: [
+      { t: "Stop at the 'Buck Atom's' space cowboy shop.", cost: 30, pts: 10, fb: "You bought a cool shirt and saw a giant space cowboy. Tulsa is weird and fun!" },
+      { t: "Just drive past and wave.", cost: 0, pts: 4, fb: "He's big, alright. You saved time, but missed some great photo opportunities." },
+      { t: "Visit a high-end Tulsa steakhouse.", cost: 80, pts: 7, fb: "The food was incredible, but that's a lot of money to spend in one night." }
+    ]},
+    { stop: "Catoosa, OK", desc: "The Blue Whale of Catoosa is a famous swimming hole. It's a very hot day.", choices: [
+      { t: "Pay the small entry fee and go for a swim.", cost: 5, pts: 10, fb: "Refreshing! The water was cool and the whale's 'head' is a fun slide." },
+      { t: "Eat a picnic lunch by the water.", cost: 10, pts: 8, fb: "A lovely break. You feel much more relaxed now." },
+      { t: "Just take a photo from the road.", cost: 0, pts: 5, fb: "It's a blue whale in a pond. Strange! You're back on the road in 5 minutes." }
+    ]},
+    { stop: "Arcadia, OK", desc: "You find 'Pops 66,' a restaurant with over 700 types of soda and a giant neon bottle.", choices: [
+      { t: "Buy a 'mystery pack' of 6 strange sodas.", cost: 18, pts: 10, fb: "One tasted like bacon, one like grass! A very memorable (and weird) experience." },
+      { t: "Buy a classic root beer and a burger.", cost: 15, pts: 8, fb: "Delicious. You can't go wrong with the classics at Pops." },
+      { t: "Just look at the giant bottle outside.", cost: 0, pts: 5, fb: "The neon light is amazing at sunset. You saved money but stayed thirsty." }
+    ]}
+  ],
+  // Cluster 6: Oklahoma (The West)
+  [
+    { stop: "Oklahoma City, OK", desc: "The state capitol building has an oil well on the front lawn! Traffic is heavy.", choices: [
+      { t: "Visit the Oklahoma City National Memorial.", cost: 0, pts: 15, fb: "A very moving and important experience. You'll never forget this stop." },
+      { t: "Navigate through the city quickly to escape traffic.", cost: 0, pts: 5, fb: "You made good time, but you didn't see anything except the highway." },
+      { t: "Stop at a fancy mall for air conditioning.", cost: 50, pts: 2, fb: "The mall was nice, but it's the same as the malls back home. A waste of road-trip time." }
+    ]},
+    { stop: "Clinton, OK", desc: "The Oklahoma Route 66 Museum is here. It’s the best museum on the whole trip.", choices: [
+      { t: "Pay for the museum and the audio guide.", cost: 15, pts: 12, fb: "Wow! You heard music and stories from every decade of the road's history." },
+      { t: "Browse only the gift shop for free.", cost: 0, pts: 5, fb: "You got a postcard, but you missed the actual history. A bit of a shame." },
+      { t: "Buy a vintage Oklahoma license plate.", cost: 25, pts: 7, fb: "A cool souvenir! It will look great in your garage one day." }
+    ]},
+    { stop: "Elk City, OK", desc: "You see the National Route 66 Museum. It's late and you need a place to sleep.", choices: [
+      { t: "Book a room at a local motel.", cost: 75, pts: 10, fb: "A quiet night's sleep. You're ready for the long Texas plains tomorrow." },
+      { t: "Try to drive all the way to Texas tonight.", cost: 0, pts: -10, fb: "You almost hit a deer because you were so tired! You had to stop anyway at a rest area." },
+      { t: "Eat a massive dinner and sleep in the car.", cost: 20, pts: 5, fb: "Full stomach, but a very cramped sleep. You feel grumpy this morning." }
+    ]}
+  ],
+  // Cluster 7: Texas (The Panhandle)
+  [
+    { stop: "Shamrock, TX", desc: "The U-Drop Inn is a beautiful Art Deco gas station. It looks like a spaceship!", choices: [
+      { t: "Stop for a milkshake and a photo.", cost: 8, pts: 10, fb: "It feels like you are in the movie 'Cars'. This is the most beautiful building in Texas!" },
+      { t: "Just get gas and keep moving.", cost: 45, pts: 5, fb: "The building was cool, but you were in too much of a hurry to enjoy it." },
+      { t: "Buy a Texas-sized cowboy hat.", cost: 60, pts: 6, fb: "Everything is bigger in Texas, including the price of hats! You look like a local now." }
+    ]},
+    { stop: "Amarillo, TX", desc: "Cadillac Ranch! Ten cars are buried nose-first in the dirt. People are painting them.", choices: [
+      { t: "Buy spray paint and add your name to a car.", cost: 12, pts: 12, fb: "So much fun! Your name is now part of the most famous art on Route 66." },
+      { t: "Take photos of other people's art.", cost: 0, pts: 7, fb: "It's a strange and colorful sight. A great free stop!" },
+      { t: "Try to climb on top of a Cadillac.", cost: 0, pts: -8, fb: "The paint is wet! Now your clothes are ruined and the locals are annoyed." }
+    ]},
+    { stop: "Amarillo, TX", desc: "The Big Texan Steak Ranch. They have a 72-ounce steak. If you eat it in an hour, it's free!", choices: [
+      { t: "Order a normal-sized steak dinner.", cost: 35, pts: 10, fb: "Delicious Texas beef. You feel strong and satisfied." },
+      { t: "Try the 72-ounce challenge!", cost: 72, pts: -5, fb: "You paid $72 and got a massive stomach ache. You couldn't even finish half!" },
+      { t: "Just buy a 'Big Texan' t-shirt.", cost: 20, pts: 5, fb: "A safe choice. You aren't hungry, but you have the souvenir." }
+    ]}
+  ],
+  // Cluster 8: New Mexico (The Land of Enchantment)
+  [
+    { stop: "Tucumcari, NM", desc: "The Blue Swallow Motel has the best neon sign on the road. 'Tucumcari Tonite!'", choices: [
+      { t: "Stay the night and enjoy the neon glow.", cost: 100, pts: 15, fb: "The owner even let you park your car in the garage. Truly magical!" },
+      { t: "Take a photo and drive to the next town.", cost: 0, pts: 6, fb: "The sign is pretty, but New Mexico is very dark at night. Be careful!" },
+      { t: "Eat at a local Mexican restaurant.", cost: 25, pts: 10, fb: "The green chili is spicy! Your mouth is burning, but it's delicious." }
+    ]},
+    { stop: "Santa Rosa, NM", desc: "The Blue Hole is a natural turquoise pool in the middle of the desert. It is 80 feet deep!", choices: [
+      { t: "Jump in for a quick, cold swim.", cost: 0, pts: 12, fb: "The water is 62 degrees! It woke you up instantly. You feel amazing." },
+      { t: "Visit the Route 66 Auto Museum nearby.", cost: 10, pts: 10, fb: "You saw some incredible classic cars. It's a hidden gem of a museum!" },
+      { t: "Buy a bag of local 'Blue Hole' jerky.", cost: 15, pts: 5, fb: "A bit salty, but it's a good snack for the long desert road ahead." }
+    ]},
+    { stop: "Albuquerque, NM", desc: "You reach Central Avenue. There are many vintage diners and shops here.", choices: [
+      { t: "Go for a ride on the Sandia Peak Tramway.", cost: 30, pts: 12, fb: "You went from the desert to the top of a mountain! The view of the city is 10/10." },
+      { t: "Shop for authentic turquoise jewelry.", cost: 60, pts: 10, fb: "You bought a beautiful ring from a local artist. A high-quality souvenir." },
+      { t: "Eat a 'Green Chili Cheeseburger'.", cost: 15, pts: 10, fb: "The local specialty! It's spicy and perfect. Best burger of the trip so far." }
+    ]}
+  ],
+  // Cluster 9: Arizona (The High Desert)
+  [
+    { stop: "Holbrook, AZ", desc: "The Wigwam Motel! You can sleep in a concrete tent (a teepee).", choices: [
+      { t: "Spend the night in a Wigwam.", cost: 95, pts: 15, fb: "How cool! You slept in a teepee with a vintage car parked outside. Total nostalgia." },
+      { t: "Take a photo and visit the Rock Shop.", cost: 15, pts: 8, fb: "You bought a piece of petrified wood. It's literally a rock from a million years ago!" },
+      { t: "Keep driving to Winslow.", cost: 0, pts: 5, fb: "You're making great time, but you missed one of the most famous motels in the world." }
+    ]},
+    { stop: "Winslow, AZ", desc: "'Standing on a corner in Winslow, Arizona...' like the song says!", choices: [
+      { t: "Take a photo on the famous corner.", cost: 0, pts: 10, fb: "A classic moment. There is even a statue and a mural of a flatbed Ford!" },
+      { t: "Eat lunch at the historic La Posada Hotel.", cost: 40, pts: 12, fb: "This hotel was for movie stars in the 1930s. You feel very fancy!" },
+      { t: "Buy a 'Winslow' guitar pick.", cost: 5, pts: 5, fb: "A cheap and easy souvenir for a music lover." }
+    ]},
+    { stop: "Flagstaff, AZ", desc: "You are high in the mountains now. There are pine trees and it's much cooler.", choices: [
+      { t: "Visit the Lowell Observatory to see stars.", cost: 25, pts: 12, fb: "Incredible! This is where they discovered Pluto. The Arizona sky is so clear." },
+      { t: "Go for a short hike in the forest.", cost: 0, pts: 10, fb: "The fresh air is exactly what you needed after 5 days of driving." },
+      { t: "Buy a warm Flagstaff hoodie.", cost: 45, pts: 7, fb: "You were shivering in your t-shirt, so this was a necessary (but pricey) purchase." }
+    ]}
+  ],
+  // Cluster 10: Arizona (The Wild West)
+  [
+    { stop: "Seligman, AZ", desc: "This town inspired 'Radiator Springs' from the movie 'Cars'. It's full of neon and kitsch.", choices: [
+      { t: "Get a haircut at Angel Delgadillo's shop.", cost: 20, pts: 15, fb: "Angel is the 'Guardian Angel' of Route 66. Hearing his stories was priceless!" },
+      { t: "Eat a 'Dead Chicken' burger at the Roadkill Cafe.", cost: 18, pts: 10, fb: "The name is scary, but the burger was great. The decor is very funny!" },
+      { t: "Buy a bag of 'Route 66' salt water taffy.", cost: 10, pts: 6, fb: "Sweet and chewy. It helped keep you awake during the next drive." }
+    ]},
+    { stop: "Kingman, AZ", desc: "You visit the Powerhouse Route 66 Museum. The desert heat is starting to rise.", choices: [
+      { t: "Buy a ticket for the museum and a cold soda.", cost: 12, pts: 10, fb: "The museum is air-conditioned! You learned about the 'Okies' who traveled this road in the 1930s." },
+      { t: "Stop at Mr D'z Route 66 Diner.", cost: 20, pts: 10, fb: "The blue and pink neon is amazing. Best root beer float in Arizona!" },
+      { t: "Drive straight through to the mountains.", cost: 0, pts: 4, fb: "It's getting very hot. You're saving time, but your car's engine is working hard." }
+    ]},
+    { stop: "Oatman, AZ", desc: "A wild western town in the mountains. Wild donkeys (burros) walk in the street!", choices: [
+      { t: "Buy 'burro cubes' to feed the donkeys.", cost: 5, pts: 12, fb: "A donkey nudged your hand for more! It was the cutest moment of the trip." },
+      { t: "Watch the staged 'Wild West' gunfight.", cost: 5, pts: 10, fb: "Bang bang! The actors were funny and it felt like being in an old movie." },
+      { t: "Try to shoo the donkeys out of the road.", cost: 0, pts: -10, fb: "The locals yelled at you! The donkeys have the right-of-way in Oatman." }
+    ]}
+  ],
+  // Cluster 11: California (The Mojave)
+  [
+    { stop: "Needles, CA", desc: "Welcome to California! It is 110 degrees (43°C). The desert is silent and hot.", choices: [
+      { t: "Buy 4 extra gallons of water and ice.", cost: 20, pts: 15, fb: "Smartest move ever. The desert is dangerous and you must stay hydrated!" },
+      { t: "Stop at the 'Wagon Wheel' for a cold tea.", cost: 5, pts: 7, fb: "It helped for a minute, but you're still sweating. It's a long way to the next town." },
+      { t: "Just keep driving fast to get out of the heat.", cost: 0, pts: -5, fb: "Your temperature gauge is rising. Driving fast in this heat is bad for the car!" }
+    ]},
+    { stop: "Amboy, CA", desc: "Roy's Motel and Café! The neon sign is famous, but the town is almost a ghost town.", choices: [
+      { t: "Buy a 'Root 66' soda and take a photo.", cost: 10, pts: 12, fb: "Roy's is iconic. You felt like you were in a lonely, beautiful movie scene." },
+      { t: "Explore the nearby Amboy Crater (volcano).", cost: 0, pts: 10, fb: "You hiked on a volcano! The lava rocks are sharp and cool. You feel like an explorer." },
+      { t: "Skip it; there is nothing here but sand.", cost: 0, pts: 2, fb: "You missed one of the most photographed spots in California. Boring!" }
+    ]},
+    { stop: "Barstow, CA", desc: "You arrive at the Barstow Station—it's a collection of old train cars turned into shops.", choices: [
+      { t: "Eat lunch inside a vintage train car.", cost: 20, pts: 10, fb: "Very cool! You ate a sandwich while sitting in a 100-year-old rail carriage." },
+      { t: "Visit the Route 66 Mother Road Museum.", cost: 5, pts: 10, fb: "A small museum but full of heart. You met a volunteer who has lived here since 1950!" },
+      { t: "Buy a 'California Republic' beach towel.", cost: 25, pts: 6, fb: "You're getting ready for the ocean! A bit early, but you're excited." }
+    ]}
+  ],
+  // Cluster 12: California (The Finish Line)
+  [
+    { stop: "San Bernardino, CA", desc: "The site of the very first McDonald's! It is now a free museum.", choices: [
+      { t: "Spend an hour looking at the old toys.", cost: 0, pts: 12, fb: "Amazing! You saw how a small burger stand became a global giant." },
+      { t: "Stop for a quick modern burger nearby.", cost: 12, pts: 5, fb: "Standard food. It filled your stomach, but you didn't see the history." },
+      { t: "Buy a 'First McDonald's' commemorative coin.", cost: 15, pts: 8, fb: "A shiny souvenir of a very famous spot." }
+    ]},
+    { stop: "Santa Monica, CA", desc: "You made it! The 'End of the Trail' sign on the Santa Monica Pier. The ocean is blue.", choices: [
+      { t: "Buy a giant seafood dinner for two.", cost: 100, pts: 15, fb: "The ultimate celebration! You watched the sunset over the Pacific. You did it!" },
+      { t: "Ride the Ferris Wheel on the pier.", cost: 15, pts: 12, fb: "From the top, you can see the road you just traveled. A beautiful moment." },
+      { t: "Just sit on the sand and rest.", cost: 0, pts: 10, fb: "Total peace. 2,448 miles are behind you. You feel like a champion." }
+    ]},
+    { stop: "Santa Monica, CA", desc: "The journey is over. You are standing at the edge of the continent.", choices: [
+      { t: "Throw a message in a bottle into the sea.", cost: 5, pts: 10, fb: "A poetic end to a great trip. Maybe someone in Hawaii will find it!" },
+      { t: "Buy an 'I Drove Route 66' gold medal.", cost: 30, pts: 12, fb: "You earned it! You survived the weather, the car trouble, and the desert." },
+      { t: "Call a friend and brag about your trip.", cost: 0, pts: 8, fb: "They are very jealous! You have stories that will last a lifetime." }
+    ]}
+  ]
+];
+
+const suddenDeaths = [
+  {
+    name: "Sandstorm!",
+    q: "⚠️ EMERGENCY: A massive wall of sand is blowing across the road in the Mojave Desert!",
+    choices: [
+      { t: "Pull over immediately and turn off all lights.", fail: false, fb: "Perfect safety! By turning off lights, other cars won't follow you off the road. You waited it out safely." },
+      { t: "Try to drive through it slowly with your bright lights on.", fail: true, fb: "CRITICAL FAILURE: You couldn't see the curve! You drove into a ditch and your radiator cracked. The trip is over." }
+    ]
+  },
+  {
+    name: "Engine Heat!",
+    q: "⚠️ EMERGENCY: Steam is pouring out of your hood! The engine is overheating in the Arizona sun!",
+    choices: [
+      { t: "Turn the heater on full blast and slow down.", fail: false, fb: "Expert move! This pulls heat away from the engine. You made it to a gas station just in time." },
+      { t: "Stop and immediately pour cold water on the engine.", fail: true, fb: "DISASTER: The cold water cracked the hot engine block! Your car is destroyed. You're walking home." }
+    ]
+  }
+];
+
+// --- UTILITIES ---
+
+/**
+ * Fischer-Yates Shuffle
+ * Randomizes an array in place.
+ */
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+// --- GAME LOGIC ---
+
+function startGame() {
+  score = 0;
+  money = 500;
+  currentStepIndex = 0;
+  
+  // Build a fresh journey of 12 steps
+  // We pick one random scenario from each of the 12 clusters
+  activeJourney = scenarioPool.map(cluster => {
+    const randomIndex = Math.floor(Math.random() * cluster.length);
+    return cluster[randomIndex];
+  });
+
+  document.getElementById("startScreen").style.display = "none";
+  document.getElementById("gameWindow").style.display = "block";
+  document.getElementById("statsBar").style.display = "flex";
+  
+  renderStep();
+}
+
+function renderStep() {
+  const fb = document.getElementById("feedback");
+  const nextBtn = document.getElementById("nextBtn");
+  const win = document.getElementById("gameWindow");
+  
+  fb.style.display = "none";
+  nextBtn.style.display = "none";
+  win.classList.remove("sudden-death-ui");
+
+  // Check for random Sudden Death (15% chance, but not on first or last step)
+  if (!inSuddenDeath && currentStepIndex > 1 && currentStepIndex < 11 && Math.random() < 0.15) {
+    triggerSuddenDeath();
+    return;
+  }
+
+  const step = activeJourney[currentStepIndex];
+  document.getElementById("progress").textContent = currentStepIndex + 1;
+  document.getElementById("score").textContent = score;
+  document.getElementById("money").textContent = money;
+  
+  document.getElementById("description").innerHTML = `<strong>LOCATION: ${step.stop}</strong><br><br>${step.desc}`;
+  
+  const container = document.getElementById("choicesCont");
+  container.innerHTML = "";
+
+  // Shuffle the choices so they aren't always in the same spot
+  const shuffledChoices = shuffle([...step.choices]);
+
+  shuffledChoices.forEach((choice, idx) => {
+    const btn = document.createElement("button");
+    btn.className = "choice-btn";
+    const costText = choice.cost > 0 ? `($${choice.cost})` : "(Free)";
+    btn.innerHTML = `<span class="choice-num">${idx + 1}</span> <span>${choice.t} ${costText}</span>`;
+    btn.onclick = () => handleChoice(choice);
+    container.appendChild(btn);
+  });
+}
+
+function handleChoice(choice) {
+  const fb = document.getElementById("feedback");
+  const btns = document.querySelectorAll(".choice-btn");
+  btns.forEach(b => b.disabled = true);
+
+  money -= choice.cost;
+  score += choice.pts;
+
+  document.getElementById("score").textContent = score;
+  document.getElementById("money").textContent = money;
+
+  fb.innerHTML = `<strong>Result:</strong> ${choice.fb}`;
+  fb.className = "feedback fb-good";
+  fb.style.display = "block";
+
+  if (money < 0) {
+    fb.innerHTML = "<strong>BROKE IN THE DESERT:</strong> You ran out of money! You had to sell your camera and your spare tire just to buy gas. Your trip ends here in disgrace. <br><br><em>Game Over.</em>";
+    fb.className = "feedback fb-bad";
+    showRestart();
+    return;
+  }
+
+  document.getElementById("nextBtn").style.display = "block";
+}
+
+function triggerSuddenDeath() {
+  inSuddenDeath = true;
+  const sd = suddenDeaths[Math.floor(Math.random() * suddenDeaths.length)];
+  const win = document.getElementById("gameWindow");
+  win.classList.add("sudden-death-ui");
+
+  document.getElementById("description").innerHTML = `<strong>${sd.q}</strong>`;
+  
+  const container = document.getElementById("choicesCont");
+  container.innerHTML = "";
+
+  const shuffledChoices = shuffle([...sd.choices]);
+
+  shuffledChoices.forEach((choice, idx) => {
+    const btn = document.createElement("button");
+    btn.className = "choice-btn";
+    btn.innerHTML = `<span class="choice-num">${idx + 1}</span> <span>${choice.t}</span>`;
+    btn.onclick = () => {
+      const fb = document.getElementById("feedback");
+      fb.style.display = "block";
+      document.querySelectorAll(".choice-btn").forEach(b => b.disabled = true);
+      
+      if (choice.fail) {
+        fb.innerHTML = choice.fb;
+        fb.className = "feedback fb-bad";
+        showRestart();
+      } else {
+        fb.innerHTML = `<strong>PHEW!</strong> ${choice.fb}`;
+        fb.className = "feedback fb-good";
+        inSuddenDeath = false;
+        document.getElementById("nextBtn").style.display = "block";
+      }
+    };
+    container.appendChild(btn);
+  });
+}
+
+function nextStep() {
+  if (currentStepIndex < activeJourney.length - 1) {
+    currentStepIndex++;
+    renderStep();
+  } else {
+    renderFinalScreen();
+  }
+}
+
+function showRestart() {
+  const btn = document.createElement("button");
+  btn.className = "btn-next";
+  btn.style.backgroundColor = "var(--danger)";
+  btn.textContent = "Try the Trip Again";
+  btn.onclick = () => location.reload();
+  document.getElementById("gameWindow").appendChild(btn);
+}
+
+function renderFinalScreen() {
+  let title, message, color;
+  
+  if (score >= 130) {
+    title = "🥇 Route 66 Legend";
+    message = "Outstanding! You didn't just drive the road; you lived it. You balanced your budget perfectly and saw the very best icons of Americana. You'll be telling stories about this trip for 50 years!";
+    color = "var(--success)";
+  } else if (score >= 90) {
+    title = "🥈 Road Trip Professional";
+    message = "Great job! You made it to the Pacific Ocean with money in your pocket and a camera full of memories. You missed a few secrets, but you conquered the Mother Road!";
+    color = "var(--sign-blue)";
+  } else {
+    title = "🥉 Casual Tourist";
+    message = "You made it! It was a bumpy ride and you might have missed some of the best history, but the sunset in Santa Monica looks just as good. Next time, try to talk to more locals!";
+    color = "#7f8c8d";
+  }
+
+  document.getElementById("gameWindow").innerHTML = `
+    <h2 style="color:${color}; font-size: 2rem;">${title}</h2>
+    <p style="font-size: 1.2rem;">${message}</p>
+    <hr style="margin: 30px 0; opacity: 0.2;">
+    <div style="display: flex; justify-content: space-around; font-size: 1.3rem; margin-bottom: 30px;">
+      <div>Final Score: <b>${score}</b></div>
+      <div>Cash Remaining: <b>$${money}</b></div>
+    </div>
+    
+    <div class="vocab-section">
+      <h3>Road Trip Vocabulary:</h3>
+      <div class="vocab-grid">
+        <div class="vocab-item"><b>Iconic:</b> Famous and representing a culture.</div>
+        <div class="vocab-item"><b>Kitsch:</b> Art or objects that are funny/cheap in a cool way.</div>
+        <div class="vocab-item"><b>Nostalgia:</b> A happy feeling when remembering the past.</div>
+        <div class="vocab-item"><b>Petrified:</b> Wood that has turned into stone over millions of years.</div>
+        <div class="vocab-item"><b>Radiator:</b> The part of the car that keeps the engine cool.</div>
+        <div class="vocab-item"><b>Neon:</b> Brightly colored glowing glass lights.</div>
+      </div>
+    </div>
+
+    <button class="btn-next" onclick="location.reload()">Drive Again (New Route)</button>
+  `;
+}
+</script>
+
+</body>
+</html>

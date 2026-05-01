@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A Busy Day — English for Accountants</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F8F7F4;--surface:#FFFFFF;--surface2:#F1EFE8;
+  --border:rgba(0,0,0,0.11);--border2:rgba(0,0,0,0.2);
+  --text:#1A1A18;--text2:#6B6B67;--text3:#9A9A96;
+  --green-bg:#EAF3DE;--green-bd:#97C459;--green-tx:#27500A;
+  --amber-bg:#FAEEDA;--amber-bd:#EF9F27;--amber-tx:#633806;
+  --red-bg:#FCEBEB;--red-bd:#F09595;--red-tx:#791F1F;
+  --fatal-bd:#E24B4A;--fatal-tx:#501313;
+  --blue-bg:#E6F1FB;--blue-bd:#85B7EB;--blue-tx:#0C447C;
+  --r:10px;--rs:6px
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:2rem 1rem 4rem}
+.page-header{width:100%;max-width:680px;margin-bottom:1.75rem;display:flex;align-items:center;justify-content:space-between}
+.page-title{font-size:13px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--text3)}
+.level-tag{font-size:11px;font-family:'DM Mono',monospace;background:var(--blue-bg);color:var(--blue-tx);border:.5px solid var(--blue-bd);border-radius:20px;padding:3px 10px}
+.card{background:var(--surface);border:.5px solid var(--border);border-radius:var(--r);padding:1.75rem;width:100%;max-width:680px;box-shadow:0 1px 5px rgba(0,0,0,0.05)}
+.card-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:.5px solid var(--border);gap:1rem}
+.char-name{font-size:15px;font-weight:500;margin-bottom:2px}
+.char-role{font-size:12px;color:var(--text2)}
+.header-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.step-track{display:flex;gap:4px;align-items:center}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border);transition:background .3s}
+.dot.done{background:#639922}.dot.active{background:#378ADD}.dot.emg{background:#E24B4A}
+.score-pill{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;background:var(--green-bg);color:var(--green-tx);border:.5px solid var(--green-bd);border-radius:20px;padding:4px 12px;min-width:58px;text-align:center}
+.time-label{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);font-weight:500;margin-bottom:.5rem}
+.emg-alert{background:var(--red-bg);border:.5px solid var(--red-bd);border-radius:var(--rs);padding:10px 14px;font-size:13px;color:var(--red-tx);margin-bottom:1rem;display:flex;align-items:center;gap:8px}
+.vocab-row{margin-bottom:1rem;font-size:12px;color:var(--text2);display:flex;flex-wrap:wrap;align-items:center;gap:4px}
+.vpill{display:inline-block;font-size:11px;font-family:'DM Mono',monospace;background:var(--blue-bg);color:var(--blue-tx);border-radius:var(--rs);padding:2px 8px}
+.scenario{font-size:15px;line-height:1.75;color:var(--text);margin-bottom:1.5rem}
+.options{display:flex;flex-direction:column;gap:10px;margin-bottom:1.25rem}
+.opt-btn{text-align:left;padding:14px 16px;border:.5px solid var(--border);border-radius:var(--rs);background:var(--surface);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);line-height:1.55;transition:background .15s,border-color .15s;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;width:100%}
+.opt-btn:hover:not(:disabled){background:var(--surface2);border-color:var(--border2)}
+.opt-btn:disabled{cursor:default}
+.opt-btn.sg{background:var(--green-bg);border-color:var(--green-bd);color:var(--green-tx)}
+.opt-btn.so{background:var(--amber-bg);border-color:var(--amber-bd);color:var(--amber-tx)}
+.opt-btn.sp{background:var(--red-bg);border-color:var(--red-bd);color:var(--red-tx)}
+.opt-btn.ss{background:var(--amber-bg);border-color:var(--amber-bd);color:var(--amber-tx)}
+.opt-btn.sf{background:var(--red-bg);border-color:var(--fatal-bd);color:var(--fatal-tx)}
+.ptag{flex-shrink:0;font-size:11px;font-weight:500;font-family:'DM Mono',monospace;padding:2px 8px;border-radius:20px;white-space:nowrap;margin-top:2px;visibility:hidden}
+.ptag.show{visibility:visible}
+.pt3{background:var(--green-bg);color:var(--green-tx)}
+.pt2{background:var(--amber-bg);color:var(--amber-tx)}
+.pt1,.pt0{background:var(--red-bg);color:var(--red-tx)}
+.fbox{padding:14px 16px;border-radius:var(--rs);font-size:14px;line-height:1.65;margin-bottom:1.25rem;display:none}
+.fbox.show{display:block}
+.fb-g{background:var(--green-bg);border:.5px solid var(--green-bd);color:var(--green-tx)}
+.fb-o{background:var(--amber-bg);border:.5px solid var(--amber-bd);color:var(--amber-tx)}
+.fb-p{background:var(--red-bg);border:.5px solid var(--red-bd);color:var(--red-tx)}
+.fb-f{background:var(--red-bg);border:1px solid var(--fatal-bd);color:var(--fatal-tx)}
+.nxt{padding:10px 22px;background:var(--surface);border:.5px solid var(--border2);border-radius:var(--rs);font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);cursor:pointer;transition:background .15s;display:none}
+.nxt:hover{background:var(--surface2)}
+.nxt.show{display:inline-block}
+/* final */
+.fin{text-align:center}
+.fin-lbl{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:1rem}
+.fin-num{font-family:'DM Mono',monospace;font-size:60px;font-weight:500;line-height:1;margin-bottom:4px}
+.fin-max{font-size:14px;color:var(--text2);margin-bottom:1.25rem}
+.bar-bg{background:var(--surface2);border-radius:20px;height:10px;overflow:hidden;margin-bottom:1.5rem}
+.bar-fill{height:10px;border-radius:20px;background:#639922;width:0%;transition:width .9s cubic-bezier(.34,1.4,.64,1)}
+.fin-grade{font-size:17px;font-weight:500;margin-bottom:.75rem}
+.fin-text{font-size:15px;line-height:1.75;text-align:left}
+.vfooter{margin-top:1.5rem;padding-top:1rem;border-top:.5px solid var(--border);font-size:12px;color:var(--text2);display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.replay{margin-top:1.5rem;padding:10px 24px;background:var(--surface);border:.5px solid var(--border2);border-radius:var(--rs);font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);cursor:pointer;transition:background .15s}
+.replay:hover{background:var(--surface2)}
+@media(max-width:480px){.card{padding:1.25rem}.fin-num{font-size:44px}}
+</style>
+</head>
+<body>
+<div class="page-header">
+  <div class="page-title">English in the Workplace</div>
+  <div class="level-tag">A2 / B1</div>
+</div>
+<div class="card" id="gc">
+  <div class="card-header">
+    <div><div class="char-name">Alex Chen</div><div class="char-role">Accountant — Precision Parts Ltd.</div></div>
+    <div class="header-right">
+      <div class="step-track" id="dots"></div>
+      <div class="score-pill" id="score">0 pts</div>
+    </div>
+  </div>
+  <div class="time-label" id="lbl"></div>
+  <div class="scenario" id="scene"></div>
+  <div class="options" id="opts"></div>
+  <div class="fbox" id="fb"></div>
+  <button class="nxt" id="nxt">Next →</button>
+</div>
+
+<script>
+/* ── STATE ── */
+const S = { score:0, answered:false, path:[] };
+let curId = null, curShuffled = [];
+
+/* ── TREE ── */
+const N = {
+d1:{
+  stage:1, label:"08:45 — Morning emails",
+  scene:`You arrive at the office. There are 14 new emails. One is from <strong>Steelworks UK</strong>, a key supplier, saying their invoice is <strong>overdue</strong> by 30 days. They will stop deliveries next week if you do not pay. A second email is from the production manager asking for an urgent <strong>cost estimate</strong> for a new client. Your boss wants to see you at 09:30.`,
+  vocab:["overdue","invoice","supplier","cost estimate","accounts payable"],
+  opts:[
+    {t:"Reply to Steelworks UK immediately. Confirm you will investigate the invoice today and give a payment update by midday.", pts:3, fb:"Excellent choice. Responding quickly to an overdue supplier invoice protects the supply chain. Giving a clear deadline — <em>by midday</em> — is professional and shows you are in control of <em>accounts payable</em>."},
+    {t:"Start the cost estimate for the production manager first. The supplier email can wait until after your 09:30 meeting.", pts:1, fb:"The cost estimate is important, but a 30-day overdue invoice from a key supplier is more urgent. Delaying your response risks a delivery stoppage and a difficult conversation with your boss."},
+    {t:"Forward the supplier email to your boss with a note: 'Please advise — overdue invoice from Steelworks UK.'", pts:2, fb:"Informing your boss is sensible, but forwarding without any action is not enough. As the accountant, your boss expects you to investigate <em>accounts payable</em> issues and come with solutions, not just problems."}
+  ],
+  next:{3:"d2a",2:"d2b",1:"d2c"}
+},
+d2a:{
+  stage:2, label:"09:05 — Checking the invoice",
+  scene:`You open the <strong>accounting software</strong>. The Steelworks UK invoice is for £9,200. It was not paid because the <strong>purchase order</strong> number is missing from the file. Without it, the financial director cannot <strong>authorise</strong> payment. You need to resolve this before your 09:30 meeting.`,
+  vocab:["purchase order","authorise","accounting software","payment terms"],
+  opts:[
+    {t:"Call the production manager right now. Ask for the purchase order number, then update the invoice file ready for the financial director to approve.", pts:3, fb:"The right approach. You identify the exact problem, get the missing information, and prepare everything for authorisation — all before your meeting. This is efficient <em>accounts payable</em> management."},
+    {t:"Email the production manager asking for the purchase order number. Then wait for their reply before doing anything else.", pts:2, fb:"Good instinct — you identify the correct problem. However, email is slower than a phone call for an urgent issue. You risk missing your 09:30 meeting without a solution ready."}
+  ],
+  next:{3:"d3aa",2:"d3ab"}
+},
+d2b:{
+  stage:2, label:"09:10 — A late start on the problem",
+  scene:`After forwarding the email, your boss replies immediately: <em>"Alex — this is your responsibility. Please handle it and update me before the meeting."</em> You open the <strong>accounting software</strong>. The invoice is for £9,200 and was not paid because the <strong>purchase order</strong> number is missing.`,
+  vocab:["purchase order","responsibility","accounting software","authorise"],
+  opts:[
+    {t:"Phone the production manager immediately to get the purchase order number. Update the file and send it to the financial director for approval before 09:30.", pts:3, fb:"A strong recovery. You act quickly, find the root cause, and prepare the file for authorisation. Your boss will see that you took ownership of the problem."},
+    {t:"Reply to your boss explaining the purchase order is missing and you are waiting for the production manager to respond.", pts:1, fb:"Explaining the problem is correct, but <em>waiting</em> passively is not. Your boss asked you to handle it — which means solving it, not describing it."}
+  ],
+  next:{3:"d3ba",1:"d3bb"}
+},
+d2c:{
+  stage:2, label:"09:10 — The supplier calls",
+  scene:`While working on the cost estimate, your phone rings. It is the <strong>accounts manager</strong> at Steelworks UK. He says: <em>"We haven't heard from you. If we don't receive payment confirmation today, we are putting your account on hold."</em> You realise you should have replied earlier.`,
+  vocab:["accounts manager","payment confirmation","on hold","supply chain"],
+  opts:[
+    {t:"Apologise professionally. Tell him you are investigating the invoice now and will call back with a payment update within one hour.", pts:2, fb:"A professional response. You acknowledge the urgency without making promises you cannot keep. Using the phrase <em>payment update within one hour</em> is good business language. However, you have lost valuable time this morning."},
+    {t:"Tell him you will call back later today, then quickly email your boss to ask what to do.", pts:1, fb:"This is too passive. The supplier is calling because they have not had a response. Asking your boss what to do — rather than investigating yourself — suggests you are not managing <em>accounts payable</em> independently."}
+  ],
+  next:{2:"d3ca",1:"d3cb"}
+},
+d3aa:{
+  stage:3, label:"09:30 — The budget meeting",
+  scene:`You arrive at the meeting prepared. Your boss asks you to present the <strong>quarterly budget report</strong>. You see that <strong>actual costs</strong> are 14% over <strong>forecast</strong>. The main reason is an emergency repair to the CNC lathe — £7,400. There is also a smaller overspend on raw materials.`,
+  vocab:["quarterly budget","actual costs","forecast","variance","overspend"],
+  opts:[
+    {t:"Present the full report. Explain both variances clearly: the lathe repair as a one-off emergency cost, and the materials overspend as a trend that needs monitoring. Recommend a contingency budget line for next quarter.", pts:3, fb:"Outstanding. You present all the facts, explain the difference between a one-off cost and a trend, and propose a forward-looking solution. This is exactly what good management accounting looks like."},
+    {t:"Present the report and focus on the lathe repair as the main cause. Mention the materials overspend briefly at the end.", pts:2, fb:"Mostly good — you are honest and accurate. However, a growing materials overspend deserves more attention. Your boss needs to understand all cost <em>variances</em>, not just the biggest one."},
+    {t:"Present only the lathe repair as the cause of the overspend. The materials variance is small and you do not want to overcomplicate the meeting.", pts:1, fb:"Being selective with financial information is risky. A good accountant presents complete data. Omitting the materials variance — even if small — could look like you are hiding problems if it grows later."}
+  ],
+  next:{3:"d4aa",2:"d4ab",1:"d4ac"}
+},
+d3ab:{
+  stage:3, label:"09:30 — Arriving without an answer",
+  scene:`You arrive at the meeting without the purchase order problem resolved — the production manager has not yet replied to your email. Your boss asks for an update on the Steelworks UK invoice before the <strong>quarterly budget</strong> presentation. You need to explain the situation.`,
+  vocab:["quarterly budget","purchase order","update","accounts payable"],
+  opts:[
+    {t:"Explain honestly: you found the purchase order is missing and have contacted the production manager. Offer to phone them immediately after the meeting to resolve it.", pts:2, fb:"A professional response. You explain the root cause, take ownership, and give a clear next step. Your boss will appreciate the honesty, even if the problem is not yet resolved."},
+    {t:"Say the invoice is 'being processed' and change the subject to the budget report quickly.", pts:1, fb:"This is misleading. If your boss later discovers the invoice is still unresolved, your credibility will suffer. Always be transparent about the status of outstanding <em>accounts payable</em> items."},
+    {t:"Tell your boss the production manager has not responded and it is their fault the invoice was not paid.", pts:0, fb:"Blaming a colleague in a meeting is unprofessional and damaging to your working relationships. As the accountant, the invoice payment process is your responsibility to manage and follow up."}
+  ],
+  next:{2:"d4aa",1:"d4ab",0:"d4ac"}
+},
+d3ba:{
+  stage:3, label:"09:30 — The budget meeting — recovered",
+  scene:`You arrive at the meeting having resolved the purchase order issue. Your boss notes your quick work. Now they ask you to present the <strong>quarterly budget report</strong>. Actual costs are 14% over forecast, mainly due to the CNC lathe repair (£7,400). Your boss asks: <em>"Is this a one-off or is spending generally too high?"</em>`,
+  vocab:["one-off cost","quarterly budget","forecast","variance","trend"],
+  opts:[
+    {t:"Explain clearly: the lathe repair is a one-off emergency cost and the rest of the budget is within forecast. Suggest adding a small machinery maintenance reserve for next quarter.", pts:3, fb:"Precise and professional. You distinguish between an exceptional item and a trend — a key skill in management accounting. The suggestion of a <em>maintenance reserve</em> shows forward planning."},
+    {t:"Say costs are over budget mainly because of the repair, and you will look into whether spending in other areas is also too high.", pts:2, fb:"A careful answer — you don't overcommit. However, you should already know whether other areas are overspent. An accountant is expected to have analysed the numbers before the meeting."},
+    {t:"Confirm it is a one-off cost. You haven't checked the other budget lines yet but you are sure everything is fine.", pts:1, fb:"Making assumptions without checking the data is a risk. What if another budget line is also overspent? Always know your numbers before a meeting with your manager."}
+  ],
+  next:{3:"d4aa",2:"d4ab",1:"d4ac"}
+},
+d3bb:{
+  stage:3, label:"09:35 — A difficult meeting",
+  scene:`Your boss is unhappy that the invoice is still unresolved. The meeting moves on to the <strong>quarterly budget report</strong>. Costs are 14% over forecast. Your boss asks: <em>"Alex, why weren't these variances flagged earlier in the month?"</em>`,
+  vocab:["variance","flagged","quarterly budget","management accounts","forecast"],
+  opts:[
+    {t:"Acknowledge the oversight honestly. Explain that you will set up a mid-month review process so that variances above 5% are flagged to management automatically.", pts:3, fb:"An honest and constructive answer. Acknowledging the problem and proposing a concrete solution — a <em>mid-month review</em> — shows maturity and good professional judgement. This is the kind of language that builds trust with a manager."},
+    {t:"Explain that the lathe repair happened late in the month and there was no opportunity to flag it earlier.", pts:2, fb:"Partly true, but a mid-month review of budget vs actuals is standard practice. Your answer is reasonable but slightly defensive. Taking some ownership of the process would be better."},
+    {t:"Suggest that the production manager should have told you about the repair cost sooner.", pts:1, fb:"Blame is not a useful response in this situation. Your boss is asking about the <em>management accounts</em> process, which is your responsibility. Focus on the system, not the individual."}
+  ],
+  next:{3:"d4aa",2:"d4ab",1:"d4ac"}
+},
+d3ca:{
+  stage:3, label:"09:40 — The invoice — under pressure",
+  scene:`After the call, you check the accounting software. The invoice was not paid because the <strong>purchase order</strong> number is missing. The financial director needs this to <strong>authorise</strong> payment. Your boss is already waiting for you. You have about five minutes before you need to be in the meeting.`,
+  vocab:["purchase order","authorise","financial director","approval process"],
+  opts:[
+    {t:"Phone the production manager immediately. Get the purchase order number, update the file, and send it to the financial director with a note explaining the urgency.", pts:3, fb:"Excellent under pressure. You solve the root cause quickly, follow the correct <em>approval process</em>, and communicate urgency clearly. Even arriving slightly late to the meeting is better than leaving the supplier unresolved."},
+    {t:"Send a quick email to the financial director explaining the situation and asking them to approve payment without the purchase order, just this once.", pts:1, fb:"Asking a senior colleague to bypass the <em>approval process</em> creates an audit risk. Even under pressure, financial controls must be followed. A missing purchase order is a solvable problem — find the number first."},
+    {t:"Go to the meeting first and deal with the invoice immediately afterwards. The supplier can wait one more hour.", pts:2, fb:"Attending the meeting is understandable, but make sure you go straight to the invoice the moment it ends. The supplier has already threatened to put the account on hold. One more hour could make the situation much worse."}
+  ],
+  next:{3:"d4aa",2:"d4ab",1:"d4ac"}
+},
+d3cb:{
+  stage:3, label:"09:45 — A late arrival",
+  scene:`You arrive at the meeting 15 minutes late. Your boss is presenting the <strong>quarterly budget report</strong> themselves. Costs are 14% over forecast. After the meeting your boss says: <em>"Alex, I need you to take more ownership. What happened this morning?"</em>`,
+  vocab:["ownership","quarterly budget","variance","accounts payable","improvement plan"],
+  opts:[
+    {t:"Be direct and honest. Explain that you did not prioritise the supplier email correctly and that you have now resolved the invoice. Describe what you will do differently in future.", pts:2, fb:"Taking ownership honestly is the right approach. Your boss wants to see that you understand the mistake and have a plan. Using professional phrases like <em>I will prioritise differently</em> and <em>I will set a process for overdue invoices</em> is exactly right."},
+    {t:"Apologise for being late and explain that the supplier situation was complicated and took longer than expected.", pts:1, fb:"The apology is necessary, but vague explanations don't reassure a manager. Be specific: what was the problem, what did you do about it, and what will you do next time? Vagueness sounds like an excuse."},
+    {t:"Explain that you were dealing with a supplier emergency and that it was unavoidable.", pts:1, fb:"Framing it as unavoidable is not accurate — the problem started because the email was not addressed promptly. Your boss will respect honesty and a clear improvement plan much more than a justification."}
+  ],
+  next:{2:"d4ab",1:"d4ac"}
+},
+d4aa:{
+  stage:4, label:"11:00 — A colleague's request",
+  scene:`After the meeting, your colleague from sales, <strong>David</strong>, approaches you. He wants you to raise an <strong>invoice</strong> for a client for a machine component order that has not yet been <strong>delivered</strong>. He says the client has verbally agreed and his quarterly <strong>sales target</strong> deadline is today.`,
+  vocab:["invoice","delivered","sales target","revenue recognition","accounting standards"],
+  opts:[
+    {t:"Explain politely but clearly that you cannot raise an invoice for goods not yet delivered. This is against accounting standards. Offer to raise it as soon as delivery is confirmed.", pts:3, fb:"Correct and professional. Raising a sales invoice before delivery is <em>premature revenue recognition</em> — it is against accounting standards and can mislead stakeholders about company performance. You say no clearly while offering a practical alternative."},
+    {t:"Agree to raise a pro-forma invoice instead, clearly marked 'not a tax invoice', to help David show progress to his manager.", pts:2, fb:"A pro-forma is a reasonable compromise — it is a document used to confirm an order, not record a sale. Make sure it is clearly labelled and that a proper invoice is raised only on delivery. This is acceptable if your company has this process."}
+  ],
+  next:{3:"d5aa",2:"d5ab"}
+},
+d4ab:{
+  stage:4, label:"11:00 — A colleague's request",
+  scene:`David from sales asks you to raise an invoice for an undelivered component order. The client has verbally agreed and David's <strong>sales target</strong> deadline is today. This time, David says your manager already verbally approved it.`,
+  vocab:["invoice","sales target","verbal approval","accounting standards","authorisation"],
+  opts:[
+    {t:"Tell David that verbal approval is not enough — you need written authorisation from your manager before you can raise any invoice, especially for undelivered goods.", pts:3, fb:"Excellent. Written authorisation protects you, David, and the company. <em>Verbal approval</em> is not sufficient for financial transactions. Asking for written confirmation is not bureaucratic — it is essential financial governance."},
+    {t:"Raise the invoice since your manager approved it, but add a note in the file saying it is pending delivery confirmation.", pts:1, fb:"Even with managerial approval, raising a sales invoice for undelivered goods is against accounting standards. A note in the file does not make it compliant. Always confirm the approval is in writing and seek clarification if you are unsure about the process."}
+  ],
+  next:{3:"d5aa",1:"d5ab"}
+},
+d4ac:{
+  stage:4, label:"11:00 — A colleague's request",
+  scene:`David from sales asks you to raise an invoice for an undelivered order. After this morning's difficulties, you want to handle this carefully. David says: <em>"It's just one invoice. Nobody will notice and it helps the whole team."</em>`,
+  vocab:["invoice","delivered","financial controls","audit","compliance"],
+  opts:[
+    {t:"Refuse clearly. Explain that raising invoices for undelivered goods is fraudulent, regardless of the team benefit. Offer to help as soon as delivery takes place.", pts:3, fb:"The right decision. The word <em>fraudulent</em> is the correct term here — this is a serious compliance issue. Standing firm, even under social pressure, demonstrates strong professional ethics. Your explanation gives David the reason without being personal."},
+    {t:"Tell David you are uncomfortable but agree to raise a draft invoice, not yet sent to the client, so he can show something to his manager.", pts:1, fb:"A draft internal document is less risky than a sent invoice, but you are still creating a misleading financial record. David's manager may not realise it is a draft. Never create financial documents intended to give a false impression of completed business."}
+  ],
+  next:{3:"d5aa",1:"d5ab"}
+},
+d5aa:{
+  stage:5, label:"13:00 — New starter payroll",
+  scene:`HR sends details for <strong>Marco</strong>, who joins Monday as a <strong>self-employed contractor</strong>. You need to add him to the <strong>payroll system</strong>. Reading his contract carefully, you notice he will work fixed hours (9–5), use company equipment, and work exclusively for Precision Parts Ltd. This looks like <em>employment</em>, not self-employment.`,
+  vocab:["self-employed","contractor","payroll","HMRC","IR35","employment status"],
+  opts:[
+    {t:"Raise the concern immediately with HR and your manager. Explain that Marco's working conditions may not meet the legal definition of self-employment under HMRC rules (IR35) and suggest a review before processing any payroll.", pts:3, fb:"This is exactly the right action. <em>IR35</em> is the UK tax legislation covering disguised employment. Incorrect worker classification can result in significant HMRC penalties for the company. You are doing your job properly by flagging this before it becomes a problem."},
+    {t:"Add Marco to the payroll as a contractor as his contract states, but write a note in the file for your own records.", pts:1, fb:"The contract describes him as a contractor, but the <em>actual working conditions</em> are what HMRC looks at — not the label on the contract. A note in your file does not protect the company. This must be escalated before the first payroll run."},
+    {t:"Email HR to ask if they are aware of IR35 and whether Marco's contract has been reviewed by a legal adviser.", pts:2, fb:"Good — you identify the issue and escalate to HR. However, you should also copy your manager and be more direct: state clearly that you believe the contract should be reviewed before you process payroll. A question to HR alone may not get a fast enough response."}
+  ],
+  next:{3:"emergency",2:"emergency",1:"emergency"}
+},
+d5ab:{
+  stage:5, label:"13:00 — New starter payroll",
+  scene:`HR sends details for <strong>Marco</strong>, joining Monday as a <strong>self-employed contractor</strong>. You are busy after this morning and almost add him to payroll without reading the contract fully. Then you notice: fixed hours, company equipment, single employer. You stop.`,
+  vocab:["self-employed","contractor","payroll","HMRC","employment status","compliance"],
+  opts:[
+    {t:"Stop immediately. Email HR, copy your manager, and explain that you cannot process this payroll until the employment status has been reviewed. Attach the specific contract clauses that concern you.", pts:3, fb:"Professional and thorough. By stopping payroll, copying your manager, and citing specific clauses, you protect the company from an HMRC compliance risk. Including the specific clauses makes your concern concrete and easy to act on."},
+    {t:"Process the payroll for now but send a separate email to HR flagging the potential issue, asking them to review it next week.", pts:1, fb:"Once payroll is processed, the company has created a tax record that is difficult to correct. <em>Next week</em> is too late — this must be resolved before Monday. Payroll compliance issues compound with every pay run."},
+    {t:"Call HR directly, explain your concern about IR35, and ask them to confirm in writing that the classification has been checked before you proceed.", pts:2, fb:"Good instinct and good professional language — asking for written confirmation is the right approach. However, also copy your manager, since this is a potential legal and financial risk that senior management should know about."}
+  ],
+  next:{3:"emergency",2:"emergency",1:"emergency"}
+},
+emergency:{
+  stage:"E", label:"15:30 — EMERGENCY",
+  isEmergency:true,
+  scene:`Your mobile rings. It is your company's bank. A <strong>suspicious transaction</strong> has been detected — £22,000 has been transferred from the business account to an unknown overseas account. The bank has <strong>temporarily frozen</strong> the account as a precaution. Your boss is presenting to a major client and cannot be interrupted. You must decide immediately.`,
+  vocab:["suspicious transaction","frozen account","fraud","internal controls","escalate"],
+  opts:[
+    {t:"Text your boss a brief urgent message: 'Bank fraud alert — account frozen — calling bank now.' Then call the bank back immediately, start the fraud investigation process, and document every step.", isSafe:true, fb:"This is the correct response. You inform your boss without interrupting the meeting, you cooperate with the bank's fraud team, and you document everything. In a potential fraud situation, fast action and clear records are essential."},
+    {t:"Wait for your boss to finish the client presentation before doing anything. You don't want to cause a panic.", isGameOver:true, fb:"<strong>GAME OVER.</strong> The delay allows the fraudulent transfer to be completed and the funds are moved beyond recovery. The company cannot meet payroll this month. A police investigation begins and the business faces insolvency proceedings. Bank fraud is always an immediate emergency — never delay."},
+    {t:"Try to reverse the transaction by logging into the business banking portal yourself, without telling anyone.", isSafe:true, fb:"Your instinct to act quickly is right, but logging into the business account alone during a suspected fraud — and attempting a reversal without authorisation — could compromise the bank's investigation and expose you to personal liability. Always work through the bank's fraud team and inform your manager first."}
+  ],
+  next:"d6"
+},
+d6:{
+  stage:6, label:"16:00 — End of day: three invoices",
+  scene:`You return to your desk. There are three <strong>supplier invoices</strong> awaiting <strong>payment authorisation</strong>. Cash flow is tight today — you can only pay two. Invoice A: Metalco Ltd, existing supplier, £4,200, overdue 45 days. Invoice B: FastFix Services, new supplier, no signed contract yet, £1,800, due today. Invoice C: TechTools Ltd, existing supplier, £6,500, overdue 10 days.`,
+  vocab:["payment authorisation","cash flow","overdue","supplier","contract","priority"],
+  opts:[
+    {t:"Pay Invoice A (most overdue, contracted supplier) and Invoice C (large balance, contracted supplier). Email FastFix to explain that payment requires a signed contract and you will process it as soon as this is in place.", pts:3, fb:"Excellent prioritisation. You pay the most overdue contracted supplier first, then the largest balance. You handle the uncontracted supplier correctly — professionally explaining the process rather than simply ignoring them. This is sound <em>cash flow management</em>."},
+    {t:"Pay Invoice A (most overdue) and Invoice B (due today, makes a good first impression). Leave Invoice C for tomorrow.", pts:2, fb:"Paying the most overdue invoice is correct. However, paying an uncontracted supplier before a contracted one with a larger overdue balance is risky — there is no agreement in place with FastFix yet. Invoice C should take priority over Invoice B."},
+    {t:"Pay Invoice B and Invoice C — they are the most recent and you want to keep relationships positive with newer and larger suppliers.", pts:1, fb:"Supplier relationships matter, but <em>Invoice A</em> is 45 days overdue — that supplier has been waiting the longest and the risk of a stoppage is highest. Prioritising newer or larger invoices over significantly overdue ones is poor <em>accounts payable</em> management."}
+  ],
+  next:{3:"d7a",2:"d7b",1:"d7c"}
+},
+d7a:{
+  stage:7, label:"17:00 — End of day review",
+  scene:`Before you leave, you do a quick review. You notice a <strong>discrepancy</strong>: the <strong>bank statement</strong> shows £320 more than the <strong>accounts receivable ledger</strong>. It could be a timing difference or a data entry error. Your colleague says: <em>"Leave it — it'll sort itself out."</em>`,
+  vocab:["discrepancy","bank statement","accounts receivable","ledger","reconciliation"],
+  opts:[
+    {t:"Investigate the £320 now. If you cannot resolve it in 15 minutes, document exactly what you found and leave a clear note for tomorrow with all the relevant transaction details.", pts:2, fb:"The right decision. A discrepancy on the ledger should never be ignored. Fifteen minutes of investigation now — or a detailed note for tomorrow — is far better than a growing unresolved difference. This is professional <em>reconciliation</em> practice."},
+    {t:"Log a note saying there is a £320 discrepancy and leave it for tomorrow without investigating.", pts:1, fb:"At least you logged it — that is better than nothing. But a quick 10-minute investigation before you leave could save significant time tomorrow. Timing differences do sometimes self-correct, but data entry errors do not."}
+  ],
+  next:{2:"final",1:"final"}
+},
+d7b:{
+  stage:7, label:"17:00 — End of day review",
+  scene:`Before leaving, you review the day's transactions. You notice a <strong>£320 discrepancy</strong> between the <strong>bank statement</strong> and the <strong>accounts receivable ledger</strong>. You also realise you still need to send the <strong>cost estimate</strong> the production manager requested this morning. Both tasks are waiting.`,
+  vocab:["discrepancy","bank statement","accounts receivable","cost estimate","reconciliation"],
+  opts:[
+    {t:"Send the cost estimate first — it is already one day late. Then spend 10 minutes investigating the £320 discrepancy, documenting whatever you find.", pts:2, fb:"Good prioritisation. The cost estimate was requested urgently and is already late — sending it immediately is right. Then documenting the discrepancy, even if unresolved, means it won't be forgotten. Two tasks handled professionally."},
+    {t:"Leave both tasks for tomorrow — it has been a long and difficult day.", pts:1, fb:"An understandable feeling, but leaving an outstanding cost estimate and an unresolved ledger discrepancy overnight creates unnecessary pressure tomorrow. Even five minutes on each would be a much better end to the day."}
+  ],
+  next:{2:"final",1:"final"}
+},
+d7c:{
+  stage:7, label:"17:00 — End of day review",
+  scene:`After a difficult day, you are about to leave when you notice a <strong>£320 discrepancy</strong> in the <strong>accounts receivable ledger</strong>. There is also an outstanding <strong>supplier confirmation email</strong> to send to FastFix Services about the contract requirement. Your manager walks past and asks: <em>"Everything under control, Alex?"</em>`,
+  vocab:["discrepancy","accounts receivable","supplier confirmation","ledger","reconciliation"],
+  opts:[
+    {t:"Tell your manager honestly: 'I have a small ledger discrepancy to investigate and a supplier email to send — I'll complete both before I leave.' Then do both.", pts:2, fb:"Exactly right. You are transparent with your manager, you commit to finishing the tasks, and you follow through. This is the kind of accountability that builds professional trust over time."},
+    {t:"Say 'Yes, all fine' and leave. You will deal with the discrepancy and the email tomorrow — they are small issues.", pts:1, fb:"Saying everything is fine when there are open items is misleading. If your manager later checks and finds the discrepancy or the supplier email outstanding, your credibility suffers. Small issues handled promptly are always better than small issues that become bigger ones."}
+  ],
+  next:{2:"final",1:"final"}
+}
+};
+
+/* ── FISHER-YATES SHUFFLE ── */
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+/* ── PROGRESS DOTS ── */
+function buildDots(id){
+  const stageMap={d1:0,d2a:1,d2b:1,d2c:1,d3aa:2,d3ab:2,d3ba:2,d3bb:2,d3ca:2,d3cb:2,d4aa:3,d4ab:3,d4ac:3,d5aa:4,d5ab:4,emergency:5,d6:6,d7a:7,d7b:7,d7c:7};
+  const cur = stageMap[id]??0;
+  const el = document.getElementById('dots');
+  el.innerHTML='';
+  for(let i=0;i<8;i++){
+    const d=document.createElement('div');
+    d.className='dot'+(i<cur?' done':i===cur?(id==='emergency'?' emg':' active'):'');
+    el.appendChild(d);
+  }
+}
+
+/* ── SHOW NODE ── */
+function show(id){
+  curId=id;
+  const node=N[id];
+  S.answered=false;
+  document.getElementById('fb').className='fbox';
+  const nb=document.getElementById('nxt');
+  nb.className='nxt'; nb.onclick=null;
+  buildDots(id);
+  document.getElementById('lbl').textContent=node.label;
+
+  let html='';
+  if(node.isEmergency) html+=`<div class="emg-alert"><span>&#9888;</span> Emergency — no points this round, but your decision matters!</div>`;
+  if(node.vocab) html+=`<div class="vocab-row">Key words: ${node.vocab.map(v=>`<span class="vpill">${v}</span>`).join('')}</div>`;
+  document.getElementById('scene').innerHTML=html+node.scene;
+
+  // Create an array of indices [0, 1, 2...] based on number of options
+  const indices = node.opts.map((_, i) => i);
+  // Shuffle the indices using Fisher-Yates
+  const shuffledIndices = shuffle(indices);
+  // Map back to the objects to create the shuffled current options list
+  curShuffled = shuffledIndices.map(i => node.opts[i]);
+
+  const el=document.getElementById('opts');
+  el.innerHTML='';
+  curShuffled.forEach((opt,i)=>{
+    const btn=document.createElement('button');
+    btn.className='opt-btn';
+    let tag='';
+    if(!node.isEmergency){
+      const p=opt.pts;
+      tag=`<span class="ptag ${p===3?'pt3':p===2?'pt2':p===1?'pt1':'pt0'}">${p>0?'+'+p:'+0'}</span>`;
+    }
+    btn.innerHTML=`<span>${opt.t}</span>${tag}`;
+    btn.addEventListener('click',()=>pick(i));
+    el.appendChild(btn);
+  });
+}
+
+/* ── PICK ── */
+function pick(di){
+  if(S.answered) return;
+  S.answered=true;
+  const node=N[curId];
+  const opt=curShuffled[di];
+  const btns=document.querySelectorAll('.opt-btn');
+  btns.forEach(b=>b.disabled=true);
+  btns.forEach(b=>{const t=b.querySelector('.ptag');if(t)t.classList.add('show');});
+
+  const fb=document.getElementById('fb');
+  const nb=document.getElementById('nxt');
+
+  if(node.isEmergency){
+    if(opt.isGameOver){
+      btns[di].classList.add('sf');
+      fb.className='fbox fb-f show'; fb.innerHTML=opt.fb;
+      nb.textContent='See Final Score'; nb.className='nxt show';
+      nb.onclick=()=>showFinal(true);
+    } else {
+      btns[di].classList.add('ss');
+      fb.className='fbox fb-o show'; fb.innerHTML=opt.fb;
+      nb.textContent='Continue →'; nb.className='nxt show';
+      nb.onclick=()=>show('d6');
+    }
+    return;
+  }
+
+  const pts=opt.pts;
+  S.score+=pts; S.path.push({id:curId,pts});
+  document.getElementById('score').textContent=S.score+' pts';
+
+  if(pts===3) btns[di].classList.add('sg');
+  else if(pts===2) btns[di].classList.add('so');
+  else btns[di].classList.add('sp');
+
+  fb.className='fbox '+(pts===3?'fb-g':pts===2?'fb-o':'fb-p')+' show';
+  fb.innerHTML=opt.fb;
+
+  let nx=node.next;
+  if(typeof nx==='object') nx=nx[pts]??nx[Object.keys(nx)[0]];
+
+  nb.className='nxt show';
+  if(nx==='final'||nx===null){
+    nb.textContent='See Final Score'; nb.onclick=()=>showFinal(false);
+  } else if(nx==='emergency'){
+    nb.textContent='Continue →'; nb.onclick=()=>show('emergency');
+  } else {
+    nb.textContent='Next →'; nb.onclick=()=>show(nx);
+  }
+}
+
+/* ── FINAL ── */
+function showFinal(gameOver){
+  const s=S.score, max=20, pct=Math.round(s/max*100);
+  let grade,body,tips;
+
+  if(gameOver){
+    grade="The day ended early.";
+    body=`Your busy day came to a sudden stop. Bank fraud is one of the most serious situations a company can face, and it requires immediate action — every minute of delay can mean more money lost and greater damage to the business. The good news is that you showed real professional skill before the emergency arrived.`;
+    tips=`The key lesson: when a bank calls about a suspicious transaction, always act immediately. Text your manager, call the bank back, and document everything. Never wait, and never try to handle it alone.`;
+  } else if(s>=18){
+    grade="Outstanding performance.";
+    body=`You managed an exceptionally demanding day with confidence and precision. Your decisions showed strong skills across <em>accounts payable</em>, <em>management reporting</em>, <em>payroll compliance</em>, and <em>financial ethics</em>. You understood when to escalate, when to push back, and when to act independently. This is the level of judgement that makes a company's finances safe.`;
+    tips=`To develop further: explore topics such as <em>audit procedures</em>, <em>HMRC compliance reporting</em>, and <em>management accounts analysis</em>. Your vocabulary and decision-making are already at a strong B1 level.`;
+  } else if(s>=15){
+    grade="Strong performance.";
+    body=`You handled most of today's challenges well and showed good professional instincts. You understood the importance of supplier communication, financial reporting accuracy, and compliance. There were one or two moments where a quicker or more decisive action would have been better, but overall your judgement was sound.`;
+    tips=`Focus on: being more decisive when escalating compliance risks (especially payroll and <em>IR35</em>), and practising language for explaining financial variances clearly in meetings. Try playing again — different paths will test different skills.`;
+  } else if(s>=11){
+    grade="A reasonable day.";
+    body=`You got through the day professionally and avoided any serious mistakes. However, there were several situations where stronger, faster action was needed — particularly around the overdue supplier invoice and the payroll classification issue. In accounting, delay and indecision can turn small problems into large ones.`;
+    tips=`Work on: the language of urgency and escalation (<em>"I need to flag this immediately"</em>, <em>"This requires authorisation before we proceed"</em>), and the principles behind <em>accounts payable priority</em> and <em>worker classification</em>. Play again to try different paths.`;
+  } else {
+    grade="A challenging day — but a real learning experience.";
+    body=`Today showed some important areas to develop. The decisions in this exercise reflect real risks that accountants face: supplier relationships, reporting accuracy, compliance, and fraud response. Every wrong decision here is a lesson that costs nothing in real life — which is exactly the point of this exercise.`;
+    tips=`Key areas to study: <em>accounts payable procedures</em>, <em>financial reporting standards</em>, <em>IR35 and employment classification</em>, and how to respond to <em>financial fraud</em>. Play again from the beginning — each path through the exercise is different.`;
+  }
+
+  document.getElementById('gc').innerHTML=`
+    <div class="fin">
+      <div class="fin-lbl">End of the day — Alex Chen, Precision Parts Ltd.</div>
+      <div style="font-size:14px;color:var(--text2);margin-bottom:4px">Your final score</div>
+      <div class="fin-num">${s}</div>
+      <div class="fin-max">out of 20 points</div>
+      <div class="bar-bg"><div class="bar-fill" id="bfill"></div></div>
+      <div class="fin-grade">${grade}</div>
+      <div class="fin-text">${body}</div>
+      <div class="fin-text" style="margin-top:1rem;padding:12px 14px;background:var(--blue-bg);border:.5px solid var(--blue-bd);border-radius:var(--rs);color:var(--blue-tx);font-size:14px">${tips}</div>
+      <div class="vfooter">Vocabulary practised:
+        ${["invoice","overdue","purchase order","variance","accounts payable","cash flow","payroll","IR35","self-employed","reconciliation","authorise","revenue recognition","accounts receivable","fraud","cost estimate"].map(v=>`<span class="vpill">${v}</span>`).join('')}
+      </div>
+      <button class="replay" onclick="restartGame()">Play again — try a different path</button>
+    </div>`;
+  setTimeout(()=>{const b=document.getElementById('bfill');if(b)b.style.width=pct+'%';},120);
+}
+
+function restartGame(){
+  S.score=0; S.answered=false; S.path=[];
+  document.getElementById('score').textContent='0 pts';
+  show('d1');
+}
+
+show('d1');
+</script>
+</body>
+</html>

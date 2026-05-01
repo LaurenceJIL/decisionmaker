@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Zen Start-Up: A Year of Mindfulness</title>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --sage-green: #8da399;
+        --soft-gold: #d4af37;
+        --serene-white: #f9fbf9;
+        --earth-brown: #5d534a;
+        --positive-green: #4caf50;
+        --gentle-warn: #ff9800;
+        --text: #2c3e50;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        font-family: 'Lora', serif;
+        background-color: var(--serene-white);
+        color: var(--text);
+        line-height: 1.6;
+    }
+
+    header {
+        background: var(--sage-green);
+        color: white;
+        padding: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 4px solid var(--soft-gold);
+    }
+
+    .score-box { background: white; color: var(--sage-green); padding: 0.6rem 1.2rem; border-radius: 20px; font-weight: 700; font-family: 'Quicksand', sans-serif; }
+
+    .container { max-width: 750px; margin: 2rem auto; padding: 0 1.5rem; }
+
+    .card { background: white; padding: 2.5rem; border-radius: 15px; box-shadow: 0 8px 30px rgba(0,0,0,0.05); display: none; }
+    .card.active { display: block; border-top: 5px solid var(--sage-green); }
+
+    h1, h2 { font-family: 'Quicksand', sans-serif; color: var(--earth-brown); margin-bottom: 1rem; }
+    p { margin-bottom: 1.2rem; font-size: 1.1rem; }
+
+    .choices-grid { display: grid; gap: 15px; margin: 2rem 0; }
+    .choice-btn {
+        background: #fff;
+        border: 2px solid #eee;
+        padding: 1.2rem;
+        border-radius: 12px;
+        cursor: pointer;
+        font-size: 1.05rem;
+        text-align: left;
+        transition: 0.3s;
+        font-family: 'Lora', serif;
+    }
+    .choice-btn:hover:not(:disabled) { border-color: var(--sage-green); background: #f0f4f2; transform: scale(1.02); }
+    .choice-btn:disabled { opacity: 0.6; cursor: default; }
+
+    .feedback { margin-top: 1.5rem; padding: 1.5rem; border-radius: 10px; display: none; border-left: 6px solid; font-style: italic; }
+    .fb-excellent { background: #e8f5e9; border-color: var(--positive-green); }
+    .fb-poor { background: #fff3e0; border-color: var(--gentle-warn); }
+
+    .next-btn {
+        margin-top: 2rem;
+        background: var(--sage-green);
+        color: white;
+        border: none;
+        padding: 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        width: 100%;
+        font-weight: 700;
+        font-family: 'Quicksand', sans-serif;
+        text-transform: uppercase;
+        display: none;
+    }
+
+    .emergency-tag { 
+        background: var(--gentle-warn); 
+        color: white; 
+        padding: 4px 12px; 
+        border-radius: 20px; 
+        font-size: 0.85rem; 
+        font-weight: bold; 
+        margin-bottom: 1rem; 
+        display: inline-block;
+        font-family: 'Quicksand', sans-serif;
+    }
+</style>
+</head>
+<body>
+
+<header>
+    <h1>The Zen Start-Up</h1>
+    <div class="score-box">Harmony Points: <span id="score">0</span></div>
+</header>
+
+<div class="container">
+    <!-- Initial Screen modeled after Renovation time A2.html[cite: 2] -->
+    <div class="card active" id="screen-start">
+        <h1>Welcome, Studio Owner!</h1>
+        <p>You have just signed a lease for a beautiful space in the city. Your goal is to navigate the first year of business, maintaining a balance between <strong>community atmosphere</strong> and <strong>financial sustainability</strong>.</p>
+        <p>Do you have the mindfulness and business savvy to reach your first anniversary?</p>
+        <button class="next-btn" style="display:block;" onclick="startGame()">Open for Business</button>
+    </div>
+
+    <div class="card" id="screen-game">
+        <div id="status-area"></div>
+        <h2 id="step-title"></h2>
+        <p id="step-desc"></p>
+        <div class="choices-grid" id="choices-container"></div>
+        
+        <div class="feedback" id="feedback-box">
+            <strong id="points-text"></strong>
+            <p id="feedback-content"></p>
+        </div>
+        
+        <button class="next-btn" id="btn-next">Breathe and Continue</button>
+    </div>
+
+    <div class="card" id="screen-final">
+        <h1>One Year Later...</h1>
+        <div id="final-stats" style="font-size: 1.5rem; text-align: center; margin-bottom: 1rem;"></div>
+        <div id="band-result" style="padding: 1.5rem; border-radius: 10px; text-align: center;"></div>
+        <button class="next-btn" style="display:block;" onclick="location.reload()">Start a New Journey</button>
+    </div>
+</div>
+
+<script>
+/* Game logic maintaining gameplay scenarios from Renovation time A2.html[cite: 2] */
+const steps = {
+    d1: {
+        title: "1. Brand Identity",
+        desc: "You need to define the 'vibe' of your studio. What is your primary focus for the branding?",
+        choices: [
+            { text: "A holistic approach focusing on community and mental well-being.", pts: 3, type: "excellent", fb: "Incredible choice! Authenticity resonates with modern clients seeking a genuine connection." },
+            { text: "Ultra-modern luxury with expensive high-tech equipment.", pts: 2, type: "good", fb: "Very stylish! It attracts a niche market, though your initial overhead costs are quite steep." },
+            { text: "Strictly competitive fitness with no focus on relaxation.", pts: 1, type: "good", fb: "A vibrant niche, but you might find it difficult to retain clients looking for traditional yoga benefits." },
+            { text: "Having no brand at all and hoping people just walk in.", pts: -1, type: "poor", fb: "What a creative, minimalist thought! However, in a crowded market, potential students need to know what you stand for to find you. Try a more defined strategy!" }
+        ],
+        next: "d2"
+    },
+    d2: {
+        title: "2. The Interior Design",
+        desc: "The studio space is empty. How do you decide to decorate?",
+        choices: [
+            { text: "Use sustainable, eco-friendly materials and plenty of natural light.", pts: 3, type: "excellent", fb: "Perfect! Sustainability is a core value for many practitioners and creates a soothing atmosphere." },
+            { text: "Fill the room with hundreds of plants and expensive fountains.", pts: 1, type: "good", fb: "It looks like a rainforest! Beautiful, but the maintenance might become a distraction from teaching." },
+            { text: "Minimalist decor with just a few high-quality mats.", pts: 2, type: "good", fb: "Clean and focused. It allows the students to concentrate on their practice without distractions." },
+            { text: "Decorate with loud colors and neon party lights.", pts: -1, type: "poor", fb: "That’s certainly energetic! While fun for a party, most students come to yoga to escape sensory overload. Perhaps something more calming would work better?" }
+        ],
+        next: "d3"
+    },
+    d3: {
+        title: "3. Recruitment",
+        desc: "You need instructors. What is your priority when hiring your first team?",
+        choices: [
+            { text: "Hiring diverse teachers with various specialties and strong interpersonal skills.", pts: 3, type: "excellent", fb: "Wise move! A diverse team ensures that every student feels welcome and represented." },
+            { text: "Hiring only 'famous' Instagram influencers.", pts: 1, type: "good", fb: "You get a lot of initial attention, but some students find the classes lack depth and personal connection." },
+            { text: "Hiring your friends who have only just started their yoga journey.", pts: 2, type: "good", fb: "Your team is very loyal, but you may need to invest heavily in further training for them." }
+        ],
+        next: "e1"
+    },
+    e1: {
+        title: "EMERGENCY: The Heat Wave!",
+        isEmergency: true,
+        desc: "A massive heat wave has hit the city and your air conditioning has malfunctioned right before a packed class!",
+        choices: [
+            { text: "Turn the session into an impromptu 'Hot Yoga' class and provide extra cold water.", pts: 0, type: "excellent", next: "d5", fb: "Brilliant adaptation! You turned a crisis into a unique, positive experience for your students." },
+            { text: "Cancel the class and offer everyone a free credit for next time.", pts: 0, type: "excellent", next: "d5", fb: "Professional and fair. Your students appreciate the honesty and the generous compensation." },
+            { text: "Force everyone to practice in the heat without saying anything.", pts: 0, type: "poor", gameOver: true, fb: "GAME OVER. The room became dangerously hot and students felt unsupported. Safety and communication are vital in a studio!" }
+        ]
+    },
+    d5: {
+        title: "5. Membership Pricing",
+        desc: "Six months in, you need to stabilize your income. What is your pricing strategy?",
+        choices: [
+            { text: "Offer a 'Founding Member' monthly subscription with exclusive perks.", pts: 3, type: "excellent", fb: "Excellent! This creates long-term loyalty and a predictable monthly revenue stream." },
+            { text: "Charge a very high price for every single individual class.", pts: 1, type: "good", fb: "You make money quickly, but students are hesitant to come back regularly due to the cost." },
+            { text: "Offer everything for free and hope for donations.", pts: -1, type: "poor", fb: "What a generous spirit! While wonderful for the community, a business needs consistent income to pay the rent. Try a more sustainable model!" }
+        ],
+        next: "d6"
+    },
+    d6: {
+        title: "6. Social Media Presence",
+        desc: "How do you choose to engage with your online community?",
+        choices: [
+            { text: "Sharing educational content, student testimonials, and 'behind-the-scenes' clips.", pts: 3, type: "excellent", fb: "Spot on! This builds trust and positions you as an expert in the wellness space." },
+            { text: "Posting only photos of yourself doing advanced poses.", pts: 1, type: "good", fb: "Impressive, but beginners might feel intimidated and think your studio isn't for them." },
+            { text: "Paying for thousands of fake followers to look successful.", pts: -1, type: "poor", fb: "It’s tempting to want to look big! However, fake followers don't attend classes. Real community engagement is much more rewarding. Try again!" }
+        ],
+        next: "d7"
+    },
+    d7: {
+        title: "7. Handling Feedback",
+        desc: "A student leaves a review saying the music was too loud during meditation. What is your response?",
+        choices: [
+            { text: "Thank them for the feedback and adjust the volume in the next session.", pts: 3, type: "excellent", fb: "Perfect! Listening to your community is the fastest way to improve your business." },
+            { text: "Ignore the review completely.", pts: 1, type: "good", fb: "It’s easy to do, but you might miss an opportunity to show that you care about student comfort." },
+            { text: "Reply with an angry message defending your music choice.", pts: -1, type: "poor", fb: "We understand you’re passionate about your music! However, a calm, professional response keeps the 'Zen' vibe alive. Let's try a softer approach." }
+        ],
+        next: "e2"
+    },
+    e2: {
+        title: "EMERGENCY: The No-Show!",
+        isEmergency: true,
+        desc: "Your 6:00 AM instructor has caught the flu and cannot make it. The students are already waiting outside!",
+        choices: [
+            { text: "Wake up early, go to the studio, and teach the class yourself.", pts: 0, type: "excellent", next: "d8", fb: "True leadership! Your students are impressed by your dedication and the class is a hit." },
+            { text: "Quickly find a substitute teacher from your trusted network.", pts: 0, type: "excellent", next: "d8", fb: "Great networking! Having a backup list of instructors saved the morning." },
+            { text: "Stay in bed and leave the doors locked.", pts: 0, type: "poor", gameOver: true, fb: "GAME OVER. Trust is the foundation of a yoga studio. Leaving students in the cold unfortunately ended the business." }
+        ]
+    },
+    d8: {
+        title: "8. Expanding the Schedule",
+        desc: "You have some empty time slots in the afternoon. How do you fill them?",
+        choices: [
+            { text: "Introduce specialized workshops like 'Yoga for Seniors' or 'Prenatal Yoga'.", pts: 3, type: "excellent", fb: "Wonderful! Specialization helps you reach parts of the community that were previously underserved." },
+            { text: "Add more of the exact same classes you already have.", pts: 2, type: "good", fb: "Safe and reliable, though it might not attract any new types of students." },
+            { text: "Turn the studio into a loud juice bar during the day.", pts: 1, type: "good", fb: "The juice is delicious, but the noise makes it hard for the afternoon meditation classes to focus!" }
+        ],
+        next: "d9"
+    },
+    d9: {
+        title: "9. Sustainability Check",
+        desc: "You want to reduce the studio's environmental footprint. What do you do?",
+        choices: [
+            { text: "Install a filtered water station to eliminate single-use plastic bottles.", pts: 3, type: "excellent", fb: "Fantastic! This aligns perfectly with the 'Yogic' principle of Ahimsa (non-harming)." },
+            { text: "Ask students to bring their own mats only.", pts: 2, type: "good", fb: "Good for hygiene, but it might be an inconvenience for commuters or new students." },
+            { text: "Stop using lights and practice only in the dark.", pts: -1, type: "poor", fb: "A very moody idea! While it saves energy, it might be a safety hazard for balance poses. Let's find a brighter solution!" }
+        ],
+        next: "d10"
+    },
+    d10: {
+        title: "10. The Anniversary",
+        desc: "You’ve made it to Year 1! How do you celebrate with your community?",
+        choices: [
+            { text: "Host a free community 'Open Day' with snacks and a group meditation.", pts: 3, type: "excellent", fb: "The perfect finale! You’ve built a loyal tribe that will support you for years to come." },
+            { text: "Give yourself a huge bonus and go on a solo holiday.", pts: 1, type: "good", fb: "You definitely deserve a rest, but don't forget to thank the people who helped you get here!" },
+            { text: "Increase all membership prices by 50% as a 'celebration'.", pts: -1, type: "poor", fb: "What a bold move! Usually, celebrations involve gifts for the students, not higher bills. Try a more festive way to mark the occasion!" }
+        ],
+        next: "final"
+    }
+};
+
+const bands = [
+    { min: -10, max: 15, title: "The Aspiring Yogi 🧘", color: "#e67e22", text: "You survived the year! It was a steep learning curve, but your passion is clear. With a bit more focus on business strategy, your studio will flourish." },
+    { min: 16, max: 26, title: "The Mindful Manager 🌿", color: "#2980b9", text: "Well done! You've successfully balanced student needs with business growth. Your studio is a pillar of the local community." },
+    { min: 27, max: 30, title: "The Zen Master 🏆", color: "#27ae60", text: "Incredible! Your studio is a resounding success. You have mastered the art of mindful business, and your community is thriving." }
+];
+
+let score = 0;
+let currentStepId = "d1";
+
+/* Shuffle algorithm maintained from Renovation time A2.html[cite: 2] */
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+function startGame() {
+    score = 0; currentStepId = "d1";
+    updateScore(); showScreen("game"); renderStep();
+}
+
+function updateScore() { document.getElementById('score').innerText = score; }
+
+function showScreen(id) {
+    document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+    document.getElementById('screen-' + id).classList.add('active');
+}
+
+function renderStep() {
+    const data = steps[currentStepId];
+    const container = document.getElementById('choices-container');
+    document.getElementById('step-title').innerText = data.title;
+    document.getElementById('step-desc').innerText = data.desc;
+    document.getElementById('status-area').innerHTML = data.isEmergency ? `<div class="emergency-tag">UNEXPECTED CHALLENGE</div>` : "";
+    container.innerHTML = "";
+    document.getElementById('feedback-box').style.display = "none";
+    document.getElementById('btn-next').style.display = "none";
+
+    const shuffledChoices = shuffleArray([...data.choices]);
+
+    shuffledChoices.forEach(choice => {
+        const btn = document.createElement('button');
+        btn.className = "choice-btn";
+        btn.innerText = choice.text;
+        btn.onclick = () => handleChoice(choice, btn);
+        container.appendChild(btn);
+    });
+}
+
+function handleChoice(choice, btn) {
+    const fbBox = document.getElementById('feedback-box');
+    const data = steps[currentStepId];
+
+    document.getElementById('points-text').innerText = choice.pts >= 0 ? `+${choice.pts} Harmony Points` : `${choice.pts} Point`;
+    if (data.isEmergency) document.getElementById('points-text').innerText = choice.type === "poor" ? "IMBALANCE" : "MINDFUL CHOICE";
+    
+    document.getElementById('feedback-content').innerText = choice.fb;
+    fbBox.className = "feedback fb-" + (choice.type === "excellent" ? "excellent" : "poor");
+    fbBox.style.display = "block";
+
+    if (choice.gameOver) {
+        setTimeout(() => { alert(choice.fb); location.reload(); }, 3000);
+        return;
+    }
+
+    if (choice.pts === -1) {
+        score += choice.pts; updateScore();
+        btn.disabled = true; return;
+    }
+
+    score += choice.pts; updateScore();
+    document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
+    const nextBtn = document.getElementById('btn-next');
+    nextBtn.style.display = "block";
+    nextBtn.onclick = () => {
+        currentStepId = choice.next || steps[currentStepId].next;
+        if (currentStepId === "final") showFinal(); else renderStep();
+    };
+}
+
+function showFinal() {
+    showScreen("final");
+    document.getElementById('final-stats').innerText = `Final Harmony Score: ${score} / 30`;
+    const band = bands.find(b => score >= b.min && score <= b.max) || bands[0];
+    const br = document.getElementById('band-result');
+    br.style.border = "2px solid " + band.color;
+    br.innerHTML = `<h2 style="color:${band.color}">${band.title}</h2><p>${band.text}</p>`;
+}
+</script>
+</body>
+</html>

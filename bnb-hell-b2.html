@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The BnB From Hell: Superhost Survival</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Roboto+Mono&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FDFCF0;--card:#FFFFFF;--ink:#2D2424;--ink-light:#635C5C;
+  --primary:#E07A5F;--secondary:#3D405B;--success:#81B29A;--danger:#E07A5F;
+  --r:12px;--sh:0 8px 30px rgba(0,0,0,0.08);
+}
+body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--ink);margin:0;padding:20px;display:flex;justify-content:center;}
+.app{width:100%;max-width:600px;margin-top:2rem;}
+.hidden{display:none !important;}
+.card{background:var(--card);border-radius:var(--r);padding:2.5rem;box-shadow:var(--sh);border:1px solid #F2E9E4;}
+h1{font-size:24px;text-align:center;margin-bottom:10px;color:var(--secondary);}
+.day-badge{display:block;text-align:center;font-weight:700;color:var(--primary);text-transform:uppercase;font-size:12px;letter-spacing:2px;margin-bottom:20px;}
+.stats{display:flex;justify-content:space-between;font-family:'Roboto Mono',monospace;font-size:12px;margin-bottom:15px;color:var(--ink-light);}
+.options{display:grid;gap:12px;margin-top:20px;}
+.btn{background:#fff;border:2px solid #F2E9E4;padding:15px;border-radius:10px;text-align:left;cursor:pointer;font-size:14px;transition:0.3s;font-family:inherit;}
+.btn:hover:not(:disabled){border-color:var(--primary);background:#FFF9F7;}
+.btn:disabled{opacity:0.6;cursor:default;text-decoration:line-through;}
+.fb{margin-top:20px;padding:15px;border-radius:8px;display:none;font-size:14px;line-height:1.5;}
+.fb-best{background:#F0F7F4;color:#2D4A3E;border-left:4px solid var(--success);}
+.fb-avg{background:#F8F9FA;color:#495057;border-left:4px solid #DEE2E6;}
+.fb-poor{background:#FFF9F2;color:#856404;border-left:4px solid #FFCC80;}
+.fb-worst{background:#FFF5F5;color:#C53030;border:2px dashed #FC8181;animation:tilt 0.3s infinite;}
+.fb-emergency{background:#FFE5E5;color:#C53030;border-left:4px solid #FC8181;}
+@keyframes tilt{0%{transform:rotate(0deg)}25%{transform:rotate(1deg)}75%{transform:rotate(-1deg)}100%{transform:rotate(0deg)}}
+.next-btn{margin-top:20px;width:100%;background:var(--secondary);color:white;border:none;padding:15px;border-radius:10px;font-weight:700;cursor:pointer;display:none;}
+.emergency-badge{background:#FFE5E5;color:#C53030;padding:8px 12px;border-radius:6px;font-weight:700;text-transform:uppercase;font-size:11px;letter-spacing:1px;margin-bottom:15px;display:inline-block;}
+</style>
+</head>
+<body>
+
+<div class="app" id="scr-intro">
+  <div class="card">
+    <h1>Superhost Dreams! 🏡</h1>
+    <p style="text-align:center; color:var(--ink-light);">Welcome to the world of short-term rentals! You're starting with a respectable 4.0-star rating. Can you reach 5.0, or will your guests drag you down to zero? Navigate 12 scenarios over one week, including 3 emergency situations. Your decisions matter!</p>
+    <button class="btn" style="width:100%; text-align:center; background:var(--primary); color:white; border:none;" onclick="initGame()">Start Hosting</button>
+  </div>
+</div>
+
+<div class="app hidden" id="scr-game">
+  <div class="stats">
+    <div id="stat-progress">Scenario 1</div>
+    <div id="stat-score">Rating: 4.0 ⭐</div>
+  </div>
+  <div class="card">
+    <span class="day-badge" id="ui-day">Day 1</span>
+    <span class="emergency-badge hidden" id="ui-emergency">⚠️ EMERGENCY</span>
+    <p id="ui-text" style="font-weight:700; font-size:16px;"></p>
+    <div class="options" id="ui-opts"></div>
+    <div id="ui-fb" class="fb"></div>
+    <button class="next-btn" id="ui-next" onclick="nextStep()">Continue...</button>
+  </div>
+</div>
+
+<div class="app hidden" id="scr-end">
+  <div class="card" style="text-align:center;">
+    <h1>Final Management Review</h1>
+    <div id="final-score" style="font-size:40px; font-weight:700; margin:20px 0;"></div>
+    <p id="final-msg" style="margin-bottom:30px; line-height:1.6;"></p>
+    <button class="btn" style="width:100%; text-align:center;" onclick="location.reload()">Reset Listing</button>
+  </div>
+</div>
+
+<script>
+// All 36 scenarios
+const ALL_SCENARIOS = [
+  {
+    t: "**Neighbor Conflict: The Persistent Party** - It's 2:00 AM, and Mrs. Crabtree, your notoriously sensitive neighbor, is banging on your door. She claims your guests' 'joyful laughter' is disturbing her afternoon nap, despite it being the middle of the night. She's threatening to call the HOA and the police, citing previous 'incidents' that never actually happened.",
+    choices: [
+      { text: "Apologize profusely to Mrs. Crabtree, promise to address the noise, and immediately send a firm but polite message to your guests reminding them of quiet hours.", type: "best", fb: "You diffused the immediate tension with Mrs. Crabtree and reinforced house rules with your guests. While she might still grumble, you've shown due diligence and protected your standing with the HOA. Your guests, though slightly annoyed, appreciate the clear communication." },
+      { text: "Politely inform Mrs. Crabtree that it's 2:00 AM, not her 'afternoon nap,' and that you'll handle any legitimate noise complaints directly. Then, send a general reminder about quiet hours to your guests.", type: "avg", fb: "You stood your ground, which might earn you some respect from Mrs. Crabtree in the long run, but she's likely to escalate her surveillance. The general reminder to guests is a good step, but lacks the urgency needed for a late-night disturbance." },
+      { text: "Ignore Mrs. Crabtree's banging, assuming she'll eventually give up. You'll deal with any official complaints if they arise.", type: "poor", fb: "Mrs. Crabtree didn't give up. She called the police, who arrived to find a lively, albeit not excessively loud, gathering. While no fines were issued, the police visit created an uncomfortable situation for your guests and a black mark on your property's record with local authorities." },
+      { text: "Confront Mrs. Crabtree, telling her to 'get a life' and that you're tired of her constant complaints. Then, send a sarcastic message to your guests about 'noisy neighbors'.", type: "worst", fb: "Your aggressive response ignited a full-blown neighborhood feud. Mrs. Crabtree, a well-connected HOA board member, initiated a formal complaint process that could lead to severe restrictions on your rental. Your guests, witnessing the drama, left a scathing review about the 'toxic environment'. Game Over. Try again." }
+    ]
+  },
+  {
+    t: "**The 'Influencer' Special: A Demanding Digital Nomad** - A guest, claiming to be a 'travel influencer' with a modest following, demands a full refund for their 3-night stay. In return, they promise a 'high-traffic' Instagram post and a tag, implying this exposure is worth more than your nightly rate. They've already checked in and are hinting at a negative review if you don't comply.",
+    choices: [
+      { text: "Politely decline the refund, explaining your pricing structure and value. Offer a small discount on a future stay if they genuinely enjoy their experience and choose to promote it organically.", type: "best", fb: "You maintained your professional boundaries and valued your property appropriately. The influencer, while not getting a free stay, might still post positively if their experience is good, or at least won't have grounds for a platform complaint. You've avoided setting a precedent for future demands." },
+      { text: "Inform them that you don't participate in 'exposure for stay' arrangements, but express hope they enjoy their time and encourage honest feedback. Document the conversation with the platform.", type: "avg", fb: "A clear and firm stance. While you've protected your revenue, the influencer might still leave a less-than-stellar review out of spite. Your documentation with the platform provides a safety net against potential blackmail." },
+      { text: "Agree to a partial refund (e.g., one night's stay) to mitigate the risk of a bad review, hoping for a positive mention in return.", type: "poor", fb: "You've appeased the influencer for now, but at a cost. This sets a dangerous precedent, and there's no guarantee of a genuinely positive review. They might still find minor faults to justify their 'discounted' stay, and you've lost revenue without a clear return on investment." },
+      { text: "Grant the full refund immediately, believing the 'exposure' will pay off in future bookings. Ask them to tag you prominently.", type: "worst", fb: "The influencer posted a single, blurry photo of your bathroom at 3 AM with a generic caption. You gained zero bookings, lost $600, and now other guests might try similar tactics. You've devalued your property and reputation. Game Over. Try again." }
+    ]
+  },
+  {
+    t: "**Maintenance Meltdown: The Venetian Hallway** - It's 11 PM, and a frantic guest calls, reporting the toilet is overflowing. They exclaim, 'The hallway is starting to look like Venice!' and are clearly distressed. The sound of running water is audible through the phone.",
+    choices: [
+      { text: "Immediately call an emergency plumber and guide the guest to the main water shut-off valve. Offer a partial refund for the inconvenience and assure them you're on the way.", type: "best", fb: "Your swift and decisive action minimized property damage and reassured the guest. While costly, you saved your flooring, prevented further issues, and demonstrated exceptional guest service, likely earning you a stellar review despite the mishap." },
+      { text: "Guide the guest through the water shut-off valve over the phone. Promise to send a plumber first thing in the morning and offer a small credit for their next stay.", type: "avg", fb: "You stopped the immediate crisis, but the guest spent their evening acting as your maintenance crew. While the credit is a nice gesture, the inconvenience might still weigh on their review. You risked more extensive water damage by not addressing it immediately." },
+      { text: "Tell them to put towels down to contain the water and that you'll deal with it on check-out day, as it's too late to call anyone.", type: "poor", fb: "The water seeped into the subfloor and behind the baseboards, leading to a significant mold problem that required extensive and expensive remediation. The guest, disgusted, checked out early and demanded a full refund, citing uninhabitable conditions." },
+      { text: "Ask the guest if they have a bucket and a 'can-do' attitude, suggesting they 'make the best of it' until morning. Refuse to come over or call a plumber at this hour.", type: "worst", fb: "The guest, furious and soaked, checked out immediately, called the health department, and initiated a lawsuit for property damage and negligence. Your listing was suspended, and you face substantial legal and repair costs. Game Over. Try again." }
+    ]
+  },
+  {
+    t: "**Unexpected Guests: The Covert Kegger** - Your exterior security camera alerts you to unusual activity. You check the feed to see at least a dozen people, along with a keg and a portable DJ system, entering your 2-person studio rental. The booking was for a quiet couple.",
+    choices: [
+      { text: "Immediately contact the guests via phone and message, informing them of the strict no-party policy and unauthorized guest count. Simultaneously, contact the platform to report a policy violation and request intervention.", type: "best", fb: "Your quick and documented action allowed the platform to intervene swiftly. The party was shut down before significant damage occurred, and the guests were removed. You protected your property and your platform standing, though you lost the revenue for that night." },
+      { text: "Go over to the property in person to confront the guests and demand that the extra people and party equipment leave immediately. Threaten to call the police if they don't comply.", type: "avg", fb: "You successfully broke up the party, but not without a tense confrontation. The guests left, but not before causing some minor damage and leaving a mess. You put yourself in a potentially unsafe situation and risked a retaliatory negative review." },
+      { text: "Send a message asking them to 'keep it down' so neighbors don't complain, hoping they'll self-regulate and avoid a bigger issue.", type: "poor", fb: "They ignored your message. The party escalated, leading to multiple noise complaints from neighbors and an eventual police visit at 2 AM. The unit was left trashed, requiring extensive cleaning and repairs, and you received a warning from the platform." },
+      { text: "Decide to 'be cool' and join the party, hoping to bond with the guests and prevent any issues from the inside. Maybe they'll leave a great review!", type: "worst", fb: "The party got out of control. The floor collapsed under the weight of the revelers, causing structural damage. The police arrested everyone, including you, for hosting an illegal gathering. You're now liable for all injuries, property damage, and face potential criminal charges. Game Over. Try again." }
+    ]
+  },
+  {
+    t: "**Missing Items: The Souvenir Collection** - After a guest checks out, you conduct your usual inspection. You notice several unique decorative items, including a hand-painted ceramic plate and a vintage travel clock, are missing. Additionally, a brand new set of premium towels is gone.",
+    choices: [
+      { text: "Politely message the guest, stating that some items appear to have been inadvertently packed and offering to provide a prepaid shipping label for their return. Mention the specific items missing.", type: "best", fb: "A diplomatic approach often yields the best results. The guest, perhaps genuinely forgetful or embarrassed, returned the items. You recovered your property without escalating to a dispute, preserving a potentially positive relationship and avoiding platform intervention." },
+      { text: "Immediately file a claim with the platform for the missing items, providing a detailed inventory and photographic evidence of the items before the stay.", type: "avg", fb: "The platform sided with you, and you were compensated for the missing items. However, the guest, feeling unjustly accused or simply annoyed, left a retaliatory 1-star review focusing on your 'accusatory tone' and 'lack of trust'." },
+      { text: "Leave a negative review for the guest, explicitly mentioning the missing items and accusing them of theft. Hope this deters future hosts.", type: "poor", fb: "The guest responded with a scathing public review, denying any wrongdoing and accusing you of being 'paranoid' and 'unprofessional'. The platform flagged your review for potential defamation, and the missing items were never recovered. Your reputation took a hit." },
+      { text: "Confront the guest aggressively via text and phone calls, demanding they return the items immediately and threatening legal action if they don't. Post about it on social media.", type: "worst", fb: "The guest blocked you, reported your harassment to the platform, and filed a police report against you. The platform issued a severe warning, temporarily suspended your listing, and you face potential legal repercussions for harassment. Game Over. Try again." }
+    ]
+  },
+  {
+    t: "**Early Check-in Request: The Red-Eye Arrival** - A guest booked for a week-long stay contacts you a day before arrival. Their red-eye flight lands at 6 AM, and they desperately need to check in by 8 AM, five hours before your standard check-in time, to rest before an important conference. Your cleaners are scheduled for a standard turnaround.",
+    choices: [
+      { text: "Offer an early check-in for a reasonable fee, explaining the need to adjust cleaner schedules and potentially pay overtime. If they decline, suggest a local luggage storage service.", type: "best", fb: "You provided a flexible solution that valued both your guest's needs and your operational costs. The guest appreciated the option and either paid the fee or found an alternative, leaving a positive impression of your responsiveness." },
+      { text: "Politely decline the early check-in, explaining that the unit won't be ready until the standard time due to cleaning. Suggest they book an extra night if they require guaranteed early access.", type: "avg", fb: "You maintained your boundaries and cleaning schedule. The guest understood, but was likely disappointed. While professional, you missed an opportunity to provide exceptional service and generate additional revenue." },
+      { text: "Agree to the early check-in without a fee, hoping for a glowing review. Instruct your cleaners to rush the job or start earlier without additional pay.", type: "poor", fb: "Your cleaners were either rushed, leading to a less-than-perfect cleaning job (which the guest noticed and mentioned in their review), or they were unhappy about the unpaid extra work, potentially impacting future service quality. You lost potential revenue and strained your relationship with your cleaning team." },
+      { text: "Tell them that early check-in is impossible and they'll just have to 'deal with it' until the official time, even if it means waiting at the airport.", type: "worst", fb: "The guest, exhausted and frustrated, left a scathing review about your inflexibility and lack of empathy. They also contacted the platform, complaining about your unhelpful attitude. Your rating plummeted, and you gained a reputation for being unaccommodating. Game Over. Try again." }
+    ]
+  },
+  {
+    t: "**Late Check-out Request: The Delayed Departure** - A guest, whose flight has been delayed by several hours, requests a late check-out at 6 PM, five hours after your official check-out time. Your next guests are arriving the same day, and your cleaners have a tight schedule.",
+    choices: [
+      { text: "Check your cleaning schedule. If possible, offer a late check-out for a reasonable fee to cover cleaner adjustments. If not, politely decline and suggest a local luggage storage service.", type: "best", fb: "You demonstrated flexibility and problem-solving while protecting your operational flow and revenue. The guest appreciated your effort, even if a late check-out wasn't possible, and your next guests weren't impacted. A win-win for guest satisfaction and business efficiency." },
+      { text: "Politely decline the late check-out, explaining the tight turnaround for the next guests and cleaning schedule. Suggest they utilize airport lockers or local storage options.", type: "avg", fb: "You maintained your schedule, but the guest might feel a lack of empathy. While understandable from a business perspective, it's a missed opportunity to go above and beyond, potentially leading to a neutral rather than glowing review." },
+      { text: "Agree to the late check-out for free, hoping for a great review. Ask your cleaners to wait or rush the job for the next guests.", type: "poor", fb: "Your cleaners were either significantly delayed, costing you extra in waiting time or overtime, or they rushed the cleaning, leading to complaints from the incoming guests. You lost revenue and created a logistical headache, all for an uncertain positive review." },
+      { text: "Tell them they need to leave immediately at the official check-out time, regardless of their flight delay, as it's 'not your problem'.", type: "worst", fb: "The guest was left stranded and furious, leaving a scathing review about your callousness and lack of support during a travel emergency. They also contacted the platform, leading to a formal complaint against you. Your rating plummeted, and your reputation suffered severe damage. Game Over. Try again." }
+    ]
+  },
+  {
+    t: "**Pest Problem: The Uninvited Guests** - A guest reports seeing multiple cockroaches in the kitchen and bathroom during their stay. They are visibly upset and threatening to cut their trip short if the issue isn't resolved immediately.",
+    choices: [
+      { text: "Apologize profusely, offer a full refund for the remaining nights, and immediately arrange for professional pest control. Offer to relocate them to a comparable hotel at your expense.", type: "best", fb: "Your decisive and generous action turned a crisis into a testament to your excellent service. The guest, though inconvenienced, appreciated your immediate response and understanding, potentially leaving a positive review despite the initial issue. You also protected your property from further infestation." },
+      { text: "Suggest they use the bug spray you keep under the sink and offer a significant discount on their current stay. Promise to call an exterminator after they check out.", type: "avg", fb: "You addressed the immediate concern with a temporary solution and a discount. The guest might tolerate it for the remainder of their stay, but their overall experience will be negatively impacted, likely resulting in a mediocre review. The underlying pest problem remains unresolved." },
+      { text: "Tell them that 'bugs happen' in this climate/area and it's a common occurrence. Advise them to keep food sealed and doors closed.", type: "poor", fb: "The guest felt dismissed and disgusted. They checked out early, demanded a full refund, and threatened to report your property to local health authorities. Your property now has a public health concern and a very unhappy former guest." },
+      { text: "Accuse the guest of bringing the cockroaches with them or exaggerating the problem. Refuse to do anything about it.", type: "worst", fb: "The guest, enraged, documented the infestation with photos and videos, posting them on social media and directly to the platform. This led to a viral shaming campaign, a health inspection that found violations, and the immediate suspension of your listing. Game Over. Try again." }
+    ]
+  },
+  {
+    t: "**Broken Appliance: The Soaked Laundry** - The washing machine breaks down mid-cycle, leaving a guest's clothes soaking wet and full of suds. They are on a long trip and desperately need clean clothes for the next leg of their journey.",
+    choices: [
+      { text: "Apologize sincerely, offer to take their laundry to a local laundromat immediately, and arrange for an emergency repair or replacement of the machine. Offer a small credit for the inconvenience.", type: "best", fb: "You transformed a frustrating situation into an opportunity to provide exceptional service. The guest was relieved and impressed by your proactive solution, likely leaving a glowing review. Your quick action also minimized the impact of the broken appliance." },
+      { text: "Offer a partial refund for the inconvenience and promise to have the machine repaired after their stay. Suggest a nearby laundromat for their immediate needs.", type: "avg", fb: "You offered a reasonable solution, but the guest still had to manage their own laundry crisis. While understanding, their overall experience was marred by the inconvenience, likely resulting in a neutral review. The broken appliance remains an issue for future guests." },
+      { text: "Tell them to hand wash their clothes or find a laundromat themselves, as you can't get a repair person out until after their stay.", type: "poor", fb: "The guest was frustrated and felt unsupported. They left a review complaining about the broken amenities and your unhelpful attitude, impacting your property's appeal to future travelers." },
+      { text: "Blame the guest for overloading the machine, refuse to help with their laundry, and tell them 'it's not a hotel'.", type: "worst", fb: "The guest, furious and with ruined clothes, reported you to the platform for unresponsiveness and demanded a full refund. They also left a scathing public review detailing your unhelpful and accusatory behavior. Your listing was flagged, and your reputation severely damaged. Game Over. Try again." }
+    ]
+  },
+  {
+    t: "**Noise Complaint from Guest: The Thin Walls** - Your current guest, a business traveler, complains about excessive noise from the neighbors late at night. They claim the thin walls make it impossible to sleep, impacting their ability to prepare for important meetings.",
+    choices: [
+      { text: "Contact the neighbors politely to address the noise issue, and offer your guest high-quality earplugs or a white noise machine. Document all steps taken with the guest and the platform.", type: "best", fb: "You showed empathy and took proactive steps to mitigate the disturbance. The guest appreciated your efforts to ensure their comfort and productivity, likely leading to a positive review. You also established a record of addressing neighbor issues responsibly." },
+      { text: "Suggest the guest close the windows and turn on the fan or AC for white noise. Mention that city living can be noisy and it's often beyond your control.", type: "avg", fb: "You offered a temporary solution, but it didn't fully address the guest's core complaint about the noise. While practical, it might come across as slightly dismissive, potentially leading to a neutral review. The underlying issue of noise remains." },
+      { text: "Tell the guest that noise is common in the area and they should expect it when booking in a residential neighborhood. Advise them to use their own headphones.", type: "poor", fb: "The guest felt completely dismissed and their sleep continued to be disturbed. They left a negative review highlighting the noise issues and your unhelpful response, impacting your property's attractiveness to other business travelers." },
+      { text: "Blame the guest for being 'too sensitive' and suggest they 'find a quieter hobby' than sleeping. Refuse to engage further.", type: "worst", fb: "The guest, utterly disrespected and sleep-deprived, demanded a partial refund and threatened to leave early. They also contacted the platform, reporting your rude and unaccommodating behavior. Your listing was flagged, and your reputation as a host was severely damaged. Game Over. Try again." }
+    ]
+  },
+  {
+    t: "**Guest Lockout: The 3 AM Panic** - A guest calls you at 3 AM in a panic, having accidentally locked themselves out of the unit after a late night out. They are cold, frustrated, and unable to get back in.",
+    choices: [
+      { text: "Calmly guide them to a hidden spare key or offer to call a 24/7 locksmith immediately, covering the cost if the lockout was due to a faulty lock. Assure them you're there to help.", type: "best", fb: "You were a true lifesaver in a stressful situation. The guest was incredibly grateful for your immediate and supportive assistance, likely leaving a glowing review about your responsiveness and care. You turned a negative into a strong positive." },
+      { text: "Suggest they try to find a spare key themselves (if one exists) or wait until morning for a locksmith, offering to reimburse them for the locksmith fee. Avoid going over yourself.", type: "avg", fb: "The guest eventually got back in, but it was a stressful and inconvenient experience for them, waiting in the cold. While you offered reimbursement, your absence might be noted in their review, leading to a neutral outcome." },
+      { text: "Tell them it's their responsibility to keep track of keys and you can't help at this hour. Advise them to find a hotel for the night.", type: "poor", fb: "The guest spent hours outside, freezing and frustrated, eventually finding an expensive last-minute hotel. They left a scathing review about your complete lack of support and empathy during an emergency, severely damaging your host reputation." },
+      { text: "Charge them an exorbitant 'emergency lockout' fee (e.g., $200) before providing any assistance or information about spare keys/locksmiths.", type: "worst", fb: "The guest refused to pay the predatory fee, contacted the platform, and reported you for extortionate practices. The platform issued a severe warning, potentially suspending your listing, and your reputation was ruined. Game Over. Try again." }
+    ]
+  },
+  {
+    t: "**Bad Review Threat: The Unjustified Demand** - A guest, unhappy about a minor, easily resolvable issue (e.g., a slightly slow internet connection), threatens to leave a 1-star review unless you give them a full refund for their entire 3-night stay.",
+    choices: [
+      { text: "Politely decline the blackmail, calmly address the minor issue (e.g., troubleshoot internet, offer alternative solution), and immediately report the review threat to the platform's support team with all communications documented.", type: "best", fb: "You stood your ground against an unfair demand and followed platform policy. The platform, with your documentation, likely removed the retaliatory review, protecting your rating and setting a precedent that you won't be blackmailed. You resolved the actual issue professionally." },
+      { text: "Offer a small partial refund (e.g., 10% of one night) to appease them and avoid the bad review, but document the interaction and the threat.", type: "avg", fb: "You avoided an immediate bad review, but at a cost. This sets a precedent that you might be swayed by threats, and you've lost some revenue. While you documented it, the platform might still see it as a concession to blackmail." },
+      { text: "Give them a full refund immediately to avoid the bad review, hoping they'll be satisfied and leave a neutral or positive comment.", type: "poor", fb: "You capitulated to blackmail, losing significant revenue. The guest, emboldened, might still leave a mediocre review, or worse, share their 'success' with others, attracting more demanding guests. You've taught guests that threats work." },
+      { text: "Respond angrily, telling the guest their demand is ridiculous and that you'll report them for extortion. Refuse to address the internet issue.", type: "worst", fb: "Your angry response escalated the situation dramatically. The guest, feeling attacked, left a devastating 1-star review detailing your rudeness and the unresolved internet issue. They also reported you to the platform for hostile communication. Your rating plummeted, and your listing was flagged for review. Game Over. Try again." }
+    ]
+  },
+  {
+    t: "**Pet Problem: The 'Emotional Support' Peacock** - A guest arrives with a large cage containing a peacock, claiming it's an 'emotional support animal' despite your strict no-pet policy. They insist it must stay in the unit.",
+    choices: [
+      { text: "Politely explain your no-pet policy and inquire about official documentation for the emotional support animal. If no valid documentation exists, offer to help them find a pet-friendly alternative accommodation.", type: "best", fb: "You handled a delicate situation with professionalism and adherence to policy. By asking for documentation, you protected yourself legally. If the peacock couldn't stay, you offered a helpful solution, maintaining a positive guest interaction despite the challenge." },
+      { text: "Allow the peacock to stay for this one time, but politely remind them of the no-pet policy for future bookings. Charge an additional cleaning fee.", type: "avg", fb: "You avoided immediate conflict, but set a precedent that your no-pet policy is flexible. The additional cleaning fee is justified, but you risked potential damage or lingering odors that could affect future guests. The guest might expect similar leniency next time." },
+      { text: "Refuse entry to the peacock and the guest, citing your strict no-pet policy, without offering any alternatives.", type: "poor", fb: "The guest was left stranded and furious, leaving a scathing review about your 'inhumane' treatment of their emotional support animal. They also contacted the platform, leading to a dispute that highlighted your lack of flexibility and potentially resulted in a forced refund." },
+      { text: "Demand they get rid of the 'bird' immediately or you'll call animal control. Threaten to cancel their booking on the spot.", type: "worst", fb: "Your aggressive stance led to a heated confrontation. The guest refused to leave, and you had to involve the platform and potentially law enforcement, creating a highly negative and public incident. Your listing was flagged, and your reputation as a host was severely damaged. Game Over. Try again." }
+    ]
+  },
+  {
+    t: "**Unexpected Damage: The Mystery Stain** - After a guest checks out, you discover a large, mysterious red stain on your brand new, light-colored rug. It wasn't there before, and you have no idea what it is or how to remove it.",
+    choices: [
+      { text: "Document the stain thoroughly with photos and a detailed description. Contact the guest politely, inquiring if they have any information about the stain and offering to resolve it amicably before involving the platform.", type: "best", fb: "Your calm and documented approach often leads to an honest explanation and a willingness from the guest to cover costs. You maintained a professional relationship and likely resolved the issue without formal dispute, saving time and stress." },
+      { text: "Immediately hire a professional cleaner to assess and attempt to remove the stain. If unsuccessful, then contact the guest and the platform with the cleaning bill.", type: "avg", fb: "You took immediate action to address the damage, which is good for your property. However, contacting the guest after the fact might make them feel ambushed, potentially leading to a dispute over the cleaning cost and a negative review." },
+      { text: "Assume the worst and immediately file a claim with the platform, demanding compensation for a new rug, without contacting the guest first.", type: "poor", fb: "The guest was blindsided by the platform claim and felt unfairly accused. They disputed the claim, leading to a lengthy and stressful mediation process. While you might eventually get compensation, you've alienated the guest and received a retaliatory review." },
+      { text: "Send an angry message to the guest, accusing them of ruining your rug and demanding they pay for a full replacement immediately, threatening to leave a terrible review.", type: "worst", fb: "Your aggressive accusation led to a furious response from the guest, who denied responsibility and reported your hostile communication to the platform. The platform issued a warning, and you received a scathing public review. The rug remained stained, and you lost any chance of amicable resolution. Game Over. Try again." }
+    ]
+  },
+  {
+    t: "**Review Request: The Awkward Silence** - A week after a guest checks out, they haven't left a review, and you're unsure if their experience was positive or negative. You want to encourage reviews but don't want to prompt a bad one.",
+    choices: [
+      { text: "Send a polite, generic follow-up message thanking them for their stay and inviting them to leave a review if they enjoyed their experience, without pressuring them.", type: "best", fb: "A gentle nudge is often all that's needed. If they had a good stay, they'll likely leave a positive review. If not, they might still choose not to, which is better than prompting a negative one. You maintained professionalism." },
+      { text: "Wait a few more days, then send a message specifically asking if everything was satisfactory during their stay, subtly hinting at a review.", type: "avg", fb: "This approach is a bit more direct and might prompt a response. If there was an issue, it gives you a chance to address it before a review. However, it could also remind a lukewarm guest to leave a less-than-glowing review." },
+      { text: "Don't send any reminder. Assume no news is good news and move on.", type: "poor", fb: "You missed an opportunity to gain valuable feedback and boost your review count. While you avoided a potential negative review, you also lost out on a positive one that could have improved your overall rating." },
+      { text: "Send multiple aggressive reminders, explicitly stating you expect a 5-star review and threatening to leave a bad review for them if they don't.", type: "worst", fb: "Your aggressive and unprofessional behavior backfired spectacularly. The guest, feeling harassed, reported you to the platform for review manipulation and left a devastating 1-star review detailing your tactics. Your listing was flagged, and your reputation was severely damaged. Game Over. Try again." }
+    ]
+  },
+  {
+    t: "**Guest Complaint: The Unbearable Heat** - It's the middle of summer, and a guest complains that the air conditioning isn't working effectively, making the unit uncomfortably hot. They are threatening to cancel their reservation.",
+    choices: [
+      { text: "Apologize sincerely, immediately send a technician to inspect the AC, and offer portable fans or a partial refund for the inconvenience. If unfixable, offer to relocate them.", type: "best", fb: "Your swift and comprehensive response addressed the guest's discomfort and demonstrated excellent service. Even if the AC couldn't be immediately fixed, your proactive solutions likely saved the booking and earned you a positive review." },
+      { text: "Suggest they adjust the thermostat settings or open windows. Promise to have someone look at it 'soon' but not immediately.", type: "avg", fb: "You offered basic troubleshooting, but the delay in addressing a critical comfort issue left the guest feeling neglected. They might tolerate it, but their experience will be negatively impacted, leading to a mediocre review." },
+      { text: "Tell them the AC is 'old but works' and that they should 'get used to it' or 'open a window'.", type: "poor", fb: "The guest, frustrated and overheated, canceled their reservation, demanded a full refund, and left a scathing review about the unbearable conditions and your unhelpful response. Your property's appeal during hot seasons plummeted." },
+      { text: "Accuse the guest of misusing the AC or being overly sensitive to heat. Refuse to send anyone to check it.", type: "worst", fb: "The guest, feeling insulted and ignored, contacted the platform, reported your unresponsiveness and rude behavior, and demanded a full refund. Your listing was flagged, and your reputation as a host was severely damaged. Game Over. Try again." }
+    ]
+  },
+  {
+    t: "**Lost Key: The Midnight Call** - A guest calls you at 1 AM, having lost the only set of keys to the unit. They are locked out and desperate to get back in.",
+    choices: [
+      { text: "Calmly guide them to a secure, hidden spare key location (if available) or immediately call a trusted 24/7 locksmith, offering to cover the cost if the lock was faulty. Assure them you're there to help.", type: "best", fb: "You were a true hero in a stressful situation. The guest was incredibly grateful for your immediate and supportive assistance, likely leaving a glowing review about your responsiveness and care. You turned a negative into a strong positive." },
+      { text: "Suggest they try retracing their steps or ask if a neighbor has a spare. Offer to come over in the morning with a spare key, but not at 1 AM.", type: "avg", fb: "The guest eventually got back in, but it was a stressful and inconvenient experience for them, waiting for hours. While you offered a solution, your delay might be noted in their review, leading to a neutral outcome." },
+      { text: "Tell them it's their responsibility to keep track of keys and you can't help at this hour. Advise them to find a hotel for the night.", type: "poor", fb: "The guest spent hours outside, freezing and frustrated, eventually finding an expensive last-minute hotel. They left a scathing review about your complete lack of support and empathy during an emergency, severely damaging your host reputation." },
+      { text: "Charge them an exorbitant 'lost key' fee (e.g., $150) before providing any assistance or information about spare keys/locksmiths.", type: "worst", fb: "The guest refused to pay the predatory fee, contacted the platform, and reported you for extortionate practices. The platform issued a severe warning, potentially suspending your listing, and your reputation was ruined. Game Over. Try again." }
+    ]
+  },
+  {
+    t: "**Internet Outage: The Remote Worker's Nightmare** - A guest, who explicitly booked your unit for its reliable internet to work remotely, reports a complete internet outage. They have an urgent deadline and are panicking.",
+    choices: [
+      { text: "Apologize sincerely, immediately contact your internet provider for an ETA, and offer a mobile hotspot or to cover the cost of a co-working space for the day. Offer a partial refund.", type: "best", fb: "Your proactive and empathetic response saved the guest's workday and their booking. They appreciated your efforts to find solutions, likely leaving a positive review despite the technical issue. You demonstrated excellent problem-solving skills." },
+      { text: "Suggest they try restarting the router and modem. Advise them to use their phone's hotspot if it's urgent, and you'll call the provider 'later'.", type: "avg", fb: "You offered basic troubleshooting, but the lack of immediate, dedicated support left the guest feeling unsupported during a critical time. Their work was disrupted, likely leading to a mediocre review." },
+      { text: "Tell them internet outages happen and it's beyond your control. Advise them to go to a coffee shop if they need internet so badly.", type: "poor", fb: "The guest, unable to work, canceled their reservation, demanded a full refund, and left a scathing review about your unresponsiveness and the critical lack of advertised amenities. Your property's appeal to remote workers plummeted." },
+      { text: "Blame the guest for not having a backup plan and tell them you're not a tech support service. Refuse to help.", type: "worst", fb: "The guest, feeling insulted and abandoned, contacted the platform, reported your unhelpful and rude behavior, and demanded a full refund. Your listing was flagged, and your reputation as a host was severely damaged. Game Over. Try again." }
+    ]
+  },
+  {
+    t: "**Unexpected Early Departure: The Family Emergency** - A guest informs you they need to cut their 5-night stay short by 3 nights due to an unforeseen family emergency. They are asking for a refund for the unused nights.",
+    choices: [
+      { text: "Express sympathy for their situation. Politely explain your cancellation policy, but offer a partial credit for a future stay or a refund for nights you successfully rebook.", type: "best", fb: "You balanced empathy with business policy. The guest appreciated your understanding and the effort to mitigate their loss, even if a full refund wasn't possible. This approach often leads to positive sentiment despite the unfortunate circumstances." },
+      { text: "Politely decline the refund, citing your strict cancellation policy, but express your condolences for their emergency.", type: "avg", fb: "You adhered strictly to your policy, protecting your revenue. However, the guest, already distressed, might feel a lack of empathy, potentially leading to a neutral or slightly negative review about your inflexibility." },
+      { text: "Grant a full refund for the unused nights immediately, hoping to gain their goodwill and a positive review.", type: "poor", fb: "You lost significant revenue by waiving your cancellation policy without any guarantee of a positive return. While the guest might be grateful, you've set a precedent and absorbed a financial loss that could have been mitigated." },
+      { text: "Accuse the guest of making up the emergency to get a free early check-out. Refuse any refund or sympathy.", type: "worst", fb: "Your callous and accusatory response deeply offended the guest. They reported your insensitive behavior to the platform, leaving a scathing review about your lack of humanity. Your listing was flagged, and your reputation as a host was severely damaged. Game Over. Try again." }
+    ]
+  },
+  {
+    t: "**Unusual Request: The Cooking Class** - A guest asks if they can host a small, private cooking class for 6 local friends in your kitchen, which is usually only for registered guests. They promise to be tidy and respectful.",
+    choices: [
+      { text: "Politely explain that the property is for registered guests only, but offer to connect them with local venues that host cooking classes or suggest a private chef service.", type: "best", fb: "You maintained your property's integrity and policies while still being helpful and resourceful. The guest appreciated your suggestions, and you avoided potential liability or overcrowding issues." },
+      { text: "Allow the cooking class, but charge an additional 'event fee' and require them to sign an addendum acknowledging liability for any damages.", type: "avg", fb: "You capitalized on the request for additional revenue, but introduced potential risks. While the addendum helps, you're still allowing more people than usual into your property, increasing wear and tear and potential for issues." },
+      { text: "Agree to the cooking class for free, hoping for a great review and word-of-mouth marketing.", type: "poor", fb: "You risked overcrowding, increased utility usage, and potential damage without any compensation. The 'small' class might turn into a larger gathering, and you've opened yourself up to liability without proper safeguards." },
+      { text: "Flatly refuse, stating 'this is not a restaurant' and that you don't allow 'strangers' in your property. Be rude and dismissive.", type: "worst", fb: "Your rude and unaccommodating response offended the guest, who felt their reasonable request was met with hostility. They left a negative review about your inflexibility and poor communication. Your listing's appeal to guests seeking unique experiences was diminished. Game Over. Try again." }
+    ]
+  },
+  {
+    t: "**Cleaning Complaint: The 'Dust Bunny' Debacle** - A guest checks in and immediately messages you with photos of a 'dust bunny' under the bed and a few stray hairs in the bathroom. They are demanding a partial refund for the 'unacceptable' cleanliness.",
+    choices: [
+      { text: "Apologize sincerely for the oversight, immediately offer to send your cleaning crew back for a touch-up, and offer a small credit for the inconvenience. Reassure them of your high standards.", type: "best", fb: "Your swift and apologetic response diffused the situation. The guest felt heard and valued, and the quick re-clean resolved the issue, likely leading to a positive resolution and preventing a negative review. You maintained your reputation for cleanliness." },
+      { text: "Acknowledge their concerns, explain that minor imperfections can occur, and offer a very small discount on a future stay. Avoid sending cleaners back immediately.", type: "avg", fb: "You acknowledged the issue but didn't fully resolve it during their current stay. The guest might still feel the cleanliness was subpar, leading to a neutral review. You risked the issue lingering in their mind throughout their trip." },
+      { text: "Tell them that 'it's not a hospital' and that they are being overly picky. Refuse any refund or re-clean.", type: "poor", fb: "The guest felt dismissed and insulted. They left a scathing review about the 'filthy' conditions and your rude response, posting the photos online. Your property's cleanliness rating plummeted, deterring future bookings." },
+      { text: "Accuse the guest of fabricating the photos or trying to get a free stay. Threaten to report them to the platform for false claims.", type: "worst", fb: "Your aggressive and baseless accusation led to a furious response from the guest, who reported your hostile communication to the platform. The platform issued a warning, and you received a devastating 1-star review. Your listing was flagged, and your reputation was severely damaged. Game Over. Try again." }
+    ]
+  },
+  {
+    t: "**Security Concern: The Unlocked Door** - A guest messages you, concerned that they found the front door unlocked upon their arrival. They are feeling unsafe and are questioning the security of the property.",
+    choices: [
+      { text: "Apologize profusely for the oversight, immediately reassure them of the property's overall security, and offer to personally check all locks and security features. Offer a small credit for their peace of mind.", type: "best", fb: "Your immediate and reassuring response addressed the guest's fear and demonstrated your commitment to their safety. By personally checking security, you rebuilt trust and likely prevented a negative incident or review. The credit was a thoughtful gesture." },
+      { text: "Acknowledge their concern, explain that it was likely an oversight by the cleaning crew, and remind them to always lock the door. Offer a small discount on a future stay.", type: "avg", fb: "You acknowledged the issue but didn't fully address their immediate feeling of insecurity. While the discount is nice, it doesn't resolve the current concern. The guest might remain uneasy throughout their stay, leading to a neutral review." },
+      { text: "Tell them it's 'not a big deal' and that they should just lock the door next time. Dismiss their concerns about safety.", type: "poor", fb: "The guest felt their safety concerns were trivialized and remained uneasy. They left a negative review highlighting the security lapse and your dismissive attitude, deterring future guests concerned about safety." },
+      { text: "Accuse the guest of lying or being overly paranoid. Tell them if they don't feel safe, they can leave.", type: "worst", fb: "Your insulting and unhelpful response enraged the guest. They immediately contacted the platform, reported your negligence and rude behavior, and demanded a full refund. Your listing was flagged for security concerns, and your reputation was severely damaged. Game Over. Try again." }
+    ]
+  },
+  {
+    t: "**Over-Communication: The Constant Inquirer** - A guest is sending you multiple messages a day, asking about every minor detail of the property and local area, even things clearly stated in your welcome guide. It's becoming overwhelming.",
+    choices: [
+      { text: "Politely and patiently answer their questions, but gently guide them back to the welcome guide for future inquiries. Offer to clarify anything unclear in the guide.", type: "best", fb: "You maintained excellent guest service while subtly training them to use your resources. The guest felt supported, and you reduced future unnecessary messages, creating a more efficient communication flow." },
+      { text: "Respond to their questions, but keep your answers brief and direct, without elaborating or offering extra help. Hope they get the hint.", type: "avg", fb: "You answered their questions, but your brevity might come across as slightly unhelpful. The guest might continue to message, or feel less inclined to ask, potentially impacting their overall experience and review." },
+      { text: "Ignore some of their less urgent messages, hoping they'll stop if they don't get an immediate response.", type: "poor", fb: "The guest felt ignored and frustrated, leading to a negative review about your unresponsiveness. They might also escalate their inquiries to the platform, creating a more significant issue." },
+      { text: "Send a blunt message telling them to 'read the damn welcome guide' and that you're 'not a personal concierge'.", type: "worst", fb: "Your rude and unprofessional response enraged the guest. They left a scathing review about your terrible communication and hostile attitude. They also reported you to the platform, leading to a warning about host conduct. Game Over. Try again." }
+    ]
+  },
+  {
+    t: "**Special Request: The Surprise Proposal** - A guest messages you, asking for help arranging a surprise marriage proposal in your unit. They want specific decorations, champagne, and a photographer hidden in the bushes.",
+    choices: [
+      { text: "Express excitement and offer to help coordinate within reasonable limits (e.g., providing local vendor contacts, allowing early access for decorators). Clearly communicate any associated costs.", type: "best", fb: "You went above and beyond, creating a memorable experience for your guest. This exceptional service will undoubtedly lead to a glowing review, fantastic photos for your listing, and potentially future referrals. You managed expectations and costs professionally." },
+      { text: "Politely decline to be directly involved in the arrangements due to liability, but wish them luck and offer to provide extra towels or glassware if needed.", type: "avg", fb: "You maintained your boundaries and avoided potential liability, which is a safe approach. However, you missed an opportunity to create an unforgettable experience and earn exceptional goodwill. The guest might feel slightly unsupported." },
+      { text: "Tell them you're too busy to help with 'personal events' and that your property is 'just a rental'.", type: "poor", fb: "The guest felt their special request was dismissed and unappreciated. They might still proceed with their plans, but their overall experience will be dampened, potentially leading to a neutral or slightly negative review." },
+      { text: "Demand an exorbitant 'event planning' fee for any involvement, even just answering questions, and refuse to allow any external vendors.", type: "worst", fb: "Your mercenary and unhelpful response deeply offended the guest. They canceled their booking, left a scathing review about your greed and lack of hospitality, and took their special occasion elsewhere. Your listing gained a reputation for being unaccommodating. Game Over. Try again." }
+    ]
+  },
+  {
+    t: "**Utility Outage: The Unexpected Blackout** - A major storm causes a widespread power outage in your area, including your rental unit. Your guests are currently staying there and are without electricity, heat/AC, and internet.",
+    choices: [
+      { text: "Immediately contact guests to inform them of the situation, provide updates on power restoration, offer flashlights/candles, and suggest alternative activities or offer a partial refund/relocation if the outage is prolonged.", type: "best", fb: "Your proactive communication and supportive actions during a difficult situation were exemplary. The guests felt informed and cared for, appreciating your efforts to mitigate their discomfort. This approach often leads to understanding and positive reviews, even in adverse circumstances." },
+      { text: "Send a message informing them of the outage and advising them to 'be patient'. Provide no further assistance or updates unless they ask.", type: "avg", fb: "You informed them, but your lack of proactive support left the guests feeling helpless and frustrated. While the outage isn't your fault, your unresponsiveness will negatively impact their experience, likely leading to a mediocre review." },
+      { text: "Ignore their messages, hoping the power comes back on quickly and they won't complain.", type: "poor", fb: "The guests were left in the dark, literally and figuratively. Feeling abandoned, they contacted the platform, demanded a full refund, and left a scathing review about your complete lack of support during an emergency. Your listing was flagged." },
+      { text: "Blame the power company and tell the guests it's 'not your problem'. Suggest they 'rough it' or find another place to stay on their own.", type: "worst", fb: "Your callous and unhelpful response enraged the guests. They immediately canceled their booking, demanded a full refund, and reported your rude behavior to the platform. Your listing was flagged, and your reputation was severely damaged. Game Over. Try again." }
+    ]
+  },
+  {
+    t: "**Guest Injury: The Slippery Step** - A guest slips on a wet step outside your unit and twists their ankle. They immediately inform you of the injury and are in pain, but not severely incapacitated.",
+    choices: [
+      { text: "Express immediate concern, advise them to seek medical attention, and offer to assist with transportation or finding a local clinic. Document the incident and check the step for hazards.", type: "best", fb: "Your empathetic and responsible response was crucial. You prioritized the guest's well-being and took steps to prevent future incidents, potentially mitigating liability and fostering goodwill. The guest appreciated your care and support." },
+      { text: "Ask if they are okay and suggest they put ice on it. Remind them to be careful on wet surfaces. Document the incident for your records.", type: "avg", fb: "You acknowledged the injury and offered basic advice, but your response lacked the proactive support needed in such a situation. The guest might feel you were not fully supportive, leading to a neutral review. You also didn't immediately address the potential hazard." },
+      { text: "Tell them to be more careful and that accidents happen. Avoid offering any assistance or checking the step.", type: "poor", fb: "The guest felt dismissed and unsupported during their injury. They left a negative review highlighting the unsafe conditions and your uncaring attitude, potentially leading to a platform investigation into safety." },
+      { text: "Accuse the guest of being clumsy or negligent. Tell them it's 'not your fault' and refuse any responsibility or assistance.", type: "worst", fb: "Your accusatory and unhelpful response enraged the guest. They immediately contacted a lawyer, reported the unsafe conditions and your negligence to the platform, and initiated a lawsuit. Your listing was suspended, and you face significant legal and financial repercussions. Game Over. Try again." }
+    ]
+  },
+  {
+    t: "**The 'Lost' Item: The Sentimental Teddy Bear** - A guest messages you a day after checking out, distraught because their child's beloved teddy bear was left behind. They are asking if you can find it and ship it back immediately.",
+    choices: [
+      { text: "Assure them you will search thoroughly for the teddy bear. If found, offer to ship it back at their expense or arrange for a pickup. Provide updates on your search.", type: "best", fb: "Your empathetic and helpful response turned a potential crisis into a positive interaction. The guest was incredibly grateful for your effort, and if found, your responsiveness will earn you a glowing review. You demonstrated excellent customer service." },
+      { text: "Tell them you'll look for it when you next visit the property, but can't guarantee anything. Advise them that shipping will be at their cost.", type: "avg", fb: "You offered to help, but the delay and lack of urgency might frustrate the guest, especially given the sentimental value. While reasonable, it might lead to a neutral review if the bear isn't found quickly." },
+      { text: "Tell them you're not responsible for lost items and they should have checked more carefully before leaving.", type: "poor", fb: "The guest was heartbroken and felt you were uncaring. They left a negative review about your lack of empathy and unhelpful attitude, impacting your property's family-friendly appeal." },
+      { text: "Demand a 'search fee' before even looking for the item, and an additional 'handling fee' for shipping.", type: "worst", fb: "Your mercenary response deeply offended the guest. They left a scathing review about your greed and lack of compassion. They also reported you to the platform for unethical practices. Your listing was flagged, and your reputation was severely damaged. Game Over. Try again." }
+    ]
+  },
+  {
+    t: "**Guest Request: The Package Delivery** - A guest asks if they can have several large packages, including a new espresso machine, delivered to your property a day before their arrival. They won't be there to receive them.",
+    choices: [
+      { text: "Politely decline, explaining that you cannot be responsible for receiving or storing packages due to liability and security concerns. Suggest they ship to a local parcel locker or post office.", type: "best", fb: "You maintained clear boundaries and protected yourself from liability and inconvenience. The guest understood your policy, and you avoided potential issues with lost or damaged packages, or having to store large items." },
+      { text: "Agree to receive the packages, but clearly state you are not responsible for their contents or condition, and they must be picked up immediately upon arrival. Charge a small handling fee.", type: "avg", fb: "You offered a flexible solution, but took on some risk and inconvenience. The handling fee is justified, but you're still responsible for ensuring the packages are safe until the guest arrives. This could lead to issues if packages are delayed or damaged." },
+      { text: "Agree to receive the packages for free, hoping for a good review and to be seen as accommodating.", type: "poor", fb: "You took on significant liability and inconvenience without compensation. If packages are lost, damaged, or contain prohibited items, you're now involved in a problem that wasn't yours. You also spent your time waiting for deliveries." },
+      { text: "Refuse rudely, stating 'this isn't a post office' and that you're 'not their personal assistant'.", type: "worst", fb: "Your rude and unhelpful response offended the guest, who felt their reasonable request was met with hostility. They left a negative review about your inflexibility and poor communication. Your listing's appeal to guests with specific needs was diminished. Game Over. Try again." }
+    ]
+  },
+  {
+    t: "**The 'Mystery' Odor: Lingering Smells** - A guest checks in and immediately reports a strange, lingering odor in the unit that wasn't there before. They suspect it's from a previous guest and are finding it very unpleasant.",
+    choices: [
+      { text: "Apologize sincerely, immediately investigate the source of the odor, and take steps to eliminate it (e.g., air purifiers, professional deodorizer). Offer a partial refund or temporary relocation if necessary.", type: "best", fb: "Your swift and thorough response addressed the guest's discomfort and demonstrated your commitment to their experience. Even if the odor was stubborn, your proactive solutions likely saved the booking and earned you a positive review." },
+      { text: "Suggest they open windows and use the air fresheners provided. Promise to investigate the source after their stay, but not immediately.", type: "avg", fb: "You offered a temporary solution, but the guest still had to endure the unpleasant odor for their stay. While understandable, it might lead to a mediocre review, as the core issue wasn't fully resolved during their visit." },
+      { text: "Tell them it's 'probably just an old house smell' or 'new house smell' and that they'll 'get used to it'.", type: "poor", fb: "The guest felt dismissed and disgusted. They checked out early, demanded a full refund, and left a scathing review about the 'unbearable' conditions and your unhelpful response. Your property's appeal plummeted." },
+      { text: "Accuse the guest of imagining the smell or being overly sensitive. Refuse to do anything about it.", type: "worst", fb: "Your insulting and unhelpful response enraged the guest. They immediately contacted the platform, reported your unresponsiveness and rude behavior, and demanded a full refund. Your listing was flagged, and your reputation as a host was severely damaged. Game Over. Try again." }
+    ]
+  },
+  {
+    t: "**Thermostat Tampering: The Arctic Blast** - A guest messages you complaining that the unit is 'freezing' despite the thermostat being set to 75\u00b0F. You check your smart thermostat logs and see it was repeatedly set to 60\u00b0F by the guest.",
+    choices: [
+      { text: "Politely explain that the thermostat logs show it was set to a very low temperature. Suggest a comfortable range and offer to adjust it remotely if they prefer. Remind them of energy conservation.", type: "best", fb: "You addressed the issue factually and politely, educating the guest without accusing them. They understood the situation, and you regained control over your energy costs while maintaining a positive guest relationship." },
+      { text: "Remotely set the thermostat to a reasonable temperature (e.g., 72\u00b0F) without informing the guest. Hope they don't notice or complain again.", type: "avg", fb: "You resolved the immediate temperature issue and saved on energy, but without communication, the guest might feel their comfort isn't being prioritized. This could lead to a neutral review if they notice the change without explanation." },
+      { text: "Send a message accusing them of tampering with the thermostat and wasting energy. Threaten to charge an extra fee if it continues.", type: "poor", fb: "The guest felt accused and defensive. They left a negative review about your 'unfriendly' communication and 'unreasonable' energy policies. You created an adversarial relationship over a solvable issue." },
+      { text: "Ignore their complaint and let them continue to freeze or overheat the unit. Assume they'll figure it out.", type: "worst", fb: "The guest, either freezing or frustrated by the lack of response, left a scathing review about the 'broken' heating/cooling system and your unresponsiveness. They also contacted the platform, leading to a complaint about amenity functionality. Your rating plummeted. Game Over. Try again." }
+    ]
+  },
+  {
+    t: "**The 'Lost' Reservation: Double Booking Scare** - A guest arrives for their booking, but your calendar shows no reservation for them. They have a confirmation email, but it's for a different date or property, indicating a potential double-booking or platform error.",
+    choices: [
+      { text: "Apologize for the confusion, thoroughly investigate the booking details, and immediately contact the platform for clarification. If it's your error, offer to relocate them to a comparable unit or hotel at your expense.", type: "best", fb: "Your calm, investigative, and proactive approach diffused a high-stress situation. By taking responsibility and offering solutions, you saved the guest's trip and protected your reputation, even if the error wasn't entirely yours. This often leads to positive reviews despite the initial scare." },
+      { text: "Tell the guest it's not your booking and they need to contact the platform directly to resolve it. Offer no further assistance.", type: "avg", fb: "You shifted responsibility, which is technically correct if it's not your booking. However, the guest is left stranded and frustrated, likely leading to a negative review about your unhelpful attitude during a crisis." },
+      { text: "Blame the guest for booking incorrectly and refuse them entry, even if they have a confirmation. Tell them to sort it out.", type: "poor", fb: "The guest was left stranded and furious, leaving a scathing review about your unaccommodating behavior and refusal to help. They also contacted the platform, leading to a formal complaint and potential suspension of your listing." },
+      { text: "Accuse the guest of trying to scam you into a free stay. Call the police to have them removed from your property.", type: "worst", fb: "Your aggressive and baseless accusation led to a public confrontation and potential legal issues. The guest, feeling threatened, reported you to the platform and law enforcement. Your listing was immediately suspended, and your reputation was utterly destroyed. Game Over. Try again." }
+    ]
+  },
+  {
+    t: "**The 'Unexpected' Visitor: Unregistered Guest** - You receive a message from a neighbor or your security camera shows an unregistered guest staying at your property for several days, clearly violating your occupancy limits and house rules.",
+    choices: [
+      { text: "Politely message the primary guest, reminding them of the occupancy limits and asking them to register the additional guest or have them leave. Inform them of potential extra fees.", type: "best", fb: "You addressed the violation directly and professionally, giving the guest a chance to rectify the situation. This approach often resolves the issue without escalation, maintaining a good relationship while enforcing your rules and potentially collecting extra fees." },
+      { text: "Send a firm message to the guest, stating they are in violation of house rules and demanding the unregistered guest leave immediately. Threaten to cancel their booking.", type: "avg", fb: "You enforced your rules, but the confrontational tone might lead to a defensive reaction from the guest. While effective, it risks a negative review or a dispute with the platform over the tone of communication." },
+      { text: "Ignore it for now, hoping the unregistered guest is only staying for a short period and won't cause any issues.", type: "poor", fb: "The unregistered guest continued to stay, increasing wear and tear, utility costs, and potential liability. If a problem arises, you have no record of their presence, complicating any claims or disputes. Your neighbors might also complain." },
+      { text: "Confront the unregistered guest directly at the property, demanding to know who they are and why they are there. Threaten to call the police.", type: "worst", fb: "You put yourself in a potentially dangerous situation and violated the primary guest's privacy. The confrontation escalated, leading to a report to the platform for harassment and a scathing review. Your listing was flagged, and your reputation was severely damaged. Game Over. Try again." }
+    ]
+  },
+  {
+    t: "**The 'Glitch' in the Matrix: Smart Home Malfunction** - Your smart lock malfunctions, preventing a newly arrived guest from entering the unit. They are standing outside with their luggage, unable to get in, and are becoming increasingly frustrated.",
+    choices: [
+      { text: "Apologize profusely, immediately provide a backup entry method (e.g., manual key, temporary code), and dispatch a technician to fix the smart lock. Offer a small credit for the inconvenience.", type: "best", fb: "Your swift and comprehensive response resolved the immediate crisis and reassured the guest. By providing a backup and addressing the root cause, you demonstrated excellent problem-solving and guest service, likely earning a positive review despite the initial glitch." },
+      { text: "Suggest they try the code again or wait a few minutes for the system to reset. Offer to call the smart lock company 'soon'.", type: "avg", fb: "You offered basic troubleshooting, but the delay in providing a guaranteed entry method left the guest stranded and frustrated. Their initial experience was negative, likely leading to a mediocre review." },
+      { text: "Tell them it's a 'smart home' and 'sometimes these things happen'. Advise them to 'be patient' or 'find a coffee shop' while they wait.", type: "poor", fb: "The guest, unable to enter, was left stranded and furious. They contacted the platform, demanded a full refund, and left a scathing review about the non-functional amenities and your unhelpful response. Your property's appeal plummeted." },
+      { text: "Blame the guest for 'not knowing how to use technology' and refuse to provide any assistance, telling them to 'figure it out'.", type: "worst", fb: "Your insulting and unhelpful response enraged the guest. They immediately contacted the platform, reported your unresponsiveness and rude behavior, and demanded a full refund. Your listing was flagged, and your reputation as a host was severely damaged. Game Over. Try again." }
+    ]
+  },
+  {
+    t: "**The 'Borrowed' Charger: Unreturned Items** - A guest messages you a few days after checking out, asking if you found their phone charger. They insist it must have been left behind and want you to ship it back to them.",
+    choices: [
+      { text: "Assure them you will search for the charger. If found, offer to ship it back at their expense or arrange for a pickup. Clearly communicate your policy on lost and found items.", type: "best", fb: "Your helpful and clear communication managed expectations while providing a solution. The guest appreciated your effort, and if found, your responsiveness will earn you goodwill. You maintained professionalism without incurring undue costs." },
+      { text: "Tell them you'll look for it when you next visit the property, but can't guarantee anything. Advise them that shipping will be at their cost.", type: "avg", fb: "You offered to help, but the delay and lack of urgency might frustrate the guest, especially if they need the charger quickly. While reasonable, it might lead to a neutral review if the item isn't found promptly." },
+      { text: "Tell them you're not responsible for lost items and they should have checked more carefully before leaving. Do not offer to look for it.", type: "poor", fb: "The guest felt dismissed and frustrated. They left a negative review about your unhelpful attitude and lack of customer service, impacting your property's appeal to future guests." },
+      { text: "Demand a 'search fee' before even looking for the item, and an additional 'handling fee' for shipping.", type: "worst", fb: "Your mercenary response deeply offended the guest. They left a scathing review about your greed and lack of compassion. They also reported you to the platform for unethical practices. Your listing was flagged, and your reputation was severely damaged. Game Over. Try again." }
+    ]
+  },
+  {
+    t: "**The 'Mystery' Stain: On the Sofa** - After a guest checks out, you discover a large, dark, and suspicious-looking stain on your expensive fabric sofa. It wasn't there before, and it looks difficult to remove.",
+    choices: [
+      { text: "Document the stain thoroughly with photos and a detailed description. Contact the guest politely, inquiring if they have any information about the stain and offering to resolve it amicably before involving the platform.", type: "best", fb: "Your calm and documented approach often leads to an honest explanation and a willingness from the guest to cover costs. You maintained a professional relationship and likely resolved the issue without formal dispute, saving time and stress." },
+      { text: "Immediately hire a professional upholstery cleaner to assess and attempt to remove the stain. If unsuccessful, then contact the guest and the platform with the cleaning bill.", type: "avg", fb: "You took immediate action to address the damage, which is good for your property. However, contacting the guest after the fact might make them feel ambushed, potentially leading to a dispute over the cleaning cost and a negative review." },
+      { text: "Assume the worst and immediately file a claim with the platform, demanding compensation for a new sofa, without contacting the guest first.", type: "poor", fb: "The guest was blindsided by the platform claim and felt unfairly accused. They disputed the claim, leading to a lengthy and stressful mediation process. While you might eventually get compensation, you've alienated the guest and received a retaliatory review." },
+      { text: "Send an angry message to the guest, accusing them of ruining your sofa and demanding they pay for a full replacement immediately, threatening to leave a terrible review.", type: "worst", fb: "Your aggressive accusation led to a furious response from the guest, who denied responsibility and reported your hostile communication to the platform. The platform issued a warning, and you received a scathing public review. The sofa remained stained, and you lost any chance of amicable resolution. Game Over. Try again." }
+    ]
+  },
+  {
+    t: "**The 'Broken' Coffee Maker: A Morning Crisis** - A guest messages you first thing in the morning, distraught that the coffee maker isn't working. They claim it's essential for their morning routine and are very unhappy.",
+    choices: [
+      { text: "Apologize sincerely, offer immediate troubleshooting steps, and if unsuccessful, offer to bring a new coffee maker or a gift card for a local coffee shop. Offer a small credit for the inconvenience.", type: "best", fb: "Your swift and empathetic response saved the guest's morning and their overall experience. By offering immediate solutions and compensation, you demonstrated excellent guest service, likely earning a positive review despite the minor amenity failure." },
+      { text: "Suggest they try restarting it or checking the water. Promise to look at it 'later today' or 'tomorrow'.", type: "avg", fb: "You offered basic troubleshooting, but the delay in resolving a critical morning amenity left the guest feeling frustrated. Their morning routine was disrupted, likely leading to a mediocre review." },
+      { text: "Tell them it 'worked fine yesterday' and that they must be 'using it wrong'. Advise them to 'just go buy coffee'.", type: "poor", fb: "The guest felt dismissed and insulted. They left a negative review about the non-functional amenities and your unhelpful attitude, impacting your property's appeal to coffee-loving guests." },
+      { text: "Blame the guest for breaking it and demand they pay for a new one. Refuse to provide any assistance.", type: "worst", fb: "Your accusatory and unhelpful response enraged the guest. They immediately contacted the platform, reported your unresponsiveness and rude behavior, and demanded a full refund. Your listing was flagged, and your reputation as a host was severely damaged. Game Over. Try again." }
+    ]
+  }
+];
+
+// 3 Emergency scenarios
+const EMERGENCY_SCENARIOS = [
+  {
+    t: "EMERGENCY! A pipe burst in the unit above yours, and water is pouring through the ceiling. Your current guests are panicking.",
+    choices: [
+      { text: "Immediately call emergency services and a plumber, then relocate your guests to a hotel at your expense.", type: "success", fb: "Crisis averted! Your quick action saved your property and your reputation. You're out some cash, but your reputation is intact." },
+      { text: "Tell the guests to put buckets under the leaks and wait for morning, hoping it stops.", type: "failure", fb: "The ceiling collapsed, damaging your property and injuring a guest. You're facing massive repair costs and a lawsuit. Game Over." }
+    ]
+  },
+  {
+    t: "EMERGENCY! A small fire breaks out in the kitchen due to an electrical fault. Guests are present.",
+    choices: [
+      { text: "Instruct guests to evacuate immediately, call emergency services, and ensure everyone is safe before assessing damage.", type: "success", fb: "You prioritized safety above all else. The fire department contained the blaze, and your guests are safe. Property damage is significant, but manageable." },
+      { text: "Try to put out the fire yourself with a small extinguisher, telling guests to stay calm.", type: "failure", fb: "The fire quickly spread, trapping guests inside. You're now facing severe legal charges, property destruction, and potential loss of life. Game Over." }
+    ]
+  },
+  {
+    t: "EMERGENCY! A guest reports a serious medical emergency (e.g., chest pains, severe allergic reaction) and needs immediate help.",
+    choices: [
+      { text: "Call emergency medical services (e.g., 911) immediately and provide clear instructions to the guest until help arrives.", type: "success", fb: "Your swift and appropriate action ensured the guest received critical medical attention. You're a responsible host." },
+      { text: "Advise the guest to 'take some painkillers' or 'lie down' and see if it gets better.", type: "failure", fb: "The guest's condition worsened significantly due to delayed care. You're now facing severe legal repercussions and a moral crisis. Game Over." }
+    ]
+  }
+];
+
+// Fischer-Yates shuffle algorithm
+function shuffleArray(array) {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// Shuffle choices within a scenario
+function shuffleChoices(scenario) {
+  const shuffled = { ...scenario };
+  shuffled.choices = shuffleArray(scenario.choices);
+  return shuffled;
+}
+
+let state = { score: 4.0, idx: 0, scenarios: [], emergencyIndices: [], currentScenarioIndex: 0, isEmergency: false };
+
+function initGame() {
+  // Select 12 random scenarios from 36
+  const shuffledAll = shuffleArray(ALL_SCENARIOS);
+  state.scenarios = shuffledAll.slice(0, 12);
+  
+  // Determine emergency positions: after scenarios 4, 8, and 12 (indices 3, 7, 11)
+  state.emergencyIndices = [3, 7, 11];
+  
+  state.score = 4.0;
+  state.idx = 0;
+  state.currentScenarioIndex = 0;
+  state.isEmergency = false;
+  
+  document.getElementById('scr-intro').classList.add('hidden');
+  document.getElementById('scr-game').classList.remove('hidden');
+  render();
+}
+
+function render() {
+  const isEmergency = state.emergencyIndices.includes(state.currentScenarioIndex);
+  state.isEmergency = isEmergency;
+  
+  let cur;
+  if (isEmergency) {
+    cur = EMERGENCY_SCENARIOS[state.emergencyIndices.indexOf(state.currentScenarioIndex)];
+  } else {
+    // Count non-emergency scenarios before current index
+    let scenarioCount = 0;
+    for (let i = 0; i < state.currentScenarioIndex; i++) {
+      if (!state.emergencyIndices.includes(i)) scenarioCount++;
+    }
+    cur = state.scenarios[scenarioCount];
+  }
+  
+  // Shuffle choices
+  cur = shuffleChoices(cur);
+  
+  // Calculate day (1-7 based on 12 scenarios + 3 emergencies = 15 total steps)
+  const day = Math.ceil((state.currentScenarioIndex + 1) / 2.14); // Roughly spread over 7 days
+  
+  document.getElementById('stat-progress').innerText = `Step ${state.currentScenarioIndex + 1} / 15`;
+  document.getElementById('stat-score').innerText = `Rating: ${state.score.toFixed(1)} ⭐`;
+  document.getElementById('ui-text').innerText = cur.t;
+  document.getElementById('ui-day').innerText = `Day ${day}`;
+  
+  if (isEmergency) {
+    document.getElementById('ui-emergency').classList.remove('hidden');
+  } else {
+    document.getElementById('ui-emergency').classList.add('hidden');
+  }
+  
+  const box = document.getElementById('ui-opts');
+  box.innerHTML = "";
+  
+  cur.choices.forEach((o, i) => {
+    const b = document.createElement('button');
+    b.className = "btn";
+    b.id = `opt-${i}`;
+    b.innerText = o.text;
+    b.onclick = () => select(o, i, cur.choices);
+    box.appendChild(b);
+  });
+
+  document.getElementById('ui-fb').style.display = 'none';
+  document.getElementById('ui-next').style.display = 'none';
+}
+
+function select(o, optIndex, allChoices) {
+  const fb = document.getElementById('ui-fb');
+  fb.innerText = o.fb;
+  fb.style.display = 'block';
+
+  if (state.isEmergency) {
+    if (o.type === "success") {
+      state.score = Math.min(5.0, state.score + 2.0);
+      fb.className = "fb fb-best";
+    } else {
+      state.score = 0;
+      fb.className = "fb fb-emergency";
+    }
+    document.querySelectorAll('.btn').forEach(b => b.disabled = true);
+    document.getElementById('ui-next').style.display = 'block';
+    document.getElementById('stat-score').innerText = `Rating: ${state.score.toFixed(1)} ⭐`;
+    
+    if (state.score === 0) {
+      setTimeout(() => showEnd(), 1500);
+    }
+  } else {
+    if (o.type === "worst") {
+      fb.className = "fb fb-worst";
+      state.score = Math.max(0, state.score - 2.0);
+      document.getElementById(`opt-${optIndex}`).disabled = true;
+      document.getElementById('stat-score').innerText = `Rating: ${state.score.toFixed(1)} ⭐`;
+      document.getElementById('ui-next').style.display = 'block';
+      
+      if (state.score === 0) {
+        setTimeout(() => showEnd(), 1500);
+      }
+    } else {
+      if (o.type === "best") {
+        state.score = Math.min(5.0, state.score + 0.1);
+        fb.className = "fb fb-best";
+      } else if (o.type === "avg") {
+        fb.className = "fb fb-avg";
+      } else if (o.type === "poor") {
+        state.score = Math.max(0, state.score - 0.5);
+        fb.className = "fb fb-poor";
+      }
+      
+      document.querySelectorAll('.btn').forEach(b => b.disabled = true);
+      document.getElementById('ui-next').style.display = 'block';
+      document.getElementById('stat-score').innerText = `Rating: ${state.score.toFixed(1)} ⭐`;
+    }
+  }
+}
+
+function nextStep() {
+  state.currentScenarioIndex++;
+  
+  if (state.currentScenarioIndex < 15) {
+    render();
+  } else {
+    showEnd();
+  }
+}
+
+function showEnd() {
+  document.getElementById('scr-game').classList.add('hidden');
+  document.getElementById('scr-end').classList.remove('hidden');
+  
+  const finalScore = state.score.toFixed(1);
+  document.getElementById('final-score').innerText = `${finalScore} / 5.0 ⭐`;
+  
+  let msg = "";
+  if (finalScore >= 4.6) {
+    msg = "SUPERHOST ELITE! You navigated the chaos with grace, wisdom, and impeccable judgment. Your calendar is fully booked for months, and guests rave about your exceptional service. You've mastered the art of hosting and turned potential disasters into opportunities for excellence. Congratulations on reaching the pinnacle of hosting success!";
+  } else if (finalScore >= 3.1) {
+    msg = "RELIABLE HOST. You survived the week with decent decision-making, though there were moments where better choices could have elevated your performance. Focus on improving your communication skills, responding faster to emergencies, and setting clearer boundaries with demanding guests. With some refinement, you could reach superhost status.";
+  } else {
+    msg = "PROBATION. Your hosting journey has been rough, with several critical missteps that damaged your reputation and rating. You struggled with guest relations, emergency response, and professional boundaries. Consider taking a hosting course, reviewing platform policies, or stepping back to reassess your approach before your listing is suspended.";
+  }
+  
+  document.getElementById('final-msg').innerText = msg;
+}
+</script>
+</body>
+</html>

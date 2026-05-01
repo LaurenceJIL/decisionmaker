@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fertilizer Sales Master: B1/B2 Challenge</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --corp-blue: #1e3799;
+        --gold: #f6b93b;
+        --green: #38ada9;
+        --red: #eb2f06;
+        --bg: #f8f9fa;
+        --dark: #2f3542;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--bg);
+        color: var(--dark);
+        line-height: 1.6;
+    }
+
+    header {
+        background: var(--corp-blue);
+        color: white;
+        padding: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 5px solid var(--gold);
+    }
+
+    .score-container { text-align: right; }
+    .score-label { font-size: 0.75rem; text-transform: uppercase; color: var(--gold); font-weight: 800; letter-spacing: 1px; }
+    .score-num { font-family: 'Roboto Mono', monospace; font-size: 2rem; }
+
+    .wrapper { max-width: 850px; margin: 2rem auto; padding: 0 1rem; }
+
+    .card {
+        background: white;
+        padding: 2.5rem;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        display: none;
+        border-top: 8px solid var(--corp-blue);
+    }
+    .card.active { display: block; animation: slideUp 0.4s ease-out; }
+
+    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+    h2 { margin-bottom: 1rem; color: var(--corp-blue); text-transform: uppercase; }
+    .intro-text { font-size: 1.1rem; margin-bottom: 2rem; color: #57606f; }
+
+    .options-list { display: grid; gap: 12px; margin-bottom: 2rem; }
+    .opt-btn {
+        background: #fff;
+        border: 2px solid #edeff2;
+        padding: 1.2rem;
+        border-radius: 8px;
+        cursor: pointer;
+        text-align: left;
+        font-size: 1rem;
+        font-weight: 600;
+        transition: 0.2s;
+        display: block;
+        width: 100%;
+    }
+    .opt-btn:hover:not(:disabled) { border-color: var(--corp-blue); background: #f0f4ff; transform: translateX(4px); }
+    .opt-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .feedback-panel {
+        display: none;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-top: 1rem;
+        border-left: 6px solid #ccc;
+        background: #fdfdfd;
+    }
+    .status-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        color: white;
+        border-radius: 4px;
+        font-weight: 800;
+        margin-bottom: 10px;
+        font-size: 0.8rem;
+    }
+
+    .nav-btn {
+        margin-top: 2rem;
+        background: var(--dark);
+        color: white;
+        border: none;
+        padding: 1.2rem;
+        border-radius: 8px;
+        cursor: pointer;
+        width: 100%;
+        font-weight: 800;
+        text-transform: uppercase;
+        display: none;
+    }
+    #start-action-btn { background: var(--corp-blue); display: block; }
+
+    .emergency-tag {
+        background: var(--red);
+        color: white;
+        padding: 4px 12px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: 900;
+        margin-bottom: 15px;
+        display: inline-block;
+    }
+</style>
+</head>
+<body>
+
+<header>
+    <div>
+        <h1 style="margin:0; font-size: 1.2rem; letter-spacing: 1px;">FERTI-CORP GLOBAL</h1>
+        <small>Regional Manager Simulation</small>
+    </div>
+    <div class="score-container">
+        <div class="score-label">Annual Revenue Score</div>
+        <div class="score-num" id="global-score">0</div>
+    </div>
+</header>
+
+<div class="wrapper">
+    <div class="card active" id="screen-intro">
+        <h2>Territory Assignment</h2>
+        <p class="intro-text">Welcome to the team. You are now the Sales Manager for the Northern Agricultural Zone. Your goal is to grow the business while protecting our professional reputation.</p>
+        <p><strong>Challenge:</strong> 10 Strategic Decisions + 3 Emergencies. <br><strong>Goal:</strong> Reach 40 points without a bankruptcy.</p>
+        <button id="start-action-btn" class="nav-btn" onclick="beginGame()">Commence Strategy</button>
+    </div>
+
+    <div id="screen-main" class="card">
+        <div id="emergency-notice"></div>
+        <h2 id="question-title"></h2>
+        <p id="question-text" class="intro-text"></p>
+        <div class="options-list" id="options-grid"></div>
+        
+        <div id="result-feedback" class="feedback-panel">
+            <span id="point-tag" class="status-badge"></span>
+            <p id="feedback-msg"></p>
+        </div>
+        
+        <button id="next-step-btn" class="nav-btn">Confirm & Proceed</button>
+    </div>
+
+    <div id="screen-end" class="card">
+        <h2>Performance Review</h2>
+        <div id="final-total" style="font-size: 2.5rem; text-align: center; margin: 1.5rem 0; font-weight: 800;"></div>
+        <div id="evaluation-box" style="padding: 2rem; border-radius: 8px; text-align: center;"></div>
+        <button class="nav-btn" style="display:block; background: var(--corp-blue);" onclick="location.reload()">New Fiscal Year</button>
+    </div>
+</div>
+
+<script>
+const gameData = {
+    d1: {
+        title: "D1: Growth Strategy",
+        text: "The organic farming sector is expanding quickly. How do you position our liquid nitrogen products for these new clients?",
+        choices: [
+            { text: "Launch 'Eco-Expert' webinars focusing on soil health and sustainability.", pts: 4, fb: "Excellent! You combined a high-margin product with professional education. This builds long-term trust and positions the company as an industry expert rather than just a basic supplier. It shows a sophisticated understanding of modern needs." },
+            { text: "Offer a 20% discount to any farm switching from a competitor.", pts: 3, fb: "A strong move for immediate market share. While aggressive discounts can hurt profit margins, it successfully disrupts competitor relationships and gets your product onto the farms quickly. This is a very common tactical approach." },
+            { text: "Hire two new sales reps to visit every farm personally.", pts: 2, fb: "This increases your reach, but it is expensive. Without a specific strategy, your team might struggle to convince happy farmers to change their current habits. It lacks the targeted precision of modern data-driven management." },
+            { text: "Send a standard product catalog to all local farms via email.", pts: 1, fb: "A very passive approach. In the fertilizer industry, personal relationships and technical proof are much more effective than cold emails, which are often ignored. You need a much more proactive and direct engagement strategy." },
+            { text: "Wait for the next season to see if the trend continues.", pts: -1, fb: "Too slow! Your competitors are already moving into this space. By waiting, you are losing the 'first-mover' advantage. Market trends move quickly, and passive managers often lose their best opportunities. Please reconsider your strategy." }
+        ],
+        next: "d2"
+    },
+    d2: {
+        title: "D2: Price Fluctuations",
+        text: "Energy costs have increased shipping prices by 15%. How do you tell your customers about the price rise?",
+        choices: [
+            { text: "Host workshops on 'Application Efficiency' to help farmers use 10% less product.", pts: 4, fb: "Masterful management! By showing customers how to save money through better techniques, you offset the price increase and prove that you care about their success. This builds deep loyalty and offsets the negative news perfectly." },
+            { text: "Send a personalized letter explaining the global market and offering a loyalty bonus.", pts: 3, fb: "Good transparency. Most professional clients understand market fluctuations, and the small bonus makes the news easier to swallow. It preserves the relationship through honesty and direct communication. It is a solid, professional way to handle it." },
+            { text: "Absorb the cost for three months, then raise prices quietly.", pts: 2, fb: "This protects the customer temporarily but hurts your company's quarterly profits significantly. It also creates a 'price shock' later on when you finally adjust the rates. It is a reactive strategy that lacks financial planning." },
+            { text: "Update the price on invoices without a formal announcement.", pts: 1, fb: "A risky choice. Customers feel disrespected when they discover price changes on an invoice. This lack of communication often leads to lost accounts and a very bad reputation. Professional management requires much better transparency." },
+            { text: "Blame the government and call the increase a 'Special Environment Tax'.", pts: -1, fb: "This is dishonest and confusing. Customers will quickly realize you are lying, and you will lose all professional credibility. In the B2B world, reputation is everything. You must find a more honest way to handle market changes." }
+        ],
+        next: "e1"
+    },
+    e1: {
+        title: "EMERGENCY: Port Strike",
+        isEmergency: true,
+        text: "A major strike has stopped all imports. Your biggest client needs their order tomorrow or they lose their crop.",
+        choices: [
+            { text: "Call the client, explain the delay, and buy temporary stock from a local partner.", type: "good", fb: "Great choice! Honesty and solving the problem for them (even at a high cost) saves the long-term relationship. It proves you are a partner who takes responsibility during a crisis rather than a vendor." },
+            { text: "Redirect a shipment meant for five smaller farms to the big client.", type: "good", fb: "Tough decision, but 'triage' is sometimes necessary. You prioritized your most critical account to prevent a massive contract loss. It is a pragmatic choice that protects the most vital revenue stream for the company." },
+            { text: "Ignore the client's calls until the port reopens.", type: "bad", gameOver: true, fb: "GAME OVER. The client lost their entire crop because they were waiting for you. They sued the company for millions, and you were fired. In an emergency, silence is the most dangerous path a manager can take." }
+        ],
+        next: "d3"
+    },
+    d3: {
+        title: "D3: Distributor Relations",
+        text: "A key distributor is starting to promote a competitor's cheaper product. How do you respond?",
+        choices: [
+            { text: "Provide a free 'Technical Support' person to help their team close complex deals.", pts: 4, fb: "Strategic brilliance! By providing technical expertise, you make the distributor's job easier and more profitable. You become a partner in their success rather than just another vendor. This creates a deep and lasting competitive advantage." },
+            { text: "Offer a tiered rebate system: higher sales lead to higher profit margins.", pts: 3, fb: "A classic and effective motivator. Volume-based incentives give distributors a clear financial reason to push your product over others. It is simple, fair, and usually successful. It aligns your company's growth with their success." },
+            { text: "Invite their management team to a luxury corporate retreat.", pts: 2, fb: "Relationships matter, but this is expensive and doesn't solve the underlying sales issues. It might help briefly, but technical and financial incentives are usually more sustainable and professional. It feels a bit old-fashioned for today." },
+            { text: "Threaten to cancel their distribution contract unless sales improve.", pts: 1, fb: "Negative reinforcement rarely works. This will likely push them closer to your competitors and create a hostile atmosphere that makes future collaboration impossible. You should focus on building value and partnership instead of using threats." },
+            { text: "Start selling directly to their customers via a mobile app.", pts: -1, fb: "Dangerous move! You will alienate your entire distribution network before your app is ready. This 'channel conflict' can destroy your business model overnight. You need to manage your partners, not declare war on them. Please re-evaluate." }
+        ],
+        next: "d4"
+    },
+    d4: {
+        title: "D4: Social Media Rumors",
+        text: "A viral video falsely claims your fertilizer is killing local bees. Sales are dropping fast.",
+        choices: [
+            { text: "Post a live video of a biologist using the product safely in a garden.", pts: 4, fb: "Excellent! 'Show, don't tell.' Visual evidence is the most powerful way to kill a rumor. It builds immediate confidence and provides your sales team with a great tool. This is a modern, transparent response." },
+            { text: "Publish an independent lab report proving the product is safe.", pts: 3, fb: "Very professional. Using third-party experts adds significant authority to your claims. It might be a bit slow for social media, but it provides a solid foundation of truth. It is the gold standard for technical product verification." },
+            { text: "Offer a 100% money-back 'Bee Safety' guarantee.", pts: 2, fb: "This shows confidence, but it also accidentally reinforces the idea that there might be a problem. Some customers will take the guarantee as a sign that the product is actually risky. It is a double-edged sword." },
+            { text: "Hire people to leave positive comments on the video.", pts: 1, fb: "This looks suspicious and 'fake.' Modern customers can usually spot paid comments, and if you are caught, the scandal will be much worse than the original rumor. Authenticity is far more valuable than manufactured praise." },
+            { text: "Sue the person who made the video for defamation.", pts: -1, fb: "This is a PR disaster. It makes you look like a bully and keeps the negative rumor in the news for even longer. It rarely fixes the underlying lack of trust. You must choose a more constructive approach." }
+        ],
+        next: "d5"
+    },
+    d5: {
+        title: "D5: Large Tenders",
+        text: "A huge government contract is available, but the price requirements are very low. How do you bid?",
+        choices: [
+            { text: "Focus on 'Total Value', highlighting increased yields and lower waste.", pts: 4, fb: "Perfect sales logic! By focusing on value and results rather than the sticker price, you justify a higher cost and show the client how they actually save money. This is the mark of a high-level professional." },
+            { text: "Include free satellite crop-monitoring for the first year of use.", pts: 3, fb: "Great value-add! This differentiates your bid from the 'product-only' competitors. It makes your company look more technologically advanced and committed to the customer's harvest. It is a very attractive offer for modern government agencies." },
+            { text: "Drop your price below cost just to win the prestigious contract.", pts: 2, fb: "You might win, but you won't make any profit. This can lead to financial problems for your department later and sets a bad precedent for future deals. Winning a race to the bottom is rarely a victory." },
+            { text: "Submit a bid based on your company's 50-year history of success.", pts: 1, fb: "History is nice, but government tenders are usually decided by technical specs and price. Being 'old' doesn't prove you are the best fit for modern challenges. You need to focus more on the future than the past." },
+            { text: "Try to find out what the competitors are bidding through 'contacts'.", pts: -1, fb: "This is unethical and potentially illegal. In many regions, this will get you disqualified and ruin your professional reputation. You must follow the formal bidding process to protect the company's integrity and your own career." }
+        ],
+        next: "e2"
+    },
+    e2: {
+        title: "EMERGENCY: Batch Error",
+        isEmergency: true,
+        text: "1,000 bags were filled with high-acidity formula by mistake. They are already at the stores.",
+        choices: [
+            { text: "Send an emergency recall text to all buyers and offer double replacement.", type: "good", fb: "Heroic management! Protecting the customer's crop is the only way to save your brand's future. This decisive action prevents a total disaster and shows that you value your customers' success above your own profit margins." },
+            { text: "Send technicians to the stores to relabel and adjust the instructions.", type: "good", fb: "Proactive and helpful! You took responsibility and provided a technical solution to prevent damage. By sending experts to the field, you turned a mistake into a service triumph. This builds immense trust for the future." },
+            { text: "Wait for complaints and replace only the damaged bags.", type: "bad", gameOver: true, fb: "GAME OVER. The crops died across the whole region, and the story went viral. The company went bankrupt from massive lawsuits. Ignoring a safety risk is the quickest way to end an industrial management career." }
+        ],
+        next: "d6"
+    },
+    d6: {
+        title: "D6: Team Motivation",
+        text: "Your best salesperson is hitting all targets but is being rude to the office staff. What do you do?",
+        choices: [
+            { text: "Coach them on 'Professional Leadership' and align their behavior with company values.", pts: 4, fb: "Excellent leadership! You kept the revenue but addressed the risk. Showing them that 'how' they sell is as important as 'how much' they sell protects the whole team. This is a sophisticated way to manage talented people." },
+            { text: "Make them a 'Mentor' for a new hire so they must lead by example.", pts: 3, fb: "A smart move! Responsibility often forces people to follow the rules more closely. It also helps spread their successful techniques to the team. It uses their ego to improve the whole department's culture." },
+            { text: "Ignore the behavior because their sales numbers are so high.", pts: 2, fb: "This creates a 'toxic' culture. Other employees will see that rules don't matter if you make money, which leads to a total collapse of discipline. You are storing up a major HR disaster for the future." },
+            { text: "Cut their sales commission as a punishment for their attitude.", pts: 1, fb: "This is a lose-lose situation. You will lose revenue, and the salesperson will likely leave and take their clients to a competitor immediately. Punishment is rarely an effective way to manage high-performing sales professionals." },
+            { text: "Fire them immediately to show that 'culture is everything'.", pts: -1, fb: "This is too extreme! You just lost 30% of your revenue without trying to fix the person first. A manager should always try coaching before termination. You need to be more balanced in your approach to staff." }
+        ],
+        next: "d7"
+    },
+    d7: {
+        title: "D7: The Off-Season",
+        text: "Sales are usually zero in the winter. How do you generate cash flow during the cold months?",
+        choices: [
+            { text: "Launch 'Early-Bird' pre-orders with a 10% discount for spring delivery.", pts: 4, fb: "Classic financial strategy! This solves your cash-flow problems and gives the farmer a better price. It also helps you plan your logistics early. It is a win-win situation for both the company and the customer." },
+            { text: "Introduce a 'Soil Testing Service' that farmers use to prepare for spring.", pts: 3, fb: "Good diversification! Selling services that are useful in the 'off-season' keeps your brand in front of the customer and generates steady revenue. It expands your business beyond just being a simple chemical supplier." },
+            { text: "Sell general winter gear like shovels and coats in your stores.", pts: 2, fb: "It generates some money, but it confuses your brand. You are a fertilizer expert, not a general store. It is a weak solution that doesn't utilize your team's real professional agricultural knowledge." },
+            { text: "Ask all staff to take two months of unpaid vacation.", pts: 1, fb: "This will destroy employee morale. Your best people will find new jobs during their 'vacation,' and you won't have a team left for the busy season. It is a very shortsighted way to manage a professional team." },
+            { text: "Stop all manufacturing and close the office until March.", pts: -1, fb: "This is total failure. A business must operate year-round to be stable. You are giving all your customers to your competitors who stay open. You must find creative ways to keep the business moving through winter." }
+        ],
+        next: "d8"
+    },
+    d8: {
+        title: "D8: Competition",
+        text: "A new company is offering a similar product for 10% less. How do you keep your clients?",
+        choices: [
+            { text: "Provide a 'Guarantee of Yield': our product produces more food per acre.", pts: 4, fb: "Brilliant! You moved the conversation away from 'price' and back to 'value.' Proving that your product makes them more money in the long run is the best way to win. Quality always beats price." },
+            { text: "Match their price but only for customers who sign a 2-year contract.", pts: 3, fb: "A solid defensive move! You protected the account and secured a long-term contract. It's better to have a lower margin than to lose a loyal customer completely. It gives you time to prove your value." },
+            { text: "Tell the customers that the new company uses 'toxic chemicals'.", pts: 2, fb: "This is 'fear-based' selling. It might work, but it can also make you sound desperate or negative. It is always better to focus on your own strengths rather than just attacking the competitor's weaknesses." },
+            { text: "Let the price-sensitive customers leave and focus on luxury farms.", pts: 1, fb: "Too passive. In a competitive market, you must fight for every account. Letting a loyal customer walk away without a real conversation is a failure. You missed an opportunity to adapt your offer." },
+            { text: "Secretly offer the competitor's manager a job to destroy their team.", pts: -1, fb: "This is highly unethical and potentially illegal. It creates a 'corporate war' that helps no one and destroys your professional reputation. Focus on improving your own product rather than sabotaging others. It is a poor choice." }
+        ],
+        next: "e3"
+    },
+    e1: {
+        title: "EMERGENCY: Port Strike",
+        isEmergency: true,
+        text: "A major strike has stopped all imports. Your biggest client needs their order tomorrow or they lose their crop.",
+        choices: [
+            { text: "Call the client, explain the delay, and buy temporary stock from a local partner.", type: "good", fb: "Great choice! Honesty and solving the problem for them (even at a high cost) saves the long-term relationship. It proves you are a partner who takes responsibility during a crisis rather than a vendor." },
+            { text: "Redirect a shipment meant for five smaller farms to the big client.", type: "good", fb: "Tough decision, but 'triage' is sometimes necessary. You prioritized your most critical account to prevent a massive contract loss. It is a pragmatic choice that protects the most vital revenue stream for the company." },
+            { text: "Ignore the client's calls until the port reopens.", type: "bad", gameOver: true, fb: "GAME OVER. The client lost their entire crop because they were waiting for you. They sued the company for millions, and you were fired. In an emergency, silence is the most dangerous path a manager can take." }
+        ],
+        next: "d3"
+    },
+    e3: {
+        title: "EMERGENCY: Environmental Accusation",
+        isEmergency: true,
+        text: "A local newspaper says your chemicals are leaking into the river. The public is angry.",
+        choices: [
+            { text: "Invite a news crew to film your factory's safety and water systems.", type: "good", fb: "Radical transparency! Opening your doors proves you have nothing to hide and stops the panic immediately. This bold move turns a crisis into a victory and shows that your company is responsible and environmentally conscious." },
+            { text: "Release all safety audits and water test results from the last 5 years.", type: "good", fb: "Smart, data-driven response! Using official, verified records is the best way to fight emotional claims with hard facts. It demonstrates that you take safety seriously and have a history of compliance. It is very professional." },
+            { text: "Post an angry comment on the newspaper's website saying they are lying.", type: "bad", gameOver: true, fb: "GAME OVER. You looked guilty and extremely unprofessional. The public turned against the brand, and the CEO was forced to resign. In a PR crisis, losing your temper is the fastest way to lose trust." }
+        ],
+        next: "d9"
+    },
+    d9: {
+        title: "D9: New Technology",
+        text: "A tech startup offers you a drone-spraying service. It is very expensive to implement.",
+        choices: [
+            { text: "Run a small 'Pilot Program' with 5 loyal farms to measure the results.", pts: 4, fb: "The perfect way to innovate! By sharing the risk and testing with real customers, you prove the value before making a massive investment. This is high-level management. It ensures that you only adopt technology that works." },
+            { text: "Offer it as a 'Premium Service' for our highest-paying customers only.", pts: 3, fb: "A smart way to upsell! Customers who buy the best fertilizer are usually the ones most interested in the best technology. It adds a 'high-tech' feel to your brand and helps you recover the costs quickly." },
+            { text: "Take a bank loan to buy 100 drones and replace all ground staff.", pts: 2, fb: "Very aggressive and expensive! If the technology doesn't work perfectly, you have wasted a lot of money and fired your best people. It's a high-risk gamble that usually fails in the agricultural sector." },
+            { text: "Reject the technology and stick to traditional manual spraying.", pts: 1, fb: "Safe, but you will eventually fall behind. Agriculture is becoming high-tech very quickly. While waiting is sometimes smart, rejecting innovation completely makes your company look outdated to the next generation of farmers. Be more open." },
+            { text: "Try to build your own drones from cheap parts to save money.", pts: -1, fb: "Dangerous! This is not your expertise. Cheap drones will crash, damage crops, and cause safety issues. You should focus on your chemicals and leave the hardware to the experts. This is a waste of resources." }
+        ],
+        next: "d10"
+    },
+    d10: {
+        title: "D10: Final Review",
+        text: "The year is ending. How do you reward your sales team for their hard work?",
+        choices: [
+            { text: "Share 'Impact Stories' of how our products helped farmers feed their communities.", pts: 4, fb: "Wonderful! Connecting sales to a 'higher purpose' is the most powerful way to motivate a team. It reminds them that they aren't just selling chemicals; they are helping feed the world. This builds deep, lasting inspiration." },
+            { text: "Introduce a 'Performance Bonus' based on customer retention, not just new sales.", pts: 3, fb: "Very practical! Money is a great motivator, but focusing on retention ensures the health of the company is protected. It aligns personal wealth with the long-term success of the business beautifully and fairly." },
+            { text: "Give every employee a $100 gift card and a 'Thank You' card.", pts: 2, fb: "It's a nice gesture, but it doesn't really drive future performance or show deep appreciation for the hard work. It is a very basic solution that feels a bit impersonal for a professional management team." },
+            { text: "Only give bonuses to the top 2 salespeople and ignore the rest.", pts: 1, fb: "This destroys team morale. Sales is a team sport that requires office support, logistics, and technical help. Ignoring everyone except the front-line sellers creates anger and high staff turnover. You need a more inclusive strategy." },
+            { text: "Tell everyone they are 'lucky to have a job' and cancel all bonuses.", pts: -1, fb: "This is the fastest way to lose your entire team. Your best people will quit immediately, and you will have to spend more money hiring and training new staff. This is an arrogant and failed leadership style." }
+        ],
+        next: "final"
+    }
+};
+
+const levels = [
+    { min: -10, max: 15, name: "The Junior Rep 👷", color: "#eb2f06", msg: "You focused on quick profits and ignored safety and relationships. You need more training in 'Value-Based Selling' to survive in this industry." },
+    { min: 16, max: 28, name: "The Steady Manager 💼", color: "#f6b93b", msg: "Good work. You are reliable and safe. To reach the executive level, try to be more innovative and proactive with new technologies and education." },
+    { min: 29, max: 37, name: "The Territory Director 🏆", color: "#38ada9", msg: "Impressive! You balanced profit with trust and managed emergencies with calm logic. You are highly respected by both your team and your clients." },
+    { min: 38, max: 40, name: "The Global VP 👑", color: "#1e3799", msg: "Masterful! You are a visionary leader. You turned every challenge into a partnership opportunity. Agro-Corp Global is lucky to have your expertise!" }
+];
+
+let currentScore = 0;
+let activeStep = "d1";
+
+/**
+ * Fisher-Yates Shuffle Implementation
+ * Randomizes an array in-place with true mathematical randomness.
+ */
+function fisherYatesShuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+function beginGame() {
+    currentScore = 0;
+    activeStep = "d1";
+    document.getElementById('global-score').innerText = currentScore;
+    transitionTo('main');
+    loadTask();
+}
+
+function transitionTo(screenId) {
+    document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+    document.getElementById('screen-' + screenId).classList.add('active');
+}
+
+function loadTask() {
+    const data = gameData[activeStep];
+    if (!data) return;
+
+    document.getElementById('question-title').innerText = data.title;
+    document.getElementById('question-text').innerText = data.text;
+    document.getElementById('emergency-notice').innerHTML = data.isEmergency ? `<div class="emergency-tag">URGENT MARKET EMERGENCY</div>` : "";
+    
+    const grid = document.getElementById('options-grid');
+    grid.innerHTML = "";
+    document.getElementById('result-feedback').style.display = "none";
+    document.getElementById('next-step-btn').style.display = "none";
+
+    // Shuffle a shallow copy of the choices to maintain data integrity
+    const randomized = fisherYatesShuffle([...data.choices]);
+
+    randomized.forEach(choice => {
+        const b = document.createElement('button');
+        b.className = "opt-btn";
+        b.innerText = choice.text;
+        b.onclick = () => selectOption(choice, b);
+        grid.appendChild(b);
+    });
+}
+
+function selectOption(choice, btn) {
+    const data = gameData[activeStep];
+    const fbPanel = document.getElementById('result-feedback');
+    const badge = document.getElementById('point-tag');
+    const msg = document.getElementById('feedback-msg');
+
+    if (choice.gameOver) {
+        badge.innerText = "CONTRACT TERMINATED";
+        badge.style.background = "var(--red)";
+        msg.innerText = choice.fb;
+        fbPanel.style.display = "block";
+        document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+        setTimeout(() => { alert("CRITICAL FAILURE: " + choice.fb); location.reload(); }, 2000);
+        return;
+    }
+
+    if (choice.pts === -1) {
+        currentScore -= 1;
+        document.getElementById('global-score').innerText = currentScore;
+        badge.innerText = "-1 PENALTY";
+        badge.style.background = "var(--red)";
+        msg.innerText = choice.fb;
+        fbPanel.style.display = "block";
+        btn.disabled = true;
+        btn.style.opacity = "0.3";
+        return;
+    }
+
+    // Success / Proceed Path
+    document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+    btn.style.borderColor = "var(--corp-blue)";
+    btn.style.background = "#f0f4ff";
+
+    if (data.isEmergency) {
+        badge.innerText = "CRISIS RESOLVED";
+        badge.style.background = "var(--green)";
+    } else {
+        currentScore += choice.pts;
+        document.getElementById('global-score').innerText = currentScore;
+        badge.innerText = "+" + choice.pts + " POINTS";
+        badge.style.background = choice.pts > 2 ? "var(--green)" : "var(--corp-blue)";
+    }
+
+    msg.innerText = choice.fb;
+    fbPanel.style.display = "block";
+    fbPanel.style.borderLeftColor = badge.style.background;
+
+    const nextBtn = document.getElementById('next-step-btn');
+    nextBtn.style.display = "block";
+    nextBtn.onclick = () => {
+        activeStep = data.next;
+        if (activeStep === "final") finishShift(); else loadTask();
+    };
+}
+
+function finishShift() {
+    transitionTo('end');
+    document.getElementById('final-total').innerText = currentScore + " / 40";
+    const band = levels.find(l => currentScore >= l.min && currentScore <= l.max) || levels[0];
+    const box = document.getElementById('evaluation-box');
+    box.style.border = "3px solid " + band.color;
+    box.innerHTML = `<h2 style="color:${band.color}">${band.name}</h2><p>${band.msg}</p>`;
+}
+</script>
+</body>
+</html>

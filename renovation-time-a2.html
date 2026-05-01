@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Home Project: English A2</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --wood-brown: #8d6e63;
+        --grass-green: #66bb6a;
+        --sky-blue: #29b6f6;
+        --danger: #ef5350;
+        --bg: #f5f5f5;
+        --text: #333;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        font-family: 'Open Sans', sans-serif;
+        background-color: var(--bg);
+        color: var(--text);
+        line-height: 1.5;
+    }
+
+    header {
+        background: var(--wood-brown);
+        color: white;
+        padding: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 5px solid var(--grass-green);
+    }
+
+    .score-box { background: white; color: var(--wood-brown); padding: 0.5rem 1rem; border-radius: 5px; font-weight: 700; }
+
+    .container { max-width: 600px; margin: 2rem auto; padding: 0 1rem; }
+
+    .card { background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: none; }
+    .card.active { display: block; }
+
+    h1 { font-family: 'Montserrat', sans-serif; font-size: 1.5rem; margin-bottom: 1rem; color: var(--wood-brown); }
+    h2 { font-family: 'Montserrat', sans-serif; font-size: 1.2rem; margin-bottom: 1rem; }
+    p { margin-bottom: 1rem; }
+
+    .choices-grid { display: grid; gap: 10px; margin: 1.5rem 0; }
+    .choice-btn {
+        background: #fff;
+        border: 2px solid #ddd;
+        padding: 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 1rem;
+        text-align: left;
+    }
+    .choice-btn:hover:not(:disabled) { border-color: var(--wood-brown); background: #fdf5f2; }
+    .choice-btn:disabled { opacity: 0.5; }
+
+    .feedback { margin-top: 1rem; padding: 1rem; border-radius: 8px; display: none; border-left: 5px solid; }
+    .fb-excellent { background: #e8f5e9; border-color: #2e7d32; }
+    .fb-poor { background: #ffebee; border-color: #c62828; }
+
+    .next-btn {
+        margin-top: 1.5rem;
+        background: var(--sky-blue);
+        color: white;
+        border: none;
+        padding: 1rem;
+        border-radius: 5px;
+        cursor: pointer;
+        width: 100%;
+        font-weight: 700;
+        display: none;
+    }
+
+    .emergency { background: var(--danger); color: white; padding: 3px 8px; border-radius: 3px; font-size: 0.8rem; font-weight: bold; margin-bottom: 0.5rem; display: inline-block; }
+</style>
+</head>
+<body>
+
+<header>
+    <h1>The Home Project</h1>
+    <div class="score-box">Points: <span id="score">0</span></div>
+</header>
+
+<div class="container">
+    <div class="card active" id="screen-start">
+        <h1>Let's Renovate!</h1>
+        <p>You want to fix your house and build a new <strong>wooden deck</strong> in the garden.</p>
+        <p>You have 10 steps. Be careful with your money and safety!</p>
+        <button class="next-btn" style="display:block;" onclick="startGame()">Start Project</button>
+    </div>
+
+    <div class="card" id="screen-game">
+        <div id="status-area"></div>
+        <h2 id="step-title"></h2>
+        <p id="step-desc"></p>
+        <div class="choices-grid" id="choices-container"></div>
+        
+        <div class="feedback" id="feedback-box">
+            <strong id="points-text"></strong>
+            <p id="feedback-content"></p>
+        </div>
+        
+        <button class="next-btn" id="btn-next">Continue</button>
+    </div>
+
+    <div class="card" id="screen-final">
+        <h1>Project Finished!</h1>
+        <div id="final-stats" style="font-size: 1.5rem; text-align: center; margin-bottom: 1rem;"></div>
+        <div id="band-result" style="padding: 1.5rem; border-radius: 10px; text-align: center;"></div>
+        <button class="next-btn" style="display:block;" onclick="location.reload()">New Project</button>
+    </div>
+</div>
+
+<script>
+const steps = {
+    d1: {
+        title: "1. The Plan",
+        desc: "You want a new wooden deck. What is the first step?",
+        choices: [
+            { text: "Draw a plan and measure the garden.", pts: 3, type: "excellent", fb: "Correct! Good planning saves time and money." },
+            { text: "Buy a lot of wood immediately.", pts: 1, type: "good", fb: "Careful! You don't know how much wood you need yet." },
+            { text: "Ask a neighbor to do it for free.", pts: 2, type: "good", fb: "Nice, but your neighbor might not have time." },
+            { text: "Start digging a hole with no plan.", pts: -1, type: "poor", fb: "No! You will destroy your garden. Choose again." }
+        ],
+        next: "d2"
+    },
+    d2: {
+        title: "2. The Budget",
+        desc: "Wood is very expensive now. What do you do?",
+        choices: [
+            { text: "Compare prices at three different shops.", pts: 3, type: "excellent", fb: "Smart! You found the best price." },
+            { text: "Buy the most expensive wood because it looks pretty.", pts: 1, type: "good", fb: "It looks good, but now you have no money for tools!" },
+            { text: "Use old wood from a broken fence.", pts: 2, type: "good", fb: "Good for the planet, but check for bugs or rot first." },
+            { text: "Steal wood from a building site.", pts: -1, type: "poor", fb: "That is illegal! You will go to jail. Choose again." }
+        ],
+        next: "d3"
+    },
+    d3: {
+        title: "3. The Foundation",
+        desc: "You need to prepare the ground for the deck.",
+        choices: [
+            { text: "Use concrete blocks to make the deck level and strong.", pts: 3, type: "excellent", fb: "Perfect! A strong foundation is very important." },
+            { text: "Put the wood directly on the wet grass.", pts: 1, type: "poor", fb: "Bad idea! The wood will rot in one year. Choose again." },
+            { text: "Put the wood on some old car tires.", pts: 2, type: "good", fb: "It works, but it doesn't look very nice." }
+        ],
+        next: "e1"
+    },
+    e1: {
+        title: "EMERGENCY: Rain!",
+        isEmergency: true,
+        desc: "You are painting the house, but it starts to rain!",
+        choices: [
+            { text: "Stop painting and cover the paint cans.", pts: 0, type: "excellent", next: "d5", fb: "Good Choice! Rain ruins fresh paint." },
+            { text: "Keep painting in the rain.", pts: 0, type: "poor", gameOver: true, fb: "GAME OVER. The rain washed the paint onto the floor. It's a mess!" },
+            { text: "Move your tools into the garage.", pts: 0, type: "excellent", next: "d5", fb: "Good Choice! Keep your tools dry." }
+        ]
+    },
+    d5: {
+        title: "5. Using the Saw",
+        desc: "You need to cut the wood to the right size.",
+        choices: [
+            { text: "Wear safety glasses and gloves.", pts: 3, type: "excellent", fb: "Safety first! Protecting your eyes is very important." },
+            { text: "Close your eyes while you cut the wood.", pts: -1, type: "poor", fb: "Dangerous! You will cut your hand. Choose again." },
+            { text: "Ask a friend to hold the wood while you cut.", pts: 2, type: "good", fb: "Okay, but make sure your friend is safe too." }
+        ],
+        next: "d6"
+    },
+    d6: {
+        title: "6. The Screws",
+        desc: "How do you connect the pieces of wood?",
+        choices: [
+            { text: "Use special 'Deck Screws' that don't rust.", pts: 3, type: "excellent", fb: "Great. These screws stay strong in the rain." },
+            { text: "Use some old glue you found in the kitchen.", pts: 1, type: "poor", fb: "Glue is not strong enough for a deck. Choose again." },
+            { text: "Use a hammer and regular nails.", pts: 2, type: "good", fb: "Okay, but screws are usually better for decks." }
+        ],
+        next: "d7"
+    },
+    d7: {
+        title: "7. The Kitchen Cabinets",
+        desc: "While building the deck, you decide to fix a cabinet in the kitchen.",
+        choices: [
+            { text: "Fix the hinge with a screwdriver.", pts: 3, type: "excellent", fb: "Easy and effective. The door closes perfectly now." },
+            { text: "Take the whole cabinet off the wall.", pts: 1, type: "good", fb: "Now you have a bigger job than you started!" },
+            { text: "Use tape to hold the door shut.", pts: 2, type: "good", fb: "It works, but it looks terrible." }
+        ],
+        next: "e2"
+    },
+    e2: {
+        title: "EMERGENCY: Electricity!",
+        isEmergency: true,
+        desc: "You want to change a light, but you see a spark!",
+        choices: [
+            { text: "Turn off the main power in the house.", pts: 0, type: "excellent", next: "d8", fb: "Good Choice! Safety is the most important thing with electricity." },
+            { text: "Touch the wires with your bare hands.", pts: 0, type: "poor", gameOver: true, fb: "GAME OVER. You got an electric shock. Very dangerous!" },
+            { text: "Call an electrician for help.", pts: 0, type: "excellent", next: "d8", fb: "Good Choice! Professionals are safer." }
+        ]
+    },
+    d8: {
+        title: "8. Finishing the Wood",
+        desc: "The deck is finished, but the wood needs protection.",
+        choices: [
+            { text: "Apply a waterproof oil or stain.", pts: 3, type: "excellent", fb: "Correct. This protects the wood from sun and rain." },
+            { text: "Cover it with a plastic sheet forever.", pts: 1, type: "good", fb: "You can't see the beautiful wood now!" },
+            { text: "Do nothing and let it turn grey.", pts: 2, type: "good", fb: "Some people like the grey look, but the wood might break sooner." }
+        ],
+        next: "d9"
+    },
+    d9: {
+        title: "9. Cleaning Up",
+        desc: "There is trash and sawdust everywhere.",
+        choices: [
+            { text: "Put everything in the correct recycling bins.", pts: 3, type: "excellent", fb: "Great. You are a responsible renovator." },
+            { text: "Throw the trash in the neighbor's garden.", pts: -1, type: "poor", fb: "Rude! Your neighbor will be very angry. Choose again." },
+            { text: "Leave it there and wait for the wind to blow it away.", pts: 1, type: "good", fb: "Now your garden is a mess!" }
+        ],
+        next: "d10"
+    },
+    d10: {
+        title: "10. The Party",
+        desc: "The deck is ready! What do you do?",
+        choices: [
+            { text: "Invite your friends for a BBQ on the new deck.", pts: 3, type: "excellent", fb: "Perfect! Enjoy your hard work." },
+            { text: "Sit on the deck alone and look at the sky.", pts: 2, type: "good", fb: "Very relaxing. You earned it." },
+            { text: "Start a new project immediately and never rest.", pts: 1, type: "good", fb: "You are a hard worker, but you need a break!" }
+        ],
+        next: "final"
+    }
+};
+
+const bands = [
+    { min: -10, max: 15, title: "Messy Builder 🛠️", color: "#e67e22", text: "Your house is still a bit broken. Practice more and try again!" },
+    { min: 16, max: 26, title: "Good Handyman 🔨", color: "#2980b9", text: "Well done! Your deck is nice and your house looks better." },
+    { min: 27, max: 30, title: "Master Builder 🏆", color: "#27ae60", text: "Incredible! Your house is perfect and your deck is amazing." }
+];
+
+let score = 0;
+let currentStepId = "d1";
+
+/* FISHER-YATES SHUFFLE ALGORITHM
+  Ensures true mathematical randomness for choice positions.
+*/
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+function startGame() {
+    score = 0; currentStepId = "d1";
+    updateScore(); showScreen("game"); renderStep();
+}
+
+function updateScore() { document.getElementById('score').innerText = score; }
+
+function showScreen(id) {
+    document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+    document.getElementById('screen-' + id).classList.add('active');
+}
+
+function renderStep() {
+    const data = steps[currentStepId];
+    const container = document.getElementById('choices-container');
+    document.getElementById('step-title').innerText = data.title;
+    document.getElementById('step-desc').innerText = data.desc;
+    document.getElementById('status-area').innerHTML = data.isEmergency ? `<div class="emergency">EMERGENCY</div>` : "";
+    container.innerHTML = "";
+    document.getElementById('feedback-box').style.display = "none";
+    document.getElementById('btn-next').style.display = "none";
+
+    // Update Render Logic: Shuffle a shallow copy of choices before creating buttons
+    const shuffledChoices = shuffleArray([...data.choices]);
+
+    shuffledChoices.forEach(choice => {
+        const btn = document.createElement('button');
+        btn.className = "choice-btn";
+        btn.innerText = choice.text;
+        btn.onclick = () => handleChoice(choice, btn);
+        container.appendChild(btn);
+    });
+}
+
+function handleChoice(choice, btn) {
+    const fbBox = document.getElementById('feedback-box');
+    const data = steps[currentStepId];
+
+    document.getElementById('points-text').innerText = choice.pts >= 0 ? `+${choice.pts} Points` : `${choice.pts} Point`;
+    if (data.isEmergency) document.getElementById('points-text').innerText = choice.type === "poor" ? "FAILED" : "GOOD CHOICE";
+    
+    document.getElementById('feedback-content').innerText = choice.fb;
+    fbBox.className = "feedback fb-" + (choice.type === "excellent" ? "excellent" : "poor");
+    fbBox.style.display = "block";
+
+    if (choice.gameOver) {
+        setTimeout(() => { alert(choice.fb); location.reload(); }, 3000);
+        return;
+    }
+
+    if (choice.pts === -1) {
+        score += choice.pts; updateScore();
+        btn.disabled = true; return;
+    }
+
+    score += choice.pts; updateScore();
+    document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
+    const nextBtn = document.getElementById('btn-next');
+    nextBtn.style.display = "block";
+    nextBtn.onclick = () => {
+        currentStepId = choice.path || choice.next || steps[currentStepId].next;
+        if (currentStepId === "final") showFinal(); else renderStep();
+    };
+}
+
+function showFinal() {
+    showScreen("final");
+    document.getElementById('final-stats').innerText = `Score: ${score} / 30`;
+    const band = bands.find(b => score >= b.min && score <= b.max) || bands[0];
+    const br = document.getElementById('band-result');
+    br.style.border = "2px solid " + band.color;
+    br.innerHTML = `<h2 style="color:${band.color}">${band.title}</h2><p>${band.text}</p>`;
+}
+</script>
+</body>
+</html>

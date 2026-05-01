@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Home Restoration Project: Upper-Intermediate English</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --wood-brown: #5d4037;
+        --grass-green: #2e7d32;
+        --sky-blue: #0277bd;
+        --danger: #c62828;
+        --bg: #fdfdfd;
+        --text: #2c3e50;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        font-family: 'Open Sans', sans-serif;
+        background-color: var(--bg);
+        color: var(--text);
+        line-height: 1.6;
+    }
+
+    header {
+        background: var(--wood-brown);
+        color: white;
+        padding: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 6px solid var(--grass-green);
+    }
+
+    .score-box { background: rgba(255,255,255,0.9); color: var(--wood-brown); padding: 0.6rem 1.2rem; border-radius: 8px; font-weight: 700; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+
+    .container { max-width: 700px; margin: 3rem auto; padding: 0 1.5rem; }
+
+    .card { background: white; padding: 2.5rem; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); display: none; border: 1px solid #eee; }
+    .card.active { display: block; }
+
+    h1 { font-family: 'Montserrat', sans-serif; font-size: 1.8rem; margin-bottom: 1.2rem; color: var(--wood-brown); }
+    h2 { font-family: 'Montserrat', sans-serif; font-size: 1.4rem; margin-bottom: 1.2rem; }
+    p { margin-bottom: 1.2rem; }
+
+    .choices-grid { display: grid; gap: 12px; margin: 2rem 0; }
+    .choice-btn {
+        background: #fff;
+        border: 2px solid #e0e0e0;
+        padding: 1.2rem;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 1.05rem;
+        text-align: left;
+        transition: all 0.2s ease;
+    }
+    .choice-btn:hover:not(:disabled) { border-color: var(--wood-brown); background: #fdfaf9; transform: translateY(-2px); }
+    .choice-btn:disabled { opacity: 0.6; cursor: default; }
+
+    .feedback { margin-top: 1.5rem; padding: 1.5rem; border-radius: 10px; display: none; border-left: 6px solid; }
+    .fb-excellent { background: #f1f8e9; border-color: #388e3c; }
+    .fb-poor { background: #fff1f0; border-color: #d32f2f; }
+
+    .next-btn {
+        margin-top: 2rem;
+        background: var(--sky-blue);
+        color: white;
+        border: none;
+        padding: 1.2rem;
+        border-radius: 8px;
+        cursor: pointer;
+        width: 100%;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        display: none;
+    }
+
+    .emergency { background: var(--danger); color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; font-weight: bold; margin-bottom: 0.8rem; display: inline-block; animation: blink 1s infinite; }
+    @keyframes blink { 50% { opacity: 0.7; } }
+</style>
+</head>
+<body>
+
+<header>
+    <h1>The Restoration Project</h1>
+    <div class="score-box">Efficiency Rating: <span id="score">0</span></div>
+</header>
+
+<div class="container">
+    <div class="card active" id="screen-start">
+        <h1>Property Modernization</h1>
+        <p>You have embarked on a comprehensive home renovation project. Your primary objective is to construct a <strong>sophisticated wooden deck</strong> to enhance your outdoor living space.</p>
+        <p>You will face 10 critical decisions. Manage your budget meticulously and prioritize safety to ensure a successful outcome!</p>
+        <button class="next-btn" style="display:block;" onclick="startGame()">Commence Project</button>
+    </div>
+
+    <div class="card" id="screen-game">
+        <div id="status-area"></div>
+        <h2 id="step-title"></h2>
+        <p id="step-desc"></p>
+        <div class="choices-grid" id="choices-container"></div>
+        
+        <div class="feedback" id="feedback-box">
+            <strong id="points-text"></strong>
+            <p id="feedback-content"></p>
+        </div>
+        
+        <button class="next-btn" id="btn-next">Proceed to Next Phase</button>
+    </div>
+
+    <div class="card" id="screen-final">
+        <h1>Renovation Complete!</h1>
+        <div id="final-stats" style="font-size: 1.5rem; text-align: center; margin-bottom: 1rem;"></div>
+        <div id="band-result" style="padding: 2rem; border-radius: 12px; text-align: center;"></div>
+        <button class="next-btn" style="display:block;" onclick="location.reload()">Start New Expedition</button>
+    </div>
+</div>
+
+<script>
+const steps = {
+    d1: {
+        title: "Phase 1: Conceptual Planning",
+        desc: "To ensure the structural integrity of your new deck, what should be your initial course of action?",
+        choices: [
+            { text: "Draft a comprehensive blueprint and take precise measurements of the landscape.", pts: 3, type: "excellent", fb: "Superb! Meticulous planning minimizes waste and optimizes your financial resources." },
+            { text: "Acquire a substantial quantity of lumber immediately to avoid price hikes.", pts: 1, type: "good", fb: "Risky. Without exact specifications, you are likely to overspend or lack sufficient materials." },
+            { text: "Request that a neighbor undertake the project as a favor.", pts: 2, type: "good", fb: "Resourceful, though relying on unskilled labor may compromise the final quality." },
+            { text: "Commence excavation without a formalized design.", pts: -1, type: "poor", fb: "Disastrous! You risk damaging underground utilities. Re-evaluate your strategy." }
+        ],
+        next: "d2"
+    },
+    d2: {
+        title: "Phase 2: Budgetary Considerations",
+        desc: "Lumber prices have skyrocketed recently due to supply chain issues. How do you manage your expenses?",
+        choices: [
+            { text: "Obtain quotations from multiple suppliers to compare market rates.", pts: 3, type: "excellent", fb: "Wise move! You've secured a competitive price while maintaining quality standards." },
+            { text: "Purchase premium hardwood regardless of the exorbitant cost.", pts: 1, type: "good", fb: "While aesthetically pleasing, this has severely depleted your remaining budget for essential tools." },
+            { text: "Utilize reclaimed timber salvaged from an old fence.", pts: 2, type: "good", fb: "Eco-friendly! However, ensure the wood is treated to prevent rot or insect infestation." },
+            { text: "Acquire construction materials through illicit means.", pts: -1, type: "poor", fb: "Illegal! Such actions lead to severe legal consequences. Select a legitimate option." }
+        ],
+        next: "d3"
+    },
+    d3: {
+        title: "Phase 3: Establishing the Foundation",
+        desc: "A durable foundation is crucial for preventing the structure from sagging or collapsing.",
+        choices: [
+            { text: "Install concrete footings to ensure the deck is level and structurally sound.", pts: 3, type: "excellent", fb: "Excellent! This foundation will withstand significant weight and adverse weather." },
+            { text: "Lay the timber directly onto the damp soil.", pts: 1, type: "poor", fb: "Unacceptable! Moisture will cause the wood to decay within a year. Re-think this approach." },
+            { text: "Improvise using discarded automobile tires as supports.", pts: 2, type: "good", fb: "Economical, yet it significantly detracts from the property's overall aesthetic value." }
+        ],
+        next: "e1"
+    },
+    e1: {
+        title: "URGENT CRISIS: Adverse Weather!",
+        isEmergency: true,
+        desc: "During the exterior painting phase, an unexpected storm begins. How do you respond?",
+        choices: [
+            { text: "Suspend the operation immediately and secure all paint containers.", pts: 0, type: "excellent", next: "d5", fb: "Strategic! Moisture prevents paint from adhering correctly to the surface." },
+            { text: "Persist with the task despite the torrential rain.", pts: 0, type: "poor", gameOver: true, fb: "PROJECT FAILURE. The precipitation has washed the fresh finish away, creating an expensive mess." },
+            { text: "Transfer all electrical equipment and materials to the shed.", pts: 0, type: "excellent", next: "d5", fb: "Prudent! Protecting your equipment from corrosion is essential." }
+        ]
+    },
+    d5: {
+        title: "Phase 5: Carpentry and Precision",
+        desc: "You must now cut the lumber to the exact specifications outlined in your blueprint.",
+        choices: [
+            { text: "Equip yourself with protective eyewear and industrial gloves.", pts: 3, type: "excellent", fb: "Safety prioritized! Adhering to safety protocols prevents avoidable workplace injuries." },
+            { text: "Operate the power saw without direct visual supervision.", pts: -1, type: "poor", fb: "Extremely reckless! This will lead to severe physical harm. Please reconsider." },
+            { text: "Enlist an assistant to stabilize the timber during the cutting process.", pts: 2, type: "good", fb: "Collaborative, but ensure both parties are wearing appropriate safety gear." }
+        ],
+        next: "d6"
+    },
+    d6: {
+        title: "Phase 6: Structural Fasteners",
+        desc: "Which method will you employ to assemble the primary frame of the deck?",
+        choices: [
+            { text: "Utilize corrosion-resistant deck screws designed for outdoor exposure.", pts: 3, type: "excellent", fb: "Optimal choice. These fasteners will not rust, maintaining the deck's stability for decades." },
+            { text: "Apply an adhesive found in the kitchen cupboard.", pts: 1, type: "poor", fb: "Ineffective! Glue lacks the tensile strength required for structural loads. Choose again." },
+            { text: "Employ standard nails and a traditional hammer.", pts: 2, type: "good", fb: "Acceptable, though screws offer superior grip and are easier to remove for repairs." }
+        ],
+        next: "d7"
+    },
+    d7: {
+        title: "Phase 7: Interior Refurbishment",
+        desc: "While waiting for the wood finish to dry, you decide to repair a malfunctioning kitchen cabinet.",
+        choices: [
+            { text: "Adjust the alignment of the hinges using a screwdriver.", pts: 3, type: "excellent", fb: "Efficient! Small adjustments often resolve significant mechanical issues." },
+            { text: "Dismantle the entire cabinetry unit from the wall.", pts: 1, type: "good", fb: "You have inadvertently complicated a simple task. Now you have a much larger project!" },
+            { text: "Apply duct tape to secure the cabinet door permanently.", pts: 2, type: "good", fb: "Functional in the short term, but aesthetically unappealing and unprofessional." }
+        ],
+        next: "e2"
+    },
+    e2: {
+        title: "URGENT CRISIS: Electrical Malfunction!",
+        isEmergency: true,
+        desc: "While replacing a light fixture, you notice a spark emanating from the wiring!",
+        choices: [
+            { text: "Disconnect the main circuit breaker to neutralize the power supply.", pts: 0, type: "excellent", next: "d8", fb: "Correct! Neutralizing the source of danger is the primary safety protocol." },
+            { text: "Examine the exposed wires with your bare hands.", pts: 0, type: "poor", gameOver: true, fb: "CRITICAL FAILURE. You have suffered a severe electric shock. Safety training is mandatory." },
+            { text: "Consult a certified electrician to handle the hazardous repair.", pts: 0, type: "excellent", next: "d8", fb: "Wise! Professional intervention is necessary when dealing with high-voltage systems." }
+        ]
+    },
+    d8: {
+        title: "Phase 8: Surface Protection",
+        desc: "The construction is complete, but the wood requires a protective coating against the elements.",
+        choices: [
+            { text: "Apply a high-quality waterproof sealant or UV-resistant stain.", pts: 3, type: "excellent", fb: "Spot on. This treatment prevents splitting, warping, and sun damage." },
+            { text: "Enclose the structure in plastic sheeting indefinitely.", pts: 1, type: "good", fb: "Impractical. While protected, the deck is now completely unusable for recreation." },
+            { text: "Leave the wood untreated to acquire a weathered appearance.", pts: 2, type: "good", fb: "Artistic, but be aware that untreated wood is more susceptible to structural degradation." }
+        ],
+        next: "d9"
+    },
+    d9: {
+        title: "Phase 9: Waste Management",
+        desc: "The construction site is currently cluttered with debris and hazardous sawdust.",
+        choices: [
+            { text: "Categorize and dispose of all materials in the appropriate recycling facilities.", pts: 3, type: "excellent", fb: "Responsible! Environmental stewardship is an essential aspect of modern construction." },
+            { text: "Discard the waste material onto the adjacent property.", pts: -1, type: "poor", fb: "Unprofessional! This will lead to disputes with your neighbors and potential fines." },
+            { text: "Leave the debris and wait for natural dispersal by the wind.", pts: 1, type: "good", fb: "Your property now looks neglected and poses a safety hazard to residents." }
+        ],
+        next: "d10"
+    },
+    d10: {
+        title: "Phase 10: Inauguration",
+        desc: "The project has reached its conclusion. How will you celebrate your achievement?",
+        choices: [
+            { text: "Host an inaugural garden gathering for your acquaintances.", pts: 3, type: "excellent", fb: "Perfect! You can now enjoy the fruits of your labor in good company." },
+            { text: "Reflect on the project's success in tranquil solitude.", pts: 2, type: "good", fb: "A well-deserved moment of peace after a demanding physical endeavor." },
+            { text: "Immediately initiate a new project without any period of recuperation.", pts: 1, type: "good", fb: "Your work ethic is commendable, but avoiding burnout is crucial for long-term productivity." }
+        ],
+        next: "final"
+    }
+};
+
+const bands = [
+    { min: -10, max: 15, title: "Amateur Enthusiast 🛠️", color: "#e67e22", text: "Your project faced significant hurdles. Consider consulting professional guides before your next renovation." },
+    { min: 16, max: 26, title: "Proficient Handyperson 🔨", color: "#2980b9", text: "Impressive! Your deck is structurally sound and aesthetically pleasing. You have managed your resources well." },
+    { min: 27, max: 30, title: "Master Contractor 🏆", color: "#27ae60", text: "Exceptional! Your attention to detail and commitment to safety have resulted in a professional-grade installation." }
+];
+
+let score = 0;
+let currentStepId = "d1";
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+function startGame() {
+    score = 0; currentStepId = "d1";
+    updateScore(); showScreen("game"); renderStep();
+}
+
+function updateScore() { document.getElementById('score').innerText = score; }
+
+function showScreen(id) {
+    document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+    document.getElementById('screen-' + id).classList.add('active');
+}
+
+function renderStep() {
+    const data = steps[currentStepId];
+    const container = document.getElementById('choices-container');
+    document.getElementById('step-title').innerText = data.title;
+    document.getElementById('step-desc').innerText = data.desc;
+    document.getElementById('status-area').innerHTML = data.isEmergency ? `<div class="emergency">CRITICAL SITUATION</div>` : "";
+    container.innerHTML = "";
+    document.getElementById('feedback-box').style.display = "none";
+    document.getElementById('btn-next').style.display = "none";
+
+    const shuffledChoices = shuffleArray([...data.choices]);
+
+    shuffledChoices.forEach(choice => {
+        const btn = document.createElement('button');
+        btn.className = "choice-btn";
+        btn.innerText = choice.text;
+        btn.onclick = () => handleChoice(choice, btn);
+        container.appendChild(btn);
+    });
+}
+
+function handleChoice(choice, btn) {
+    const fbBox = document.getElementById('feedback-box');
+    const data = steps[currentStepId];
+
+    document.getElementById('points-text').innerText = choice.pts >= 0 ? `+${choice.pts} Rating Points` : `${choice.pts} Penalty`;
+    if (data.isEmergency) document.getElementById('points-text').innerText = choice.type === "poor" ? "PROTOCOL FAILURE" : "OPTIMAL RESPONSE";
+    
+    document.getElementById('feedback-content').innerText = choice.fb;
+    fbBox.className = "feedback fb-" + (choice.type === "excellent" ? "excellent" : "poor");
+    fbBox.style.display = "block";
+
+    if (choice.gameOver) {
+        setTimeout(() => { alert(choice.fb); location.reload(); }, 3000);
+        return;
+    }
+
+    if (choice.pts === -1) {
+        score += choice.pts; updateScore();
+        btn.disabled = true; return;
+    }
+
+    score += choice.pts; updateScore();
+    document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
+    const nextBtn = document.getElementById('btn-next');
+    nextBtn.style.display = "block";
+    nextBtn.onclick = () => {
+        currentStepId = choice.path || choice.next || steps[currentStepId].next;
+        if (currentStepId === "final") showFinal(); else renderStep();
+    };
+}
+
+function showFinal() {
+    showScreen("final");
+    document.getElementById('final-stats').innerText = `Final Score: ${score} / 30`;
+    const band = bands.find(b => score >= b.min && score <= b.max) || bands[0];
+    const br = document.getElementById('band-result');
+    br.style.border = "2px solid " + band.color;
+    br.innerHTML = `<h2 style="color:${band.color}">${band.title}</h2><p>${band.text}</p>`;
+}
+</script>
+</body>
+</html>

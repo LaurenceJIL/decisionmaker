@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FastHire: The Recruitment Game (A2 Level)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@600&family=DM+Sans:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F8FAFC;--surface:#FFFFFF;--ink:#1E293B;--ink2:#475569;
+  --primary:#2563EB;--success:#16A34A;--warning:#D97706;--danger:#DC2626;
+  --rule:rgba(0,0,0,0.08);--r:16px;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);line-height:1.5;margin:0;padding:15px}
+.shell{max-width:650px;margin:0 auto}
+.header{text-align:center;margin-bottom:20px}
+.badge{display:inline-block;padding:4px 12px;background:var(--ink);color:white;border-radius:20px;font-size:11px;font-weight:bold;text-transform:uppercase;letter-spacing:1px}
+.card{background:var(--surface);border-radius:var(--r);box-shadow:0 10px 25px -5px rgba(0,0,0,0.1);padding:25px;border:1px solid var(--rule)}
+.stats{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;font-family:'DM Mono',monospace;font-size:14px;border-bottom:1px solid var(--rule);padding-bottom:15px}
+.time{color:var(--primary);font-weight:bold}
+.vocab-box{margin-bottom:20px;display:flex;flex-wrap:wrap;gap:6px}
+.v-pill{font-size:11px;background:#F1F5F9;padding:3px 10px;border-radius:6px;color:var(--ink2);border:1px solid var(--rule)}
+.scenario{font-size:17px;margin-bottom:25px;font-weight:500;color:var(--ink)}
+.options{display:flex;flex-direction:column;gap:10px}
+.btn-opt{text-align:left;padding:14px;border:2px solid #E2E8F0;border-radius:12px;background:white;cursor:pointer;font-family:inherit;font-size:14px;transition:0.2s}
+.btn-opt:hover:not(:disabled){background:#F8FAFC;border-color:var(--primary)}
+.btn-opt:disabled{opacity:0.6;cursor:default}
+.feedback{margin-top:20px;padding:15px;border-radius:10px;display:none;font-size:14px;font-weight:500}
+.fb-3{background:#F0FFF4;border:1px solid var(--success);color:#166534}
+.fb-2{background:#F0F9FF;border:1px solid #0EA5E9;color:#075985}
+.fb-1{background:#FFFBEB;border:1px solid var(--warning);color:#92400E}
+.fb-neg{background:#FEF2F2;border:1px solid var(--danger);color:#991B1B}
+.next-btn{margin-top:20px;width:100%;padding:14px;background:var(--primary);color:white;border:none;border-radius:10px;font-weight:bold;cursor:pointer;display:none;font-size:16px}
+.final-score{font-size:54px;font-weight:bold;margin:10px 0;color:var(--primary);font-family:'Lora',serif}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <div class="header">
+    <div class="badge">A2 English Training</div>
+    <h1>FastHire Agency Simulator</h1>
+  </div>
+
+  <div id="game-container" class="card">
+    <div id="ui-top" class="stats">
+      <span id="time-display" class="time">09:00 AM</span>
+      <span class="score-box">Score: <span id="score">0</span></span>
+    </div>
+    <div id="vocab" class="vocab-box"></div>
+    <div id="content"></div>
+  </div>
+</div>
+
+<script>
+const state = { stage: 0, score: 0 };
+
+const data = [
+  {
+    time: "09:00 AM — Morning Tasks",
+    vocab: ["inbox", "urgent", "priority", "client"],
+    scene: "Your desk is messy. You have 15 new emails and an angry client is calling your phone. What do you do first?",
+    opts: [
+      { t: "Ignore the phone and read all 15 emails slowly.", pts: 1, fb: "Average. Emails are important, but the client on the phone is waiting." },
+      { t: "Answer the phone immediately to help the client.", pts: 3, fb: "Best! In recruitment, talking to clients is the highest priority." },
+      { t: "Go to the kitchen to get coffee for 20 minutes.", pts: -1, fb: "Poor choice! You must work when the office is busy. Try again." },
+      { t: "Send a short email to everyone saying 'I am busy'.", pts: 2, fb: "Good. You are communicating, but calling the client is better." }
+    ]
+  },
+  {
+    time: "10:00 AM — The Job Advert",
+    vocab: ["advert", "bullet points", "clear", "salary"],
+    scene: "You need to write a job advert for a 'Receptionist'. How should you write it?",
+    opts: [
+      { t: "Write 3 pages of text with every small detail.", pts: 1, fb: "Average. Most people will not read a very long advert." },
+      { t: "Don't write an advert. Just wait for people to call you.", pts: -1, fb: "Poor! Nobody will find the job if you don't post it. Try again." },
+      { t: "Use simple English and bullet points for the main tasks.", pts: 3, fb: "Best! Clear and simple adverts get the most applications." },
+      { t: "Write only the salary and the phone number.", pts: 2, fb: "Good, but candidates want to know what the job is about." }
+    ]
+  },
+  {
+    time: "11:00 AM — Finding Candidates",
+    vocab: ["CV", "search", "experience", "skills"],
+    scene: "You are looking for a chef. You find a CV with great skills, but the person lives 50 miles away. What do you do?",
+    opts: [
+      { t: "Call them to see if they want to move or travel.", pts: 3, fb: "Best! Skills are hard to find. It is always worth a phone call." },
+      { t: "Delete the CV immediately because they live too far.", pts: -1, fb: "Poor! They might be planning to move to your city. Try again." },
+      { t: "Save the CV and maybe call them next week.", pts: 1, fb: "Average. Next week might be too late; another agency will call them." },
+      { t: "Email them a list of local apartments to rent.", pts: 2, fb: "Good. You are being helpful, but talk to them about the job first!" }
+    ]
+  },
+  {
+    time: "12:00 PM — Interview Prep",
+    vocab: ["preparation", "advice", "dress code", "company culture"],
+    scene: "A candidate has an interview tomorrow. They are very nervous. How do you help them?",
+    opts: [
+      { t: "Tell them to 'just be lucky' and hang up.", pts: -1, fb: "Poor. A recruiter should always prepare their candidates." },
+      { t: "Give them a list of common questions and tell them the dress code.", pts: 3, fb: "Best! Preparation helps the candidate succeed and makes you look professional." },
+      { t: "Tell them to wear a costume to stand out.", pts: 1, fb: "Average. This is very risky advice for a professional job." },
+      { t: "Call the company and cancel the interview.", pts: 2, fb: "Good that you worry, but canceling doesn't help the candidate get the job." }
+    ]
+  },
+  {
+    time: "02:00 PM — The Client Meeting",
+    vocab: ["requirement", "feedback", "negotiate", "contract"],
+    scene: "A client says your candidates are 'not good enough'. How do you respond?",
+    opts: [
+      { t: "Argue with the client and tell them they are wrong.", pts: -1, fb: "Poor! You must maintain a good relationship with your client." },
+      { t: "Ask for specific feedback and update the job requirements.", pts: 3, fb: "Best! Feedback helps you find exactly what the client wants." },
+      { t: "Say nothing and send the same candidates again.", pts: 1, fb: "Average. This wastes time for everyone involved." },
+      { t: "Offer the client a discount on the contract price.", pts: 2, fb: "Good. This might make them stay, but finding better people is more important." }
+    ]
+  },
+  {
+    time: "04:30 PM — The Placement",
+    vocab: ["start date", "references", "congratulate", "paperwork"],
+    scene: "Your candidate got the job! What is the final step?",
+    opts: [
+      { t: "Congratulate them and check the start date and paperwork.", pts: 3, fb: "Best! Finishing the paperwork ensures the placement is successful." },
+      { t: "Stop answering their calls because you already won.", pts: -1, fb: "Poor! You must support the candidate until they start the job." },
+      { t: "Ask them to buy you a present.", pts: 1, fb: "Average. This is unprofessional behavior." },
+      { t: "Send a message on LinkedIn but forget the paperwork.", pts: 2, fb: "Good. It's nice to celebrate, but don't forget the legal details." }
+    ]
+  }
+];
+
+/** * Fisher-Yates Shuffle Algorithm 
+ */
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+function render() {
+  const container = document.getElementById('content');
+  const vocabDiv = document.getElementById('vocab');
+  
+  if (state.stage >= data.length) {
+    showFinal();
+    return;
+  }
+
+  const step = data[state.stage];
+  document.getElementById('time-display').textContent = step.time;
+
+  vocabDiv.innerHTML = step.vocab.map(v => `<span class="v-pill">${v}</span>`).join('');
+
+  // Shuffle a copy of the options array to maintain randomness while keeping data locked
+  const shuffledOptions = shuffleArray([...step.opts]);
+
+  container.innerHTML = `
+    <div class="scenario">${step.scene}</div>
+    <div class="options" id="opt-list"></div>
+    <div id="fb" class="feedback"></div>
+    <button id="next-btn" class="next-btn" onclick="next()">Next Stage →</button>
+  `;
+
+  const list = document.getElementById('opt-list');
+  shuffledOptions.forEach(opt => {
+    const b = document.createElement('button');
+    b.className = 'btn-opt';
+    b.textContent = opt.t;
+    b.onclick = () => handleChoice(opt, b);
+    list.appendChild(b);
+  });
+}
+
+function handleChoice(opt, btn) {
+  const fbDiv = document.getElementById('fb');
+  const btns = document.querySelectorAll('.btn-opt');
+  const nextBtn = document.getElementById('next-btn');
+
+  if (opt.pts === -1) {
+    fbDiv.innerHTML = `<strong>Try again:</strong> ${opt.fb}`;
+    fbDiv.className = "feedback fb-neg";
+    fbDiv.style.display = "block";
+    return;
+  }
+
+  state.score += opt.pts;
+  document.getElementById('score').textContent = state.score;
+  btns.forEach(b => b.disabled = true);
+  btn.style.borderColor = "var(--primary)";
+  btn.style.background = "#F1F5F9";
+  
+  fbDiv.innerHTML = opt.fb;
+  fbDiv.className = `feedback fb-${opt.pts}`;
+  fbDiv.style.display = "block";
+  nextBtn.style.display = "block";
+}
+
+function next() {
+  state.stage++;
+  render();
+}
+
+function showFinal() {
+  let msg, band;
+  
+  if (state.score >= 15) {
+    band = "Expert Consultant";
+    msg = "Amazing! You are a master of recruitment. You are professional, honest, and you know how to talk to people. FastHire is lucky to have you!";
+  } else if (state.score >= 10) {
+    band = "Strong Recruiter";
+    msg = "Well done! You made many good choices today. You understand the basics and you are very helpful to your candidates.";
+  } else {
+    band = "Trainee Recruiter";
+    msg = "A difficult day! Recruitment is hard to learn. Try to focus more on client calls and being honest with everyone next time.";
+  }
+
+  document.getElementById('content').innerHTML = `
+    <div style="text-align:center; padding: 20px 0;">
+      <div class="badge" style="background:var(--primary)">Simulation Complete</div>
+      <div class="final-score">${state.score}</div>
+      <h2 style="margin-bottom:10px">${band}</h2>
+      <p style="color:var(--ink2); margin-bottom:30px">${msg}</p>
+      <button class="next-btn" style="display:block" onclick="location.reload()">Restart Training</button>
+    </div>
+  `;
+  document.getElementById('ui-top').style.display = "none";
+  document.getElementById('vocab').style.display = "none";
+}
+
+render();
+</script>
+
+</body>
+</html>

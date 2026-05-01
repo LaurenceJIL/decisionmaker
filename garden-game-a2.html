@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Simple Garden Game — A2 Level</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green-dark: #2d5a27;
+    --green-mid: #4a7c44;
+    --green-light: #8fbc8f;
+    --danger: #c0392b;
+    --gold: #b08d2d;
+    --text: #2c3e50;
+    --bg: #f4f7f6;
+  }
+
+  body { font-family: 'Lato', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; align-items: center; }
+  .header { background: var(--green-dark); color: white; width: 100%; padding: 15px; text-align: center; position: sticky; top: 0; z-index: 10; }
+  
+  .stats-bar { display: flex; justify-content: space-around; background: #fff; width: 100%; padding: 10px 0; border-bottom: 2px solid #ddd; font-weight: bold; }
+  .stat-item { display: flex; align-items: center; gap: 5px; }
+
+  .progress-bar { width: 100%; height: 8px; background: #ddd; }
+  .progress-fill { height: 100%; background: var(--green-light); width: 0%; transition: 0.5s; }
+
+  .game-container { max-width: 800px; width: 90%; margin: 20px auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); min-height: 400px; }
+  .choice-list { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+
+  .choice-btn { 
+    padding: 18px; border: 2px solid #eee; border-radius: 8px; background: white; 
+    cursor: pointer; font-size: 1rem; text-align: left; transition: 0.2s;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .choice-btn:hover:not(:disabled) { border-color: var(--green-mid); background: #f0f7f0; transform: translateX(5px); }
+  .choice-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+  
+  .price-tag { padding: 2px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: bold; }
+  .cost-tag { background: #eee; color: #333; }
+  .profit-tag { background: #d4edda; color: #155724; }
+
+  .feedback { margin-top: 20px; padding: 20px; border-radius: 8px; display: none; line-height: 1.6; border-left: 5px solid #ccc; font-size: 1.05rem; }
+  .btn-next { display: none; margin-top: 20px; padding: 15px 30px; background: var(--green-dark); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; font-size: 1.1rem; }
+
+  .vocab-section { margin-top: 30px; background: #f9f9f9; padding: 20px; border-radius: 10px; text-align: left; border-top: 4px solid var(--green-mid); }
+  .vocab-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px; }
+  .vocab-item { font-size: 0.95rem; line-height: 1.4; }
+  .vocab-item b { color: var(--green-dark); }
+
+  #landingPage {
+    position: fixed; inset: 0; z-index: 100;
+    background: var(--green-dark);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 30px;
+  }
+
+  .landing-inner { max-width: 680px; width: 100%; text-align: center; color: white; }
+  .landing-title { font-family: 'Playfair Display', serif; font-size: 3rem; margin-bottom: 10px; }
+  .landing-btn { padding: 17px 48px; background: var(--gold); color: #fff; font-weight: 700; border: none; border-radius: 6px; cursor: pointer; margin-top: 20px; }
+</style>
+</head>
+<body>
+
+<div id="landingPage">
+  <div class="landing-inner">
+    <h1 class="landing-title">The Garden Game</h1>
+    <p>It is Spring! You have a new garden and <strong>$100</strong>.</p>
+    <p>Make good choices. Do you want food, flowers, or herbs? Watch the weather and help your neighbors!</p>
+    <button class="landing-btn" onclick="startGame()">Start Game →</button>
+  </div>
+</div>
+
+<div class="header">
+  <h1>🌿 My Garden Journey</h1>
+</div>
+
+<div class="stats-bar">
+  <div class="stat-item">⭐ Stars: <span id="scoreDisplay">0</span></div>
+  <div class="stat-item">💰 Money: <span id="budgetDisplay">$100</span></div>
+</div>
+
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+<div class="game-container" id="gameWindow">
+  <h2 id="stepTitle">Choose Your Garden</h2>
+  <p id="stepDesc">What do you want to grow today?</p>
+  <div class="choice-list" id="choiceList"></div>
+  <div class="feedback" id="feedbackBox"></div>
+  <button class="btn-next" id="nextBtn" onclick="nextStep()">Continue →</button>
+</div>
+
+<script>
+let currentStepKey = "start";
+let score = 0;
+let budget = 100;
+
+const gameData = {
+  "start": {
+    title: "Step 1: Your Choice",
+    desc: "What do you want to grow in your garden?",
+    choices: [
+      { text: "Vegetables: Grow food like tomatoes and carrots.", cost: 20, pts: 5, next: "prep_veg", fb: "<b>Great!</b> You want to grow food to eat. You need good soil and water." },
+      { text: "Flowers: Grow beautiful red and yellow flowers.", cost: 15, pts: 8, next: "prep_flower", fb: "<b>Beautiful!</b> You want a colorful garden. Bees and butterflies will visit you." },
+      { text: "Herbs: Grow plants for cooking (like mint).", cost: 10, pts: 4, next: "prep_herb", fb: "<b>Yummy!</b> Herbs are small and easy to grow. They smell very good." }
+    ]
+  },
+
+  // VEGETABLE PATH
+  "prep_veg": {
+    title: "Step 2: The Soil",
+    desc: "Plants need good 'food' from the ground. What do you do?",
+    choices: [
+      { text: "Buy the best organic fertilizer.", cost: 25, pts: 10, next: "plant_veg", fb: "<b>Perfect!</b> The ground is now healthy. Your vegetables will grow big." },
+      { text: "Buy cheap fertilizer pellets.", cost: 10, pts: 5, next: "plant_veg", fb: "<b>Okay.</b> This works, but it is not the best for the earth." },
+      { text: "Just dig a hole and do nothing.", cost: 0, pts: 2, next: "plant_veg", fb: "<b>Be careful.</b> If the soil is bad, the plants will be small." }
+    ]
+  },
+  "plant_veg": {
+    title: "Step 3: Planting",
+    desc: "How do you put your seeds in the ground?",
+    choices: [
+      { text: "Plant in straight rows.", cost: 0, pts: 5, next: "emergency_1", fb: "<b>Very neat!</b> Now it is easy to see the plants and the weeds." },
+      { text: "Mix different plants together.", cost: 5, pts: 10, next: "emergency_1", fb: "<b>Smart!</b> Some plants help each other grow." }
+    ]
+  },
+
+  // FLOWER PATH
+  "prep_flower": {
+    title: "Step 2: Planning",
+    desc: "Which flowers do you want?",
+    choices: [
+      { text: "Flowers that come back every year.", cost: 30, pts: 10, next: "plant_flower", fb: "<b>Good idea!</b> You buy them once, and they grow every spring." },
+      { text: "Flowers that live for only one summer.", cost: 15, pts: 8, next: "plant_flower", fb: "<b>So bright!</b> These flowers have very strong colors." }
+    ]
+  },
+  "plant_flower": {
+    title: "Step 3: Sowing",
+    desc: "How do you put the seeds down?",
+    choices: [
+      { text: "Throw them by hand for a 'wild' look.", cost: 0, pts: 8, next: "emergency_1", fb: "<b>Nice!</b> It looks like a real forest meadow." },
+      { text: "Put them in small pots first.", cost: 15, pts: 12, next: "emergency_1", fb: "<b>Safe!</b> This protects the small plants from birds." }
+    ]
+  },
+
+  // HERB PATH
+  "prep_herb": {
+    title: "Step 2: The Pots",
+    desc: "Herbs need a home. What do you use?",
+    choices: [
+      { text: "Classic clay pots.", cost: 15, pts: 10, next: "plant_herb", fb: "<b>Classic!</b> These pots have small holes so the water can leave." },
+      { text: "Old wooden boxes.", cost: 0, pts: 12, next: "plant_herb", fb: "<b>Great!</b> You are recycling. This is good for the planet." }
+    ]
+  },
+  "plant_herb": {
+    title: "Step 3: Which Herbs?",
+    desc: "What do you want to cook with?",
+    choices: [
+      { text: "Sun-loving herbs (Rosemary, Thyme).", cost: 5, pts: 10, next: "emergency_1", fb: "<b>Strong!</b> These plants love the hot sun." },
+      { text: "Mint (it grows very fast).", cost: 5, pts: 5, next: "emergency_1", fb: "<b>Careful!</b> Mint grows everywhere. Use a separate pot!" }
+    ]
+  },
+
+  "emergency_1": {
+    title: "🚨 PROBLEM: Very Cold Weather",
+    desc: "The news says it will be freezing tonight! Your plants might die. What do you do?",
+    choices: [
+      { text: "Cover them with a warm cloth.", cost: 15, pts: 10, next: "social_step", fb: "<b>Saved!</b> The plants were warm and they are safe now." },
+      { text: "Cover them with old plastic buckets.", cost: 0, pts: 5, next: "social_step", fb: "<b>Smart!</b> You used what you had. The plants are okay." },
+      { text: "Do nothing.", cost: 0, type: "gameover", fb: "<b>OH NO!</b> The ice killed your plants. The game is over." }
+    ]
+  },
+
+  "social_step": {
+    title: "Step 5: Sharing",
+    desc: "Your garden is growing! How do you show your friends?",
+    choices: [
+      { text: "Take beautiful photos for the internet.", cost: 0, pts: 10, next: "emergency_2", fb: "<b>Popular!</b> Many people like your garden photos." },
+      { text: "Invite neighbors to a garden party.", cost: 10, pts: 15, next: "emergency_2", fb: "<b>Friendly!</b> You made new friends and shared your plants." }
+    ]
+  },
+
+  "emergency_2": {
+    title: "🚨 PROBLEM: Hungry Bugs",
+    desc: "Small green bugs are eating your plants! What do you do?",
+    choices: [
+      { text: "Buy 'Ladybugs' to eat the bad bugs.", cost: 10, pts: 15, next: "final_harvest", fb: "<b>Nature's way!</b> The ladybugs helped your garden stay healthy." },
+      { text: "Use a strong chemical spray.", cost: 5, type: "gameover", fb: "<b>GAME OVER!</b> The chemicals hurt the bees and the birds. People are sad." },
+      { text: "Use a spray made of soap and garlic.", cost: 2, pts: 10, next: "final_harvest", fb: "<b>Good!</b> It smells bad, but the bugs leave and the plants are safe." }
+    ]
+  },
+
+  "final_harvest": {
+    title: "Step 7: The End",
+    desc: "The season is over. What do you do with your plants?",
+    choices: [
+      { text: "Sell them at the local market.", cost: -100, pts: 10, next: "end", fb: "<b>Rich!</b> You made $100." },
+      { text: "Give the food to people who are hungry.", cost: 0, pts: 30, next: "end", fb: "<b>Kind!</b> You are a hero in your town." }
+    ]
+  }
+};
+
+const vocabulary = [
+  { word: "Soil", def: "The 'dirt' or ground where plants grow." },
+  { word: "Seeds", def: "Small things you put in the ground to grow a plant." },
+  { word: "Fertilizer", def: "Food for plants." },
+  { word: "Freezing", def: "Very, very cold (0°C)." },
+  { word: "Recycle", def: "To use old things again." },
+  { word: "Neighbor", def: "A person who lives near your house." }
+];
+
+/**
+ * Fisher-Yates Shuffle Algorithm
+ * Ensures true mathematical randomness.
+ */
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+function loadStep() {
+  const step = gameData[currentStepKey];
+  document.getElementById("stepTitle").innerText = step.title;
+  document.getElementById("stepDesc").innerHTML = step.desc;
+  const list = document.getElementById("choiceList");
+  list.innerHTML = "";
+  
+  // Shuffle a copy of the choices array before rendering
+  const shuffledChoices = shuffleArray([...step.choices]);
+  
+  shuffledChoices.forEach((c) => {
+    const btn = document.createElement("button");
+    btn.className = "choice-btn";
+    const canAfford = c.cost < 0 || budget >= c.cost;
+    btn.disabled = !canAfford;
+    btn.innerHTML = `<span>${c.text} ${!canAfford ? '<b style="color:red">(No money!)</b>' : ''}</span>
+      <span class="price-tag ${c.cost < 0 ? 'profit-tag' : 'cost-tag'}">${c.cost < 0 ? '+$' + Math.abs(c.cost) : '$' + c.cost}</span>`;
+    
+    // We pass the specific choice object to selectChoice to maintain data integrity
+    btn.onclick = () => selectChoice(c);
+    list.appendChild(btn);
+  });
+  document.getElementById("feedbackBox").style.display = "none";
+  document.getElementById("nextBtn").style.display = "none";
+}
+
+function selectChoice(choice) {
+  // Integrity check: choice data remains locked to its text regardless of position
+  budget -= choice.cost;
+  score += choice.pts;
+  document.getElementById("scoreDisplay").innerText = score;
+  document.getElementById("budgetDisplay").innerText = "$" + budget;
+  const fb = document.getElementById("feedbackBox");
+  fb.innerHTML = choice.fb;
+  fb.style.display = "block";
+  const btns = document.querySelectorAll(".choice-btn");
+  btns.forEach(b => b.disabled = true);
+
+  if (choice.type === "gameover") {
+    endGame("GAME OVER", "Try again!");
+  } else {
+    currentStepKey = choice.next;
+    document.getElementById("nextBtn").style.display = "block";
+  }
+}
+
+function nextStep() {
+  if (currentStepKey === "end") {
+    endGame("FINISH!", "You are a great gardener!");
+  } else {
+    loadStep();
+  }
+}
+
+function endGame(title, message) {
+  let vocabHTML = `<div class="vocab-section"><h3>New Words:</h3><div class="vocab-grid">`;
+  vocabulary.forEach(v => { vocabHTML += `<div class="vocab-item"><b>${v.word}:</b> ${v.def}</div>`; });
+  vocabHTML += `</div></div>`;
+  document.getElementById("gameWindow").innerHTML = `<h2>${title}</h2><p>${message}</p><hr>
+    <p>Stars: <b>${score}</b></p><p>Money: <b>$${budget}</b></p>${vocabHTML}
+    <button class="btn-next" style="display:block" onclick="location.reload()">Play Again</button>`;
+}
+
+function startGame() { document.getElementById("landingPage").style.display = "none"; }
+loadStep();
+</script>
+</body>
+</html>

@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EuroTech: The Compliance Architect</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;800&family=Space+Mono&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#020617; --card:#0f172a; --accent:#8b5cf6; --accent-light:#c084fc;
+  --text:#f8fafc; --text-dim:#94a3b8; --gold:#fbbf24; --crimson:#ef4444; --emerald:#10b981;
+}
+body{font-family:'Outfit',sans-serif; background:var(--bg); color:var(--text); margin:0; display:flex; justify-content:center; align-items:center; min-height:100vh; overflow-x:hidden;}
+.game-container{width:95%; max-width:850px; background:var(--card); border:1px solid #1e293b; border-radius:24px; padding:40px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); position:relative;}
+h1{font-weight:800; text-transform:uppercase; letter-spacing:2px; color:var(--accent-light); margin-top:0;}
+.score-bar{display:flex; justify-content:space-between; margin-bottom:20px; font-family:'Space Mono',monospace; border-bottom:1px solid #334155; padding-bottom:15px;}
+.vocab-grid{display:grid; grid-template-columns: repeat(2, 1fr); gap:10px; margin:20px 0; background:rgba(139,92,246,0.1); padding:15px; border-radius:12px; border-left:4px solid var(--accent);}
+.vocab-item{font-size:0.85rem; color:var(--text-dim);}
+.vocab-item b{color:var(--accent-light);}
+.options-grid{display:grid; grid-template-columns:1fr; gap:12px; margin-top:25px;}
+.opt-btn{background:#1e293b; border:1px solid #334155; color:var(--text); padding:18px; border-radius:12px; cursor:pointer; text-align:left; transition:0.3s; font-size:1rem; line-height:1.4;}
+.opt-btn:hover{background:var(--accent); border-color:var(--accent-light); transform:translateX(5px);}
+.feedback{display:none; margin-top:20px; padding:20px; border-radius:12px; line-height:1.6; animation: fadeIn 0.5s;}
+.emergency-alert{background:rgba(239,68,68,0.15); border:2px solid var(--crimson); padding:20px; border-radius:12px; color:var(--crimson); font-weight:600; margin-bottom:20px;}
+.next-btn{background:var(--emerald); color:var(--bg); border:none; padding:15px 30px; border-radius:8px; font-weight:bold; cursor:pointer; margin-top:20px; width:100%; display:none;}
+@keyframes fadeIn {from{opacity:0;} to{opacity:1;}}
+.hidden{display:none;}
+</style>
+</head>
+<body>
+
+<div class="game-container" id="game-wrap">
+    <div id="screen-intro">
+        <h1>EuroTech Architect</h1>
+        <p>You are the Chief People Officer for a high-growth engineering firm in Berlin. The EU regulatory landscape is a minefield. One wrong step leads to litigation; the right steps lead to a gold-standard workplace.</p>
+        <p><b>Rules:</b> 8 Strategic Decisions + 2 Emergencies. Top score is 30 points.</p>
+        <button class="next-btn" style="display:block" onclick="nextStep()">Initialize Simulation</button>
+    </div>
+
+    <div id="screen-game" class="hidden">
+        <div class="score-bar">
+            <span>PHASE: <span id="step-num">1</span>/10</span>
+            <span>STRATEGIC SCORE: <span id="score-val">0</span></span>
+        </div>
+        
+        <div id="emergency-banner" class="emergency-alert hidden">⚠️ EMERGENCY PROTOCOL ACTIVATED</div>
+        
+        <h2 id="q-title"></h2>
+        <p id="q-desc"></p>
+
+        <div class="vocab-grid" id="vocab-box"></div>
+        <div class="options-grid" id="opt-box"></div>
+        
+        <div id="feedback-box" class="feedback"></div>
+        <button id="btn-continue" class="next-btn" onclick="nextStep()">Advance to Next Phase</button>
+    </div>
+
+    <div id="screen-result" class="hidden">
+        <h1 id="res-title">Simulation Terminated</h1>
+        <p id="res-desc"></p>
+        <button class="next-btn" style="display:block" onclick="location.reload()">Reboot System</button>
+    </div>
+</div>
+
+<script>
+let score = 0;
+let currentStep = 0;
+
+const content = [
+    {
+        title: "The Gig Economy Paradox",
+        desc: "Your CEO wants to hire 200 software testers as 'independent contractors' to avoid social security contributions. The EU Platform Work Directive is looming.",
+        vocab: ["Social Security (Protection)","False Self-employment (Legal risk)","Subordination (Management control)","Rebuttable Presumption (Legal shift)"],
+        opts: [
+            {t: "Reclassify them as employees immediately.", s: 3, fb: "Wise move. You avoid massive back-taxes and legal fees, building a loyal core team."},
+            {t: "Use a B2B agency to buffer the risk.", s: 3, fb: "Strategic outsourcing. You maintain flexibility while shifting the direct compliance burden."},
+            {t: "Cap their hours to keep them 'casual'.", s: 1, fb: "A weak patch. It slows down testing and won't fool a labor inspector for long."},
+            {t: "Treat them as contractors but track their exact hours and tools.", s: -1, fb: "CRITICAL ERROR. Direct control creates a 'presumption of employment.' Choose a different strategy."}
+        ]
+    },
+    {
+        title: "The AI Surveillance Conflict",
+        desc: "Engineering wants to use 'Emotion AI' to monitor coder burnout through webcam facial analysis. The EU AI Act just entered force.",
+        vocab: ["Prohibited AI (Banned tech)","Biometric Data (Sensitive info)","DPIA (Impact assessment)","High-risk Systems (Regulated AI)"],
+        opts: [
+            {t: "Ban the tool; it's Prohibited AI in the workplace.", s: 3, fb: "Correct. The EU AI Act strictly forbids emotion recognition in workplaces."},
+            {t: "Pivot to an anonymous 'self-report' pulse tool.", s: 3, fb: "Smart. You get the burnout data without the invasive surveillance."},
+            {t: "Pilot it only with explicit written consent.", s: 1, fb: "Risky. EU regulators argue 'consent' is rarely valid in employer-employee power imbalances."},
+            {t: "Launch it as a 'voluntary productivity' perk.", s: -1, fb: "LEGAL TRAP. In the EU, surveillance disguised as a 'perk' is still a violation. Try again."}
+        ]
+    },
+    {
+        title: "Cross-Border Remote Work",
+        desc: "A star developer wants to work from their villa in Spain for 6 months while staying on a German contract. Tax and social security are at stake.",
+        vocab: ["Permanent Establishment (Tax risk)","A1 Certificate (Social security)","Posted Worker (Temporary labor)","Lex Loci Laboris (Law of the place of work)"],
+        opts: [
+            {t: "Approve via an Employer of Record (EOR) in Spain.", s: 3, fb: "Excellent. The EOR handles Spanish taxes locally, keeping your firm compliant."},
+            {t: "Limit the stay to 183 days and file an A1 form.", s: 3, fb: "Solid compliance. You use the 'posted worker' loophole to keep things simple."},
+            {t: "Let them go but tell them to 'keep it quiet'.", s: 1, fb: "Dangerous. If they have an accident, you are liable for millions in uninsured costs."},
+            {t: "Deduct German taxes only and hope for the best.", s: -1, fb: "TAX EVASION RISK. Spain will demand their share. Rethink this."}
+        ]
+    },
+    {
+        title: "The Whistleblower's Whisper",
+        desc: "An anonymous tip on your new internal portal claims the CTO is taking kickbacks from a cloud provider. How do you respond?",
+        vocab: ["Internal Reporting Channel (Safe path)","Non-retaliation (Legal shield)","Confidentiality (Identity protection)","Interim Relief (Court protection)"],
+        opts: [
+            {t: "Trigger a formal, third-party investigation.", s: 3, fb: "Perfect. It ensures impartiality and follows the EU Whistleblowing Directive."},
+            {t: "Protect the reporter's ID and suspend the CTO.", s: 3, fb: "Bold. You prioritize integrity and protect the firm from corporate liability."},
+            {t: "Ask the CTO to explain the 'misunderstanding'.", s: 1, fb: "Weak. This tips off the suspect and risks evidence being deleted."},
+            {t: "Identify the reporter to check their 'motives'.", s: -1, fb: "REPRISAL RISK. Identifying or punishing a whistleblower is a crime. Choose again."}
+        ]
+    },
+    {
+        title: "EMERGENCY: The Trade Union Leak",
+        desc: "A spreadsheet containing the trade union membership status of all employees was accidentally emailed to the entire 'All-Hands' list. This is a massive GDPR breach of 'Special Category' data.",
+        isEmergency: true,
+        opts: [
+            {t: "Self-report to the DPA within 72 hours and notify staff.", s: 3, fb: "Crisis managed. Transparency prevents the maximum fine and maintains trust."},
+            {t: "Recall the email and hope nobody saved a copy.", s: 0, fb: "GAME OVER. Covering up a sensitive data breach is a criminal offense in the EU. You are dismissed."}
+        ]
+    },
+    {
+        title: "Successive Fixed-Term Contracts",
+        desc: "You have a brilliant researcher on their 4th consecutive 6-month contract. They want another extension, but the law is tightening.",
+        vocab: ["Fixed-term Employee (Temporary)","Indefinite Contract (Permanent)","Objective Justification (Legal reason)","Abuse of Succession (Legal breach)"],
+        opts: [
+            {t: "Convert them to a permanent contract now.", s: 3, fb: "The 'Golden Path'. You retain talent and eliminate the risk of a 'de facto' permanent status lawsuit."},
+            {t: "Find an 'objective justification' like a specific project.", s: 3, fb: "Legal and lean. As long as the project is real, this holds up in court."},
+            {t: "Break the service for 1 month then re-hire.", s: 1, fb: "The 'revolving door'. Highly frowned upon by EU courts and kills morale."},
+            {t: "Keep extending them; they haven't complained yet.", s: -1, fb: "LEGAL MINEFIELD. Automatic conversion to permanent status usually happens after 2 years. Try again."}
+        ]
+    },
+    {
+        title: "The Pay Transparency Gap",
+        desc: "Your audit reveals men in 'DevOps' earn 15% more than women in 'Cloud Eng', despite identical job evaluations. New EU rules require reporting.",
+        vocab: ["Gender Pay Gap (Stat differential)","Pay Secrecy Clauses (Banned)","Right to Information (Employee power)","Joint Pay Assessment (Mandatory audit)"],
+        opts: [
+            {t: "Immediately adjust salaries to close the 15% gap.", s: 3, fb: "Courageous. You are now ahead of the EU Pay Transparency Directive."},
+            {t: "Publish the gap and commit to a 2-year fix plan.", s: 3, fb: "Honest. Transparency builds more trust than a secret fix."},
+            {t: "Change job titles so they aren't 'identical'.", s: 1, fb: "Sneaky. Courts look at 'work of equal value,' not just titles. This won't work."},
+            {t: "Enforce a 'no-talk' policy regarding salaries.", s: -1, fb: "ILLEGAL. EU law now bans 'pay secrecy' clauses. You cannot stop staff from talking. Try again."}
+        ]
+    },
+    {
+        title: "EWC and the Merger",
+        desc: "A US tech giant is buying your firm. They want to announce layoffs on Monday without talking to the European Works Council (EWC).",
+        vocab: ["Information and Consultation (Duty)","Transnational (Cross-border)","Injunctive Relief (Legal halt)","Social Plan (Mitigation)"],
+        opts: [
+            {t: "Insist on a 30-day consultation period first.", s: 3, fb: "Vital. Ignoring the EWC can lead to a court injunction freezing the entire merger."},
+            {t: "Draft a 'Social Plan' with the EWC immediately.", s: 3, fb: "Collaborative. Negotiating the exit packages early prevents strikes."},
+            {t: "Inform the EWC 1 hour before the public news.", s: 1, fb: "Disrespectful. It meets the 'inform' rule but fails the 'consult' spirit. Expect friction."},
+            {t: "Follow the US 'At-Will' logic and fire them.", s: -1, fb: "TERMINATED. 'At-Will' does not exist in the EU. This leads to immediate mass-litigation. Try again."}
+        ]
+    },
+    {
+        title: "EMERGENCY: The CCTV Incident",
+        desc: "A manager is caught using 'hidden' cameras in the breakroom to see who is 'slacking'. The Works Council has found out and is calling the police.",
+        isEmergency: true,
+        opts: [
+            {t: "Fire the manager and apologize to the Council.", s: 3, fb: "You saved the company. By taking decisive action, you prove the firm doesn't condone illegal surveillance."},
+            {t: "Defend the manager's right to protect company assets.", s: 0, fb: "GAME OVER. Secret surveillance of break areas is a massive human rights violation. The company is sued into oblivion."}
+        ]
+    },
+    {
+        title: "The 'Women on Boards' Quota",
+        desc: "The EU 'Gender Balance' Directive requires 40% of non-executive directors to be the underrepresented sex. You are currently at 10%.",
+        vocab: ["Gender Balance (Quota)","Selection Criteria (Merit-based)","Proportionality (Fairness)","Non-Executive Directors (Board role)"],
+        opts: [
+            {t: "Mandate that the next 3 board openings are 'Women-Only' shortlists.", s: 3, fb: "Proactive. Merit remains key, but you are actively fixing the pipeline."},
+            {t: "Implement a 'Tie-Break' rule: equal merit favors the woman.", s: 3, fb: "The EU Standard. This is the legally preferred way to achieve quotas."},
+            {t: "Set a 10-year goal to reach 20%.", s: 1, fb: "Too slow. You will miss the EU deadline and face sanctions."},
+            {t: "Ignore it; we are a private company.", s: -1, fb: "WRONG. The directive applies to large listed companies and sets the tone for all. Try again."}
+        ]
+    }
+];
+
+function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+function nextStep() {
+    if (currentStep >= content.length) {
+        showResults();
+        return;
+    }
+
+    const data = content[currentStep];
+    document.getElementById('screen-intro').classList.add('hidden');
+    document.getElementById('screen-game').classList.remove('hidden');
+    document.getElementById('feedback-box').style.display = 'none';
+    document.getElementById('btn-continue').style.display = 'none';
+    document.getElementById('opt-box').innerHTML = '';
+    
+    document.getElementById('step-num').innerText = currentStep + 1;
+    document.getElementById('q-title').innerText = data.title;
+    document.getElementById('q-desc').innerText = data.desc;
+
+    // Emergency styling
+    if(data.isEmergency) {
+        document.getElementById('emergency-banner').classList.remove('hidden');
+        document.getElementById('vocab-box').classList.add('hidden');
+    } else {
+        document.getElementById('emergency-banner').classList.add('hidden');
+        document.getElementById('vocab-box').classList.remove('hidden');
+        document.getElementById('vocab-box').innerHTML = data.vocab.map(v => `<div class="vocab-item">🔹 <b>${v.split('(')[0]}</b>: ${v.split('(')[1].replace(')','')}</div>`).join('');
+    }
+
+    const shuffledOpts = shuffle([...data.opts]);
+
+    shuffledOpts.forEach(o => {
+        const btn = document.createElement('button');
+        btn.className = 'opt-btn';
+        btn.innerText = o.t;
+        btn.onclick = () => handleChoice(o, data.isEmergency);
+        document.getElementById('opt-box').appendChild(btn);
+    });
+}
+
+function handleChoice(opt, isEmergency) {
+    const fb = document.getElementById('feedback-box');
+    fb.style.display = 'block';
+    fb.innerText = opt.fb;
+    fb.style.borderLeft = `5px solid ${opt.s > 0 ? 'var(--emerald)' : 'var(--crimson)'}`;
+
+    if (opt.s === -1) {
+        // Choose again logic
+        return;
+    }
+
+    if (isEmergency && opt.s === 0) {
+        endGame("Dismissed for Gross Misconduct", opt.fb);
+        return;
+    }
+
+    score += opt.s;
+    document.getElementById('score-val').innerText = score;
+    document.getElementById('opt-box').innerHTML = ''; // Disable further clicks
+    document.getElementById('btn-continue').style.display = 'block';
+    currentStep++;
+}
+
+function endGame(title, desc) {
+    document.getElementById('screen-game').classList.add('hidden');
+    document.getElementById('screen-result').classList.remove('hidden');
+    document.getElementById('res-title').innerText = title;
+    document.getElementById('res-desc').innerText = desc;
+}
+
+function showResults() {
+    let title = "";
+    let desc = "";
+
+    if (score >= 26) {
+        title = "The EU Strategic Visionary";
+        desc = `Final Score: ${score}/30. You don't just follow the law; you use it to build a competitive advantage. You've created a workplace that is ethical, transparent, and future-proof. The Board is promoting you to Global Head of People.`;
+    } else if (score >= 16) {
+        title = "The Solid Compliance Officer";
+        desc = `Final Score: ${score}/30. You are competent and careful. While you occasionally prioritize speed over perfection, you've kept the company out of court and the employees generally satisfied. A safe pair of hands.`;
+    } else {
+        title = "The Bureaucratic Disaster";
+        desc = `Final Score: ${score}/30. Your tenure was marked by 'close calls' and legal friction. By trying to cut corners on EU labor directives, you've cost the company millions in potential fines and lost the trust of the Works Council. Expect a call from Legal.`;
+    }
+
+    endGame(title, desc);
+}
+</script>
+
+</body>
+</html>

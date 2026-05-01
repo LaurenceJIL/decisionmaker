@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HR Hero: The Precision Maze (Legal Edition)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto+Mono&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0F172A;--surface:#1E293B;--accent:#38BDF8;--accent-hover:#0EA5E9;
+  --ink:#F1F5F9;--ink-light:#94A3B8;--success:#22C55E;--warning:#F59E0B;--danger:#EF4444;
+  --compliance:#FBBF24; 
+  --radius:12px;--shadow:0 10px 15px -3px rgba(0,0,0,0.5);
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--ink);margin:0;padding:20px;display:flex;justify-content:center}
+.container{width:100%;max-width:850px;}
+.card{background:var(--surface);padding:40px;border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid #334155; position: relative; overflow: hidden;}
+h1{font-size:28px;margin-bottom:16px;color:var(--accent); text-transform: uppercase; letter-spacing: 1px;}
+p{line-height:1.7;font-size:17px; color: #CBD5E1}
+
+.stats-container {display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 25px;}
+.stat-box {background: #334155; padding: 12px; border-radius: 8px; text-align: center; border-bottom: 3px solid transparent;}
+.stat-label {font-size: 10px; text-transform: uppercase; color: var(--ink-light); margin-bottom: 5px; display: block;}
+.stat-val {font-family: 'Roboto Mono', monospace; font-size: 18px; font-weight: bold;}
+.stat-morale { border-color: var(--success); }
+.stat-prod { border-color: var(--accent); }
+.stat-legal { border-color: var(--compliance); }
+
+.btn{background:var(--accent);color:var(--bg);border:none;padding:14px 28px;border-radius:8px;font-weight:700;cursor:pointer;font-size:16px; transition: 0.3s;}
+.btn:hover{background:var(--accent-hover); transform: translateY(-2px);}
+.options{display:flex;flex-direction:column;gap:15px;margin-top:30px}
+.option-btn{background:#334155;border:1px solid #475569;padding:18px;border-radius:8px;text-align:left;cursor:pointer;transition:0.2s;font-size:16px; color: var(--ink); line-height: 1.4;}
+.option-btn:hover:not(:disabled){border-color:var(--accent);background:#3D4D63}
+.option-btn:disabled{cursor: default; opacity: 0.7;}
+.feedback{margin-top:25px;padding:20px;border-radius:8px;display:none;font-size:15px;border-left:5px solid; background: rgba(0,0,0,0.2); line-height: 1.6;}
+.vpill{display:inline-block;background:#475569;color:#E2E8F0;padding:5px 10px;border-radius:4px;margin:4px;font-size:13px;}
+.progress-bar {height: 4px; background: #334155; margin-bottom: 20px; border-radius: 2px;}
+.progress-fill {height: 100%; background: var(--accent); width: 0%; transition: 0.5s;}
+.hidden{display:none}
+</style>
+</head>
+<body>
+
+<div class="container" id="intro">
+  <div class="card">
+    <h1>HR Hero: The Precision Maze</h1>
+    <p>Welcome, Lead HR Partner. You are the final shield between engineering innovation and regulatory collapse. Every decision you make impacts three pillars: <strong>Morale</strong>, <strong>Efficiency</strong>, and <strong>Legal Compliance</strong>.</p>
+    <p style="color:var(--compliance)"><strong>⚠️ THE ZERO RULE:</strong> If Legal Compliance hits 0%, the Ministry of Labour will shut down the facility immediately. You must survive 8 critical decisions to pass the annual audit.</p>
+    <br>
+    <button class="btn" onclick="startGame()">Initialize Simulation</button>
+  </div>
+</div>
+
+<div class="container hidden" id="game-ui">
+  <div class="progress-bar"><div class="progress-fill" id="p-fill"></div></div>
+  <div class="stats-container">
+    <div class="stat-box stat-morale"><span class="stat-label">Morale</span><span class="stat-val" id="morale-val">50</span></div>
+    <div class="stat-box stat-prod"><span class="stat-label">Efficiency</span><span class="stat-val" id="prod-val">50</span></div>
+    <div class="stat-box stat-legal"><span class="stat-label">Compliance</span><span class="stat-val" id="legal-val">100</span></div>
+  </div>
+  
+  <div class="card" id="q-card">
+    <h2 id="q-title" style="margin-top:0; font-size:22px; color:var(--accent)"></h2>
+    <p id="q-text"></p>
+    <div class="options" id="opt-box"></div>
+    <div id="fb-box" class="feedback"></div>
+    <button class="btn hidden" id="next-btn" style="margin-top:25px; width:100%" onclick="processNext()">Proceed to Next Phase</button>
+  </div>
+</div>
+
+<div class="container hidden" id="results">
+  <div class="card">
+    <h1>Audit Final Report</h1>
+    <p id="final-msg"></p>
+    <div id="vocab-list" style="margin-top:20px"><p><strong>Regulatory Concepts Encountered:</strong></p></div>
+    <button class="btn" onclick="location.reload()" style="margin-top:20px">Re-run Simulation</button>
+  </div>
+</div>
+
+<script>
+let morale = 50;
+let production = 50;
+let legal = 100;
+let stepCount = 0;
+
+const storyNodes = [
+  {
+    title: "The Safety Drill Crisis",
+    text: "A fire drill is scheduled during a mission-critical server migration. The Engineering Lead demands to skip it to prevent potential data loss.",
+    opts: [
+      { t: "Force the evacuation immediately.", m: -10, p: -10, l: +10, fb: "Strict adherence to safety protocols ensures physical security. While the engineers are frustrated by the interruption, you have successfully avoided a major fire code violation penalty." },
+      { t: "Grant an exception for the server room.", m: +10, p: +10, l: -30, fb: "Favoring short-term production creates a dangerous precedent. By ignoring mandatory safety drills, you've exposed the firm to massive liability and potential closure during a surprise regulatory audit." }
+    ]
+  },
+  {
+    title: "The 'Invisible' Overtime",
+    text: "Engineers are working 80-hour weeks voluntarily to meet a launch. They aren't recording their extra hours to keep the 'project budget' clean.",
+    opts: [
+      { t: "Mandate strict time-tracking and pay overtime.", m: +10, p: -20, l: +15, fb: "Accurate labor tracking is vital for Wage and Hour compliance. While the project budget is now over, you've prevented a future Whistleblower claim for unpaid wages." },
+      { t: "Allow the 'off-the-clock' work to continue.", m: -10, p: +20, l: -40, fb: "Encouraging wage theft is a felony-level compliance risk. When the Ministry audits your logs, the discrepancy between system logs and time-sheets will be impossible to explain." }
+    ]
+  },
+  {
+    title: "The Diversity Requirement",
+    text: "Your recruitment AI has inadvertently filtered out all applicants with gaps in their CVs, disproportionately affecting candidates who took parental leave.",
+    opts: [
+      { t: "Manually audit the rejected pool and retrain the AI.", m: +15, p: -10, l: +15, fb: "Addressing 'Disparate Impact' is both ethical and legally prudent. By correcting the algorithm, you improve the talent pool and mitigate risk of class-action litigation." },
+      { t: "Trust the AI's efficiency for this hiring cycle.", m: -10, p: +15, l: -25, fb: "Ignoring algorithmic bias creates systemic legal risk. This is a classic case of indirect discrimination that will fail any compliance audit." }
+    ]
+  },
+  {
+    title: "The Rival Poaching",
+    text: "Your top software architect has left for a rival, taking confidential source code on a personal USB drive.",
+    opts: [
+      { t: "Initiate immediate legal injunction and IP recovery.", m: -5, p: -10, l: +20, fb: "Swift action protects trade secrets. Although expensive, it sends a clear signal that intellectual property theft will not be tolerated by the firm." },
+      { t: "Offer a higher salary to bring them back.", m: +10, p: +10, l: -30, fb: "Rewarding a breach of contract and potential theft sets a disastrous precedent. You've compromised the firm's legal standing to enforce non-disclosure agreements." }
+    ]
+  },
+  {
+    title: "The Privacy Breach",
+    text: "A project manager accidentally posted employee salary data on a public Slack channel for five minutes.",
+    opts: [
+      { t: "Self-report to the Data Protection Authority.", m: -20, p: 0, l: +30, fb: "Honesty in the face of a GDPR/Data breach often mitigates the final fine. It's painful for morale, but crucial for maintaining your license to operate." },
+      { t: "Delete the post and hope no one screenshotted it.", m: 0, p: 0, l: -50, fb: "Covering up a PII breach is often more legally damaging than the breach itself. If discovered, the fine will be quadrupled for gross negligence." }
+    ]
+  },
+  {
+    title: "The Whistleblower",
+    text: "A junior engineer claims a senior VP is taking kickbacks from a cloud service provider.",
+    opts: [
+      { t: "Launch an independent internal investigation.", m: -10, p: -10, l: +25, fb: "Protecting the whistleblower and investigating claims prevents institutional rot and ensures compliance with anti-corruption laws." },
+      { t: "Dismiss the claim to avoid internal scandal.", m: +5, p: 0, l: -60, fb: "Ignoring corruption is a death sentence during an external audit. You are now personally complicit in the VP's legal violations." }
+    ]
+  },
+  {
+    title: "The Ergonomic Crisis",
+    text: "To save money, the facility manager bought sub-standard chairs. Half the engineering team is reporting back pain.",
+    opts: [
+      { t: "Replace all seating with certified equipment.", m: +20, p: -15, l: +10, fb: "Investing in health and safety prevents long-term workers' compensation claims and keeps your staff functional and loyal." },
+      { t: "Tell them to take more breaks and use cushions.", m: -30, p: -5, l: -15, fb: "Failing to provide a safe workplace is a breach of fundamental labor law. You are inviting a mass medical-leave exit." }
+    ]
+  },
+  {
+    title: "The Final Audit",
+    text: "The Ministry inspectors have arrived. They want to see your records on 'Reasonable Accommodations' for staff with disabilities.",
+    opts: [
+      { t: "Provide full, documented accommodation logs.", m: +10, p: 0, l: +20, fb: "Clear documentation is the bedrock of compliance. Your transparency proves that the facility operates within the letter and spirit of the law." },
+      { t: "Say you handle it 'case-by-case' without logs.", m: -10, p: 0, l: -40, fb: "Lack of documentation is viewed as a failure of policy. The inspectors mark this as a major non-conformity." }
+    ]
+  }
+];
+
+/**
+ * Fisher-Yates Shuffle Algorithm
+ * Ensures true mathematical randomness.
+ */
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+function startGame() {
+  document.getElementById('intro').classList.add('hidden');
+  document.getElementById('game-ui').classList.remove('hidden');
+  renderStep();
+}
+
+function renderStep() {
+  const node = storyNodes[stepCount];
+  document.getElementById('q-title').innerText = node.title;
+  document.getElementById('q-text').innerText = node.text;
+  document.getElementById('fb-box').style.display = 'none';
+  document.getElementById('next-btn').classList.add('hidden');
+  
+  const optBox = document.getElementById('opt-box');
+  optBox.innerHTML = '';
+
+  // Shuffle a copy of the options to ensure the original storyNodes stays intact
+  const shuffledChoices = shuffleArray([...node.opts]);
+
+  shuffledChoices.forEach(opt => {
+    const b = document.createElement('button');
+    b.className = 'option-btn';
+    b.innerText = opt.t;
+    // Pass the original option object to maintain points/feedback integrity
+    b.onclick = () => makeChoice(opt, b);
+    optBox.appendChild(b);
+  });
+
+  document.getElementById('p-fill').style.width = ((stepCount / storyNodes.length) * 100) + "%";
+}
+
+function makeChoice(opt, btn) {
+  // Lock logic to the object's specific properties
+  morale = Math.max(0, morale + opt.m);
+  production = Math.max(0, production + opt.p);
+  legal = Math.max(0, legal + opt.l);
+
+  // Update UI
+  document.getElementById('morale-val').innerText = morale;
+  document.getElementById('prod-val').innerText = production;
+  document.getElementById('legal-val').innerText = legal;
+
+  const fb = document.getElementById('fb-box');
+  fb.innerText = opt.fb;
+  fb.style.display = 'block';
+  fb.style.borderLeftColor = opt.l >= 0 ? 'var(--success)' : 'var(--danger)';
+
+  // Disable buttons
+  document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+  btn.style.borderColor = 'var(--accent)';
+
+  if (legal <= 0) {
+    setTimeout(() => {
+      showFinalReport();
+    }, 2000);
+  } else {
+    document.getElementById('next-btn').classList.remove('hidden');
+  }
+}
+
+function processNext() {
+  stepCount++;
+  if (stepCount >= storyNodes.length) {
+    showFinalReport();
+  } else {
+    renderStep();
+  }
+}
+
+function showFinalReport() {
+  document.getElementById('game-ui').classList.add('hidden');
+  document.getElementById('results').classList.remove('hidden');
+  
+  const finalScore = (morale + production + legal) / 3;
+  let bandMsg = "";
+  
+  if (legal <= 0) {
+    document.getElementById('result-header').innerText = "AUDIT FAILED: IMMEDIATE CLOSURE";
+    document.getElementById('result-header').style.color = "var(--danger)";
+    bandMsg = "Your failure to maintain Legal Compliance has resulted in the Ministry of Labour revoking your operational license. The facility is closed, and you are relieved of duty.";
+  } else if (finalScore >= 70) {
+    bandMsg = "<strong style='color:var(--success)'>RANK: ELITE GUARDIAN.</strong> You have mastered the delicate balance of human empathy, corporate output, and legal rigor. Your department is a model of sustainable excellence.";
+  } else if (finalScore >= 40) {
+    bandMsg = "<strong style='color:var(--warning)'>RANK: SURVIVOR.</strong> The company is still standing, but the foundation is shaky. While you avoided total legal collapse, your inconsistent decisions have left scars on morale.";
+  } else {
+    bandMsg = "<strong style='color:var(--danger)'>RANK: LIABILITY.</strong> You barely crossed the finish line. The organization is plagued by burnout and near-constant legal threats. Next time, focus on long-term policy.";
+  }
+
+  document.getElementById('final-msg').innerHTML = `Final Metrics: Morale: ${morale}% | Efficiency: ${production}% | Compliance: ${legal}%<br><br>${bandMsg}`;
+  
+  const vocab = ["Disparate Impact", "Nexus Compliance", "GDPR", "Gross Negligence", "Poaching", "Wage Theft", "Whistleblower Protection"];
+  document.getElementById('vocab-list').innerHTML += vocab.map(v => `<span class="vpill">${v}</span>`).join('');
+}
+</script>
+
+</body>
+</html>

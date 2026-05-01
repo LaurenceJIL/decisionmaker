@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Factory Fixer: Maintenance Challenge</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --grey: #2f3542;
+        --orange: #ff9f43;
+        --blue: #0984e3;
+        --green: #2ecc71;
+        --red: #d63031;
+        --bg: #f1f2f6;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--bg);
+        color: #333;
+        line-height: 1.5;
+    }
+
+    header {
+        background: var(--grey);
+        color: white;
+        padding: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 5px solid var(--orange);
+    }
+
+    .container { max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+
+    .card {
+        background: white;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        display: none;
+    }
+    .card.active { display: block; }
+
+    h1 { font-family: 'Roboto Mono', monospace; text-transform: uppercase; font-size: 1.5rem; }
+    h2 { margin-bottom: 1rem; color: var(--grey); }
+    p { margin-bottom: 1.5rem; color: #57606f; }
+
+    .choices-grid { display: grid; gap: 1rem; margin: 2rem 0; }
+    .choice-btn {
+        background: white;
+        border: 2px solid #ced4da;
+        padding: 1rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 1rem;
+        font-weight: 600;
+        text-align: left;
+        transition: all 0.2s;
+    }
+    .choice-btn:hover:not(:disabled) { border-color: var(--blue); background-color: #f8faff; }
+    .choice-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .feedback {
+        padding: 1.5rem;
+        border-radius: 6px;
+        margin-top: 1.5rem;
+        display: none;
+    }
+    .fb-good { background: #dff9fb; border-left: 5px solid var(--green); }
+    .fb-bad { background: #ffeaa7; border-left: 5px solid var(--orange); }
+
+    .next-btn {
+        background: var(--grey);
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 800;
+        display: none;
+        width: 100%;
+        margin-top: 1rem;
+    }
+
+    .emergency-badge {
+        background: var(--red);
+        color: white;
+        padding: 0.2rem 0.6rem;
+        font-size: 0.8rem;
+        border-radius: 4px;
+        display: inline-block;
+        margin-bottom: 0.5rem;
+    }
+
+    .vpill {
+        display: inline-block;
+        background: #ced4da;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        margin: 2px;
+    }
+</style>
+</head>
+<body>
+
+<header>
+    <h1>Factory Fixer v1.0</h1>
+    <div>Score: <span id="scoreDisplay">0</span> / 30</div>
+</header>
+
+<div class="container">
+    <div class="card active" id="screen-start">
+        <h2>Maintenance Shift Start</h2>
+        <p>Welcome to the production floor. You are the Maintenance Lead. Your job is to keep the factory running smoothly while dealing with mechanical failures and team issues.</p>
+        <p>Make 10 major decisions. High-point choices build your reputation. Watch out for <strong>emergencies</strong> where a wrong move ends the game!</p>
+        <button class="choice-btn" style="width: 100%; text-align: center;" onclick="startGame()">Clock In →</button>
+    </div>
+
+    <div class="card" id="screen-game">
+        <div id="step-header"></div>
+        <h2 id="step-title"></h2>
+        <p id="step-desc"></p>
+        <div class="choices-grid" id="choices-container"></div>
+        <div class="feedback" id="feedback-box">
+            <strong id="points-label"></strong>
+            <p id="feedback-text" style="margin: 0.5rem 0 0 0;"></p>
+        </div>
+        <button class="next-btn" id="btn-next">Next Task →</button>
+    </div>
+
+    <div class="card" id="screen-final">
+        <h2>Shift Report</h2>
+        <div id="final-stats" style="font-size: 1.5rem; font-weight: 800; margin: 1rem 0;"></div>
+        <p id="final-msg"></p>
+        <div id="vocab-list" style="margin-top: 2rem; border-top: 1px solid #ddd; padding-top: 1rem;">
+            <h3>Technical Terms Mastered:</h3>
+            <div id="vocab-container"></div>
+        </div>
+        <button class="choice-btn" style="width: 100%; text-align: center; margin-top: 2rem;" onclick="location.reload()">Restart Shift</button>
+    </div>
+</div>
+
+<script>
+const steps = {
+    s1: {
+        title: "The Overheating Pump",
+        desc: "Main cooling pump A is vibrating and the temperature is rising. Production is at 100%. What's your call?",
+        choices: [
+            { text: "Slow down production by 20% and perform a vibration analysis immediately.", pts: 3, type: "good", fb: "Smart. You prevented a total seizure and identified a worn bearing before it shattered." },
+            { text: "Switch to the backup pump and schedule repair for the weekend.", pts: 2, type: "good", fb: "Standard procedure. It keeps the line running, but the backup is old and might not last long." },
+            { text: "Spray it with coolant and hope it finishes the 8-hour shift.", pts: 1, type: "bad", fb: "Risky. You finished the shift, but now the shaft is warped beyond repair. Expensive!" },
+            { text: "Ignore the alarm; the sensors are probably just glitching again.", pts: -1, type: "bad", fb: "The pump exploded. Production is down for 24 hours. Your manager is not happy. Choose again!" }
+        ],
+        next: "s2"
+    },
+    s2: {
+        title: "The New Apprentice",
+        desc: "A new hire is cleaning the conveyor belt while it's moving. This is against safety protocol.",
+        choices: [
+            { text: "Stop the line immediately and give a formal safety briefing on 'Lock-Out Tag-Out'.", pts: 3, type: "good", fb: "Excellent. Safety is priority zero. The team sees that you don't compromise on lives." },
+            { text: "Pull them aside and show them how to clean it safely without stopping the line.", pts: 1, type: "bad", fb: "Dangerous. You taught them a 'shortcut' that could lead to a lost finger later." },
+            { text: "Shout at them from across the room to stop what they are doing.", pts: 2, type: "good", fb: "You stopped the danger, but your communication style is making the team nervous." },
+            { text: "Record it on your phone to show the safety manager later.", pts: -1, type: "bad", fb: "You watched a safety violation happen without intervening. Negligence! Choose again!" }
+        ],
+        next: "s3"
+    },
+    s3: {
+        title: "The Spare Parts Choice",
+        desc: "You need a new motor. Do you buy the 'Premium OEM' or the 'Budget Generic' version?",
+        choices: [
+            { text: "Premium OEM: It's expensive but has a 5-year guarantee.", pts: 3, type: "good", path: "pathQuality", fb: "The long-term play. High reliability means fewer midnight repair calls for you." },
+            { text: "Budget Generic: It's 50% cheaper and ships today.", pts: 3, type: "good", path: "pathBudget", fb: "The accountant is happy! You saved money, but let's hope it holds up." },
+            { text: "Try to fix the old motor with some spare copper wire and tape.", pts: 1, type: "bad", next: "e1", fb: "It works for now, but it's a 'band-aid' fix. Expect trouble soon." },
+            { text: "Order both and hide one in your personal locker just in case.", pts: -1, type: "bad", fb: "That's company theft. Your ethics score just plummeted. Try again!" }
+        ]
+    },
+    pathQuality: {
+        title: "Quality Path: The Stress Test",
+        desc: "The Premium motor arrives. Your manager says it was too expensive and wants a justification.",
+        choices: [
+            { text: "Show the 'Mean Time Between Failure' (MTBF) data to prove long-term savings.", pts: 3, type: "good", fb: "Data-driven leadership! The manager is impressed by your professional analysis." },
+            { text: "Tell them to trust your expertise or find a new Maintenance Lead.", pts: 2, type: "good", fb: "Bold. You won the argument, but you might have damaged your relationship with the boss." },
+            { text: "Apologize and promise to buy cheaper parts next month.", pts: 1, type: "bad", fb: "You look weak. Now they will question every technical decision you make." },
+            { text: "Lie and say the cheaper motor was out of stock.", pts: -1, type: "bad", fb: "Dishonesty in maintenance leads to disasters. Never lie about parts. Try again!" }
+        ],
+        next: "e1"
+    },
+    pathBudget: {
+        title: "Budget Path: The Early Failure",
+        desc: "The Budget motor is making a high-pitched squealing noise after just 2 days.",
+        choices: [
+            { text: "Contact the supplier for a replacement under the short-term warranty.", pts: 3, type: "good", fb: "Correct. You're holding the vendor accountable for their 'budget' quality." },
+            { text: "Add more grease and hope the noise goes away.", pts: 1, type: "bad", fb: "Grease doesn't fix a bad bearing. It's still squealing, and now it's messy too." },
+            { text: "Blame the installation team for 'improper alignment'.", pts: 2, type: "good", fb: "It might be true, but you're passing the buck. The motor still needs fixing." },
+            { text: "Kick the motor and walk away.", pts: -1, type: "bad", fb: "Violence against machinery is not a maintenance strategy. Choose again!" }
+        ],
+        next: "e1"
+    },
+    e1: {
+        title: "EMERGENCY: The Electrical Fire",
+        isEmergency: true,
+        desc: "A transformer is sparking and smoke is filling the assembly area! What is the first step?",
+        choices: [
+            { text: "Hit the Emergency Stop (E-Stop) and isolate the main power breaker.", pts: 0, type: "good", next: "s5", fb: "Correct! Removing the energy source is the only way to stop an electrical fire." },
+            { text: "Grab a water bucket and throw it on the sparks.", pts: 0, type: "bad", gameOver: true, fb: "FATAL ERROR: Water conducts electricity. You've caused a massive explosion. Game Over." },
+            { text: "Evacuate the building and wait for the Fire Department.", pts: 0, type: "good", next: "s5", fb: "Safe. You lost the transformer, but you saved every life in the factory." },
+            { text: "Open the control panel to see which wire is burning.", pts: 0, type: "bad", gameOver: true, fb: "FATAL ERROR: Opening a live, sparking panel is suicide. Game Over." }
+        ]
+    },
+    s5: {
+        title: "The Weekend Overtime",
+        desc: "The fire caused a backlog. You need the team to work Saturday and Sunday to catch up.",
+        choices: [
+            { text: "Offer time-and-a-half pay and provide a catered lunch for everyone.", pts: 3, type: "good", fb: "Morale is high! The team works hard and the backlog is cleared by Sunday noon." },
+            { text: "Make it mandatory and remind them it's in their contracts.", pts: 1, type: "bad", fb: "The team is angry. Productivity is low, and two people have called in 'sick'." },
+            { text: "Work the shift yourself and let the team stay home.", pts: 2, type: "good", fb: "Noble, but you are exhausted. You missed a critical sensor check due to fatigue." },
+            { text: "Tell them to work for free to 'show loyalty' to the company.", pts: -1, type: "bad", fb: "That is illegal and insulting. You've lost the respect of your crew. Choose again!" }
+        ],
+        next: "s6"
+    },
+    s6: {
+        title: "The Software Update",
+        desc: "The robots need a firmware update, but it might cause 'bugs' in the custom logic.",
+        choices: [
+            { text: "Run the update on one robot first (Pilot Test) before doing the whole fleet.", pts: 3, type: "good", fb: "Perfect. You found a bug in the pilot and fixed it before it crashed the whole line." },
+            { text: "Update all of them at once to save time.", pts: 1, type: "bad", fb: "The whole line is frozen. The robots are now trying to weld the floor. Nightmare!" },
+            { text: "Skip the update; if it's not broken, don't fix it.", pts: 2, type: "good", fb: "Safe, but you're missing out on a 10% speed increase from the new code." },
+            { text: "Let the night shift do it without telling them about the risks.", pts: -1, type: "bad", fb: "Sabotaging your colleagues is a fireable offense. Try a real solution!" }
+        ],
+        next: "s7"
+    },
+    s7: {
+        title: "The Hydraulic Leak",
+        desc: "Fluid is pooling under the heavy press. It's slippery and the pressure is dropping.",
+        choices: [
+            { text: "Put down absorbent 'socks' and replace the seal during the lunch break.", pts: 3, type: "good", fb: "Great efficiency. You managed the hazard and fixed the root cause without downtime." },
+            { text: "Keep topping up the fluid reservoir every hour.", pts: 1, type: "bad", fb: "Wasteful and dangerous. The floor is like an ice rink. Someone will fall." },
+            { text: "Weld the joint shut permanently.", pts: 1, type: "bad", fb: "Now you can never open it for maintenance again. You've created a future disaster." },
+            { text: "Hide the leak under a wooden pallet.", pts: -1, type: "bad", fb: "Criminal negligence. Someone could slip and be seriously injured. Pick again!" }
+        ],
+        next: "e2"
+    },
+    e2: {
+        title: "EMERGENCY: The Audit",
+        isEmergency: true,
+        desc: "The Government Safety Inspector is here. They want to see the maintenance logs for the last year.",
+        choices: [
+            { text: "Hand over the organized, digital CMMS records immediately.", pts: 0, type: "good", next: "s8", fb: "The inspector is impressed. Your factory is a model of compliance!" },
+            { text: "Try to write a year's worth of logs in the next 10 minutes.", pts: 0, type: "bad", gameOver: true, fb: "FAILED: Falsifying safety records is a federal crime. The factory is closed. Game Over." },
+            { text: "Tell them the dog ate the logbooks.", pts: 0, type: "bad", gameOver: true, fb: "FAILED: The inspector doesn't have a sense of humor. Huge fines and closure. Game Over." },
+            { text: "Offer the inspector a 'private tour' and a free company laptop.", pts: 0, type: "bad", gameOver: true, fb: "FAILED: That's an attempted bribe. You are being escorted out in handcuffs. Game Over." }
+        ]
+    },
+    s8: {
+        title: "The Noise Complaint",
+        desc: "Neighbors say the factory's new exhaust fan is too loud at night.",
+        choices: [
+            { text: "Install acoustic baffling to reduce the decibel level.", pts: 3, type: "good", fb: "Good citizen. The neighbors are happy and the city won't revoke your night-shift permit." },
+            { text: "Only run the fan during the day and let the heat build up at night.", pts: 1, type: "bad", fb: "The equipment is overheating. You're trading a noise problem for a fire problem." },
+            { text: "Tell the neighbors to buy earplugs.", pts: 1, type: "bad", fb: "The local newspaper just wrote a story about the 'Evil Factory'. PR disaster!" },
+            { text: "Turn off the noise sensors so you can't see the problem.", pts: -1, type: "bad", fb: "Ignorance isn't a solution. It's a liability. Choose a professional fix." }
+        ],
+        next: "s9"
+    },
+    s9: {
+        title: "The Predictive Upgrade",
+        desc: "Should you invest in AI sensors that predict failures before they happen?",
+        choices: [
+            { text: "Yes, start a pilot program on the most critical machine.", pts: 3, type: "good", fb: "The future! You caught a gearbox failure 2 weeks early. Total savings: $50,000." },
+            { text: "No, we have good mechanics who can hear problems.", pts: 2, type: "good", fb: "Traditional. It works, but your competitors are becoming more efficient than you." },
+            { text: "Buy the sensors but don't install them yet.", pts: 1, type: "bad", fb: "Money wasted. They are sitting in a box while the machines continue to break." },
+            { text: "Tell the mechanics the AI is replacing them.", pts: -1, type: "bad", fb: "You've just caused a strike. Terrible leadership. Choose a collaborative path." }
+        ],
+        next: "s10"
+    },
+    s10: {
+        title: "The Final Promotion",
+        desc: "A corporate role is open. How do you prepare your successor?",
+        choices: [
+            { text: "Document all 'Tribal Knowledge' in a central wiki and mentor the best mechanic.", pts: 3, type: "good", fb: "Legacy secured. The factory will thrive long after you move to the head office." },
+            { text: "Take all your notes with you so they have to call you for help.", pts: 1, type: "bad", fb: "Selfish. You're sabotaging the factory to feel important. Not professional." },
+            { text: "Let the manager pick someone based on a coin flip.", pts: 1, type: "bad", fb: "Lazy. Leadership requires careful selection, not luck." },
+            { text: "Tell them the job is impossible and they should quit.", pts: -1, type: "bad", fb: "Bitter much? Leave on a high note, not with a toxic warning. Try again!" }
+        ],
+        next: "final"
+    }
+};
+
+const BANDS = [
+    { min: 25, max: 30, label: "Chief Technical Officer", msg: "Flawless. You are a titan of industry. The factory is efficient, safe, and profitable." },
+    { min: 15, max: 24, label: "Senior Maintenance Manager", msg: "Solid work. The machines are running, though you took some shortcuts that might cost you later." },
+    { min: 0, max: 14, label: "Junior Mechanic", msg: "You survived, but the factory is a mess. You need more training in safety and long-term planning." }
+];
+
+const VOCAB = ["Mean Time Between Failure (MTBF)", "Lock-Out Tag-Out (LOTO)", "Vibration Analysis", "OEM (Original Equipment Manufacturer)", "Mean Time To Repair (MTTR)", "Acoustic Baffling", "CMMS (Computerized Maintenance Management System)", "Firmware", "Hydraulic Pressure", "Predictive Maintenance"];
+
+let score = 0;
+let currentStepId = "s1";
+
+/**
+ * Fisher-Yates Shuffle
+ * Ensures true mathematical randomness for choice positioning.
+ */
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+function startGame() {
+    showScreen("game");
+    renderStep();
+}
+
+function showScreen(id) {
+    document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+    document.getElementById('screen-' + id).classList.add('active');
+}
+
+function updateScore() {
+    document.getElementById('scoreDisplay').innerText = score;
+}
+
+function renderStep() {
+    const data = steps[currentStepId];
+    const container = document.getElementById('choices-container');
+    const header = document.getElementById('step-header');
+    
+    header.innerHTML = data.isEmergency ? `<div class="emergency-badge">⚠️ EMERGENCY SITUATION</div>` : "";
+    document.getElementById('step-title').innerText = data.title;
+    document.getElementById('step-desc').innerText = data.desc;
+    
+    container.innerHTML = "";
+    document.getElementById('feedback-box').style.display = "none";
+    document.getElementById('btn-next').style.display = "none";
+
+    // Create a copy and shuffle it to maintain data integrity
+    const shuffledChoices = shuffleArray([...data.choices]);
+
+    shuffledChoices.forEach(choice => {
+        const btn = document.createElement('button');
+        btn.className = "choice-btn";
+        btn.innerText = choice.text;
+        // Data integrity: the choice object contains its own pts, fb, and metadata
+        btn.onclick = () => handleChoice(choice, btn);
+        container.appendChild(btn);
+    });
+}
+
+function handleChoice(choice, btn) {
+    const fbBox = document.getElementById('feedback-box');
+    const label = document.getElementById('points-label');
+    const data = steps[currentStepId];
+
+    label.innerText = choice.pts >= 0 ? `+${choice.pts} Points` : `${choice.pts} Point`;
+    if (data.isEmergency) label.innerText = choice.type === "bad" ? "FAILED" : "GOOD CHOICE";
+    
+    document.getElementById('feedback-text').innerText = choice.fb;
+    fbBox.className = "feedback fb-" + (choice.type === "good" ? "good" : "bad");
+    fbBox.style.display = "block";
+
+    if (choice.gameOver) {
+        setTimeout(() => { alert(choice.fb); location.reload(); }, 3000);
+        return;
+    }
+
+    if (choice.pts === -1) {
+        score += choice.pts; updateScore();
+        btn.disabled = true; return;
+    }
+
+    score += choice.pts; updateScore();
+    document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
+    const nextBtn = document.getElementById('btn-next');
+    nextBtn.style.display = "block";
+    nextBtn.onclick = () => {
+        currentStepId = choice.path || choice.next || steps[currentStepId].next;
+        if (currentStepId === "final") showFinal(); else renderStep();
+    };
+}
+
+function showFinal() {
+    showScreen("final");
+    document.getElementById('final-stats').innerText = `Score: ${score} / 30`;
+    const band = BANDS.find(b => score >= b.min && score <= b.max) || BANDS[BANDS.length-1];
+    document.getElementById('final-msg').innerHTML = `<strong>Rank: ${band.label}</strong><br>${band.msg}`;
+    
+    const vContainer = document.getElementById('vocab-container');
+    VOCAB.forEach(word => {
+        vContainer.innerHTML += `<span class="vpill">${word}</span>`;
+    });
+}
+</script>
+</body>
+</html>

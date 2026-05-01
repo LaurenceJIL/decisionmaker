@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Paris Heights: Apartment Manager Elite</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --parisian-blue: #2c3e50;
+        --chic-gold: #af944d;
+        --velvet-red: #7b241c;
+        --limestone: #f4f1ea;
+        --success: #27ae60;
+        --error: #c0392b;
+        --text: #34495e;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: var(--limestone);
+        color: var(--text);
+        line-height: 1.7;
+    }
+
+    header {
+        background: var(--parisian-blue);
+        color: white;
+        padding: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        position: sticky; top: 0; z-index: 1000;
+    }
+
+    .tally-container { text-align: right; }
+    .tally-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; color: var(--chic-gold); }
+    .tally-score { font-size: 1.8rem; font-weight: 700; color: var(--chic-gold); }
+
+    .container { max-width: 900px; margin: 2rem auto; padding: 0 1.5rem; }
+
+    .card {
+        background: white;
+        padding: 3rem;
+        border-radius: 2px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+        display: none;
+        border-top: 5px solid var(--chic-gold);
+    }
+    .card.active { display: block; animation: slideUp 0.5s ease-out; }
+
+    @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+    h1, h2 { font-family: 'Playfair Display', serif; color: var(--parisian-blue); }
+    p { margin-bottom: 1.5rem; }
+
+    .choices-grid { display: grid; gap: 1rem; margin: 2rem 0; }
+    .choice-btn {
+        background: #fff;
+        border: 1px solid #ddd;
+        padding: 1.2rem;
+        cursor: pointer;
+        transition: 0.3s;
+        text-align: left;
+        font-size: 1rem;
+        font-family: 'Poppins', sans-serif;
+    }
+    .choice-btn:hover:not(:disabled) { border-color: var(--chic-gold); background: #fdfbf7; }
+    .choice-btn:disabled { opacity: 0.5; cursor: not-allowed; text-decoration: line-through; }
+
+    .feedback-area {
+        margin-top: 2rem;
+        padding: 2rem;
+        display: none;
+        border-left: 8px solid;
+    }
+    .fb-best { background: #f0f9eb; border-color: var(--success); color: #2d5a27; }
+    .fb-avg { background: #fdf6ec; border-color: var(--chic-gold); color: #856404; }
+    .fb-poor { background: #fff9f2; border-color: #ffcc80; color: #856404; }
+    .fb-worst { background: #fdf2f2; border-color: var(--error); color: #721c24; animation: tilt 0.3s infinite; }
+
+    @keyframes tilt{0%{transform:rotate(0deg)}25%{transform:rotate(1deg)}75%{transform:rotate(-1deg)}100%{transform:rotate(0deg)}}
+
+    .points-badge {
+        display: inline-block;
+        font-weight: 700;
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+        text-transform: uppercase;
+    }
+
+    .next-btn {
+        margin-top: 2rem;
+        background: var(--parisian-blue);
+        color: white;
+        border: none;
+        padding: 1rem 3rem;
+        cursor: pointer;
+        font-weight: 600;
+        display: none;
+        width: 100%;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+</style>
+</head>
+<body>
+
+<header>
+    <div>
+        <h2 style="color: white; margin: 0; letter-spacing: 1px;">THE PARIS HEIGHTS</h2>
+        <span style="font-size: 0.7rem; color: var(--chic-gold);">LUXURY SERVICED APARTMENTS</span>
+    </div>
+    <div class="tally-container">
+        <div class="tally-label">Star Rating</div>
+        <div class="tally-score" id="scoreDisplay">4.0 ⭐</div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="card active" id="screen-start">
+        <h1 style="font-size: 2.5rem;">Welcome to the City of Light</h1>
+        <p>Manage your luxury flats. You start with a **4.0 Star Rating**[cite: 1, 4].</p>
+        <p>Your goal is 5.0. Avoid poor choices, or you will be forced to choose again[cite: 1].</p>
+        <button class="next-btn" style="display:block;" onclick="startGame()">Begin Management</button>
+    </div>
+
+    <div class="card" id="screen-game">
+        <div id="status-container"></div>
+        <h2 id="step-title"></h2>
+        <p id="step-desc" style="font-style: italic; color: #666;"></p>
+        <div class="choices-grid" id="choices-container"></div>
+        
+        <div class="feedback-area" id="feedback-box">
+            <span id="points-reveal" class="points-badge"></span>
+            <div id="feedback-content"></div>
+        </div>
+        
+        <button class="next-btn" id="btn-next">Next Step</button>
+    </div>
+
+    <div class="card" id="screen-final">
+        <h1>Season Report</h1>
+        <div id="final-stats"></div>
+        <div id="band-content" style="margin-top: 2rem; padding: 2rem; border: 1px solid #ddd;"></div>
+        <button class="next-btn" style="display:block;" onclick="location.reload()">Restart Career</button>
+    </div>
+</div>
+
+<script>
+const steps = {
+    d1: {
+        title: "Decision 1: The Tiny Elevator",
+        desc: "A family arrives with six massive suitcases. Your historic elevator fits exactly two people and zero bags. What is your move?",
+        choices: [
+            { text: "Carry the bags up yourself while they take the elevator in shifts.", type: "best", fb: "Heroic service! You saved them from a claustrophobic panic attack." },
+            { text: "Explain that carrying heavy items is against historic preservation rules.", type: "avg", fb: "A classic move. Blaming 'rules' is a very local way of saying 'no'." },
+            { text: "Suggest they leave most of their clothes in the trunk of their rental car.", type: "poor", fb: "A bit blunt. Expect them to worry about their designer wardrobe all night." },
+            { text: "Laugh and say, 'Welcome to the real Europe!' then go back to your desk.", type: "worst", fb: "Mocking a guest's exhaustion is a cardinal sin. Choose again!" }
+        ],
+        next: "d2"
+    },
+    d2: {
+        title: "Decision 2: The Coffee Crisis",
+        desc: "A guest calls at 7 AM. 'The coffee machine looks like a spaceship and I just want a normal black coffee.'",
+        choices: [
+            { text: "Go to the apartment, show them how to use it, and bring a 'French Press' as a backup.", type: "best", fb: "Magnificent. You’ve provided technical support and a premium backup plan." },
+            { text: "Email them a YouTube tutorial link for that specific coffee machine model.", type: "avg", fb: "Efficient but cold. You missed the 'human' part of luxury hospitality." },
+            { text: "Tell them there is a Starbucks three blocks away that opens at 8 AM.", type: "poor", fb: "Mentioning the 'S-word' in a luxury Parisian flat is a dangerous game." },
+            { text: "Inform them that 'real' coffee doesn't come in large cups and they should adapt.", type: "worst", fb: "Condescending. You are a manager, not a philosopher. Choose again!" }
+        ],
+        next: "d5"
+    },
+    d5: {
+        title: "Decision 5: The Delivery Disaster",
+        desc: "A guest's 200-euro dinner was left at the wrong building and is now cold.",
+        choices: [
+            { text: "Personally go to a nearby bistro to pick up a fresh, hot meal for them.", type: "best", fb: "Above and beyond! You’ve shown you are more reliable than an app." },
+            { text: "Help them navigate the app's French interface to request a full refund.", type: "avg", fb: "Supportive, but the guest is still hungry. Professional and helpful." },
+            { text: "Give them the customer support number and tell them to file a claim.", type: "poor", fb: "Ouch. A hungry guest doesn't want a phone number; they want food." },
+            { text: "Tell them that cold food is a local delicacy and they should appreciate it.", type: "worst", fb: "Trying to gaslight a guest into eating cold food is a new low. Choose again!" }
+        ],
+        next: "d10"
+    },
+    d10: {
+        title: "Decision 10: The Parting Souvenir",
+        desc: "The season is over. How do you ensure your high-end guests return?",
+        choices: [
+            { text: "Give them high-end macarons and a note mentioning their favorite coffee style.", type: "best", fb: "Masterful! Active listening turned a guest into a loyal fan." },
+            { text: "Ask for a 5-star review and give them a 5% discount code for next time.", type: "avg", fb: "Practical and business-like. It gets the job done efficiently." },
+            { text: "Just wave goodbye and tell them to 'try not to forget their bags'.", type: "poor", fb: "A bit snarky. You missed an opportunity for a real connection." },
+            { text: "Hand them a bill for the 'emotional labor' of dealing with complaints.", type: "worst", fb: "Charging for 'emotions' is the quickest way to ruin your reputation. Choose again!" }
+        ],
+        next: "final"
+    }
+};
+
+let score = 4.0;
+let currentStepId = "d1";
+
+function startGame() {
+    score = 4.0;
+    currentStepId = "d1";
+    updateScoreDisplay();
+    showScreen("game");
+    renderStep();
+}
+
+function updateScoreDisplay() {
+    document.getElementById('scoreDisplay').innerText = score.toFixed(1) + " ⭐";
+}
+
+function showScreen(id) {
+    document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+    document.getElementById('screen-' + id).classList.add('active');
+}
+
+function renderStep() {
+    const data = steps[currentStepId];
+    const container = document.getElementById('choices-container');
+    document.getElementById('step-title').innerText = data.title;
+    document.getElementById('step-desc').innerText = data.desc;
+    container.innerHTML = "";
+    document.getElementById('feedback-box').style.display = "none";
+    document.getElementById('btn-next').style.display = "none";
+
+    data.choices.forEach((choice, index) => {
+        const btn = document.createElement('button');
+        btn.className = "choice-btn";
+        btn.id = "opt-" + index;
+        btn.innerText = choice.text;
+        btn.onclick = () => handleChoice(choice, index);
+        container.appendChild(btn);
+    });
+}
+
+function handleChoice(choice, btnIndex) {
+    const ptReveal = document.getElementById('points-reveal');
+    const fbBox = document.getElementById('feedback-box');
+
+    if (choice.type === "worst") {
+        score = Math.max(0, score - 0.4);
+        ptReveal.innerText = "-0.4 Stars";
+        fbBox.className = "feedback-area fb-worst";
+        document.getElementById("opt-" + btnIndex).disabled = true;
+    } else {
+        if (choice.type === "best") {
+            score = Math.min(5.0, score + 0.1);
+            ptReveal.innerText = "+0.1 Stars";
+            fbBox.className = "feedback-area fb-best";
+        } else if (choice.type === "avg") {
+            ptReveal.innerText = "No Change";
+            fbBox.className = "feedback-area fb-avg";
+        } else if (choice.type === "poor") {
+            score = Math.max(0, score - 0.2);
+            ptReveal.innerText = "-0.2 Stars";
+            fbBox.className = "feedback-area fb-poor";
+        }
+        
+        document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
+        document.getElementById('btn-next').style.display = "block";
+    }
+
+    document.getElementById('feedback-content').innerText = choice.fb;
+    fbBox.style.display = "block";
+    updateScoreDisplay();
+
+    document.getElementById('btn-next').onclick = () => {
+        currentStepId = steps[currentStepId].next;
+        if (currentStepId === "final") showFinal(); else renderStep();
+    };
+}
+
+function showFinal() {
+    showScreen("final");
+    document.getElementById('final-stats').innerHTML = `<h2 style="text-align:center">Final Rating: ${score.toFixed(1)} / 5.0 ⭐</h2>`;
+    const bc = document.getElementById('band-content');
+    
+    if (score >= 4.5) {
+        bc.innerHTML = `<h2 style="color:var(--success); text-align:center;">The Legend of the Loire</h2><p style="text-align:center;">Incredible! You turned every disaster into a champagne toast.</p>`;
+    } else if (score >= 3.5) {
+        bc.innerHTML = `<h2 style="color:var(--chic-gold); text-align:center;">The Chic Coordinator</h2><p style="text-align:center;">Solid work. You were professional and reliable.</p>`;
+    } else {
+        bc.innerHTML = `<h2 style="color:var(--error); text-align:center;">The Banished Manager</h2><p style="text-align:center;">You have been relocated to the outskirts. Improve your hospitality diplomacy.</p>`;
+    }
+}
+</script>
+</body>
+</html>

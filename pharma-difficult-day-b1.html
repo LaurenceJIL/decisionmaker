@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pharma Dev Leader — B2 Interactive</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F4F7F9;--surface:#FFFFFF;--surface2:#EDF2F7;--surface3:#E2E8F0;
+  --ink:#1A202C;--ink2:#4A5568;--ink3:#718096;
+  --rule:rgba(26,32,44,0.1);
+  --green-bg:#F0FFF4;--green-bd:#48BB78;--green-tx:#22543D;
+  --amber-bg:#FFF9E5;--amber-bd:#ECC94B;--amber-tx:#744210;
+  --red-bg:#FFF5F5;--red-bd:#F56565;--red-tx:#742A2A;
+  --blue-bg:#EBF8FF;--blue-bd:#4299E1;--blue-tx:#2A4365;
+  --rxl:16px;--rs:8px;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+.shell{max-width:750px;margin:2rem auto;padding:0 1rem}
+.card{background:var(--surface);border-radius:var(--rxl);box-shadow:0 10px 15px -3px rgba(0,0,0,0.1);overflow:hidden;border:1px solid var(--rule)}
+.card-bar{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;background:#fff;border-bottom:1px solid var(--rule)}
+.progress-track{display:flex;gap:5px}
+.dot{width:12px;height:12px;border-radius:50%;background:var(--surface3)}
+.dot.done{background:var(--green-bd)}
+.dot.active{background:var(--blue-bd)}
+.dot.emg{background:var(--red-bd);animation:pulse 1.2s infinite}
+@keyframes pulse{0%{opacity:1}50%{opacity:0.4}100%{opacity:1}}
+.score-chip{font-family:'DM Mono',monospace;font-size:13px;background:var(--blue-bg);color:var(--blue-tx);padding:4px 12px;border-radius:20px;border:1px solid var(--blue-bd)}
+.card-body{padding:1.5rem;animation:slideUp 0.4s ease-out}
+@keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.time-label{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.5rem}
+.vocab-row{margin-bottom:1rem}
+.vpill{font-family:'DM Mono',monospace;font-size:10px;background:var(--surface2);color:var(--ink2);padding:2px 8px;border-radius:12px;margin-right:4px;border:1px solid var(--rule)}
+.scenario{font-size:17px;margin-bottom:1.5rem;color:var(--ink)}
+.opt{width:100%;text-align:left;padding:14px;background:var(--surface);border:1px solid var(--rule);border-radius:var(--rs);cursor:pointer;margin-bottom:10px;font-size:14px;transition:0.2s;display:flex;justify-content:space-between;align-items:center}
+.opt:hover{background:var(--surface2);border-color:var(--ink3)}
+.fbox{margin-top:1rem;padding:1rem;border-radius:var(--rs);font-size:14px;display:none;border-left:4px solid}
+.fbox.show{display:block}
+.nxt{margin-top:1.5rem;padding:12px 24px;background:var(--ink);color:#fff;border:none;border-radius:var(--rs);cursor:pointer;display:none;float:right;font-weight:600}
+.nxt.show{display:block}
+.final-screen{padding:2.5rem}
+.band-box{margin:1.5rem 0;padding:1.5rem;border-radius:var(--rs);text-align:left}
+.band-A{background:var(--green-bg);border:1px solid var(--green-bd);color:var(--green-tx)}
+.band-B{background:var(--amber-bg);border:1px solid var(--amber-bd);color:var(--amber-tx)}
+.band-C{background:var(--red-bg);border:1px solid var(--red-bd);color:var(--red-tx)}
+
+/* Glossary Styles */
+.glossary-section {margin-top:2.5rem; border-top:2px solid var(--surface3); padding-top:1.5rem;}
+.glossary-title {font-family:Lora; font-size:22px; margin-bottom:1.2rem;}
+.glossary-grid {display:grid; grid-template-columns:1fr; gap:15px;}
+.g-item {background:var(--bg); padding:12px; border-radius:var(--rs); border:1px solid var(--rule);}
+.g-term {font-family:'DM Mono',monospace; font-weight:600; color:var(--blue-tx); display:block; margin-bottom:4px; font-size:14px;}
+.g-def {font-size:13px; color:var(--ink2); display:block;}
+.g-note {font-size:11px; color:var(--ink3); font-style:italic; margin-top:4px; display:block;}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <div class="card" id="main-card">
+    <div class="card-bar" id="card-bar" style="display:none">
+      <div style="font-family:Lora;font-weight:600">BioVax: Lead Developer</div>
+      <div style="display:flex;align-items:center;gap:15px">
+        <div class="progress-track" id="dots"></div>
+        <div class="score-chip" id="score">0 pts</div>
+      </div>
+    </div>
+    <div id="content"></div>
+  </div>
+</div>
+
+<script>
+const S = { score: 0, answered: false };
+
+const GLOSSARY = [
+  { term: "Excipient", def: "An inactive substance used as a carrier or vehicle for the active drug. (e.g., lactose or cellulose).", note: "Commonly used in Pharma instead of 'ingredient'." },
+  { term: "Stability Data", def: "Information showing how a drug maintains its quality over time under different conditions.", note: "Vital for determining expiration dates." },
+  { term: "SAE (Serious Adverse Event)", def: "Any medical incident during a trial that results in death, hospitalization, or disability.", note: "Must be reported to regulators immediately." },
+  { term: "Indication", def: "The specific disease or condition that a medicine is officially approved to treat.", note: "Ex: 'The drug's primary indication is Type 2 Diabetes'." },
+  { term: "Cold Chain", def: "A temperature-controlled supply chain necessary to preserve the potency of biologics and vaccines.", note: "If the chain 'breaks', the drug is usually discarded." },
+  { term: "SOP (Standard Operating Procedure)", def: "Documented, step-by-step instructions for routine operations to ensure consistency.", note: "Deviating from an SOP is a serious compliance risk." },
+  { term: "Efficacy", def: "The ability of a medication to produce the desired therapeutic effect in patients.", note: "Often confused with 'Effectiveness' (real-world use)." },
+  { term: "CRO (Clinical Research Org)", def: "A company contracted to manage and lead clinical trials for a pharma firm.", note: "Critical for outsourcing development tasks." },
+  { term: "Quarantine", def: "The physical or digital isolation of products to prevent their use until they are cleared by Quality Control.", note: "Usually used when a temperature excursion occurs." }
+];
+
+const DATA = {
+  d1: {
+    label: "08:30 — Lab Verification",
+    scene: "Your Lead Chemist reports a slight <strong>discrepancy</strong> in the stability data for the new tablet. The CEO expects a report for investors by 10:00 AM.",
+    vocab: ["discrepancy", "stability", "investors"],
+    opts: [
+      { t: "Tell the Chemist to run a rapid re-test and delay the report until you have confirmation.", pts: 3, fb: "Correct. Scientific integrity is prioritized over investor deadlines." },
+      { t: "Submit the report but include a footnote saying the data is 'preliminary'.", pts: 1, fb: "Risky. A 'preliminary' note might be ignored, leading to misinformation." },
+      { t: "Ignore the Chemist for now and submit the positive report to keep investors happy.", pts: 0, fb: "Unprofessional. If the data is wrong, you are legally liable for misleading stakeholders." }
+    ],
+    next: { 3: "d2a", 1: "d2b", 0: "d2b" }
+  },
+  d2a: {
+    label: "10:15 — The Supply Chain",
+    scene: "The re-test shows the data was fine. However, your primary <strong>excipient</strong> supplier is facing a 4-month strike. Production has stopped.",
+    vocab: ["excipient", "supply chain", "strike"],
+    opts: [
+      { t: "Wait for the strike to end; our current supplier is the highest quality.", pts: 1, fb: "Passive. A 4-month delay can cost the company millions in market share." },
+      { t: "Try to find a cheaper, unverified local supplier to keep things moving.", pts: 0, fb: "Dangerous. Unverified excipients can compromise drug safety." },
+      { t: "Activate the backup contract with the secondary supplier in Lyon immediately.", pts: 3, fb: "Excellent. Contingency planning is key to pharmaceutical management." }
+    ],
+    next: "d3"
+  },
+  d2b: {
+    label: "10:15 — Investor Pushback",
+    scene: "Investors saw the 'preliminary' note and are worried. The CEO asks: 'Can we definitely hit the Phase III milestone by June?'",
+    vocab: ["milestone", "stakeholders"],
+    opts: [
+      { t: "Yes, 100%. We will work double shifts to make it happen.", pts: 1, fb: "Too confident. You don't have the validated data yet." },
+      { t: "It depends on the re-test results, but we are cautiously optimistic.", pts: 3, fb: "Balanced. Professional B2 communication requires managing expectations." },
+      { t: "No, we should probably cancel the trial phase for now.", pts: 0, fb: "Too pessimistic. You are causing panic before you have facts." }
+    ],
+    next: "d3"
+  },
+  d3: {
+    label: "13:00 — Regulatory Update",
+    scene: "The FDA released new guidance on <strong>Pediatric Indications</strong>. To include children in the label, you must add 50 more patients to the trial.",
+    vocab: ["pediatric", "guidance", "indications"],
+    opts: [
+      { t: "Add the 50 patients. It’s expensive, but it expands the drug’s use significantly.", pts: 3, fb: "Strategic. A wider indication means a much larger commercial success later." },
+      { t: "Stick to the adult-only plan to save money and time for the current launch.", pts: 2, fb: "Practical, but you lose out on the pediatric market completely." },
+      { t: "Ignore the new guidance and hope the FDA doesn't notice.", pts: 0, fb: "Impossible. Regulatory bodies check every detail against their latest guidance." }
+    ],
+    next: "d4"
+  },
+  d4: {
+    label: "15:00 — Lab Protocol",
+    scene: "The manufacturing team wants to skip a 24-hour 'rest period' for the <strong>excipient</strong> mix to save time. They say 'it never makes a difference'.",
+    vocab: ["protocol", "compliance"],
+    opts: [
+      { t: "Allow the skip just this once to get the batch out by Friday.", pts: 0, fb: "Compliance breach. Skipping SOP steps can invalidate the entire batch." },
+      { t: "Insist on the 24-hour rest period. SOPs are non-negotiable.", pts: 3, fb: "Correct. Compliance and safety come before the schedule." },
+      { t: "Ask the team to write a memo explaining why they skipped it after they do it.", pts: 1, fb: "Weak. You are documenting a failure rather than preventing it." }
+    ],
+    next: "emergency1"
+  },
+  emergency1: {
+    label: "16:00 — EMERGENCY: Safety Alert",
+    scene: "A clinical site reports a <strong>Serious Adverse Event (SAE)</strong>. A patient has been hospitalized with severe liver inflammation.",
+    vocab: ["SAE", "inflammation", "protocol"],
+    opts: [
+      { t: "Do nothing until you have 5 more similar cases; one case might be a coincidence.", isGameOver: true, fb: "<strong>GAME OVER.</strong> Negligence. More patients get sick. The trial is shut down by the government." },
+      { t: "Immediately suspend dosing for that patient group and notify the Ethics Committee.", isSafe: true, fb: "The only ethical choice. Safety protocols must be triggered immediately." },
+      { t: "Contact the site and ask them to classify it as a 'minor event' to avoid paperwork.", isGameOver: true, fb: "<strong>GAME OVER.</strong> Ethical violation. This is data fraud and leads to criminal charges." }
+    ],
+    next: "d5"
+  },
+  d5: {
+    label: "09:00 (Next Day) — The Buyout",
+    scene: "A larger firm wants to buy your project. They want to change the <strong>CRO</strong> managing your data. This would delay you by 3 months.",
+    vocab: ["buyout", "CRO", "negotiation"],
+    opts: [
+      { t: "Negotiate: Agree to the buyout but keep your current CRO until Phase II is complete.", pts: 3, fb: "Smart. You get the funding without the immediate technical delay." },
+      { t: "Accept immediately; the new firm is much more famous.", pts: 2, fb: "Fine, but a 3-month delay is a heavy price to pay for 'fame'." },
+      { t: "Reject the deal; we don't need anyone else's help.", pts: 1, fb: "Short-sighted. Pharma development is extremely expensive; you likely need the capital." }
+    ],
+    next: "d6"
+  },
+  d6: {
+    label: "11:00 — Resource Split",
+    scene: "Your factory has one line open. You can produce 'Neuro-Pax' (New Drug) or 'Heart-Safe' (Old, profitable drug). You cannot do both.",
+    vocab: ["allocation", "pipeline"],
+    opts: [
+      { t: "Produce 'Neuro-Pax'. The future of the company depends on the new pipeline.", pts: 3, fb: "Correct. Protecting R&D projects is vital for long-term growth." },
+      { t: "Produce 'Heart-Safe' to ensure we have cash to pay salaries this month.", pts: 2, fb: "Practical, but it delays the innovation that saves the company later." },
+      { t: "Split the time 50/50, even though it makes both production runs inefficient.", pts: 1, fb: "Inefficient. In manufacturing, half-runs often lead to higher waste and lower quality." }
+    ],
+    next: "d7"
+  },
+  d7: {
+    label: "14:00 — Marketing Claims",
+    scene: "Marketing wants to advertise the drug as a 'Breakthrough Cure'. Scientific data shows it only manages symptoms, it doesn't 'cure'.",
+    vocab: ["breakthrough", "efficacy", "misleading"],
+    opts: [
+      { t: "Let them use it; 'Cure' is a strong word that will help sales.", pts: 0, fb: "Unethical. Misleading marketing in pharma leads to massive fines and lost trust." },
+      { t: "Insist on 'Symptom Management'. Accuracy is more important than hype.", pts: 3, fb: "Correct. Scientific accuracy is a legal requirement." },
+      { t: "Suggest 'Life-Changing Relief'. It's strong but not technically a lie.", pts: 2, fb: "A clever compromise, but 'Symptom Management' is still the safer medical term." }
+    ],
+    next: "emergency2"
+  },
+  emergency2: {
+    label: "16:30 — EMERGENCY: Cold Chain",
+    scene: "A shipment of vaccines was left on a loading dock in 30°C heat for 4 hours. The <strong>Cold Chain</strong> sensor is red.",
+    vocab: ["cold chain", "potency", "quarantine"],
+    opts: [
+      { t: "Put them in the freezer immediately and hope the potency is still okay.", isGameOver: true, fb: "<strong>GAME OVER.</strong> You distributed dead vaccines. Thousands of people are unprotected. Massive scandal." },
+      { t: "Check the 'Stability Budget' data to see if 4 hours is within the allowed window.", pts: 1, fb: "Risky. Even if the data says it's okay, you are taking a huge gamble with patient safety." },
+      { t: "Quarantine the entire batch and mark it as 'Not for Human Use'.", isSafe: true, fb: "The only safe choice. Better to lose a batch than to lose a patient's life." }
+    ],
+    next: "d8"
+  },
+  d8: {
+    label: "17:30 — The Final Board Pitch",
+    scene: "You must give a 'Go/No-Go' recommendation for the $50M Phase III trial. The safety signal from yesterday is still being investigated.",
+    vocab: ["mitigation", "recommendation"],
+    opts: [
+      { t: "Recommend 'Go' but with a strict new safety monitoring protocol in place.", pts: 3, fb: "Professional. You recognize the risk but provide a solution to manage it." },
+      { t: "Recommend 'No-Go' and cancel everything; the risk is too high.", pts: 1, fb: "Too cautious. Every drug has risks; the goal is to manage them, not run away." },
+      { t: "Tell the board you can't decide and ask them to choose for you.", pts: 0, fb: "Weak. You are the Lead Developer; the board pays you for your expert opinion." }
+    ],
+    next: "final"
+  }
+};
+
+/**
+ * Fisher-Yates Shuffle Implementation
+ * Ensures true mathematical randomness by swapping elements in O(n) time.
+ */
+function fisherYatesShuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[array[j] === undefined ? i : j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+// Keeping the original shuffle name for compatibility, but using Fisher-Yates logic
+function shuffle(array) {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+function buildDots(id) {
+  const stages = ["d1", "d2a", "d3", "d4", "emergency1", "d5", "d6", "d7", "emergency2", "d8"];
+  const curIdx = stages.indexOf(id === "d2b" ? "d2a" : id);
+  const el = document.getElementById('dots');
+  el.innerHTML = '';
+  for(let i=0; i<8; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i < curIdx ? ' done' : i === curIdx ? ' active' : '');
+    if (id.includes('emergency')) d.className += ' emg';
+    el.appendChild(d);
+  }
+}
+
+function show(id) {
+  const node = DATA[id];
+  S.answered = false;
+  document.getElementById('card-bar').style.display = 'flex';
+  buildDots(id);
+  
+  let h = `<div class="card-body"><div class="time-label">${node.label}</div>`;
+  if(node.vocab) h += `<div class="vocab-row">${node.vocab.map(v=>`<span class="vpill">${v}</span>`).join('')}</div>`;
+  h += `<div class="scenario">${node.scene}</div><div class="options">`;
+  
+  // Create a randomized copy of options every time the step is rendered
+  let displayOpts = shuffle(node.opts);
+  
+  displayOpts.forEach((o) => {
+    // We pass the option object properties safely to maintain data integrity
+    h += `<button class="opt" onclick="pick('${id}', ${JSON.stringify(o).replace(/"/g, '&quot;')})">
+            <span>${o.t}</span>
+          </button>`;
+  });
+  h += `</div><div class="fbox" id="fb"></div><button class="nxt" id="nxt">Continue →</button></div>`;
+  document.getElementById('content').innerHTML = h;
+}
+
+function pick(id, opt) {
+  if(S.answered) return;
+  S.answered = true;
+  const nxt = document.getElementById('nxt');
+  const fb = document.getElementById('fb');
+  
+  if(!DATA[id].isEmergency && opt.pts !== undefined) S.score += opt.pts;
+  document.getElementById('score').textContent = S.score + ' pts';
+  
+  fb.innerHTML = opt.fb;
+  fb.className = 'fbox show';
+  fb.style.backgroundColor = (opt.pts === 3 || opt.isSafe) ? 'var(--green-bg)' : (opt.pts === 0 || opt.isGameOver) ? 'var(--red-bg)' : 'var(--amber-bg)';
+  fb.style.borderColor = (opt.pts === 3 || opt.isSafe) ? 'var(--green-bd)' : (opt.pts === 0 || opt.isGameOver) ? 'var(--red-bd)' : 'var(--amber-bd)';
+  
+  if(opt.isGameOver) {
+    nxt.textContent = "Final Review";
+    nxt.onclick = () => finish(true);
+  } else {
+    let nextId = typeof DATA[id].next === 'string' ? DATA[id].next : DATA[id].next[opt.pts];
+    nxt.onclick = () => show(nextId);
+  }
+  nxt.classList.add('show');
+}
+
+function finish(gameOver) {
+  document.getElementById('card-bar').style.display = 'none';
+  let band, title, text, bClass;
+  
+  if(gameOver) {
+    bClass = "band-C"; title = "Regulatory Failure"; text = "A critical safety or ethical breach occurred. In pharma, data or safety failures result in project termination and legal liability.";
+  } else if(S.score >= 19) {
+    bClass = "band-A"; title = "Executive Director"; text = "Outstanding leadership. You balanced speed, ethics, and regulatory compliance. You are ready for a global leadership role.";
+  } else if(S.score >= 12) {
+    bClass = "band-B"; title = "Senior Project Manager"; text = "Good job. You reached Phase III safely. While some choices were cautious, you followed the rules and protected the project.";
+  } else {
+    bClass = "band-C"; title = "Junior Associate"; text = "You survived, but your choices were often reactive. Focus on learning about SOPs and the long-term drug pipeline.";
+  }
+
+  let glossHtml = `
+    <div class="glossary-section">
+      <h3 class="glossary-title">Glossary & Language Review</h3>
+      <div class="glossary-grid">
+        ${GLOSSARY.map(g => `
+          <div class="g-item">
+            <span class="g-term">${g.term}</span>
+            <span class="g-def">${g.def}</span>
+            <span class="g-note">${g.note}</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>`;
+
+  document.getElementById('content').innerHTML = `
+    <div class="final-screen">
+      <h2 style="font-family:Lora; font-size:28px">End of Simulation</h2>
+      <div style="font-size:18px; margin:10px 0; font-family:'DM Mono'">Final Score: ${S.score} / 24</div>
+      <div class="band-box ${bClass}">
+        <h3 style="margin-bottom:5px">${title}</h3>
+        <p style="font-size:14px">${text}</p>
+      </div>
+      ${glossHtml}
+      <button class="opt" style="justify-content:center; margin-top:20px; font-weight:600" onclick="location.reload()">Restart Simulation</button>
+    </div>`;
+}
+
+function start() {
+  document.getElementById('content').innerHTML = `
+    <div class="final-screen" style="text-align:center">
+      <h2 style="font-family:Lora; font-size:32px">BioVax Solutions</h2>
+      <p style="margin:1.5rem 0; color:var(--ink2)">Manage the development of 'Neuro-Pax'. Balance data integrity, safety alerts, and supply chain crises in this interactive B2 pharma simulation.</p>
+      <button class="opt" style="justify-content:center; background:var(--ink); color:#fff; padding:18px" onclick="show('d1')">Enter the Lab →</button>
+    </div>`;
+}
+
+start();
+</script>
+</body>
+</html>

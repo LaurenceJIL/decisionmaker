@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>System Down — English for IT Professionals</title>
+<meta name="description" content="An interactive English language exercise for B1 learners working in IT. Navigate a high-pressure day at an insurance company, practise professional vocabulary, and see how your decisions shape the outcome.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+:root{
+  --bg:#F2F4F7;
+  --surface:#FFFFFF;
+  --surface2:#EAEDF2;
+  --surface3:#DFE3EC;
+  --ink:#14161A;
+  --ink2:#52566B;
+  --ink3:#8A8FA8;
+  --line:rgba(20,22,26,0.10);
+  --line2:rgba(20,22,26,0.18);
+  --green-bg:#E4F3E8;--green-bd:#6BBF80;--green-tx:#1A5430;
+  --amber-bg:#FDF3E0;--amber-bd:#E8A020;--amber-tx:#5C3408;
+  --red-bg:#FCEAEA;--red-bd:#E08080;--red-tx:#6E1A1A;
+  --fatal-bg:#FCEAEA;--fatal-bd:#CC2222;--fatal-tx:#4A0808;
+  --blue-bg:#E8F1FD;--blue-bd:#6CA4E8;--blue-tx:#0A3472;
+  --teal-bg:#E4F4F4;--teal-bd:#5BBFBF;--teal-tx:#0C4444;
+  --accent:#0052CC;
+  --accent2:#003D99;
+  --r:12px;--rs:8px;--rxs:6px;
+  --shadow:0 2px 14px rgba(0,0,0,0.08);
+  --shadow-lg:0 4px 28px rgba(0,0,0,0.12)
+}
+body{font-family:'DM Sans',sans-serif;font-size:16px;line-height:1.6;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:0 1rem 5rem}
+.shell{width:100%;max-width:720px;margin:0 auto}
+
+/* TOP BAR */
+.topbar{width:100%;max-width:720px;display:flex;align-items:center;justify-content:space-between;padding:1.5rem 0 1.25rem;border-bottom:.5px solid var(--line);margin-bottom:2rem}
+.topbar-brand{display:flex;align-items:center;gap:10px}
+.brand-icon{width:34px;height:34px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.brand-icon svg{width:18px;height:18px}
+.brand-name{font-size:13px;font-weight:500;color:var(--ink);letter-spacing:.01em}
+.brand-sub{font-size:11px;color:var(--ink3);margin-top:1px}
+.level-badge{font-family:'DM Mono',monospace;font-size:11px;font-weight:500;background:var(--teal-bg);color:var(--teal-tx);border:.5px solid var(--teal-bd);border-radius:20px;padding:4px 12px;letter-spacing:.02em}
+
+/* INTRO */
+.intro-card{background:var(--surface);border:.5px solid var(--line);border-radius:var(--r);padding:2.5rem;box-shadow:var(--shadow)}
+.intro-eyebrow{font-size:11px;font-weight:500;letter-spacing:.09em;text-transform:uppercase;color:var(--ink3);margin-bottom:1rem}
+.intro-title{font-size:28px;font-weight:300;line-height:1.25;color:var(--ink);margin-bottom:.25rem;letter-spacing:-.02em}
+.intro-title strong{font-weight:500}
+.intro-divider{width:40px;height:2px;background:var(--accent);border-radius:2px;margin:1.25rem 0}
+.intro-body{font-size:15px;line-height:1.8;color:var(--ink2);margin-bottom:1.5rem}
+.intro-body p+p{margin-top:.75rem}
+.intro-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:2rem}
+.meta-item{background:var(--surface2);border-radius:var(--rs);padding:12px 14px}
+.meta-label{font-size:11px;color:var(--ink3);margin-bottom:3px;letter-spacing:.03em;text-transform:uppercase}
+.meta-value{font-size:14px;font-weight:500;color:var(--ink)}
+.start-btn{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#fff;border:none;border-radius:var(--rs);padding:13px 24px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer;transition:background .15s,transform .1s}
+.start-btn:hover{background:var(--accent2)}
+.start-btn:active{transform:scale(.98)}
+
+/* GAME CARD */
+.game-card{background:var(--surface);border:.5px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);display:none}
+.game-card.active{display:block}
+
+/* PROGRESS */
+.progress-strip{height:3px;background:var(--surface2);position:relative}
+.progress-fill{height:100%;background:var(--accent);border-radius:0 2px 2px 0;transition:width .4s cubic-bezier(.4,0,.2,1)}
+
+/* CARD HEADER */
+.card-header{display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.75rem;border-bottom:.5px solid var(--line);gap:1rem}
+.char-name{font-size:14px;font-weight:500;color:var(--ink);margin-bottom:1px}
+.char-role{font-size:11px;color:var(--ink3)}
+.header-right{display:flex;align-items:center;gap:12px;flex-shrink:0}
+.stage-dots{display:flex;gap:5px;align-items:center}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--line2);transition:all .25s}
+.dot.done{background:#3A9A5C}
+.dot.active{background:var(--accent);box-shadow:0 0 0 2.5px rgba(0,82,204,.18)}
+.dot.emg{background:#CC2222;box-shadow:0 0 0 2.5px rgba(204,34,34,.18)}
+.score-chip{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;background:var(--green-bg);color:var(--green-tx);border:.5px solid var(--green-bd);border-radius:20px;padding:4px 12px;min-width:62px;text-align:center;transition:all .2s}
+
+/* CARD BODY */
+.card-body{padding:1.75rem}
+.time-chip{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-bottom:1rem}
+.time-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0}
+.time-dot.red{background:#CC2222}
+
+.emg-banner{display:flex;align-items:flex-start;gap:10px;background:var(--red-bg);border:.5px solid var(--red-bd);border-radius:var(--rs);padding:13px 15px;margin-bottom:1.25rem}
+.emg-icon{width:22px;height:22px;border-radius:50%;background:#CC2222;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.emg-text{font-size:13px;color:var(--red-tx);line-height:1.55}
+.emg-text strong{display:block;margin-bottom:2px;font-size:14px}
+
+.vocab-strip{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1.25rem;padding-bottom:1.25rem;border-bottom:.5px solid var(--line)}
+.vocab-label{font-size:11px;color:var(--ink3);margin-right:2px;align-self:center}
+.vpill{display:inline-block;font-size:11px;font-family:'DM Mono',monospace;background:var(--blue-bg);color:var(--blue-tx);border:.5px solid var(--blue-bd);border-radius:20px;padding:2px 10px}
+
+.scenario{font-size:15px;line-height:1.82;color:var(--ink);margin-bottom:1.75rem}
+.scenario strong{font-weight:500}
+.scenario em{font-style:italic;color:var(--ink2)}
+.scenario .sysbox{background:var(--surface2);border:.5px solid var(--line2);border-left:3px solid var(--accent);border-radius:var(--rxs);padding:10px 14px;margin:1rem 0;font-family:'DM Mono',monospace;font-size:13px;color:var(--ink2);line-height:1.6}
+
+/* OPTIONS */
+.options{display:flex;flex-direction:column;gap:10px;margin-bottom:1.5rem}
+.opt{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:15px 16px;background:var(--surface);border:.5px solid var(--line2);border-radius:var(--rs);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--ink);line-height:1.6;transition:background .12s,border-color .12s,transform .08s;text-align:left;width:100%}
+.opt:hover:not(:disabled){background:var(--surface2);border-color:var(--line2);transform:translateY(-1px)}
+.opt:active:not(:disabled){transform:translateY(0)}
+.opt:disabled{cursor:default;transform:none}
+.opt-letter{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--surface2);border:.5px solid var(--line2);font-size:11px;font-weight:500;color:var(--ink2);display:flex;align-items:center;justify-content:center;margin-top:1px;transition:all .12s}
+.opt-text{flex:1}
+.ptag{flex-shrink:0;font-size:11px;font-weight:500;font-family:'DM Mono',monospace;padding:3px 9px;border-radius:20px;white-space:nowrap;margin-top:2px;visibility:hidden}
+.ptag.vis{visibility:visible}
+.pt3{background:var(--green-bg);color:var(--green-tx);border:.5px solid var(--green-bd)}
+.pt2{background:var(--amber-bg);color:var(--amber-tx);border:.5px solid var(--amber-bd)}
+.pt1,.pt0{background:var(--red-bg);color:var(--red-tx);border:.5px solid var(--red-bd)}
+
+.opt.sel-g{background:var(--green-bg);border-color:var(--green-bd);color:var(--green-tx)}
+.opt.sel-g .opt-letter{background:var(--green-bg);border-color:var(--green-bd);color:var(--green-tx)}
+.opt.sel-o{background:var(--amber-bg);border-color:var(--amber-bd);color:var(--amber-tx)}
+.opt.sel-o .opt-letter{background:var(--amber-bg);border-color:var(--amber-bd);color:var(--amber-tx)}
+.opt.sel-p{background:var(--red-bg);border-color:var(--red-bd);color:var(--red-tx)}
+.opt.sel-p .opt-letter{background:var(--red-bg);border-color:var(--red-bd);color:var(--red-tx)}
+.opt.sel-s{background:var(--amber-bg);border-color:var(--amber-bd);color:var(--amber-tx)}
+.opt.sel-f{background:var(--fatal-bg);border-color:var(--fatal-bd);color:var(--fatal-tx)}
+.opt.sel-f .opt-letter{background:var(--fatal-bg);border-color:var(--fatal-bd);color:var(--fatal-tx)}
+
+/* FEEDBACK */
+.feedback{border-radius:var(--rs);padding:15px 16px;font-size:14px;line-height:1.65;margin-bottom:1.5rem;display:none;animation:fadein .2s ease}
+.feedback.show{display:block}
+@keyframes fadein{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.fb-g{background:var(--green-bg);border:.5px solid var(--green-bd);color:var(--green-tx)}
+.fb-o{background:var(--amber-bg);border:.5px solid var(--amber-bd);color:var(--amber-tx)}
+.fb-p{background:var(--red-bg);border:.5px solid var(--red-bd);color:var(--red-tx)}
+.fb-f{background:var(--fatal-bg);border:1px solid var(--fatal-bd);color:var(--fatal-tx)}
+
+/* NEXT */
+.nxt-row{display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.nxt-note{font-size:12px;color:var(--ink3);font-style:italic}
+.nxt{display:none;align-items:center;gap:6px;padding:11px 22px;background:var(--accent);color:#fff;border:none;border-radius:var(--rs);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:background .12s,transform .08s;white-space:nowrap}
+.nxt:hover{background:var(--accent2)}
+.nxt:active{transform:scale(.98)}
+.nxt.show{display:inline-flex}
+
+/* FINAL */
+.final-hero{background:linear-gradient(135deg,#001F5C 0%,var(--accent) 100%);color:#fff;border-radius:var(--r) var(--r) 0 0;padding:2.5rem 2rem;text-align:center}
+.final-eyebrow{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:.75rem}
+.final-score-num{font-family:'DM Mono',monospace;font-size:72px;font-weight:500;line-height:1;color:#fff;margin-bottom:2px}
+.final-score-max{font-size:15px;color:rgba(255,255,255,.5);margin-bottom:1.5rem}
+.bar-track{background:rgba(255,255,255,.2);border-radius:20px;height:6px;max-width:300px;margin:0 auto 1.5rem;overflow:hidden}
+.bar-fill{height:100%;border-radius:20px;background:#fff;width:0%;transition:width 1s cubic-bezier(.34,1.3,.64,1)}
+.final-grade{font-size:20px;font-weight:300;color:#fff;letter-spacing:-.01em}
+.final-body{background:var(--surface);border:.5px solid var(--line);border-top:none;border-radius:0 0 var(--r) var(--r);padding:2rem}
+.feedback-section{margin-bottom:1.5rem}
+.section-head{font-size:11px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--ink3);margin-bottom:.65rem}
+.feedback-para{font-size:15px;line-height:1.8;color:var(--ink)}
+.tips-box{background:var(--blue-bg);border:.5px solid var(--blue-bd);border-radius:var(--rs);padding:16px 18px;margin-bottom:1.5rem}
+.tips-box .section-head{color:var(--blue-tx)}
+.tips-box .feedback-para{color:var(--blue-tx);font-size:14px;line-height:1.7}
+.vocab-cloud{display:flex;flex-wrap:wrap;gap:6px;margin-top:.65rem}
+.score-bands{border:.5px solid var(--line);border-radius:var(--rs);overflow:hidden;margin-bottom:1.75rem}
+.band-row{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:.5px solid var(--line);font-size:13px}
+.band-row:last-child{border-bottom:none}
+.band-row.yours{background:var(--green-bg)}
+.band-range{font-family:'DM Mono',monospace;font-size:12px;color:var(--ink3);min-width:52px;flex-shrink:0}
+.band-row.yours .band-range{color:var(--green-tx)}
+.band-label{color:var(--ink2);flex:1}
+.band-row.yours .band-label{color:var(--green-tx);font-weight:500}
+.band-you{font-size:11px;font-weight:500;background:var(--green-tx);color:#fff;border-radius:20px;padding:2px 8px;white-space:nowrap}
+.replay-row{display:flex;gap:10px;flex-wrap:wrap}
+.replay-primary{flex:1;min-width:180px;display:inline-flex;align-items:center;justify-content:center;gap:6px;background:var(--accent);color:#fff;border:none;border-radius:var(--rs);padding:13px 20px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:background .12s}
+.replay-primary:hover{background:var(--accent2)}
+
+/* FOOTER */
+.page-footer{margin-top:3rem;padding-top:1.5rem;border-top:.5px solid var(--line);width:100%;max-width:720px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem}
+.footer-note{font-size:12px;color:var(--ink3)}
+
+@media(max-width:540px){
+  .intro-meta{grid-template-columns:1fr 1fr}
+  .meta-item:last-child{grid-column:1/-1}
+  .card-body{padding:1.25rem}
+  .final-score-num{font-size:52px}
+  .final-hero{padding:2rem 1.25rem}
+  .final-body{padding:1.5rem 1.25rem}
+  .nxt-note{display:none}
+}
+@media(max-width:380px){.intro-meta{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="topbar shell">
+  <div class="topbar-brand">
+    <div class="brand-icon">
+      <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="2" y="2" width="6" height="6" rx="1.5" fill="white"/>
+        <rect x="10" y="2" width="6" height="6" rx="1.5" fill="white" opacity=".55"/>
+        <rect x="2" y="10" width="6" height="6" rx="1.5" fill="white" opacity=".55"/>
+        <path d="M10 13h6M13 10v6" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div>
+      <div class="brand-name">English in the Workplace</div>
+      <div class="brand-sub">Interactive Decision Exercise</div>
+    </div>
+  </div>
+  <div class="level-badge">B1</div>
+</div>
+
+<div class="shell" id="intro">
+  <div class="intro-card">
+    <div class="intro-eyebrow">Information Technology English · Insurance Sector</div>
+    <div class="intro-title"><strong>System Down</strong><br>A Day in IT at Meridian Insurance</div>
+    <div class="intro-divider"></div>
+    <div class="intro-body">
+      <p>You are <strong>Jordan Ellis</strong>, an IT Support Analyst at <strong>Meridian Insurance Group</strong>, a mid-sized company with 600 employees. Your team keeps the company's systems running — claims processing software, customer databases, internal networks, and security tools.</p>
+      <p>Today is unusually high-pressure. A server alert, a security incident, a difficult software decision, a data protection request, a vendor problem, and a major emergency will all arrive before the end of your shift. Your decisions will determine how the day ends — and whether the company stays secure and operational.</p>
+      <p>Choose carefully. Some paths are much better than others, and one wrong decision at a critical moment could end the exercise early.</p>
+    </div>
+    <div class="intro-meta">
+      <div class="meta-item"><div class="meta-label">Level</div><div class="meta-value">B1</div></div>
+      <div class="meta-item"><div class="meta-label">Decisions</div><div class="meta-value">7 stages</div></div>
+      <div class="meta-item"><div class="meta-label">Max score</div><div class="meta-value">20 points</div></div>
+    </div>
+    <button class="start-btn" onclick="startGame()">Begin your shift &nbsp;→</button>
+  </div>
+</div>
+
+<div class="shell" id="game" style="display:none">
+  <div class="game-card active" id="gc">
+    <div class="progress-strip"><div class="progress-fill" id="prog"></div></div>
+    <div class="card-header">
+      <div>
+        <div class="char-name">Jordan Ellis</div>
+        <div class="char-role">IT Support Analyst — Meridian Insurance Group</div>
+      </div>
+      <div class="header-right">
+        <div class="stage-dots" id="dots"></div>
+        <div class="score-chip" id="score">0 / 20</div>
+      </div>
+    </div>
+    <div class="card-body" id="card-body">
+      <div class="time-chip"><div class="time-dot" id="tdot"></div><span id="lbl"></span></div>
+      <div id="scene"></div>
+      <div class="options" id="opts"></div>
+      <div class="feedback" id="fb"></div>
+      <div class="nxt-row">
+        <div class="nxt-note" id="nxt-note"></div>
+        <button class="nxt" id="nxt"></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="shell" id="final-wrap" style="display:none">
+  <div id="fin">
+    <div class="final-hero">
+      <div class="final-eyebrow">End of shift — Meridian Insurance Group</div>
+      <div class="final-score-num" id="fin-num">—</div>
+      <div class="final-score-max">out of 20 points</div>
+      <div class="bar-track"><div class="bar-fill" id="bfill"></div></div>
+      <div class="final-grade" id="fin-grade"></div>
+    </div>
+    <div class="final-body">
+      <div class="feedback-section">
+        <div class="section-head">How did it go?</div>
+        <div class="feedback-para" id="fin-body"></div>
+      </div>
+      <div class="tips-box">
+        <div class="section-head">To develop further</div>
+        <div class="feedback-para" id="fin-tips"></div>
+      </div>
+      <div class="feedback-section">
+        <div class="section-head">Vocabulary practised today</div>
+        <div class="vocab-cloud" id="fin-vocab"></div>
+      </div>
+      <div class="feedback-section">
+        <div class="section-head">Score guide</div>
+        <div class="score-bands" id="score-bands"></div>
+      </div>
+      <div class="replay-row">
+        <button class="replay-primary" onclick="restartGame()">↺ &nbsp;Play again — try a different path</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page-footer shell">
+  <div class="footer-note">English in the Workplace · Information Technology Series</div>
+  <div class="footer-note">Interactive exercise · B1 level</div>
+</div>
+
+<script>
+/* ── STATE ── */
+const S={score:0,answered:false,path:[]};
+let curId=null,curShuf=[];
+const LABELS='ABCDEFGH';
+
+/* ══════════════════════════════════════════
+   NODE DATA
+   Stages: D1→D2(a/b/c)→D3(aa/ab/ba/bb/ca/cb)→D4(aa/ab/ac)→D5(aa/ab)→EMG→D6→D7(a/b/c)→final
+   Max score: 3+3+3+3+3+3+2 = 20
+══════════════════════════════════════════ */
+const N={
+
+/* ━━━━━━━━━━ STAGE 1 ━━━━━━━━━━ */
+d1:{
+  stage:1, label:"08:30 — Monday morning alert",
+  scene:`<div class="scenario">You arrive at your desk and open the monitoring dashboard. An automated alert is waiting:<div class="sysbox">⚠ ALERT — Server MRD-DB-04 (Claims Database)<br>CPU usage: 97% · Response time: 8.2s (normal: 0.4s)<br>Status: DEGRADED · 3 dependent services affected</div>The claims processing team uses this server constantly. It is the start of the week and the system is already under heavy <strong>load</strong>. Your team leader is in a meeting. You must decide how to respond first.</div>`,
+  vocab:["server alert","CPU usage","degraded","load","monitoring dashboard","escalate"],
+  opts:[
+    {t:"Investigate the alert immediately. Check the server logs, identify the process causing the high CPU usage, and send a status update to the claims team and your team leader before taking any action.",pts:3,fb:"Excellent first response. Investigating before acting prevents you from making the problem worse. Notifying both the affected team and your manager at the same time is correct — the claims team can prepare for a possible delay, and your manager is informed. Checking the <em>server logs</em> is always the right first step."},
+    {t:"Restart the server straight away to clear the high CPU load. It is the quickest fix and the system will be back online within minutes.",pts:1,fb:"Restarting a production server without investigating the cause is risky. You could lose unsaved data, interrupt active claims processing, and — if the problem is a runaway process or a security issue — restarting will not fix the root cause. Always investigate before taking action on a <em>production system</em>."},
+    {t:"Send an alert to the claims team to tell them the system is slow, then wait for your team leader to come out of the meeting before investigating.",pts:2,fb:"Notifying the claims team is good practice. However, waiting passively for your manager to appear wastes valuable time. You can begin investigating the <em>server logs</em> immediately and update your manager as soon as you have findings — you do not need permission to look at the problem."}
+  ],
+  next:{3:"d2a",2:"d2b",1:"d2c"}
+},
+
+/* ━━━━━━━━━━ STAGE 2 ━━━━━━━━━━ */
+d2a:{
+  stage:2, label:"08:50 — Root cause found",
+  scene:`<div class="scenario">You check the logs and find the cause quickly. A <strong>scheduled batch job</strong> — the weekly policy renewal report — launched at 08:00 and is consuming almost all available CPU. It is a known process but it has never caused a problem before. Today it is running much slower than usual, possibly because the <strong>database</strong> has grown significantly since last month.</div>`,
+  vocab:["batch job","scheduled task","database","performance","query optimisation"],
+  opts:[
+    {t:"Pause the batch job temporarily to restore normal performance. Then check the database growth figures and raise a ticket to investigate the underlying performance issue properly.",pts:3,fb:"The right call. Pausing the job restores service to the claims team quickly, and raising a formal <em>ticket</em> ensures the root cause — database growth affecting <em>query performance</em> — is investigated properly rather than ignored. This is good incident management."},
+    {t:"Kill the batch job permanently so it cannot cause problems again. The report can be run manually if anyone needs it.",pts:1,fb:"Permanently removing a <em>scheduled task</em> without authorisation is not appropriate. The weekly policy renewal report may be important to other teams. Always pause and investigate before removing a process — and any permanent changes to scheduled jobs require proper <em>change management</em> approval."}
+  ],
+  next:{3:"d3aa",1:"d3ab"}
+},
+d2b:{
+  stage:2, label:"08:55 — Catching up on the alert",
+  scene:`<div class="scenario">You check the logs and identify the cause: a <strong>scheduled batch job</strong> is consuming almost all CPU. Your team leader has just come out of their meeting and asks you for an update. You need to explain what you found and what you think should be done.</div>`,
+  vocab:["batch job","root cause","CPU","escalate","recommend"],
+  opts:[
+    {t:"Give a clear, structured update: explain what the alert showed, what you found in the logs, what is causing it, and recommend pausing the batch job while the performance issue is investigated.",pts:3,fb:"Excellent communication. Structuring your update as <em>observation → cause → recommendation</em> is exactly right for an IT professional reporting to a manager. The phrase <em>'I recommend pausing the job while we investigate'</em> shows initiative and clear thinking."},
+    {t:"Tell your team leader the server is slow and ask them to decide what to do next.",pts:1,fb:"This gives your manager very little to work with. As the person who investigated, you have more information than they do right now. Your manager expects you to come with a finding and a recommendation, not just a problem. Develop the habit of always proposing a solution alongside the problem."}
+  ],
+  next:{3:"d3ba",1:"d3bb"}
+},
+d2c:{
+  stage:2, label:"09:05 — The team leader returns",
+  scene:`<div class="scenario">Your team leader comes out of the meeting and sees the alert still active. They ask: <em>"Jordan, this has been running for 35 minutes. What's the status?"</em> You have not investigated yet. You need to explain your decision to wait and now take action immediately.</div>`,
+  vocab:["incident","status update","triage","investigate","server logs"],
+  opts:[
+    {t:"Be honest: explain that you notified the claims team but waited for guidance before investigating. Then immediately begin checking the server logs and give a full update within ten minutes.",pts:2,fb:"Honesty is the right approach — your manager will appreciate it. The important thing now is to act quickly and thoroughly. Starting the investigation immediately and committing to a ten-minute update is professional and shows you understand the urgency. Avoid making the same mistake again: in IT, investigating does not require permission."},
+    {t:"Tell your manager the system appears to be recovering on its own and you were monitoring it carefully.",pts:1,fb:"This is misleading. The system has not recovered — the alert is still active — and you have not been actively monitoring it. Providing inaccurate status information to a manager during an <em>active incident</em> undermines trust and can delay the response. Always be accurate, even when the news is uncomfortable."}
+  ],
+  next:{2:"d3ca",1:"d3cb"}
+},
+
+/* ━━━━━━━━━━ STAGE 3 ━━━━━━━━━━ */
+d3aa:{
+  stage:3, label:"09:30 — A suspicious login",
+  scene:`<div class="scenario">While the batch job investigation is underway, a <strong>security alert</strong> arrives. The <strong>SIEM system</strong> (Security Information and Event Management) has flagged an unusual login:<div class="sysbox">⚠ SECURITY ALERT<br>User: p.torres@meridian.com<br>Login location: Bucharest, Romania · 09:14 UTC<br>Previous login: London, UK · 08:52 UTC<br>Time between logins: 22 minutes</div>It is physically impossible to travel from London to Bucharest in 22 minutes. This is called an <strong>impossible travel</strong> alert.</div>`,
+  vocab:["SIEM","impossible travel","credential compromise","security alert","MFA"],
+  opts:[
+    {t:"Treat it as a likely credential compromise. Immediately disable the account, contact the user through a separate channel (phone or in person) to verify their identity, and escalate to the security team with a full incident report.",pts:3,fb:"This is the textbook response to an impossible travel alert. Disabling the account immediately stops any potential attacker. Contacting the user through a <em>separate channel</em> is essential — if their email is compromised, contacting them by email is useless. Writing a full incident report from the start is good <em>security operations</em> practice."},
+    {t:"Send an email to the user asking if they recognise this login activity, and wait for their reply before taking any action.",pts:2,fb:"Contacting the user is correct, but email is the wrong channel if the account may be compromised — an attacker with access to the account will see your warning. You should also disable or suspend the account immediately as a precaution, rather than waiting. In security incidents, speed matters."},
+    {t:"Log the alert for review in the next weekly security meeting. Impossible travel alerts are common and most turn out to be VPN connections.",pts:1,fb:"VPN connections can trigger false positives, but a 22-minute gap between London and Bucharest is a strong indicator of <em>credential compromise</em>. Deferring investigation to a weekly meeting is far too slow. Security alerts of this type must be triaged within minutes, not days. This is the kind of delay that allows an attacker to cause serious damage."}
+  ],
+  next:{3:"d4aa",2:"d4ab",1:"d4ac"}
+},
+d3ab:{
+  stage:3, label:"09:30 — A suspicious login",
+  scene:`<div class="scenario">A <strong>security alert</strong> arrives from the SIEM system. An impossible travel alert has been flagged for a user account — login from London followed 22 minutes later by a login from Bucharest. This is almost certainly a <strong>compromised account</strong>. Your team leader asks you to handle it, but also asks you to first fix the batch job issue that is still causing the server to run slowly.</div>`,
+  vocab:["compromised account","SIEM","impossible travel","triage","prioritise"],
+  opts:[
+    {t:"Prioritise the security alert. A compromised account on a live system is more urgent than a performance issue. Disable the account, contact the user, and escalate — then return to the batch job.",pts:3,fb:"Correct prioritisation. A <em>compromised account</em> on a live system poses an immediate and growing risk — an attacker may be exfiltrating data right now. A performance issue is disruptive but not dangerous. Security incidents always take priority over performance issues."},
+    {t:"Finish fixing the batch job first since that was the original task. Then investigate the security alert. It will only take another 15 minutes.",pts:2,fb:"A 15-minute delay on a security incident can be significant. However, finishing a near-complete task before switching context is understandable if the batch job fix is truly almost done. The key lesson is that <em>security alerts</em> should almost always take priority over performance issues — they have a time dimension that performance issues often do not."},
+    {t:"Ask your team leader to assign the security alert to a colleague. You are already dealing with the server issue and cannot handle two things at once.",pts:1,fb:"It is acceptable to ask for help, but handing off a security alert entirely — especially without even triaging it first — is not ideal. A brief initial triage (is this a real threat or a false positive?) takes two minutes and allows a much better handover to a colleague. <em>'I cannot handle two things at once'</em> is not an appropriate response to an active security alert."}
+  ],
+  next:{3:"d4aa",2:"d4ab",1:"d4ac"}
+},
+d3ba:{
+  stage:3, label:"09:30 — A suspicious login",
+  scene:`<div class="scenario">Your team leader approves your recommendation to pause the batch job. As the performance issue is resolved, a <strong>SIEM alert</strong> arrives: an <strong>impossible travel</strong> login for user <strong>p.torres@meridian.com</strong> — London at 08:52, then Bucharest at 09:14. Your team leader says: <em>"Good work on the batch job. How do you want to handle this one?"</em></div>`,
+  vocab:["SIEM","impossible travel","account suspension","incident response","security protocol"],
+  opts:[
+    {t:"Propose a clear incident response plan: suspend the account immediately, contact the user by phone to verify their identity, check the account's recent activity logs for any data access, and write up a security incident report.",pts:3,fb:"An excellent response to a direct question from your manager. You show that you understand the full <em>incident response</em> process: contain (suspend the account), verify (contact the user), investigate (review logs), and document (incident report). This level of structured thinking is exactly what good IT security practice looks like."},
+    {t:"Suggest monitoring the account for a few hours to gather more evidence before taking action, in case it is just a VPN.",pts:2,fb:"Wanting more evidence before acting is understandable but too cautious in this situation. An impossible travel alert with a 22-minute window is strong enough to act on immediately. If it turns out to be a VPN, the account can be re-enabled quickly. The cost of being wrong by waiting is much higher than the cost of being wrong by acting."},
+    {t:"Send a password reset link to the user's email address so they can secure their account themselves.",pts:1,fb:"If the account is compromised, the attacker may already have access to the email inbox — and will intercept the password reset link. This action could actually make the situation worse. Never send security-sensitive links to a potentially compromised inbox. Always use a separate, verified channel."}
+  ],
+  next:{3:"d4aa",2:"d4ab",1:"d4ac"}
+},
+d3bb:{
+  stage:3, label:"09:35 — A difficult question",
+  scene:`<div class="scenario">Your team leader is frustrated that the server was running slowly for over 30 minutes before they were informed. Now a <strong>SIEM security alert</strong> — an impossible travel login — has arrived. Your team leader asks: <em>"Jordan, I need you to show me you can handle this. What are the steps you would take for this kind of alert?"</em></div>`,
+  vocab:["SIEM","incident response","account disable","verify","document"],
+  opts:[
+    {t:"Give a structured answer: disable the account immediately as a precaution, contact the user directly by phone to verify their identity, review the account's recent access logs, and create a formal incident report for the security team.",pts:3,fb:"A strong recovery. Giving a structured, confident answer shows your team leader that you know the correct process. The four steps — disable, verify, review, document — cover the key stages of <em>incident response</em> and demonstrate good security awareness. This is exactly the kind of answer that rebuilds confidence after an earlier mistake."},
+    {t:"Suggest sending an email to the user to check whether they are travelling today.",pts:2,fb:"Contacting the user is part of the correct process, but email is the wrong channel for a potentially compromised account. Also, simply asking about travel is not enough — you need to disable the account first and then verify identity through a secure channel. Your answer shows some understanding but misses the key steps."},
+    {t:"Say you would wait to see if there are any more alerts from the same account before taking action, to avoid disrupting a legitimate user.",pts:1,fb:"Waiting for more alerts before responding is not how <em>incident response</em> works. The impossible travel indicator is already sufficient to act. Concern about disrupting a legitimate user is understandable, but account suspension is temporary and reversible — the risk of not acting is much higher."}
+  ],
+  next:{3:"d4aa",2:"d4ab",1:"d4ac"}
+},
+d3ca:{
+  stage:3, label:"09:30 — Two problems at once",
+  scene:`<div class="scenario">You are investigating the server performance issue when a <strong>SIEM alert</strong> arrives for user <strong>p.torres@meridian.com</strong> — an impossible travel login. You now have an active <strong>performance incident</strong> and a potential <strong>security incident</strong> running at the same time. Your team leader is on a call.</div>`,
+  vocab:["SIEM","incident","prioritise","escalate","impossible travel","triage"],
+  opts:[
+    {t:"Immediately suspend the user account and send your team leader a brief message: 'Possible account compromise — p.torres suspended pending verification. Also working on DB performance. Update in 10 mins.' Then continue the performance investigation.",pts:3,fb:"Excellent under pressure. You act on the security threat immediately (the higher priority), keep your manager informed with a concise message, and continue working on the performance issue in parallel. The short message format — problem, action taken, next update — is exactly right for a manager who is on a call."},
+    {t:"Focus entirely on the server performance issue since that is what you were working on. Send the security alert to your team leader to deal with when they are off the call.",pts:2,fb:"Finishing the current task is understandable, but a security alert of this type should not simply be forwarded and left. At minimum, suspend the account first (a two-minute action), then continue with the performance issue. Forwarding it without any initial action is a missed opportunity to contain a potential threat."},
+    {t:"Leave both issues running and wait for your team leader to finish their call before doing anything, so you can get clear instructions on which to prioritise.",pts:1,fb:"Waiting for explicit instructions before taking any action on a live security alert is not appropriate. Suspending a potentially compromised account is a low-risk, reversible action that you have the authority and knowledge to take immediately. Paralysis during an active security incident can cause serious harm."}
+  ],
+  next:{3:"d4aa",2:"d4ab",1:"d4ac"}
+},
+d3cb:{
+  stage:3, label:"09:40 — Under scrutiny",
+  scene:`<div class="scenario">After a difficult start, a <strong>security alert</strong> arrives: an impossible travel login for <strong>p.torres@meridian.com</strong>. Your team leader is watching closely after your slow response to the server alert. They ask: <em>"What do you do first with an alert like this?"</em></div>`,
+  vocab:["SIEM","account suspend","verify","security incident","credential compromise"],
+  opts:[
+    {t:"Answer confidently and correctly: 'First I suspend the account to prevent any further access. Then I contact the user directly by phone — not email — to verify their identity and check if they are actually travelling. Then I document everything in a security incident report.'",pts:2,fb:"A clear and correct answer that shows good <em>incident response</em> knowledge. Explaining the reasoning — phone not email, because the inbox may be compromised — demonstrates deeper understanding. This is a strong answer that will reassure your team leader after a difficult morning."},
+    {t:"Say you would email the user first, then check with your team leader before suspending the account.",pts:1,fb:"Both actions are problematic. Email is the wrong channel for a potentially compromised account, and asking your team leader before suspending shows a lack of confidence in your own authority to take a basic protective action. In <em>incident response</em>, initial containment steps — like suspending an account — are within the remit of the IT support analyst and do not require management approval."}
+  ],
+  next:{2:"d4ab",1:"d4ac"}
+},
+
+/* ━━━━━━━━━━ STAGE 4 ━━━━━━━━━━ */
+d4aa:{
+  stage:4, label:"11:00 — The software deployment decision",
+  scene:`<div class="scenario">The development team has asked IT to deploy a <strong>software update</strong> to the claims processing application. The update includes important bug fixes and a new feature that the claims team has been waiting for. However, your testing team has found one <strong>unresolved bug</strong> in the new feature — it occasionally causes the application to log users out unexpectedly. The development team says the bug is minor and the update should go ahead today.</div>`,
+  vocab:["deployment","software update","bug","testing","change management","rollback"],
+  opts:[
+    {t:"Recommend delaying the deployment until the bug is fixed. A logout issue in a claims processing application could interrupt active work and cause data loss. Follow the change management process and schedule a new deployment date.",pts:3,fb:"The right decision. A bug that causes unexpected logouts in a <em>production system</em> — especially one used for claims processing — is not minor. Users could lose unsaved data mid-claim. Following <em>change management</em> procedures and delaying until the bug is fixed protects both the users and the company. Good IT professionals push back on pressure to deploy flawed software."},
+    {t:"Deploy the update as requested but prepare a rollback plan in case the logout issue becomes serious. Document that the deployment was made with a known bug.",pts:2,fb:"Having a <em>rollback plan</em> is always good practice. Documenting the known bug is also correct — it creates an audit trail. However, deploying software with a known logout bug to a production system used for live claims processing is still a risk that could have been avoided. The documentation protects you but does not protect the users."}
+  ],
+  next:{3:"d5aa",2:"d5ab"}
+},
+d4ab:{
+  stage:4, label:"11:00 — The software deployment decision",
+  scene:`<div class="scenario">The development team wants to deploy a <strong>software update</strong> today. Testing found an unresolved bug — occasional unexpected logouts. The development team is putting pressure on IT to approve the deployment, saying the bug is 'cosmetic'. Your team leader asks for your technical opinion.</div>`,
+  vocab:["deployment","bug","production system","change management","risk assessment"],
+  opts:[
+    {t:"Give an honest technical opinion: the bug is not cosmetic — unexpected logouts in a live claims system could interrupt active sessions and cause data loss. Recommend following change management and delaying until it is fixed.",pts:3,fb:"This is exactly what your team leader needs from you: an honest, technically informed opinion. Unexpected logouts are not cosmetic — they affect data integrity and user experience on a critical system. <em>Change management</em> processes exist precisely for situations like this. Being willing to push back on pressure from another team is an important professional skill."},
+    {t:"Agree with the development team and approve the deployment. The bug sounds minor and the claims team wants the new feature.",pts:1,fb:"Approving a deployment with a known bug in a production system — especially under pressure from the team that built it — is not good practice. The development team has an interest in releasing their work; your role is to protect the stability of the live system. Always apply your own technical judgement rather than simply deferring to the team requesting the change."}
+  ],
+  next:{3:"d5aa",1:"d5ab"}
+},
+d4ac:{
+  stage:4, label:"11:00 — The software deployment decision",
+  scene:`<div class="scenario">After a difficult morning, the development team asks IT to approve a <strong>software deployment</strong> with a known logout bug. They say the business needs the new feature urgently and the bug will be fixed in the next release. Your team leader is already disappointed with this morning's incident responses and is watching how you handle this.</div>`,
+  vocab:["deployment","known bug","change management","rollback","production environment"],
+  opts:[
+    {t:"Recommend a delay clearly and professionally. Explain that deploying with a known logout bug to a production claims system is against change management policy, and offer to help schedule a new deployment date as soon as the bug is resolved.",pts:3,fb:"Strong and professional. You follow the correct process, explain the reason clearly, and offer a constructive alternative. This shows your team leader that you can apply policy and technical judgement under pressure — exactly what they need to see after this morning. The offer to help with scheduling shows a collaborative attitude."},
+    {t:"Approve the deployment to show decisiveness and to help the business. You will monitor the system closely afterwards.",pts:1,fb:"Approving a deployment with a known bug to look decisive is the wrong reason to make a technical decision. <em>Change management</em> policies exist to protect production systems — overriding them under social pressure, rather than on technical grounds, is a significant professional misjudgement. Your team leader will not see this as decisiveness; they will see it as a failure to apply your technical role correctly."}
+  ],
+  next:{3:"d5aa",1:"d5ab"}
+},
+
+/* ━━━━━━━━━━ STAGE 5 ━━━━━━━━━━ */
+d5aa:{
+  stage:5, label:"13:30 — A GDPR data subject request",
+  scene:`<div class="scenario">An email arrives from the <strong>Data Protection Officer</strong> (DPO). A customer has submitted a <strong>Subject Access Request (SAR)</strong> under GDPR — they want a copy of all personal data Meridian holds about them. The DPO asks IT to extract the relevant data from the claims database and the customer portal within 72 hours. You need to decide how to handle this.</div>`,
+  vocab:["GDPR","Subject Access Request","Data Protection Officer","personal data","data extract","compliance"],
+  opts:[
+    {t:"Acknowledge the request immediately and confirm the 72-hour deadline. Identify the relevant data sources, create a secure, encrypted extract, and send it only to the DPO — never directly to the customer. Log every step for the compliance record.",pts:3,fb:"Textbook handling of a <strong>SAR</strong>. Acknowledging promptly, identifying all relevant data sources, using an encrypted transfer, and routing through the DPO (not directly to the customer) are all correct. Logging every action creates the audit trail required by <em>GDPR</em>. This is exactly the process that protects both the customer's rights and the company's legal position."},
+    {t:"Extract the data from the main claims database and email it directly to the customer to save time, since the deadline is tight.",pts:1,fb:"Sending personal data directly to the customer by email bypasses the DPO's verification process. The DPO must first verify the requester's identity and review what data can legally be shared. Unencrypted email is also not a secure transfer method for personal data. Both of these errors could constitute a <em>GDPR</em> violation."},
+    {t:"Ask the DPO to clarify exactly which databases to search before doing anything, to make sure the extract is complete and accurate.",pts:2,fb:"Clarifying the scope before acting is sensible — it is important to be thorough and accurate with SARs. However, you should also acknowledge the request and confirm the deadline immediately, and begin identifying the data sources in parallel. Waiting for full clarification before starting any work risks missing the 72-hour window."}
+  ],
+  next:{3:"emergency",2:"emergency",1:"emergency"}
+},
+d5ab:{
+  stage:5, label:"13:30 — A GDPR data subject request",
+  scene:`<div class="scenario">The <strong>Data Protection Officer</strong> sends a <strong>Subject Access Request</strong> — a customer wants all their personal data from Meridian's systems. The DPO needs the data extract within 72 hours. You are busy after a difficult morning. As you read the request, you are not entirely sure which databases contain the customer's data.</div>`,
+  vocab:["GDPR","Subject Access Request","data extract","compliance","personal data","DPO"],
+  opts:[
+    {t:"Acknowledge the request and the deadline immediately. Ask the DPO for the customer's identifier so you can search all relevant systems. Begin with the main claims database and customer portal, and document every search you perform.",pts:3,fb:"Good approach. Acknowledging the request and deadline first shows you understand the urgency of <em>GDPR</em> compliance. Asking for the correct identifier before searching prevents errors. Starting with the most likely data sources while documenting everything creates a defensible audit trail — which is essential for SAR compliance."},
+    {t:"Tell the DPO you are too busy today and ask if the deadline can be extended.",pts:1,fb:"SAR deadlines under <em>GDPR</em> are legal requirements, not flexible guidelines. A 72-hour window cannot be extended simply because the IT team is busy. Failing to meet this deadline exposes the company to regulatory action from the ICO. In practice, SAR responses should be treated as urgent compliance tasks that take priority over routine IT work."},
+    {t:"Forward the request to a colleague and ask them to handle it, since they have more experience with database extracts.",pts:2,fb:"Delegating to a more experienced colleague is not unreasonable if they are available and the handover is thorough. However, you should acknowledge the request yourself first, confirm the deadline with the DPO, and stay involved to ensure it is completed on time. A silent forward without follow-up is not sufficient for a legal compliance task."}
+  ],
+  next:{3:"emergency",2:"emergency",1:"emergency"}
+},
+
+/* ━━━━━━━━━━ EMERGENCY ━━━━━━━━━━ */
+emergency:{
+  stage:"E", label:"15:45 — CRITICAL INCIDENT",
+  isEmergency:true,
+  scene:`<div class="scenario">Every screen in the office suddenly displays the same message:<div class="sysbox" style="border-left-color:#CC2222;color:#4A0808">⛔ YOUR FILES HAVE BEEN ENCRYPTED<br>All company data on this network has been locked.<br>Contact: recover@darkmail.onion within 48 hours.<br>Do NOT attempt to remove this software.</div>The network monitoring system is showing mass file encryption across 14 servers. This is a <strong>ransomware attack</strong>. The entire office has stopped working. Your team leader is already on the phone to senior management. All eyes are on the IT team.</div>`,
+  vocab:["ransomware","encryption","isolate","incident response","backup","containment"],
+  opts:[
+    {t:"Immediately isolate the network by disabling all switch ports and Wi-Fi access points to stop the ransomware spreading. Notify the IT security team and senior management simultaneously. Do not touch any encrypted files. Begin identifying which systems are unaffected and whether backups are intact.",pts:0,isSafe:true,fb:"This is the correct emergency response. <strong>Isolating the network</strong> first stops the ransomware from spreading to unaffected systems — every second of delay means more files encrypted. You correctly avoid touching the encrypted files (which could destroy forensic evidence), notify the right people, and begin assessing the damage. This is textbook ransomware containment."},
+    {t:"Try to find and remove the ransomware software from the servers before it encrypts any more files. You may be able to stop it if you act fast enough.",pts:0,isGameOver:true,fb:"<strong>Game over.</strong> Attempting to manually remove active ransomware from infected servers without isolating the network first allows it to continue spreading to every connected system — including the backup servers. Within 20 minutes all backups are encrypted. Meridian Insurance cannot recover its data and is forced to notify the regulator of a catastrophic data breach. The company faces massive fines and reputational damage. The correct first step is always network isolation — stop the spread before attempting any removal."},
+    {t:"Pay the ransom quickly using a company credit card. This is the fastest way to get the decryption key and restore services before the end of the business day.",pts:0,isSafe:true,fb:"Paying a ransom is not recommended by any cybersecurity authority — there is no guarantee the attackers will provide a working decryption key, and payment funds further criminal activity. However, the more serious immediate error in this choice was not isolating the network first. In practice, the ransom question is a decision for senior management and legal counsel — not for an IT analyst to make unilaterally. The right first action is always containment."}
+  ],
+  next:"d6"
+},
+
+/* ━━━━━━━━━━ STAGE 6 ━━━━━━━━━━ */
+d6:{
+  stage:6, label:"17:00 — Recovery and decisions",
+  scene:`<div class="scenario">The immediate threat has been contained. The network is isolated and the security team is on site. Senior management asks IT for an assessment. You have been asked to brief the IT Director on three immediate decisions:<br><br><strong>Option 1:</strong> Restore from last night's backup (data loss: 8 hours), estimated 6 hours to restore.<br><strong>Option 2:</strong> Restore from last week's backup (data loss: 5 days), estimated 2 hours to restore.<br><strong>Option 3:</strong> Bring in a specialist cyber recovery firm (cost: £40,000, no data loss, estimated 18–36 hours).</div>`,
+  vocab:["backup restoration","data loss","recovery time","cyber incident","business continuity"],
+  opts:[
+    {t:"Recommend Option 1 — last night's backup. Present the trade-off clearly: 8 hours of data loss is recoverable through manual re-entry, the cost is internal, and it restores service significantly faster than the specialist firm. Recommend parallel investigation of how the attack entered the network.",pts:3,fb:"An excellent, well-reasoned recommendation. You present the options clearly, acknowledge the trade-offs honestly, and make a specific recommendation with justification. For an insurance company, 8 hours of data loss is manageable compared to 5 days. Recommending a parallel investigation shows <em>business continuity</em> thinking — recovery and root cause analysis should happen simultaneously."},
+    {t:"Recommend Option 3 — the specialist cyber recovery firm. No data loss is the safest outcome for an insurance company that handles sensitive customer data.",pts:2,fb:"Option 3 is a defensible choice — especially for a regulated company where data integrity is critical. However, a 36-hour outage for an insurance company has serious operational consequences. The IT Director needs to weigh this carefully. Presenting your recommendation with a clear cost-benefit analysis — rather than simply saying 'no data loss is best' — would make this a stronger response."},
+    {t:"Recommend Option 2 — last week's backup. It is the fastest restore option and the IT team can be back to supporting the business within 2 hours.",pts:1,fb:"Speed is important, but recommending 5 days of data loss — meaning thousands of claims records would need to be manually reconstructed — is difficult to justify when last night's backup is available. The 4-hour difference in recovery time does not offset 5 days of lost data for an insurance company with regulatory obligations. This recommendation needs a stronger justification."}
+  ],
+  next:{3:"d7a",2:"d7b",1:"d7c"}
+},
+
+/* ━━━━━━━━━━ STAGE 7 ━━━━━━━━━━ */
+d7a:{
+  stage:7, label:"19:00 — The incident report",
+  scene:`<div class="scenario">The recovery is underway. Your team leader asks you to draft the initial <strong>incident report</strong> before you finish your shift. This report will be reviewed by the IT Director, the Data Protection Officer, and potentially the company's insurers. It must be accurate, complete, and professional.</div>`,
+  vocab:["incident report","timeline","root cause","remediation","post-incident review"],
+  opts:[
+    {t:"Write a structured report covering: timeline of events, systems affected, root cause (if identified), containment actions taken, current recovery status, and recommended next steps including a full post-incident review.",pts:2,fb:"An excellent incident report structure. The six sections — timeline, affected systems, root cause, containment, recovery status, and next steps — cover everything a senior reader will need. Including a recommendation for a full <em>post-incident review</em> shows maturity: major incidents should always be followed by a structured analysis to prevent recurrence. This report will serve the company well."},
+    {t:"Write a brief summary of what happened and what actions were taken, and say the investigation is ongoing.",pts:1,fb:"A brief summary is better than nothing, but an incident of this severity requires a much more detailed record. The IT Director, DPO, and insurers will need a full timeline, list of affected systems, and clear documentation of every action taken. Vague reports create gaps in the audit trail and can create problems during regulatory investigations. Take the extra time to write it properly."}
+  ],
+  next:{2:"final",1:"final"}
+},
+d7b:{
+  stage:7, label:"19:00 — The incident report",
+  scene:`<div class="scenario">Recovery is underway following the ransomware attack. Your team leader asks you to write the <strong>incident report</strong> and also asks you to check whether the GDPR Subject Access Request from earlier today has been completed, since it was due within 72 hours.</div>`,
+  vocab:["incident report","GDPR","Subject Access Request","deadline","documentation"],
+  opts:[
+    {t:"Check the SAR status first — if it is nearly due, make sure it will be completed on time. Then write the full incident report, noting both the ransomware incident and the SAR status in your end-of-day documentation.",pts:2,fb:"Good prioritisation. The SAR is a legal obligation with a fixed deadline — checking its status first ensures it is not missed during the chaos of the incident response. Including both items in your end-of-day documentation is thorough and professional. This shows you can track multiple compliance obligations simultaneously."},
+    {t:"Write the incident report first and deal with the SAR tomorrow morning when things are calmer.",pts:1,fb:"The incident report is important, but so is the SAR. If the SAR deadline passes because you were busy with the incident, the company faces a potential <em>GDPR</em> violation on top of the ransomware attack — a very difficult situation. Always check time-sensitive compliance obligations before deciding what to defer."}
+  ],
+  next:{2:"final",1:"final"}
+},
+d7c:{
+  stage:7, label:"19:00 — The incident report",
+  scene:`<div class="scenario">After a very difficult day, your team leader asks you to write the incident report and also asks you to reflect on the morning's slow response to the server alert. They say: <em>"I'd like you to include in the report what you would do differently next time."</em></div>`,
+  vocab:["incident report","lessons learned","improvement","response time","post-incident review"],
+  opts:[
+    {t:"Include a honest and constructive 'lessons learned' section. Acknowledge that the server alert response was slower than it should have been, explain what you would do differently (investigate immediately, do not wait for manager approval), and recommend a team process improvement for future alerts.",pts:2,fb:"Exactly the right approach. A 'lessons learned' section in an incident report shows professional maturity and a commitment to improvement. Acknowledging the slow response honestly — and proposing a concrete process change — is far more valuable than defensive explanations. Your team leader will see this as a sign of growth, not weakness."},
+    {t:"Write the incident report focusing only on the ransomware attack. The morning server alert was a separate issue and does not belong in this report.",pts:1,fb:"The morning server alert is relevant context — it happened on the same day and the IT team's response time was part of the overall incident picture. Including it as part of a broader <em>post-incident review</em> is standard practice. Separating it out entirely can look like you are avoiding accountability. Honest self-reflection in incident reports is what makes IT teams improve over time."}
+  ],
+  next:{2:"final",1:"final"}
+}
+
+}; /* end N */
+
+/* ══ UTILITY: FISHER-YATES SHUFFLE ══ */
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+/* ══ STAGE MAP ══ */
+const stageMap={d1:0,d2a:1,d2b:1,d2c:1,d3aa:2,d3ab:2,d3ba:2,d3bb:2,d3ca:2,d3cb:2,d4aa:3,d4ab:3,d4ac:3,d5aa:4,d5ab:4,emergency:5,d6:6,d7a:7,d7b:7,d7c:7};
+
+/* ══ DOTS ══ */
+function buildDots(id){
+  const cur=stageMap[id]??0;
+  const el=document.getElementById('dots');
+  el.innerHTML='';
+  for(let i=0;i<8;i++){
+    const d=document.createElement('div');
+    d.className='dot'+(i<cur?' done':i===cur?(id==='emergency'?' emg':' active'):'');
+    el.appendChild(d);
+  }
+  document.getElementById('prog').style.width=Math.round((cur/8)*100)+'%';
+}
+
+/* ══ START ══ */
+function startGame(){
+  document.getElementById('intro').style.display='none';
+  document.getElementById('game').style.display='block';
+  show('d1');
+}
+
+/* ══ SHOW ══ */
+function show(id){
+  curId=id;
+  const node=N[id];
+  S.answered=false;
+  const fb=document.getElementById('fb');
+  fb.className='feedback'; fb.innerHTML='';
+  const nb=document.getElementById('nxt');
+  nb.className='nxt'; nb.textContent=''; nb.onclick=null;
+  document.getElementById('nxt-note').textContent='';
+  buildDots(id);
+  document.getElementById('lbl').textContent=node.label;
+  document.getElementById('tdot').className='time-dot'+(node.isEmergency?' red':'');
+
+  let html='';
+  if(node.isEmergency){
+    html+=`<div class="emg-banner"><div class="emg-icon">!</div><div class="emg-text"><strong>Critical incident</strong>No points this round — but your decision has serious consequences.</div></div>`;
+  }
+  if(node.vocab&&node.vocab.length){
+    html+=`<div class="vocab-strip"><span class="vocab-label">Key terms:</span>${node.vocab.map(v=>`<span class="vpill">${v}</span>`).join('')}</div>`;
+  }
+  document.getElementById('scene').innerHTML=html+node.scene;
+
+  // Clone and Shuffle using Fisher-Yates
+  curShuf = shuffleArray([...node.opts]);
+
+  const el=document.getElementById('opts');
+  el.innerHTML='';
+  curShuf.forEach((opt,i)=>{
+    const btn=document.createElement('button');
+    btn.className='opt';
+    let tag='';
+    if(!node.isEmergency){
+      const p=opt.pts;
+      tag=`<span class="ptag ${p===3?'pt3':p===2?'pt2':p===1?'pt1':'pt0'}">${p>0?'+'+p:'+0'}</span>`;
+    }
+    btn.innerHTML=`<span class="opt-letter">${LABELS[i]}</span><span class="opt-text">${opt.t}</span>${tag}`;
+    btn.addEventListener('click',()=>pick(i));
+    el.appendChild(btn);
+  });
+  document.getElementById('gc').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+/* ══ PICK ══ */
+function pick(di){
+  if(S.answered) return;
+  S.answered=true;
+  const node=N[curId];
+  const opt=curShuf[di];
+  const btns=document.querySelectorAll('.opt');
+  btns.forEach(b=>{b.disabled=true;const t=b.querySelector('.ptag');if(t)t.classList.add('vis');});
+  const fb=document.getElementById('fb');
+  const nb=document.getElementById('nxt');
+
+  if(node.isEmergency){
+    if(opt.isGameOver){
+      btns[di].classList.add('sel-f');
+      fb.className='feedback fb-f show'; fb.innerHTML=opt.fb;
+      nb.textContent='See your result'; nb.className='nxt show';
+      nb.onclick=()=>showFinal(true);
+    } else {
+      btns[di].classList.add('sel-s');
+      fb.className='feedback fb-o show'; fb.innerHTML=opt.fb;
+      nb.textContent='Continue →'; nb.className='nxt show';
+      nb.onclick=()=>show('d6');
+    }
+    return;
+  }
+
+  const pts=opt.pts;
+  S.score+=pts; S.path.push({id:curId,pts});
+  document.getElementById('score').textContent=S.score+' / 20';
+  if(pts===3) btns[di].classList.add('sel-g');
+  else if(pts===2) btns[di].classList.add('sel-o');
+  else btns[di].classList.add('sel-p');
+  fb.className='feedback '+(pts===3?'fb-g':pts===2?'fb-o':'fb-p')+' show';
+  fb.innerHTML=opt.fb;
+
+  let nx=node.next;
+  if(typeof nx==='object') nx=nx[pts]??nx[Object.keys(nx)[0]];
+  nb.className='nxt show';
+  if(nx==='final'||nx===null){
+    nb.textContent='See your final score →'; nb.onclick=()=>showFinal(false);
+  } else if(nx==='emergency'){
+    nb.textContent='Continue →';
+    document.getElementById('nxt-note').textContent='A critical incident is about to hit the network.';
+    nb.onclick=()=>show('emergency');
+  } else {
+    nb.textContent='Next →'; nb.onclick=()=>show(nx);
+  }
+}
+
+/* ══ FINAL ══ */
+const BANDS=[
+  {min:18,max:20,label:"Outstanding"},
+  {min:15,max:17,label:"Strong"},
+  {min:11,max:14,label:"Competent"},
+  {min:7, max:10,label:"Developing"},
+  {min:0, max:6, label:"Game over / early path"}
+];
+
+function showFinal(gameOver){
+  document.getElementById('game').style.display='none';
+  document.getElementById('final-wrap').style.display='block';
+  document.getElementById('final-wrap').scrollIntoView({behavior:'smooth',block:'start'});
+
+  const s=S.score, pct=Math.round(s/20*100);
+  document.getElementById('fin-num').textContent=s;
+
+  let grade,body,tips;
+  if(gameOver){
+    grade="The network is down.";
+    body=`Your shift ended in a worst-case scenario — a total ransomware encryption of the network. This is one of the most critical lessons in cybersecurity: when ransomware is detected on a live network, the <strong>first and only immediate priority is network isolation</strong>. Every other action — removing the malware, paying the ransom, calling for help — comes after the network is cut off from further spread. The decisions you made earlier in the day showed real skill; the emergency response is where the critical lesson lies.`;
+    tips=`Study the <em>incident response lifecycle</em>: Preparation → Detection → Containment → Eradication → Recovery → Lessons Learned. For ransomware specifically, memorise this sequence: <em>isolate → notify → assess → recover</em>. Never attempt manual removal before isolation. Practise the language of incident escalation: <em>"I am isolating the network now and notifying the security team simultaneously."</em>`;
+  } else if(s>=18){
+    grade="Exceptional shift.";
+    body=`You handled one of the most demanding days in IT support with precision and professionalism. From the initial server alert to the ransomware response, your decisions showed strong technical knowledge, excellent communication skills, and a clear understanding of <em>security protocols</em>, <em>GDPR compliance</em>, and <em>change management</em>. You are operating at a high B1+ level and demonstrating the kind of judgement that IT teams genuinely rely on.`;
+    tips=`To develop further: explore <em>ITIL incident management frameworks</em>, deepen your knowledge of <em>GDPR Article 33</em> (breach notification obligations), and practise writing formal <em>post-incident reports</em> in English. Your vocabulary is strong — focus on using more precise technical terms confidently in spoken presentations and briefings.`;
+  } else if(s>=15){
+    grade="Strong performance.";
+    body=`You managed a very difficult day well. Your instincts were generally sound — you understood the importance of escalating security incidents, applying change management, and respecting GDPR deadlines. There were one or two moments where more decisive action or clearer communication would have improved the outcome, but overall you protected the company effectively.`;
+    tips=`Focus on: being more decisive with initial <em>incident response</em> actions (especially account suspension for security alerts), and structuring your technical communications more clearly using the <em>observation → cause → recommendation</em> format. Try the exercise again — different paths test different skills.`;
+  } else if(s>=11){
+    grade="Competent, with room to grow.";
+    body=`You got through a challenging day and avoided catastrophic decisions. However, there were several moments where faster, more confident action was needed — particularly on the morning server alert and the security incident triage. In IT operations, delay and uncertainty can turn manageable problems into serious ones very quickly.`;
+    tips=`Work on: the language of <em>incident triage</em> and <em>escalation</em>. Key phrases include <em>"I am treating this as a priority one incident"</em>, <em>"I am isolating the affected system pending investigation"</em>, and <em>"I recommend delaying this deployment under change management policy."</em> Also review the basics of <em>GDPR Subject Access Requests</em> and ransomware containment procedures.`;
+  } else {
+    grade="A challenging shift — and a valuable learning experience.";
+    body=`Today showed some important areas to develop. IT operations in a regulated environment like insurance involves a constant balance between speed, security, and compliance — and each wrong decision in this exercise reflects a real risk that IT teams face. The good news is that every path through this exercise teaches something different, and there are hundreds of routes to explore.`;
+    tips=`Start with the fundamentals: <em>incident response procedures</em>, <em>change management policy</em>, and <em>GDPR compliance basics</em>. Then build your vocabulary for reporting and escalation. Useful phrases: <em>"I have identified the root cause as…"</em>, <em>"I recommend we delay this pending further investigation"</em>, <em>"I am escalating this to the security team immediately."</em> Play again from the beginning.`;
+  }
+
+  document.getElementById('fin-grade').textContent=grade;
+  document.getElementById('fin-body').innerHTML=body;
+  document.getElementById('fin-tips').innerHTML=tips;
+
+  const vocab=["server alert","CPU usage","batch job","SIEM","impossible travel","credential compromise","incident response","change management","deployment","rollback","GDPR","Subject Access Request","ransomware","network isolation","backup restoration","business continuity","escalate","post-incident review","data breach","containment","triage","root cause"];
+  document.getElementById('fin-vocab').innerHTML=[...new Set(vocab)].map(v=>`<span class="vpill">${v}</span>`).join('');
+
+  const curBand=BANDS.find(b=>s>=b.min&&s<=b.max)||BANDS[BANDS.length-1];
+  document.getElementById('score-bands').innerHTML=BANDS.filter(b=>b.min>0).map(b=>{
+    const y=b===curBand&&!gameOver;
+    return `<div class="band-row${y?' yours':''}"><span class="band-range">${b.min}–${b.max}</span><span class="band-label">${b.label}</span>${y?'<span class="band-you">Your score</span>':''}</div>`;
+  }).join('');
+
+  setTimeout(()=>{const b=document.getElementById('bfill');if(b)b.style.width=pct+'%';},150);
+}
+
+/* ══ RESTART ══ */
+function restartGame(){
+  S.score=0; S.answered=false; S.path=[];
+  document.getElementById('score').textContent='0 / 20';
+  document.getElementById('final-wrap').style.display='none';
+  document.getElementById('game').style.display='block';
+  show('d1');
+  document.getElementById('gc').scrollIntoView({behavior:'smooth',block:'start'});
+}
+</script>
+</body>
+</html>

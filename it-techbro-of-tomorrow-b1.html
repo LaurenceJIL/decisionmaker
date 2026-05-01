@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CEO Challenge 4.0: The Strategic Reveal</title>
+    <style>
+        :root {
+            --primary: #1e40af;
+            --secondary: #475569;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --warning: #ca8a04;
+            --dark: #0f172a;
+            --light: #f8fafc;
+        }
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #94a3b8;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        #main-wrapper {
+            display: flex;
+            gap: 20px;
+            max-width: 1150px;
+            width: 95%;
+            padding: 20px;
+        }
+        #sidebar {
+            flex: 1;
+            background: var(--dark);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+        }
+        #sidebar h3 { color: #fbbf24; border-bottom: 1px solid #334155; padding-bottom: 8px; margin-top:0; }
+        #sidebar ul { padding-left: 18px; }
+        #sidebar li { margin-bottom: 8px; line-height: 1.4; }
+
+        #game-container {
+            flex: 3;
+            background: white;
+            padding: 35px;
+            border-radius: 16px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            min-height: 600px;
+            position: relative;
+        }
+        .hidden { display: none; }
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-bottom: 10px;
+            width: 100%;
+            text-align: left;
+            transition: all 0.2s;
+        }
+        .btn:hover:not(:disabled) { background: #1e3a8a; transform: translateX(4px); }
+        .btn:disabled { opacity: 0.6; cursor: default; }
+        .btn-retry { background: var(--danger) !important; }
+        .feedback-box { margin-top: 15px; padding: 20px; border-radius: 8px; display: none; line-height: 1.5; }
+        .pts-span { font-weight: bold; font-size: 1.2rem; display: block; margin-bottom: 5px; }
+        .success-bg { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .warning-bg { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+        .score-badge { position: absolute; top: 20px; right: 20px; background: var(--dark); color: white; padding: 5px 15px; border-radius: 20px; font-weight: bold; }
+        .progress-container { width: 100%; background: #e2e8f0; height: 8px; border-radius: 4px; margin: 25px 0; }
+        .progress-bar { height: 100%; background: var(--primary); width: 0%; border-radius: 4px; transition: width 0.4s; }
+        h1 { color: var(--dark); margin-top: 0; font-size: 1.8rem; border-left: 5px solid var(--primary); padding-left: 15px; }
+        h2 { font-size: 1.2rem; color: var(--secondary); margin-bottom: 25px; }
+        .next-step-btn { background: var(--dark); margin-top: 15px; font-weight: bold; text-align: center; }
+        .final-card { text-align: center; padding: 20px; }
+        .final-score { font-size: 3rem; color: var(--primary); font-weight: 800; margin: 15px 0; }
+    </style>
+</head>
+<body>
+
+<div id="main-wrapper">
+    <div id="sidebar">
+        <h3>Glossary & Terms</h3>
+        <ul>
+            <li><strong>Scale:</strong> To grow a business significantly in size and revenue.</li>
+            <li><strong>Margins:</strong> The difference between the cost of making a product and its selling price.</li>
+            <li><strong>Churn:</strong> The rate at which customers stop doing business with an entity.</li>
+            <li><strong>Equity:</strong> Ownership of assets that may have debts or other liabilities attached to them.</li>
+            <li><strong>Burn Rate:</strong> The rate at which a new company uses up its venture capital to finance overhead before generating positive cash flow.</li>
+            <li><strong>ROI:</strong> Return on Investment; the ratio between net profit and cost of investment.</li>
+            <li><strong>MVP:</strong> Minimum Viable Product; a version of a product with just enough features to be usable by early customers.</li>
+        </ul>
+    </div>
+
+    <div id="game-container">
+        <div id="score-display" class="score-badge">Score: 0</div>
+        
+        <div id="start-screen">
+            <h1 style="border:none; padding:0; margin-bottom:20px;">The CEO Challenge: Year One</h1>
+            <p>You have just been appointed CEO of a mid-sized tech company. You have 10 critical decisions to make. Each decision affects your success rating.</p>
+            <p>Can you lead the company to an IPO, or will you be replaced by the board?</p>
+            <button class="btn" style="text-align:center; margin-top:20px;" onclick="startGame()">Commence Strategy</button>
+        </div>
+
+        <div id="game-screen" class="hidden">
+            <div class="progress-container"><div id="progress" class="progress-bar"></div></div>
+            <h1 id="question-title">Decision Title</h1>
+            <h2 id="question-text">Decision description goes here.</h2>
+            <div id="choices-container"></div>
+            <div id="feedback" class="feedback-box">
+                <span id="feedback-pts" class="pts-span"></span>
+                <span id="feedback-text"></span>
+                <button id="btn-continue" class="btn next-step-btn hidden" onclick="nextStep()">Continue to Next Quarter</button>
+            </div>
+        </div>
+
+        <div id="final-screen" class="hidden">
+            <div class="final-card">
+                <h1>Annual Performance Review</h1>
+                <div id="final-score-val" class="final-score">0</div>
+                <h2 id="final-title">Title</h2>
+                <p id="final-desc">Description</p>
+                <button class="btn" style="text-align:center; margin-top:20px;" onclick="location.reload()">Start New Fiscal Year</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const STEPS = [
+        {
+            title: "Product Launch Strategy",
+            text: "Your new software is 80% ready. The marketing team wants to launch now to beat a competitor. What is your call?",
+            choices: [
+                { text: "Launch the 'Beta' version now. Fix bugs based on real user feedback while generating revenue.", pts: 3, fb: "Strategic! This is the MVP (Minimum Viable Product) approach. It builds early market share." },
+                { text: "Wait 4 months to ensure the product is 100% perfect before anyone sees it.", pts: 1, fb: "Risky. By the time you launch, your competitor has already captured the market." },
+                { text: "Cancel the project. If it isn't perfect, it isn't worth the brand risk.", pts: -1, fb: "Disastrous. You've wasted millions in R&D. The board is unhappy. Try again." },
+                { text: "Launch now, but lie about the features that aren't finished yet.", pts: 2, fb: "Aggressive. You beat the competitor, but your customer support team is now overwhelmed with complaints." }
+            ]
+        },
+        {
+            title: "The Talent War",
+            text: "Your lead developer has been offered a job at Google. They are critical to your roadmap. How do you respond?",
+            choices: [
+                { text: "Match the salary offer and provide 1% equity in the company.", pts: 3, fb: "Excellent. Giving equity (ownership) creates long-term loyalty and aligns their interests with yours." },
+                { text: "Tell them 'good luck' and try to hire a junior developer to replace them for half the cost.", pts: 1, fb: "Inefficient. A junior cannot replace a lead's knowledge. Your roadmap will be delayed by a year." },
+                { text: "Immediately fire them for being disloyal to the company.", pts: -1, fb: "Unprofessional. You've lost your best worker and created a toxic office culture. Try again." },
+                { text: "Promote them to 'Head of Tech' with a title change but no extra money.", pts: 2, fb: "Temporary fix. A new title feels good for a month, but they will eventually leave for a better salary." }
+            ]
+        },
+        {
+            title: "Budget Realignment",
+            text: "The economy is slowing down. You need to reduce your 'Burn Rate' to survive the year. Where do you cut?",
+            choices: [
+                { text: "Cut the fancy office perks (free lunches, travel) and reduce the marketing budget for new acquisitions.", pts: 3, fb: "Prudent. You are protecting the core staff while reducing unnecessary overhead." },
+                { text: "Fire 20% of your customer support team to save on monthly salaries.", pts: 1, fb: "Short-sighted. Your churn rate will skyrocket as service quality drops." },
+                { text: "Do nothing and hope you win a massive new contract next month.", pts: -1, fb: "Negligent. Hope is not a strategy. You will run out of cash in three months. Try again." },
+                { text: "Reduce everyone's salary by 10% including your own.", pts: 2, fb: "Noble, but risky. Your top performers will start looking for new jobs immediately." }
+            ]
+        },
+        {
+            title: "Global Expansion",
+            text: "You have the opportunity to open an office in Tokyo. It's expensive but opens a massive new market. What's the plan?",
+            choices: [
+                { text: "Partner with a local Japanese firm to share the risk and use their cultural knowledge.", pts: 3, fb: "Smart move. International expansion is difficult without local expertise to navigate the market." },
+                { text: "Send your best US manager to Tokyo to run everything the 'American Way'.", pts: 1, fb: "Cultural blind spot. Business practices in Japan are very different; you will likely struggle to find clients." },
+                { text: "Ignore Japan for now. Focus only on the US market until you have $50M in the bank.", pts: 2, fb: "Safe, but slow. You are leaving the global market open for your competitors to dominate." },
+                { text: "Open 5 offices at once across Asia to show the world you are a global leader.", pts: -1, fb: "Over-leveraged. You've spent all your cash on rent and furniture. The company is bankrupt. Try again." }
+            ]
+        },
+        {
+            title: "The Crisis Management",
+            text: "A major security breach has exposed 5,000 customer email addresses. How do you handle the PR?",
+            choices: [
+                { text: "Be 100% transparent. Email all customers immediately, apologize, and explain how you will fix it.", pts: 3, fb: "Integrity! Transparency builds long-term trust even when you make mistakes." },
+                { text: "Only tell the customers who were affected and hope the media doesn't find out.", pts: 1, fb: "Weak. When the media eventually finds out, it will look like a cover-up." },
+                { text: "Blame a third-party vendor and say it wasn't your company's fault.", pts: 2, fb: "Defensive. Customers don't care who is at fault; they want to know their data is safe with YOU." },
+                { text: "Delete the evidence and pretend it never happened.", pts: -1, fb: "Illegal and unethical. You will face massive fines and a total loss of brand reputation. Try again." }
+            ]
+        },
+        {
+            title: "Scaling the Sales Team",
+            text: "You need to increase revenue by 40%. How do you grow the sales department?",
+            choices: [
+                { text: "Hire 'Sales Engineers' who understand the technical product, not just how to talk.", pts: 3, fb: "Expertise. In tech, customers buy solutions. Having technical sales staff increases your closing rate." },
+                { text: "Hire 50 low-cost callers to make 200 'cold calls' every day.", pts: 1, fb: "Quantity over quality. You will annoy 10,000 people and only get 2 sales." },
+                { text: "Buy a list of 1 million emails and send a generic marketing message to everyone.", pts: -1, fb: "Spam. You have been blacklisted by email providers and your domain is blocked. Try again." },
+                { text: "Double the commission (bonuses) for your current sales team.", pts: 2, fb: "Good motivator, but your current team is already at max capacity. You need more people." }
+            ]
+        },
+        {
+            title: "The Merger Offer",
+            text: "A larger competitor offers to buy your company for $100M. It's a good price, but you lose control.",
+            choices: [
+                { text: "Decline. Your data shows you will be worth $500M in two years if you stay independent.", pts: 3, fb: "Visionary. You are playing the 'long game' and believe in your product's potential." },
+                { text: "Accept immediately. You and the early employees will never have to work again.", pts: 2, fb: "Financial win, but a loss for the mission. You are now an employee at a big, slow company." },
+                { text: "Leaked the offer to the press to try and start a 'bidding war'.", pts: 1, fb: "Messy. The competitor might withdraw the offer, leaving you with nothing." },
+                { text: "Ask for $1 Billion or tell them to leave your office.", pts: -1, fb: "Arrogant. You've insulted a major player and now they are going to spend millions to destroy you. Try again." }
+            ]
+        },
+        {
+            title: "Customer Support Overhaul",
+            text: "Customers are complaining that it takes 2 days to get a response to a help ticket. What is the fix?",
+            choices: [
+                { text: "Invest in an AI Chatbot for basic questions and hire more 'Tier 2' expert humans for complex issues.", pts: 3, fb: "Efficiency. You've automated the easy stuff and prioritized human intelligence for the hard stuff." },
+                { text: "Remove the phone number from the website so customers can only send emails.", pts: -1, fb: "Frustrating. Customers feel ignored. They are leaving for your competitor today. Try again." },
+                { text: "Tell the current staff they are not allowed to go home until all tickets are finished.", pts: 1, fb: "Toxic. Your staff will quit, and then you will have ZERO support people." },
+                { text: "Give every complaining customer a $10 credit to be quiet.", pts: 2, fb: "Expensive. You are losing money on every ticket without actually fixing the slow response time." }
+            ]
+        },
+        {
+            title: "Innovation Lab",
+            text: "The Board thinks you are spending too much on 'future projects' that don't make money yet.",
+            choices: [
+                { text: "Show them the R&D (Research & Development) data that proves these projects will dominate the market in 2026.", pts: 3, fb: "Data-driven. Using evidence to manage your bosses is the most important skill for a CEO." },
+                { text: "Shut down the lab and focus 100% on the current product features.", pts: 1, fb: "Stagnation. You've won this year's budget but you have guaranteed the company will be obsolete in 3 years." },
+                { text: "Ignore the Board. You are the CEO and you do what you want.", pts: -1, fb: "Fired. The Board of Directors has the power to remove you. You are now unemployed. Try again." },
+                { text: "Move the Innovation Lab to a secret location and hide the costs in the 'Marketing' budget.", pts: 2, fb: "Crafty, but dangerous. If the auditors find out, you are in serious trouble." }
+            ]
+        },
+        {
+            title: "The IPO Decision",
+            text: "Your company is healthy. Banks want you to go public (IPO). Are you ready for the pressure?",
+            choices: [
+                { text: "Yes. Use the billions from the IPO to acquire three smaller competitors and dominate the sector.", pts: 3, fb: "Expansionist. This is how small tech companies become global giants." },
+                { text: "No. Stay private so you don't have to answer to thousands of public shareholders every 3 months.", pts: 2, fb: "Valid choice. Companies like SpaceX stay private to focus on big missions without stock market pressure." },
+                { text: "Wait 1 more year to ensure your financial audits are 100% clean.", pts: 1, fb: "Cautious. You might miss the 'window' when investors are excited about tech." },
+                { text: "Tell the banks you will only IPO if the CEO (you) gets a $50M personal bonus.", pts: -1, fb: "Greedy. This has leaked to the press. Investors think you are a 'scam artist' and your stock price is $0. Try again." }
+            ]
+        }
+    ];
+
+    let currentStep = 0;
+    let score = 0;
+
+    /**
+     * Fisher-Yates Shuffle Algorithm
+     * Ensures true mathematical randomness.
+     */
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    function startGame() {
+        document.getElementById('start-screen').classList.add('hidden');
+        document.getElementById('game-screen').classList.remove('hidden');
+        renderStep();
+    }
+
+    function renderStep() {
+        const step = STEPS[currentStep];
+        document.getElementById('question-title').innerText = `Quarter ${currentStep + 1}: ${step.title}`;
+        document.getElementById('question-text').innerText = step.text;
+        document.getElementById('progress').style.width = `${((currentStep + 1) / STEPS.length) * 100}%`;
+        
+        const container = document.getElementById('choices-container');
+        container.innerHTML = '';
+        
+        // Randomize the order of answer choices every time the question is displayed
+        const shuffledChoices = shuffleArray([...step.choices]);
+
+        shuffledChoices.forEach(choice => {
+            const btn = document.createElement('button');
+            btn.className = 'btn';
+            btn.innerText = choice.text;
+            btn.onclick = () => handleChoice(choice, btn);
+            container.appendChild(btn);
+        });
+
+        document.getElementById('feedback').style.display = 'none';
+        document.getElementById('btn-continue').classList.add('hidden');
+    }
+
+    function handleChoice(choice, btn) {
+        const feedbackBox = document.getElementById('feedback');
+        const feedbackPts = document.getElementById('feedback-pts');
+        const feedbackText = document.getElementById('feedback-text');
+        const continueBtn = document.getElementById('btn-continue');
+        const allBtns = document.querySelectorAll('#choices-container .btn');
+
+        if (choice.pts === -1) {
+            feedbackBox.className = "feedback-box warning-bg";
+            feedbackBox.style.display = "block";
+            feedbackPts.innerText = "CRITICAL FAILURE (0 PTS)";
+            feedbackText.innerText = choice.fb;
+            btn.classList.add('btn-retry');
+            return;
+        }
+
+        score += choice.pts;
+        document.getElementById('score-display').innerText = `Score: ${score}`;
+
+        allBtns.forEach(b => b.disabled = true);
+        btn.style.border = "3px solid var(--dark)";
+
+        feedbackBox.className = "feedback-box success-bg";
+        feedbackBox.style.display = "block";
+        feedbackPts.innerText = `Result: +${choice.pts} Performance Points`;
+        feedbackText.innerText = choice.fb;
+        continueBtn.classList.remove('hidden');
+    }
+
+    function nextStep() {
+        currentStep++;
+        if (currentStep < STEPS.length) {
+            renderStep();
+        } else {
+            showFinal();
+        }
+    }
+
+    function showFinal() {
+        document.getElementById('game-screen').classList.add('hidden');
+        document.getElementById('final-screen').classList.remove('hidden');
+        
+        const scoreVal = document.getElementById('final-score-val');
+        const title = document.getElementById('final-title');
+        const text = document.getElementById('final-desc');
+        
+        scoreVal.innerText = score;
+        
+        if (score >= 26) {
+            title.innerText = "Silicon Valley Legend";
+            text.innerText = "Masterful performance. You have navigated the treacherous waters of year one with perfect vision. The company's IPO was the most successful of the decade, and you are now featured on the cover of Forbes. You are truly an icon of industry.";
+        } else if (score >= 18) {
+            title.innerText = "Successful Regional CEO";
+            text.innerText = "Very well done. You have built a sustainable, profitable business that dominates your local region. Your decisions were largely logical and efficient, though you missed a few opportunities for hyper-growth. With a little more risk-taking and focus on data, you could easily become a national household name.";
+        } else if (score >= 10) {
+            title.innerText = "Steady Local Business Owner";
+            text.innerText = "You survived the first year, which is more than most! You have a stable shop with a loyal following, but you are currently stuck in the 'owner-operator' trap. To grow further, you need to stop doing the work yourself and start managing systems. Focus on marketing and reinvesting your profits into technology next time.";
+        } else {
+            title.innerText = "The Learning Experience";
+            text.innerText = "A difficult journey. Your business is currently struggling with low margins and high stress. This happened because you often chose short-term fixes or safe options over long-term strategic investments. In business, if you aren't innovating, you are falling behind. Take the lessons from these failures and try a different sector!";
+        }
+        
+        document.getElementById('final-score-val').innerText = `Final Score: ${score} / 30`;
+    }
+</script>
+</body>
+</html>
