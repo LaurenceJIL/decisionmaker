@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Dog Show Manager Challenge</title>
+<title>Dog Show Manager: Rating Challenge</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
@@ -11,8 +11,9 @@
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#fdfcf0;min-height:100vh;color:#333}
   .container{max-width:600px;margin:0 auto;padding:20px}
-  .header{text-align:center;margin-bottom:20px;background:#fff;padding:15px;border-radius:12px;box-shadow:0 4px 6px rgba(0,0,0,0.05)}
-  .paws-tally{font-size:1.5rem;margin-bottom:10px}
+  .header{text-align:center;margin-bottom:20px;background:#fff;padding:15px;border-radius:12px;box-shadow:0 4px 6px rgba(0,0,0,0.05);position: sticky;top: 10px;z-index: 100;}
+  .rating-display {font-size: 1.8rem; font-weight: 800; color: #ffcc00; display: flex; align-items: center; justify-content: center; gap: 10px;}
+  .rating-label {font-size: 0.9rem; color: #888; text-transform: uppercase;}
   .card{background:#fff;padding:25px;border-radius:15px;box-shadow:0 10px 25px rgba(0,0,0,0.1);margin-bottom:20px}
   .scenario-title{font-size:0.9rem;color:#666;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
   .question{font-size:1.25rem;font-weight:700;margin-bottom:20px;line-height:1.4}
@@ -30,7 +31,7 @@
   .emergency{border:3px solid #f56565;background:#fff5f5}
   .emergency-label{color:#f56565;font-weight:bold;margin-bottom:5px;display:block}
   .final-screen{text-align:center}
-  .final-score{font-size:3rem;font-weight:900;margin:20px 0;color:#ffcc00}
+  .final-score{font-size:4rem;font-weight:900;margin:10px 0;color:#ffcc00}
   .final-text{font-size:1.1rem;line-height:1.6;margin-bottom:30px;text-align:left}
   @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 </style>
@@ -46,10 +47,10 @@ const scenarios = [
     title: "Scenario 1: The Venue",
     question: "You need a place for 2,000 dogs. Which location do you choose for the show?",
     options: [
-      { text: "A large farm with big indoor halls, green fields for exercise, and lots of parking space.", points: 3, feedback: "This is the perfect choice! It has everything you need for a safe and happy show. Dogs have space to run, and owners can park easily. Great job!" },
-      { text: "A modern city center building near trains. It is clean but has no grass or outdoor areas.", points: 2, feedback: "This is okay because it is easy to reach by train. However, dogs will be unhappy without grass. It might be difficult for a large show like this one." },
-      { text: "A beautiful old castle with small rooms and expensive carpets, but very little space for cars.", points: 1, feedback: "The castle looks lovely, but it is not practical. Small rooms are crowded, and no parking will make owners angry. It is better for a small party, not a dog show." },
-      { text: "A busy shopping mall parking lot with no shade and no water for the animals.", points: -1, feedback: "This is a terrible idea! The hot ground will hurt the dogs' paws, and there is no water. This is dangerous for the animals. Please choose a safer location." }
+      { text: "A large farm with big indoor halls, green fields for exercise, and lots of parking space.", value: 0.2, feedback: "This is the perfect choice! It has everything you need for a safe and happy show. Dogs have space to run, and owners can park easily. Great job!" },
+      { text: "A modern city center building near trains. It is clean but has no grass or outdoor areas.", value: 0.1, feedback: "This is okay because it is easy to reach by train. However, dogs will be unhappy without grass. It might be difficult for a large show like this one." },
+      { text: "A beautiful old castle with small rooms and expensive carpets, but very little space for cars.", value: 0, feedback: "The castle looks lovely, but it is not practical. Small rooms are crowded, and no parking will make owners angry. It is better for a small party, not a dog show." },
+      { text: "A busy shopping mall parking lot with no shade and no water for the animals.", value: -0.5, feedback: "This is a terrible idea! The hot ground will hurt the dogs' paws, and there is no water. This is dangerous for the animals. Please choose a safer location." }
     ]
   },
   {
@@ -57,10 +58,10 @@ const scenarios = [
     title: "Scenario 2: The Date",
     question: "When is the best time to hold your big outdoor dog show?",
     options: [
-      { text: "In late spring when the weather is mild and the grass is fresh and green.", points: 3, feedback: "Excellent choice! The weather is not too hot or too cold. This is the safest time for dogs to be outside all day. Everyone will enjoy the fresh air." },
-      { text: "In the middle of summer during the hottest week of the year.", points: 1, feedback: "This is very risky. High temperatures can cause heatstroke in many dog breeds. You will need to spend a lot of money on cooling and water to stay safe." },
-      { text: "On a holiday weekend when many people are free to visit.", points: 2, feedback: "This is a good idea for getting more visitors. However, travel might be difficult and expensive for the dog owners. Make sure the venue is still available and affordable." },
-      { text: "In the middle of winter when it often snows and the ground is frozen.", points: -1, feedback: "This is a bad choice for an outdoor show. The dogs will be freezing, and the ice is dangerous for walking. You must think about the animals' comfort first." }
+      { text: "In late spring when the weather is mild and the grass is fresh and green.", value: 0.2, feedback: "Excellent choice! The weather is not too hot or too cold. This is the safest time for dogs to be outside all day. Everyone will enjoy the fresh air." },
+      { text: "On a holiday weekend when many people are free to visit.", value: 0.1, feedback: "This is a good idea for getting more visitors. However, travel might be difficult and expensive for the dog owners. Make sure the venue is still available and affordable." },
+      { text: "In the middle of summer during the hottest week of the year.", value: 0, feedback: "This is very risky. High temperatures can cause heatstroke in many dog breeds. You will need to spend a lot of money on cooling and water to stay safe." },
+      { text: "In the middle of winter when it often snows and the ground is frozen.", value: -0.5, feedback: "This is a bad choice for an outdoor show. The dogs will be freezing, and the ice is dangerous for walking. You must think about the animals' comfort first." }
     ]
   },
   {
@@ -68,10 +69,10 @@ const scenarios = [
     title: "Scenario 3: Hiring Judges",
     question: "How do you choose the people who will judge the dogs?",
     options: [
-      { text: "Hire experts who have studied specific breeds for many years and have official certificates.", points: 3, feedback: "Perfect! Expert judges make the show professional. Owners trust their decisions because they know the breeds very well. This keeps the competition fair and respected by everyone involved." },
-      { text: "Invite a famous TV star who loves dogs but does not know the official rules.", points: 1, feedback: "The star might bring more fans, but the dog owners will be unhappy. They want a fair judge who understands the rules, not just a famous face. Be careful!" },
-      { text: "Ask local dog owners to judge each other's pets to save money.", points: -1, feedback: "This is a mistake. People will think the judging is not fair because friends are judging friends. You need independent experts to make the show successful and honest." },
-      { text: "Use experienced judges from other countries to make the show feel international.", points: 2, feedback: "This is a nice idea! It makes your show feel special and important. Just remember that flying judges from other countries is very expensive and needs careful planning." }
+      { text: "Hire experts who have studied specific breeds for many years and have official certificates.", value: 0.2, feedback: "Perfect! Expert judges make the show professional. Owners trust their decisions because they know the breeds very well. This keeps the competition fair and respected by everyone involved." },
+      { text: "Use experienced judges from other countries to make the show feel international.", value: 0.1, feedback: "This is a nice idea! It makes your show feel special and important. Just remember that flying judges from other countries is very expensive and needs careful planning." },
+      { text: "Invite a famous TV star who loves dogs but does not know the official rules.", value: 0, feedback: "The star might bring more fans, but the dog owners will be unhappy. They want a fair judge who understands the rules, not just a famous face. Be careful!" },
+      { text: "Ask local dog owners to judge each other's pets to save money.", value: -0.5, feedback: "This is a mistake. People will think the judging is not fair because friends are judging friends. You need independent experts to make the show successful and honest." }
     ]
   },
   {
@@ -79,10 +80,10 @@ const scenarios = [
     title: "Scenario 4: The Schedule",
     question: "Many owners have more than one dog. How do you plan the timing of the rings?",
     options: [
-      { text: "Start all groups at different times so owners can move between rings easily.", points: 3, feedback: "This is very smart! It shows you understand the owners' needs. They can show all their dogs without rushing or missing their turn. Your show will run very smoothly." },
-      { text: "Start every single competition at exactly 9:00 AM to finish early.", points: 1, feedback: "This will cause chaos! Owners with two dogs will have to choose only one. People will be stressed and angry. It is better to spread the events out." },
-      { text: "Let the judges decide when to start their own rings on the day.", points: -1, feedback: "No, this is a disaster! Without a fixed schedule, nobody knows where to go or when. You must be the leader and provide a clear plan for everyone." },
-      { text: "Group similar breeds together in the morning and others in the afternoon.", points: 2, feedback: "This is a logical way to organize the day. It helps a bit, but some owners might still have problems if they own different types of dogs. Good effort!" }
+      { text: "Start all groups at different times so owners can move between rings easily.", value: 0.2, feedback: "This is very smart! It shows you understand the owners' needs. They can show all their dogs without rushing or missing their turn. Your show will run very smoothly." },
+      { text: "Group similar breeds together in the morning and others in the afternoon.", value: 0.1, feedback: "This is a logical way to organize the day. It helps a bit, but some owners might still have problems if they own different types of dogs. Good effort!" },
+      { text: "Start every single competition at exactly 9:00 AM to finish early.", value: 0, feedback: "This will cause chaos! Owners with two dogs will have to choose only one. People will be stressed and angry. It is better to spread the events out." },
+      { text: "Let the judges decide when to start their own rings on the day.", value: -0.5, feedback: "No, this is a disaster! Without a fixed schedule, nobody knows where to go or when. You must be the leader and provide a clear plan for everyone." }
     ]
   },
   {
@@ -90,10 +91,10 @@ const scenarios = [
     title: "Scenario 5: Food and Drink",
     question: "What kind of food and water should you provide at the show?",
     options: [
-      { text: "Many water stations for dogs and a variety of healthy food for people.", points: 3, feedback: "Great job! Keeping dogs hydrated is the most important thing. Providing good food for people will keep them happy and staying at your show for the whole day." },
-      { text: "Only one small snack bar for people and no water stations for dogs.", points: -1, feedback: "This is dangerous! Dogs can get sick very quickly without water. You must provide water everywhere. People will also be unhappy if they are hungry and thirsty." },
-      { text: "Sell expensive luxury meals and fancy bottled water for dogs.", points: 1, feedback: "This is a bit too much. Most owners bring their own special dog food. They just need free, clean water and simple, affordable food for themselves. Keep it practical." },
-      { text: "Invite several local food trucks to sell different types of meals.", points: 2, feedback: "This is a fun idea! It creates a festival atmosphere and gives people many choices. Just make sure you also have plenty of free water for the dogs nearby." }
+      { text: "Many water stations for dogs and a variety of healthy food for people.", value: 0.2, feedback: "Great job! Keeping dogs hydrated is the most important thing. Providing good food for people will keep them happy and staying at your show for the whole day." },
+      { text: "Invite several local food trucks to sell different types of meals.", value: 0.1, feedback: "This is a fun idea! It creates a festival atmosphere and gives people many choices. Just make sure you also have plenty of free water for the dogs nearby." },
+      { text: "Sell expensive luxury meals and fancy bottled water for dogs.", value: 0, feedback: "This is a bit too much. Most owners bring their own special dog food. They just need free, clean water and simple, affordable food for themselves. Keep it practical." },
+      { text: "Only one small snack bar for people and no water stations for dogs.", value: -0.5, feedback: "This is dangerous! Dogs can get sick very quickly without water. You must provide water everywhere. People will also be unhappy if they are hungry and thirsty." }
     ]
   },
   {
@@ -101,22 +102,22 @@ const scenarios = [
     title: "Scenario 6: Safety Rules",
     question: "How do you make sure all the dogs and people stay safe during the event?",
     options: [
-      { text: "Have a vet on-site, clear safety signs, and a team of trained security guards.", points: 3, feedback: "Excellent! Having a vet is essential for any emergency. Security and signs help people know what to do. This makes your show professional and very safe for everyone." },
-      { text: "Just put up a few signs saying 'Be Careful' at the main entrance.", points: 1, feedback: "This is not enough. Signs cannot help in a real emergency. You need people who are trained to help if a dog gets sick or a person gets hurt." },
-      { text: "Tell everyone that they are responsible for their own safety and their dogs.", points: -1, feedback: "You cannot do this. As the organizer, you are legally responsible for safety. If you don't have a plan, you could get into a lot of trouble. Try again!" },
-      { text: "Hire a first-aid team for people but don't worry about a vet.", points: 2, feedback: "It is good to help people, but this is a dog show! You must have a vet. Dogs can have accidents or get stressed. A vet is a requirement." }
+      { text: "Have a vet on-site, clear safety signs, and a team of trained security guards.", value: 0.2, feedback: "Excellent! Having a vet is essential for any emergency. Security and signs help people know what to do. This makes your show professional and very safe for everyone." },
+      { text: "Hire a first-aid team for people but don't worry about a vet.", value: 0.1, feedback: "It is good to help people, but this is a dog show! You must have a vet. Dogs can have accidents or get stressed. A vet is a requirement." },
+      { text: "Just put up a few signs saying 'Be Careful' at the main entrance.", value: 0, feedback: "This is not enough. Signs cannot help in a real emergency. You need people who are trained to help if a dog gets sick or a person gets hurt." },
+      { text: "Tell everyone that they are responsible for their own safety and their dogs.", value: -0.5, feedback: "You cannot do this. As the organizer, you are legally responsible for safety. If you don't have a plan, you could get into a lot of trouble. Try again!" }
     ]
   },
   {
     id: "E1",
-    title: "EMERGENCY 1: A Dog Fight",
+    title: "EMERGENCY: A Dog Fight",
     isEmergency: true,
     question: "Two large dogs start fighting in the middle of a busy ring! What is your first action?",
     options: [
-      { text: "Quickly send trained handlers to separate the dogs and call the vet immediately.", points: 3, feedback: "Perfect response! You acted fast and used experts. This stops the fight safely and ensures the dogs get medical help right away. You kept the crowd calm and safe." },
-      { text: "Run into the ring yourself and try to pull the dogs apart by their collars.", points: 1, feedback: "This is very brave but very dangerous. You could be bitten badly. It is always better to let trained professionals handle a dog fight with the right equipment." },
-      { text: "Shout loudly at the owners to control their dogs and stop the fight.", points: -1, feedback: "Shouting often makes dogs more excited and aggressive. It doesn't help stop the fight and it scares the spectators. You need a more professional and calm plan. Try again!" },
-      { text: "Close the ring and move all other dogs and people to a safe distance.", points: 2, feedback: "This is a good safety move. It protects the public from getting hurt. However, you still need to deal with the fighting dogs quickly. Make sure the vet is coming!" }
+      { text: "Quickly send trained handlers to separate the dogs and call the vet immediately.", value: 0.2, feedback: "Perfect response! You acted fast and used experts. This stops the fight safely and ensures the dogs get medical help right away." },
+      { text: "Close the ring and move all other dogs and people to a safe distance.", value: 0.1, feedback: "This is a good safety move. It protects the public from getting hurt. However, you still need to deal with the fighting dogs quickly." },
+      { text: "Run into the ring yourself and try to pull the dogs apart by their collars.", value: 0, feedback: "This is very brave but very dangerous. You could be bitten badly. It is always better to let trained professionals handle a dog fight." },
+      { text: "Shout loudly at the owners to control their dogs and stop the fight.", value: -0.5, feedback: "Shouting often makes dogs more excited and aggressive. It doesn't help stop the fight and it scares the spectators. Try again!" }
     ]
   },
   {
@@ -124,10 +125,10 @@ const scenarios = [
     title: "Scenario 7: Advertising",
     question: "How will you tell people about your dog show to get many visitors?",
     options: [
-      { text: "Use social media, local newspapers, and put posters in every pet shop.", points: 3, feedback: "Great strategy! You are reaching both local people and dog lovers online. This variety will bring a lot of visitors and exhibitors to your event. Well done!" },
-      { text: "Only tell your friends and family and hope they tell others.", points: 1, feedback: "This is not enough for a big show. You need 2,000 dogs! You must use professional advertising to reach enough people to make the show a success." },
-      { text: "Spend all your money on one big TV advertisement during the news.", points: -1, feedback: "This is a waste of money. TV ads are very expensive and most people watching might not own dogs. It is better to use cheaper, targeted pet advertising. Try again!" },
-      { text: "Create a simple website and wait for people to find it on Google.", points: 2, feedback: "A website is necessary, but people won't find it by magic. You need to share the link on social media and in dog magazines to get visitors." }
+      { text: "Use social media, local newspapers, and put posters in every pet shop.", value: 0.2, feedback: "Great strategy! You are reaching both local people and dog lovers online. This variety will bring a lot of visitors and exhibitors." },
+      { text: "Create a simple website and wait for people to find it on Google.", value: 0.1, feedback: "A website is necessary, but people won't find it by magic. You need to share the link on social media to get visitors." },
+      { text: "Only tell your friends and family and hope they tell others.", value: 0, feedback: "This is not enough for a big show. You need 2,000 dogs! You must use professional advertising to reach enough people." },
+      { text: "Spend all your money on one big TV advertisement during the news.", value: -0.5, feedback: "This is a waste of money. TV ads are very expensive and untargeted. It is better to use cheaper, targeted pet advertising. Try again!" }
     ]
   },
   {
@@ -135,10 +136,10 @@ const scenarios = [
     title: "Scenario 8: Cleaning Up",
     question: "A dog show can get very messy. How do you handle the waste?",
     options: [
-      { text: "Provide many waste bins and hire a cleaning team to work all day.", points: 3, feedback: "Excellent! A clean show is a happy show. It prevents smells and diseases. Owners will appreciate that you care about the environment and the health of their pets." },
-      { text: "Ask owners to take all their dog's waste home with them in bags.", points: 1, feedback: "This is not very nice for the owners. They are busy with their dogs and don't want to carry waste all day. You should provide bins to help them." },
-      { text: "Don't worry about it until the show is finished the next day.", points: -1, feedback: "This is a terrible idea! The venue will become very dirty and smelly. It is unhygienic and will make a bad impression on everyone. You must clean constantly." },
-      { text: "Have a few bins at the exit but nowhere else in the fields.", points: 2, feedback: "This is a start, but people won't walk to the exit every time their dog makes a mess. You need bins near every ring to keep the area clean." }
+      { text: "Provide many waste bins and hire a cleaning team to work all day.", value: 0.2, feedback: "Excellent! A clean show is a happy show. It prevents smells and diseases. Owners will appreciate that you care about the health of their pets." },
+      { text: "Have a few bins at the exit but nowhere else in the fields.", value: 0.1, feedback: "This is a start, but people won't walk to the exit every time their dog makes a mess. You need bins near every ring." },
+      { text: "Ask owners to take all their dog's waste home with them in bags.", value: 0, feedback: "This is not very nice for the owners. They are busy with their dogs and don't want to carry waste all day." },
+      { text: "Don't worry about it until the show is finished the next day.", value: -0.5, feedback: "This is a terrible idea! The venue will become very dirty and smelly. It is unhygienic and will make a bad impression. Try again!" }
     ]
   },
   {
@@ -146,62 +147,50 @@ const scenarios = [
     title: "Scenario 9: Prizes and Trophies",
     question: "What should the winners receive at the end of the competition?",
     options: [
-      { text: "Beautiful ribbons, official certificates, and some high-quality dog food.", points: 3, feedback: "Perfect! These are traditional prizes that owners love. The food is a practical gift that the dogs will enjoy. It makes the winners feel very special and proud." },
-      { text: "Give a large amount of cash to the top three winners only.", points: 1, feedback: "Giving cash can sometimes make people too competitive and aggressive. It is better to give trophies and items that celebrate the dog's beauty and skill instead." },
-      { text: "Don't give any prizes because the honor of winning is enough.", points: -1, feedback: "No, people work very hard to train their dogs. They want something to show for their success. Without prizes, fewer people will want to enter your show next year." },
-      { text: "Give small plastic toys that are cheap and easy to buy in bulk.", points: 2, feedback: "This is okay for a small local show, but for a big event, owners expect something more professional. Try to find better quality prizes to match your show's size." }
+      { text: "Beautiful ribbons, official certificates, and some high-quality dog food.", value: 0.2, feedback: "Perfect! These are traditional prizes that owners love. The food is a practical gift that the dogs will enjoy." },
+      { text: "Give small plastic toys that are cheap and easy to buy in bulk.", value: 0.1, feedback: "This is okay for a small local show, but for a big event, owners expect something more professional." },
+      { text: "Give a large amount of cash to the top three winners only.", value: 0, feedback: "Giving cash can sometimes make people too competitive and aggressive. It is better to celebrate the dog's beauty and skill." },
+      { text: "Don't give any prizes because the honor of winning is enough.", value: -0.5, feedback: "No, people work very hard to train their dogs. They want something to show for their success. Try again!" }
     ]
   },
   {
     id: 10,
-    title: "Scenario 10: The Weather Changes",
-    question: "It starts raining heavily during the outdoor part of the show. What do you do?",
+    title: "Scenario 10: Weather Changes",
+    question: "It starts raining heavily during the outdoor show. What do you do?",
     options: [
-      { text: "Move the main events into the indoor halls and provide towels for the dogs.", points: 3, feedback: "Great thinking! This keeps the dogs dry and safe. Providing towels is a very kind touch that owners will remember. Your show can continue without any problems." },
-      { text: "Tell everyone to put on their coats and continue the show in the rain.", points: 1, feedback: "This is not ideal. Wet dogs are difficult to judge, and the grass will become muddy and slippery. It could be dangerous for both people and animals." },
-      { text: "Cancel the whole show immediately and send everyone home without refunds.", points: -1, feedback: "This is a very bad decision. People have traveled far and paid money. You should have a backup plan for rain. Sending them home like this will ruin your reputation." },
-      { text: "Wait for 30 minutes under the trees to see if the rain stops.", points: 2, feedback: "This is a reasonable short-term plan. However, if the rain continues, you will need a better solution. Always check the weather report and have an indoor space ready." }
+      { text: "Move the main events into the indoor halls and provide towels for the dogs.", value: 0.2, feedback: "Great thinking! This keeps the dogs dry and safe. Providing towels is a very kind touch that owners will remember." },
+      { text: "Wait for 30 minutes under the trees to see if the rain stops.", value: 0.1, feedback: "This is a reasonable short-term plan. However, if the rain continues, you will need a better solution." },
+      { text: "Tell everyone to put on their coats and continue the show in the rain.", value: 0, feedback: "This is not ideal. Wet dogs are difficult to judge, and the grass will become muddy and slippery." },
+      { text: "Cancel the whole show immediately and send everyone home without refunds.", value: -0.5, feedback: "This is a very bad decision. People have traveled far and paid money. You must have a backup plan. Try again!" }
     ]
   },
   {
     id: 11,
     title: "Scenario 11: Newcomer Help",
-    question: "A first-time owner is very nervous and makes a mistake in the ring. How do you help?",
+    question: "A first-time owner is nervous and makes a mistake in the ring. How do you help?",
     options: [
-      { text: "Ask the steward to quietly give them some friendly advice and encouragement.", points: 3, feedback: "Wonderful! This is how you build a friendly community. The owner will feel supported and will want to come back to your show again. Kindness is very important." },
-      { text: "Ignore them and let them fail so they learn for next time.", points: 1, feedback: "This is a bit cold. New people are the future of dog shows. If they have a bad experience, they might never come back. A little help goes a long way." },
-      { text: "Disqualify them immediately for not following the official rules.", points: -1, feedback: "This is too strict for a minor mistake! You should be helping people learn, not punishing them. This will make your show feel unfriendly and scary for beginners." },
-      { text: "Stop the show and explain their mistake to everyone watching.", points: 2, feedback: "This is helpful for learning, but it might make the nervous owner feel very embarrassed. It is better to give advice privately and quietly in the ring." }
+      { text: "Ask the steward to quietly give them some friendly advice and encouragement.", value: 0.2, feedback: "Wonderful! This is how you build a friendly community. The owner will feel supported and will want to return." },
+      { text: "Stop the show and explain their mistake to everyone watching.", value: 0.1, feedback: "This is helpful for learning, but it might make the nervous owner feel very embarrassed. Quiet advice is better." },
+      { text: "Ignore them and let them fail so they learn for next time.", value: 0, feedback: "This is a bit cold. New people are the future of dog shows. If they have a bad experience, they might never come back." },
+      { text: "Disqualify them immediately for not following the official rules.", value: -0.5, feedback: "This is too strict for a minor mistake! You should be helping people learn, not punishing them. Try again!" }
     ]
   },
   {
     id: 12,
     title: "Scenario 12: Sponsorship",
-    question: "A big dog food company wants to give you money to put their name on the show.",
+    question: "A big dog food company wants to sponsor the show for a fee.",
     options: [
-      { text: "Accept the money but make sure the company's signs don't block the rings.", points: 3, feedback: "Smart move! The money will help pay for the vet and prizes. As long as the signs are in the right place, it's a win-win situation for everyone." },
-      { text: "Refuse all sponsors because you want the show to be 100% private.", points: 1, feedback: "This is very difficult. Without sponsors, the entry fees for owners will have to be very high. Most big shows need some financial help to be successful." },
-      { text: "Let the sponsor change the rules of the show to favor their favorite dogs.", points: -1, feedback: "Never do this! This is dishonest and will destroy the fairness of the competition. Sponsors should help with money, not with the judging or the rules." },
-      { text: "Give the sponsor the best parking spots and free food all day.", points: 2, feedback: "This is a nice way to say thank you to your sponsor. It keeps them happy so they might help you again next year. Just make sure the dog owners are still happy too." }
-    ]
-  },
-  {
-    id: "E2",
-    title: "EMERGENCY 2: Power Cut",
-    isEmergency: true,
-    question: "The power goes out! The indoor halls are dark and the microphones don't work. What now?",
-    options: [
-      { text: "Use battery lights and a megaphone to give clear instructions to everyone.", points: 3, feedback: "Excellent! You were prepared for a problem. Using a megaphone allows you to lead the crowd safely. Keeping everyone informed prevents panic in the dark." },
-      { text: "Tell everyone to stay exactly where they are and wait in the dark.", points: 1, feedback: "This might be okay for a few minutes, but people will start to get worried or bored. You need to communicate with them so they know what is happening." },
-      { text: "Panic and start shouting for everyone to run to the exits immediately.", points: -1, feedback: "No! Shouting 'run' causes a dangerous stampede. In the dark, people could fall and get hurt. You must stay calm and lead people slowly and safely. Try again!" },
-      { text: "Move the show outside into the daylight until the power comes back.", points: 2, feedback: "This is a good practical solution if it is daytime and the weather is nice. It allows the show to continue while the electricians fix the power problem." }
+      { text: "Accept the money but make sure the company's signs don't block the rings.", value: 0.2, feedback: "Smart move! The money will help pay for the vet and prizes. As long as signs are well-placed, it's a win-win." },
+      { text: "Give the sponsor the best parking spots and free food all day.", value: 0.1, feedback: "This is a nice way to say thank you to your sponsor and keep them happy for next year." },
+      { text: "Refuse all sponsors because you want the show to be 100% private.", value: 0, feedback: "This is very difficult. Without sponsors, the entry fees for owners will have to be very high." },
+      { text: "Let the sponsor change the rules of the show to favor their favorite dogs.", value: -0.5, feedback: "Never do this! This is dishonest and will destroy the fairness of the competition. Try again!" }
     ]
   }
 ];
 
 function App() {
   const [currentIdx, setCurrentIdx] = useState(0);
-  const [paws, setPaws] = useState(0);
+  const [rating, setRating] = useState(4.0);
   const [selectedOption, setSelectedOption] = useState(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
@@ -213,17 +202,16 @@ function App() {
     setSelectedOption(idx);
     setShowFeedback(true);
     
-    const points = currentScenario.options[idx].points;
-    if (points !== -1) {
-      setPaws(prev => prev + points);
-    }
+    const val = currentScenario.options[idx].value;
+    // Update rating immediately for the current selection
+    setRating(prev => parseFloat((prev + val).toFixed(1)));
   };
 
   const handleNext = () => {
-    const points = currentScenario.options[selectedOption].points;
+    const val = currentScenario.options[selectedOption].value;
     
-    if (points === -1) {
-      // Choose again logic
+    if (val === -0.5) {
+      // "Choose Again" logic: Keep same scenario, reset selection
       setSelectedOption(null);
       setShowFeedback(false);
     } else {
@@ -238,24 +226,19 @@ function App() {
   };
 
   const getFinalFeedback = () => {
-    if (paws >= 38) {
-      return "You are a Master Dog Show Manager! Your decisions were professional, kind, and always put the safety of the dogs first. You managed the budget well and handled emergencies like an expert. The community respects you, and every owner wants to return to your show next year. Excellent work!";
-    } else if (paws >= 25) {
-      return "You are a Good Dog Show Manager. Most of your choices were smart and helpful. The show was a success, and the dogs were mostly happy and safe. With a little more attention to detail and better emergency planning, you could be a master. Well done on a successful event!";
-    } else {
-      return "You are a Junior Dog Show Manager. You have some good ideas, but you made some risky choices that caused stress for the dogs and owners. Managing a big show is difficult, and you need to focus more on safety and planning. Keep learning and try again to improve your score!";
-    }
+    if (rating >= 5.5) return "Your rating is spectacular! You are a Master Dog Show Manager. Owners and dogs alike are raving about your event online.";
+    if (rating >= 4.5) return "You are a highly-rated Manager! The show was a great success with only minor notes for improvement.";
+    return "You finished with a decent rating, but there's room to grow. Focus on safety and organization to reach those 5-paw reviews!";
   };
 
   if (isFinished) {
     return (
       <div className="container">
         <div className="card final-screen">
-          <h1 className="question">Show Results</h1>
-          <div className="paws-tally">{"🐾".repeat(Math.max(0, Math.min(paws, 20)))}{paws > 20 ? " +" : ""}</div>
-          <div className="final-score">{paws} Paws</div>
+          <h1 className="question">Final Rating</h1>
+          <div className="final-score">{rating.toFixed(1)} 🐾</div>
           <p className="final-text">{getFinalFeedback()}</p>
-          <button className="next-btn" onClick={() => window.location.reload()}>Play Again</button>
+          <button className="next-btn" onClick={() => window.location.reload()}>Restart Career</button>
         </div>
       </div>
     );
@@ -264,18 +247,18 @@ function App() {
   return (
     <div className="container">
       <div className="header">
-        <h1>Dog Show Manager</h1>
-        <div className="paws-tally">
-          {Array.from({ length: Math.max(0, paws) }).map((_, i) => (
-            <span key={i} title="Paw Point">🐾</span>
-          ))}
-          {paws === 0 && <span style={{color: '#ccc'}}>No paws yet</span>}
+        <div className="rating-label">Live Manager Rating</div>
+        <div className="rating-display">
+          <span>{rating.toFixed(1)}</span>
+          <span style={{color: '#ffcc00'}}>🐾</span>
         </div>
-        <div style={{fontSize: '0.8rem', color: '#888'}}>Scenario {currentIdx + 1} of {scenarios.length}</div>
+        <div style={{fontSize: '0.7rem', color: '#aaa', marginTop: '5px'}}>
+          Progress: {currentIdx + 1} / {scenarios.length}
+        </div>
       </div>
 
       <div className={`card ${currentScenario.isEmergency ? 'emergency' : ''}`}>
-        {currentScenario.isEmergency && <span className="emergency-label">🚨 EMERGENCY SITUATION</span>}
+        {currentScenario.isEmergency && <span className="emergency-label">🚨 CRITICAL INCIDENT</span>}
         <div className="scenario-title">{currentScenario.title}</div>
         <div className="question">{currentScenario.question}</div>
         
@@ -293,11 +276,16 @@ function App() {
         </div>
 
         {showFeedback && (
-          <div className={`feedback ${currentScenario.options[selectedOption].points === 3 ? 'positive' : currentScenario.options[selectedOption].points === -1 ? 'negative' : 'neutral'}`}>
-            <strong>{currentScenario.options[selectedOption].points === -1 ? "Wait!" : "Feedback:"}</strong><br/>
+          <div className={`feedback ${
+            currentScenario.options[selectedOption].value > 0 ? 'positive' : 
+            currentScenario.options[selectedOption].value === 0 ? 'neutral' : 'negative'
+          }`}>
+            <strong>
+              {currentScenario.options[selectedOption].value === -0.5 ? "Critical Failure!" : "Impact:"}
+            </strong><br/>
             {currentScenario.options[selectedOption].feedback}
             <button className="next-btn" onClick={handleNext}>
-              {currentScenario.options[selectedOption].points === -1 ? "Try Again" : "Continue"}
+              {currentScenario.options[selectedOption].value === -0.5 ? "Revise Decision" : "Next Scenario"}
             </button>
           </div>
         )}
