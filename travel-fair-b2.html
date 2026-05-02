@@ -217,7 +217,7 @@ const STEPS=[
 ];
 
 const TOTAL=STEPS.length;
-const RAW_MAX=STEPS.reduce((s,q)=>s+Math.max(...q.options.map(o=>o.points)),0);
+const RAW_MAX=STEPS.reduce((s,q)=>s+5,0); // Assuming 5 is always the max possible
 const sc=v=>Math.round((v/RAW_MAX)*100);
 
 const TIER={5:{color:"#059669",bg:"#ecfdf5",border:"#6ee7b7",label:"Excellent",dbBg:"#d1fae5",dbC:"#065f46"},
@@ -226,6 +226,17 @@ const TIER={5:{color:"#059669",bg:"#ecfdf5",border:"#6ee7b7",label:"Excellent",d
   0:{color:"#dc2626",bg:"#fef2f2",border:"#fca5a5",label:"Poor",dbBg:"#fee2e2",dbC:"#7f1d1d"}};
 
 let cur=0,rawScore=0,chosen=null,selections={},gameOver=false,gameOverMsg="",done=false;
+
+// Fisher-Yates Shuffle Implementation
+function shuffleOptions() {
+  STEPS.forEach(step => {
+    let options = step.options;
+    for (let i = options.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [options[i], options[j]] = [options[j], options[i]];
+    }
+  });
+}
 
 function render(){
   const app=document.getElementById('app');
@@ -348,7 +359,10 @@ function next(){
   else done=true;
   render();
 }
-function restart(){cur=0;rawScore=0;chosen=null;selections={};gameOver=false;gameOverMsg="";done=false;render();}
+function restart(){
+  shuffleOptions(); // Re-shuffle on restart
+  cur=0;rawScore=0;chosen=null;selections={};gameOver=false;gameOverMsg="";done=false;render();
+}
 
 function downloadSelf(){
   const html=document.documentElement.outerHTML;
@@ -359,6 +373,8 @@ function downloadSelf(){
   a.click();
 }
 
+// Initial shuffle and render
+shuffleOptions();
 render();
 </script>
 </body>
