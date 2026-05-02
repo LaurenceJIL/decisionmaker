@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Vernal Estate — Advanced Horticultural Simulation</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green-dark: #1a3c1a;
+    --green-mid: #3a5a40;
+    --green-light: #588157;
+    --green-pale: #dad7cd;
+    --earth: #344e41;
+    --gold: #a3b18a;
+    --red-soft: #bc4749;
+    --cream: #f8f9fa;
+    --text-dark: #1b263b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Lato', sans-serif;
+    background-color: var(--cream);
+    color: var(--text-dark);
+    min-height: 100vh;
+  }
+
+  /* ── HEADER & EMOJI SCORING ── */
+  .site-header {
+    background: var(--green-dark);
+    color: var(--cream);
+    padding: 15px 25px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .site-header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-style: italic;
+  }
+
+  .garden-tracker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    min-height: 30px;
+    background: rgba(255,255,255,0.1);
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+
+  .emoji-point {
+    font-size: 1.4rem;
+    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+  }
+
+  @keyframes popIn {
+    0% { transform: scale(0); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  /* ── INTERFACE ── */
+  .screen {
+    display: none;
+    max-width: 850px;
+    margin: 40px auto;
+    padding: 0 20px;
+    animation: fadeIn 0.8s ease;
+  }
+  .screen.active { display: block; }
+
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .scenario-card {
+    background: white;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    border-left: 8px solid var(--green-mid);
+  }
+
+  .scenario-card h2 {
+    font-family: 'Playfair Display', serif;
+    margin-bottom: 20px;
+    color: var(--green-dark);
+  }
+
+  .desc { font-size: 1.2rem; line-height: 1.8; margin-bottom: 30px; }
+
+  .choices { display: flex; flex-direction: column; gap: 15px; }
+
+  .choice-btn {
+    background: #fff;
+    border: 2px solid var(--green-pale);
+    padding: 18px 25px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.05rem;
+    text-align: left;
+    transition: 0.3s;
+    font-family: 'Lato', sans-serif;
+  }
+
+  .choice-btn:hover:not(:disabled) {
+    background: var(--green-pale);
+    border-color: var(--green-mid);
+  }
+
+  .feedback {
+    margin-top: 30px;
+    padding: 25px;
+    border-radius: 8px;
+    display: none;
+  }
+
+  .fb-good { background: #e8f5e9; border: 1px solid #2e7d32; color: #1b5e20; }
+  .fb-neutral { background: #fff8e1; border: 1px solid #fbc02d; color: #7f4d00; }
+  .fb-poor { background: #ffebee; border: 1px solid #c62828; color: #b71c1c; }
+
+  .btn-action {
+    background: var(--green-dark);
+    color: white;
+    padding: 15px 35px;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 20px;
+  }
+
+  .final-stats { text-align: center; background: white; padding: 50px; border-radius: 15px; }
+  .final-stats h2 { font-size: 2.5rem; font-family: 'Playfair Display', serif; }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-top">
+    <h1>The Vernal Estate</h1>
+    <div id="numericScore" style="font-weight: bold; color: var(--gold);">Merit: 0</div>
+  </div>
+  <div class="garden-tracker" id="emojiLine">
+    <!-- Emojis populate here -->
+  </div>
+</header>
+
+<main>
+  <!-- Landing -->
+  <section id="screen-start" class="screen active">
+    <div class="scenario-card" style="text-align:center">
+      <h2>Horticultural Mastery</h2>
+      <p class="desc">The vernal equinox approaches. As the steward of this landscape, your objective is to navigate the complexities of spring cultivation while maintaining ecological equilibrium. Do you possess the acumen to foster a flourishing sanctuary?</p>
+      <button class="btn-action" onclick="launchSim()">Commence Stewardship</button>
+    </div>
+  </section>
+
+  <!-- Game -->
+  <section id="screen-game" class="screen">
+    <div class="scenario-card">
+      <h2 id="title">Scenario</h2>
+      <p class="desc" id="description">Description goes here.</p>
+      <div class="choices" id="choiceContainer"></div>
+      
+      <div id="feedbackBox" class="feedback">
+        <h3 id="fbTitle">Assessment</h3>
+        <p id="fbContent" style="margin-top:10px"></p>
+        <button class="btn-action" id="nextBtn">Proceed to Next Phase</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Results -->
+  <section id="screen-final" class="screen">
+    <div class="final-stats">
+      <h2 id="finalTitle">Evaluation Complete</h2>
+      <p id="finalDesc" class="desc" style="margin-top:20px"></p>
+      <button class="btn-action" onclick="location.reload()">Reset Season</button>
+    </div>
+  </section>
+</main>
+
+<script>
+const gardenEmojis = ["🌱", "🌿", "☘️", "🍀", "🍃", "🌸", "🌼", "🌻", "🌺", "🌹", "🌷", "🐝", "🦋", "🍄", "🌳", "🧤", "🧺", "🐦", "🍎", "🥕", "🍓"];
+
+const scenarios = {
+  "prep": {
+    title: "Phase I: Preliminary Preparations",
+    desc: "The frost is receding, yet the substrate remains dormant. What is your primary directive for the season's inception?",
+    choices: [
+      { text: "Sanitize your horticultural implements and organize the potting shed for optimal efficiency.", pts: 3, type: "good", fb: "Exemplary. Maintaining sterilized equipment mitigates the risk of pathogenic transmission throughout the garden beds." },
+      { text: "Immediate open-ground sowment of Lycopersicon (Tomato) seeds into the unconditioned soil.", pts: 0, type: "poor", fb: "A catastrophic error. The nocturnal temperatures will inevitably cause cellular rupture in such delicate seedlings." },
+      { text: "Procure an array of ephemeral ornamentals from a local purveyor for immediate aesthetic gratification.", pts: 1, type: "neutral", fb: "Aesthetic, yet superficial. You have neglected the foundational infrastructure required for long-term vitality." }
+    ],
+    next: "sowing"
+  },
+  "sowing": {
+    title: "Phase II: Seed Dissemination Strategy",
+    desc: "You possess a cache of Helianthus (Sunflower) seeds. Which methodology ensures maximum germination rates?",
+    choices: [
+      { text: "Cultivate them in controlled propagation trays on a south-facing windowsill.", pts: 3, type: "good", fb: "Astute. This methodology provides the thermal stability requisite for vigorous initial development." },
+      { text: "Indiscriminately scatter the seeds across the lawn and await naturalization.", pts: 0, type: "poor", fb: "Ineffective. Local avian populations have exploited your negligence, consuming the entirety of your potential harvest." },
+      { text: "Postpone all propagation activities for several weeks until the climate stabilizes further.", pts: 1, type: "neutral", fb: "Overly cautious. You risk truncating the maturation cycle, potentially preventing a full autumnal display." }
+    ],
+    next: "soil"
+  },
+  "soil": {
+    title: "Phase III: Substrate Fortification",
+    desc: "The soil requires nutrient replenishment to sustain intensive growth. What is your chosen additive?",
+    choices: [
+      { text: "Integrate organic compost and well-attenuated manure into the topsoil.", pts: 3, type: "good", fb: "Splendid. This enhances the soil structure and fosters a robust subterranean microbial ecosystem." },
+      { text: "Maintain the status quo, as the soil appears visually adequate.", pts: 1, type: "neutral", fb: "Suboptimal. The subsequent growth will likely manifest as stunted or chlorotic due to nutrient deficiencies." },
+      { text: "Saturate the area with concentrated synthetic herbicides to eradicate all competitors.", pts: -2, type: "poor", fb: "Regrettable. You have compromised the soil's biological integrity and likely decimated beneficial invertebrate populations." }
+    ],
+    next: "frost"
+  },
+  "frost": {
+    title: "Phase IV: Mitigating Nocturnal Cold Events",
+    desc: "A meteorological advisory predicts a localized frost event. How do you safeguard your vulnerable cultivars?",
+    choices: [
+      { text: "Insulate the specimens with horticultural fleece or permeable protective shrouds.", pts: 3, type: "good", fb: "Prudent. This thermal barrier prevents the formation of lethal ice crystals on tender foliage." },
+      { text: "Induce heavy irrigation with frigid water to lower the ground temperature further.", pts: 0, type: "poor", fb: "Counter-productive. You have exacerbated the thermal stress on the root systems, leading to probable necrosis." },
+      { text: "Disregard the forecast and allow the plants to acclimate naturally to the elements.", pts: -1, type: "poor", fb: "Negligent. Several prized specimens have succumbed to the frigid conditions, a loss that was entirely preventable." }
+    ],
+    next: "end"
+  }
+};
+
+let score = 0;
+let currentPath = "prep";
+
+function launchSim() {
+  document.getElementById('screen-start').classList.remove('active');
+  document.getElementById('screen-game').classList.add('active');
+  renderScenario();
+}
+
+function updateScoring() {
+  document.getElementById('numericScore').innerText = `Merit: ${score}`;
+  const emojiLine = document.getElementById('emojiLine');
+  emojiLine.innerHTML = '';
+  
+  // Requirement: One emoji per extra point gained[cite: 2]
+  const displayCount = Math.max(0, score);
+  for(let i = 0; i < displayCount; i++) {
+    const span = document.createElement('span');
+    span.className = 'emoji-point';
+    // Cycle through emojis
+    span.innerText = gardenEmojis[i % gardenEmojis.length];
+    emojiLine.appendChild(span);
+  }
+}
+
+function renderScenario() {
+  const data = scenarios[currentPath];
+  document.getElementById('title').innerText = data.title;
+  document.getElementById('description').innerText = data.desc;
+  document.getElementById('feedbackBox').style.display = 'none';
+  
+  const container = document.getElementById('choiceContainer');
+  container.innerHTML = '';
+  container.style.display = 'flex';
+
+  data.choices.forEach(c => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.innerText = c.text;
+    btn.onclick = () => handleChoice(c);
+    container.appendChild(btn);
+  });
+}
+
+function handleChoice(choice) {
+  score += choice.pts;
+  updateScoring();
+  
+  document.getElementById('choiceContainer').style.display = 'none';
+  const fb = document.getElementById('feedbackBox');
+  fb.style.display = 'block';
+  fb.className = `feedback fb-${choice.type}`;
+  
+  document.getElementById('fbTitle').innerText = 
+    choice.type === "good" ? "Commendable Assessment" : 
+    choice.type === "neutral" ? "Adequate Assessment" : "Critical Oversight";
+    
+  document.getElementById('fbContent').innerText = choice.fb;
+  
+  document.getElementById('nextBtn').onclick = () => {
+    const nextPath = scenarios[currentPath].next;
+    if (nextPath === "end") {
+      showFinal();
+    } else {
+      currentPath = nextPath;
+      renderScenario();
+    }
+  };
+}
+
+function showFinal() {
+  document.getElementById('screen-game').classList.remove('active');
+  document.getElementById('screen-final').classList.add('active');
+  
+  let resultText = "";
+  if (score >= 10) {
+    resultText = "Your stewardship has been exemplary. The estate is a testament to your horticultural sophistication and ecological foresight.";
+  } else if (score >= 5) {
+    resultText = "An adequate performance. While the garden persists, a more rigorous adherence to foundational principles would yield superior results.";
+  } else {
+    resultText = "The season has been fraught with mismanagement. Extensive remedial study of plant physiology is recommended before the next vernal cycle.";
+  }
+  
+  document.getElementById('finalDesc').innerText = resultText;
+}
+</script>
+</body>
+</html>

@@ -3,24 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Spring Garden — English Learning Adventure</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<title>The Spring Garden Challenge</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --green-dark: #2d5a27;
     --green-mid: #4a8c3f;
     --green-light: #7dba6f;
-    --green-pale: #d4edca;
     --earth: #8b5e3c;
-    --earth-light: #c4956a;
     --cream: #faf7f0;
-    --warm-white: #fff8ef;
     --gold: #c9a84c;
-    --red-soft: #c0392b;
-    --blue-soft: #2980b9;
-    --text-dark: #1a2e1a;
-    --text-mid: #3d5a3d;
-    --shadow: rgba(45, 90, 39, 0.15);
+    --red: #c0392b;
+    --text: #1a2e1a;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -28,620 +22,306 @@
   body {
     font-family: 'Lato', sans-serif;
     background-color: var(--cream);
-    color: var(--text-dark);
-    min-height: 100vh;
-    overflow-x: hidden;
-    background-image:
-      radial-gradient(ellipse at 20% 0%, rgba(125,186,111,0.12) 0%, transparent 60%),
-      radial-gradient(ellipse at 80% 100%, rgba(196,149,106,0.10) 0%, transparent 60%);
+    color: var(--text);
+    line-height: 1.6;
   }
 
-  /* ── HEADER ── */
+  /* ── EMOJI SCORING HEADER ── */
   .site-header {
     background: var(--green-dark);
-    color: var(--cream);
-    padding: 14px 24px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+    color: white;
+    padding: 15px 20px;
     position: sticky;
     top: 0;
     z-index: 100;
-  }
-  .site-header h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.35rem;
-    letter-spacing: 0.03em;
-  }
-  .score-display {
-    background: rgba(255,255,255,0.12);
-    border: 1px solid rgba(255,255,255,0.25);
-    border-radius: 30px;
-    padding: 6px 18px;
-    font-size: 0.9rem;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    color: var(--gold);
-    transition: all 0.4s;
-  }
-  .progress-bar-wrap {
-    width: 100%;
-    height: 5px;
-    background: rgba(255,255,255,0.15);
-    position: relative;
-  }
-  .progress-bar-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--green-light), var(--gold));
-    width: 0%;
-    transition: width 0.7s ease;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
   }
 
-  /* ── MAIN CONTAINER ── */
-  .screen {
-    display: none;
+  .header-content {
     max-width: 800px;
     margin: 0 auto;
-    padding: 32px 20px 60px;
-    animation: fadeUp 0.5s ease both;
-  }
-  .screen.active { display: block; }
-
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(22px); }
-    to   { opacity: 1; transform: translateY(0); }
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
   }
 
-  /* ── LANDING ── */
-  .hero {
-    text-align: center;
-    padding: 40px 20px 20px;
-  }
-  .hero-emoji { font-size: 4rem; margin-bottom: 10px; display: block; }
-  .hero h2 {
-    font-family: 'Playfair Display', serif;
-    font-size: 2.1rem;
-    color: var(--green-dark);
-    margin-bottom: 8px;
-    line-height: 1.2;
-  }
-  .hero .subtitle {
-    color: var(--text-mid);
-    font-size: 1rem;
-    max-width: 540px;
-    margin: 0 auto 12px;
-    line-height: 1.6;
-  }
-  .level-badge {
-    display: inline-block;
-    background: var(--green-pale);
-    color: var(--green-dark);
-    border: 1.5px solid var(--green-light);
-    border-radius: 20px;
-    padding: 4px 14px;
-    font-size: 0.8rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    margin-bottom: 30px;
-  }
-
-  /* ── SCENARIO BOX ── */
-  .scenario-card {
-    background: white;
-    padding: 32px;
-    border-radius: 20px;
-    box-shadow: 0 4px 20px var(--shadow);
-    border-bottom: 4px solid var(--green-mid);
-    margin-bottom: 24px;
-  }
-  .scenario-card h3 {
-    font-family: 'Playfair Display', serif;
-    color: var(--green-dark);
-    margin-bottom: 16px;
-    font-size: 1.5rem;
-  }
-  .scenario-desc {
-    font-size: 1.15rem;
-    line-height: 1.7;
-    color: var(--text-dark);
-  }
-
-  /* ── CHOICES ── */
-  .choice-stack {
-    display: grid;
-    gap: 12px;
-    margin-bottom: 30px;
-  }
-  .choice-btn {
-    background: white;
-    border: 2px solid #e2e8e0;
-    padding: 16px 24px;
-    border-radius: 12px;
-    font-size: 1rem;
-    color: var(--text-dark);
-    cursor: pointer;
-    text-align: left;
-    transition: all 0.2s ease;
+  .title-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
   }
+
+  .title-row h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+  }
+
+  .score-badge {
+    font-weight: bold;
+    color: var(--gold);
+    background: rgba(255,255,255,0.1);
+    padding: 4px 12px;
+    border-radius: 20px;
+  }
+
+  .emoji-line {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    min-height: 35px;
+    background: rgba(0,0,0,0.2);
+    padding: 8px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .garden-emoji {
+    font-size: 1.5rem;
+    animation: grow 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  @keyframes grow {
+    from { transform: scale(0); }
+    to { transform: scale(1); }
+  }
+
+  /* ── GAME CARDS ── */
+  .container {
+    max-width: 800px;
+    margin: 30px auto;
+    padding: 0 20px;
+  }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  .card {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.05);
+    border-bottom: 5px solid var(--green-mid);
+  }
+
+  h2 { font-family: 'Playfair Display', serif; margin-bottom: 15px; color: var(--green-dark); }
+  .description { font-size: 1.1rem; margin-bottom: 25px; }
+
+  .choice-list { display: grid; gap: 12px; }
+
+  .choice-btn {
+    background: white;
+    border: 2px solid #eee;
+    padding: 15px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    text-align: left;
+    font-size: 1rem;
+    transition: 0.2s;
+  }
+
   .choice-btn:hover:not(:disabled) {
     border-color: var(--green-light);
-    background-color: var(--warm-white);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px var(--shadow);
+    background: #f9fff9;
   }
-  .choice-btn:disabled { cursor: default; }
 
-  /* ── FEEDBACK ── */
-  .feedback-box {
+  .feedback {
+    margin-top: 25px;
+    padding: 20px;
+    border-radius: 10px;
     display: none;
-    margin-bottom: 30px;
-    padding: 24px;
-    border-radius: 16px;
-    animation: fadeIn 0.4s ease;
-    border-left: 6px solid #ccc;
+    animation: fadeIn 0.5s;
   }
-  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-  
-  .fb-good { background-color: #f0fdf4; border-color: var(--green-mid); color: #166534; }
-  .fb-neutral { background-color: #fffbeb; border-color: var(--gold); color: #92400e; }
-  .fb-poor { background-color: #fef2f2; border-color: var(--red-soft); color: #991b1b; }
 
-  .feedback-box h4 {
-    margin-bottom: 8px;
-    font-family: 'Playfair Display', serif;
-    font-size: 1.25rem;
-  }
-  .feedback-box p { line-height: 1.6; font-size: 1rem; }
+  .fb-good { background: #eefbee; border: 1px solid var(--green-mid); color: #1e461e; }
+  .fb-neutral { background: #fffdf2; border: 1px solid var(--gold); color: #5c4d1a; }
+  .fb-poor { background: #fff5f5; border: 1px solid var(--red); color: #611a1a; }
 
-  /* ── BUTTONS ── */
-  .btn-primary {
+  .btn-next {
     background: var(--green-dark);
     color: white;
     border: none;
-    padding: 16px 40px;
-    border-radius: 12px;
-    font-weight: 700;
-    font-size: 1rem;
+    padding: 12px 30px;
+    border-radius: 8px;
+    font-weight: bold;
     cursor: pointer;
-    transition: 0.3s;
-    display: inline-block;
+    margin-top: 15px;
   }
-  .btn-primary:hover {
-    background: var(--green-mid);
-    box-shadow: 0 6px 15px rgba(0,0,0,0.2);
-  }
-  .next-wrapper { text-align: center; }
 
-  /* ── FINAL SCREEN ── */
-  .final-card {
-    background: white;
-    padding: 45px 30px;
-    border-radius: 24px;
-    text-align: center;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-  }
-  .trophy { font-size: 5rem; margin-bottom: 20px; display: block; }
-  .final-score-title { font-size: 1.2rem; color: var(--text-mid); margin-bottom: 5px; }
-  .final-score-val { font-size: 3.5rem; font-family: 'Playfair Display', serif; font-weight: 700; color: var(--green-dark); margin-bottom: 20px; }
-  
-  .band-box {
-    margin: 20px auto;
-    padding: 25px;
-    border: 3px solid;
-    border-radius: 20px;
-    max-width: 500px;
-  }
-  .band-title { font-family: 'Playfair Display', serif; font-size: 1.6rem; margin-bottom: 10px; }
-  .band-text { line-height: 1.7; color: var(--text-dark); }
-
-  @media (max-width: 600px) {
-    .site-header h1 { font-size: 1.1rem; }
-    .hero h2 { font-size: 1.7rem; }
-    .scenario-card { padding: 24px; }
-  }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 </style>
 </head>
 <body>
 
 <header class="site-header">
-  <h1>🌸 The Spring Garden</h1>
-  <div class="score-display">Points: <span id="scoreText">0</span></div>
+  <div class="header-content">
+    <div class="title-row">
+      <h1>🌸 My Spring Garden</h1>
+      <div class="score-badge">Garden Points: <span id="numScore">0</span></div>
+    </div>
+    <div class="emoji-line" id="emojiLine">
+      <!-- Garden items appear here as you gain points -->
+    </div>
+  </div>
 </header>
-<div class="progress-bar-wrap">
-  <div class="progress-bar-fill" id="progressBar"></div>
+
+<div class="container">
+  <!-- START SCREEN -->
+  <section id="screen-start" class="screen active">
+    <div class="card" style="text-align: center;">
+      <h2>Welcome to the Garden!</h2>
+      <p class="description">Winter is over and spring is finally here. It is time to start your garden! Can you make the best choices to help your plants grow and keep the bees happy?</p>
+      <button class="btn-next" onclick="startGame()">Start Gardening</button>
+    </div>
+  </section>
+
+  <!-- GAME SCREEN -->
+  <section id="screen-game" class="screen">
+    <div class="card">
+      <h2 id="stepTitle">Title</h2>
+      <p class="description" id="stepDesc">Description</p>
+      <div class="choice-list" id="choiceList"></div>
+
+      <div id="feedbackBox" class="feedback">
+        <h3 id="fbTitle">Result</h3>
+        <p id="fbText" style="margin: 10px 0;"></p>
+        <button class="btn-next" id="nextBtn">Continue →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL SCREEN -->
+  <section id="screen-final" class="screen">
+    <div class="card" style="text-align: center;">
+      <h2>Garden Season Finished!</h2>
+      <p class="description" id="finalMessage"></p>
+      <button class="btn-next" onclick="location.reload()">Try Again</button>
+    </div>
+  </section>
 </div>
 
-<main>
-  <section id="screen-landing" class="screen active">
-    <div class="hero">
-      <span class="hero-emoji">🏡</span>
-      <div class="level-badge">English for Gardeners — A2/B1</div>
-      <h2>Your Spring Challenge</h2>
-      <p class="subtitle">It is March. Your garden is waking up! Can you make the right choices to grow a beautiful spring garden?</p>
-      <button class="btn-primary" onclick="startSim()">Enter the Garden</button>
-    </div>
-  </section>
-
-  <section id="screen-game" class="screen">
-    <div class="scenario-card">
-      <h3 id="step-title">...</h3>
-      <p class="scenario-desc" id="step-desc">...</p>
-    </div>
-
-    <div class="choice-stack" id="choice-list"></div>
-
-    <div id="feedback-box" class="feedback-box">
-      <h4 id="feedback-title">Title</h4>
-      <p id="feedback-text">Text...</p>
-    </div>
-
-    <div class="next-wrapper">
-      <button id="btn-next" class="btn-primary" style="display: none;">Next Step →</button>
-    </div>
-  </section>
-
-  <section id="screen-final" class="screen">
-    <div class="final-card">
-      <span id="finalTrophy" class="trophy">🏆</span>
-      <p class="final-score-title">Your Garden Score</p>
-      <div id="finalScore" class="final-score-val">0</div>
-      
-      <div id="bandBox" class="band-box">
-        <h3 id="bandTitle" class="band-title">...</h3>
-        <p id="bandText" class="band-text">...</p>
-      </div>
-
-      <button class="btn-primary" style="margin-top:20px;" onclick="restartGame()">Try Again</button>
-    </div>
-  </section>
-</main>
-
 <script>
-// ══════════════════════════════════════════════════════════════════
-// DATA
-// ══════════════════════════════════════════════════════════════════
-const steps = {
-  "start": {
-    title: "Planning the Year",
-    desc: "The snow is gone, but the ground is still cold. What is your first job in the garden?",
+const gardenItems = ["🌱", "🌿", "🍀", "🍃", "🌸", "🌼", "🌻", "🌺", "🌹", "🌷", "🐝", "🦋", "🍄", "🌳", "🧺", "🐦", "🍎", "🥕", "🍓", "🧤", "🚿"];
+
+const steps = [
+  {
+    title: "Step 1: Getting Ready",
+    desc: "The weather is getting warmer, but the ground is still a bit cold. What is the first thing you should do?",
     choices: [
-      {
-        text: "Clean your tools and tidy the garden shed.",
-        pts: 3,
-        fb: "<b>Excellent!</b> Good gardeners always start with clean, sharp tools. This helps prevent diseases later.",
-        type: "good",
-        next: "seeds"
-      },
-      {
-        text: "Plant your tomato seeds outside in the soil immediately.",
-        pts: 0,
-        fb: "<b>Oh no!</b> It's too cold for tomatoes. They will freeze and die tonight.",
-        type: "poor",
-        next: "seeds"
-      },
-      {
-        text: "Buy some colorful flowers from the local shop.",
-        pts: 1,
-        fb: "<b>Nice!</b> It makes the garden look pretty, but you still have a lot of work to do first.",
-        type: "neutral",
-        next: "seeds"
-      }
+      { text: "Clean and sharpen your garden tools.", pts: 3, type: "good", fb: "<b>Great!</b> Clean tools are very important. They help you work better and keep your plants healthy." },
+      { text: "Plant your tomato seeds outside in the garden immediately.", pts: 0, type: "poor", fb: "<b>Oh no!</b> It is still too cold for tomatoes. They will freeze and die during the night." },
+      { text: "Buy some pretty flowers from a shop to put in the garden.", pts: 1, type: "neutral", fb: "<b>Nice!</b> It makes the garden look pretty, but you have more important work to do first." }
     ]
   },
-  "seeds": {
-    title: "Sowing Seeds",
-    desc: "You have a packet of sunflower seeds. How will you plant them?",
+  {
+    title: "Step 2: Planting Seeds",
+    desc: "You have a packet of sunflower seeds. What is the best way to plant them?",
     choices: [
-      {
-        text: "Sow them inside in small pots on a sunny windowsill.",
-        pts: 3,
-        fb: "<b>Great choice!</b> The seeds are warm and safe. They will grow strong before you move them outside.",
-        type: "good",
-        next: "soil"
-      },
-      {
-        text: "Throw them all over the grass and hope for the best.",
-        pts: 0,
-        fb: "<b>Unlucky!</b> The birds saw you. They ate almost every seed within ten minutes.",
-        type: "poor",
-        next: "soil"
-      },
-      {
-        text: "Wait another month before doing anything.",
-        pts: 1,
-        fb: "<b>Safe...</b> but you might miss the best growing time if you wait too long.",
-        type: "neutral",
-        next: "soil"
-      }
+      { text: "Plant them in small pots inside near a sunny window.", pts: 3, type: "good", fb: "<b>Perfect!</b> The seeds are warm and safe inside. They will grow strong before they go outside." },
+      { text: "Throw the seeds on the grass and hope they grow.", pts: 0, type: "poor", fb: "<b>Unlucky!</b> The birds saw you throw the seeds. They ate almost all of them for lunch." },
+      { text: "Wait one month before you do anything with the seeds.", pts: 1, type: "neutral", fb: "<b>Safe...</b> but if you wait too long, you might miss the best time for growing." }
     ]
   },
-  "soil": {
-    title: "Feeding the Soil",
-    desc: "Your plants need nutrients to grow. What will you add to the earth?",
+  {
+    title: "Step 3: Helping the Soil",
+    desc: "Plants need food to grow big and strong. What should you add to the earth?",
     choices: [
-      {
-        text: "Dig in some organic compost or well-rotted manure.",
-        pts: 3,
-        fb: "<b>Wonderful!</b> This makes the soil rich and healthy. Your plants will be very happy.",
-        type: "good",
-        next: "frost"
-      },
-      {
-        text: "Nothing. The soil looks okay to me.",
-        pts: 1,
-        fb: "<b>Okay...</b> The plants will grow, but they won't be very big or strong.",
-        type: "neutral",
-        next: "frost"
-      },
-      {
-        text: "Use a very strong chemical weedkiller everywhere.",
-        pts: -2,
-        fb: "<b>Watch out!</b> You might kill the weeds, but you also damage the healthy bugs and soil life.",
-        type: "poor",
-        next: "frost"
-      }
+      { text: "Add natural compost or manure to the soil.", pts: 3, type: "good", fb: "<b>Excellent!</b> This makes the soil rich and healthy. Your plants will love it." },
+      { text: "Do nothing. The soil looks fine to me.", pts: 1, type: "neutral", fb: "<b>Okay...</b> The plants will grow, but they won't be very big or healthy." },
+      { text: "Use a lot of strong chemicals to kill all the weeds first.", pts: -2, type: "poor", fb: "<b>Careful!</b> Strong chemicals can hurt the good bugs and the soil. It is better to use natural things." }
     ]
   },
-  "frost": {
-    title: "The Late Frost",
-    desc: "The weather forecast says there will be a frost tonight! Your young plants are outside. What do you do?",
+  {
+    title: "Step 4: A Cold Night",
+    desc: "The news says it will be very cold tonight! Your young plants are outside. What do you do?",
     choices: [
-      {
-        text: "Cover the delicate plants with a garden fleece or an old sheet.",
-        pts: 3,
-        fb: "<b>Perfect!</b> The cover keeps the plants warm enough to survive the night.",
-        type: "good",
-        next: "weeds"
-      },
-      {
-        text: "Water them heavily with very cold water.",
-        pts: 0,
-        fb: "<b>Oh dear!</b> This actually makes the cold worse for the roots. Some plants died.",
-        type: "poor",
-        next: "weeds"
-      },
-      {
-        text: "Ignore the forecast and go to sleep.",
-        pts: -1,
-        fb: "<b>Risk!</b> You lost two of your favorite plants to the ice.",
-        type: "poor",
-        next: "weeds"
-      }
-    ]
-  },
-  "weeds": {
-    title: "Dealing with Weeds",
-    desc: "Small green weeds are appearing everywhere. They are stealing water from your flowers.",
-    choices: [
-      {
-        text: "Pull them out by hand, including the roots.",
-        pts: 3,
-        fb: "<b>Hard work!</b> But it is the best way. Now your flowers have plenty of space to grow.",
-        type: "good",
-        next: "insects"
-      },
-      {
-        text: "Cut the tops off with scissors.",
-        pts: 1,
-        fb: "<b>Temporary fix!</b> The weeds will grow back very quickly because the roots are still there.",
-        type: "neutral",
-        next: "insects"
-      },
-      {
-        text: "Buy a plastic cover to hide the weeds.",
-        pts: 0,
-        fb: "<b>Messy!</b> It looks bad and doesn't solve the problem. The weeds are still growing underneath.",
-        type: "poor",
-        next: "insects"
-      }
-    ]
-  },
-  "insects": {
-    title: "Friendly Visitors",
-    desc: "You see bees and butterflies in your garden. How can you help them?",
-    choices: [
-      {
-        text: "Plant 'pollinator-friendly' flowers like lavender or foxgloves.",
-        pts: 3,
-        fb: "<b>Beautiful!</b> The bees love these flowers. You are helping the local environment.",
-        type: "good",
-        next: "watering"
-      },
-      {
-        text: "Put out a bowl of sugar water.",
-        pts: 1,
-        fb: "<b>Helpful!</b> It gives them energy, but they really need the pollen from flowers.",
-        type: "neutral",
-        next: "watering"
-      },
-      {
-        text: "Spray the insects with water so they go away.",
-        pts: -2,
-        fb: "<b>Wait!</b> Bees and butterflies are good for the garden. They help your fruits and flowers grow.",
-        type: "poor",
-        next: "watering"
-      }
-    ]
-  },
-  "watering": {
-    title: "Watering Wisdom",
-    desc: "It hasn't rained for a week. When is the best time to water the garden?",
-    choices: [
-      {
-        text: "Early in the morning or late in the evening.",
-        pts: 3,
-        fb: "<b>Correct!</b> The water doesn't evaporate in the hot sun, so the roots get more to drink.",
-        type: "good",
-        next: "final"
-      },
-      {
-        text: "In the middle of the afternoon when it's hottest.",
-        pts: 0,
-        fb: "<b>Waste!</b> Most of the water turns into steam before the soil can absorb it.",
-        type: "poor",
-        next: "final"
-      },
-      {
-        text: "Every 15 minutes all day long.",
-        pts: -1,
-        fb: "<b>Too much!</b> You are wasting water and might drown the roots of your plants.",
-        type: "poor",
-        next: "final"
-      }
+      { text: "Cover the small plants with a garden cloth or an old sheet.", pts: 3, type: "good", fb: "<b>Good job!</b> The cloth keeps the plants warm enough to survive the cold night." },
+      { text: "Give them a lot of very cold water before you go to bed.", pts: 0, type: "poor", fb: "<b>Oh dear!</b> Cold water makes the plants even colder. This was not a good idea." },
+      { text: "Go to sleep and don't worry about the weather.", pts: -1, type: "poor", fb: "<b>Oh no!</b> You forgot to protect your plants. Some of them died in the ice." }
     ]
   }
-};
-
-const bands = [
-  { min: 18, max: 21, emoji: "🌻", title: "Master Gardener", color: "#2d5a27", text: "Incredible! Your garden is the pride of the neighborhood. You understand exactly what plants need to thrive. Your soil is healthy, your tools are clean, and the bees are very happy in your flowerbeds." },
-  { min: 12, max: 17, emoji: "🌿", title: "Green Thumb", color: "#4a8c3f", text: "Well done! You have a lovely, healthy garden. You made mostly smart choices, and your plants are looking strong. With a little more attention to planning, you'll be a master in no time!" },
-  { min: 6, max: 11, emoji: "🌱", title: "Budding Gardener", color: "#c9a84c", text: "Not bad! Your garden has survived the spring. You learned some important lessons about frost and weeds. Keep practicing, and your harvest will be even better next year." },
-  { min: -10, max: 5, emoji: "🍂", title: "Wilting Willow", color: "#c0392b", text: "Oh dear! It was a difficult season. Your garden struggled with the cold and the weeds. Don't give up — every great gardener has a bad year. Try again and remember to check the weather forecast!" }
 ];
 
-// ══════════════════════════════════════════════════════════════════
-// STATE
-// ══════════════════════════════════════════════════════════════════
 let score = 0;
-let currentStepId = "start";
-let gameStepCount = 0;
-const totalSteps = Object.keys(steps).length;
+let currentIdx = 0;
 
-// ══════════════════════════════════════════════════════════════════
-// CORE LOGIC
-// ══════════════════════════════════════════════════════════════════
-
-/**
- * Fisher-Yates Shuffle Algorithm
- * Ensures answer choices are truly randomized.
- */
-function shuffleArray(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-  return array;
-}
-
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById('screen-' + id).classList.add('active');
-  window.scrollTo(0,0);
-}
-
-function startSim() {
-  score = 0;
-  gameStepCount = 0;
-  currentStepId = "start";
-  updateScoreDisplay();
-  showScreen("game");
+function startGame() {
+  document.getElementById('screen-start').classList.remove('active');
+  document.getElementById('screen-game').classList.add('active');
   renderStep();
 }
 
-function updateScoreDisplay() {
-  document.getElementById("scoreText").textContent = score;
-}
-
-function updateProgressBar() {
-  const pct = (gameStepCount / totalSteps) * 100;
-  document.getElementById("progressBar").style.width = pct + "%";
+function updateScore() {
+  document.getElementById('numScore').innerText = score;
+  const line = document.getElementById('emojiLine');
+  line.innerHTML = '';
+  
+  // Requirement: show emojis for points gained
+  const displayCount = Math.max(0, score);
+  for (let i = 0; i < displayCount; i++) {
+    const span = document.createElement('span');
+    span.className = 'garden-emoji';
+    span.innerText = gardenItems[i % gardenItems.length];
+    line.appendChild(span);
+  }
 }
 
 function renderStep() {
-  const data = steps[currentStepId];
-  if (!data) return;
-
-  updateProgressBar();
-
-  document.getElementById("step-title").textContent = data.title;
-  document.getElementById("step-desc").textContent = data.desc;
+  const data = steps[currentIdx];
+  document.getElementById('stepTitle').innerText = data.title;
+  document.getElementById('stepDesc').innerText = data.desc;
+  document.getElementById('feedbackBox').style.display = 'none';
   
-  const list = document.getElementById("choice-list");
-  list.innerHTML = "";
-  
-  // Requirement: Shuffle choices to prevent pattern recognition
-  const shuffledChoices = shuffleArray([...data.choices]);
+  const list = document.getElementById('choiceList');
+  list.innerHTML = '';
+  list.style.display = 'grid';
 
-  shuffledChoices.forEach(choice => {
-    const btn = document.createElement("button");
-    btn.className = "choice-btn";
-    btn.innerHTML = `<span>${choice.text}</span> <span style="font-size:1.2rem">🌿</span>`;
-    btn.onclick = () => handleChoice(choice, btn);
+  data.choices.forEach(choice => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.innerText = choice.text;
+    btn.onclick = () => handleChoice(choice);
     list.appendChild(btn);
   });
-
-  document.getElementById("feedback-box").style.display = "none";
-  document.getElementById("btn-next").style.display = "none";
 }
 
-function handleChoice(choice, btn) {
-  // Disable all choice buttons
-  document.querySelectorAll(".choice-btn").forEach(b => b.disabled = true);
-  
-  // Highlight selected
-  btn.style.borderColor = "var(--green-dark)";
-  btn.style.backgroundColor = "white";
-
-  // Update Score
+function handleChoice(choice) {
   score += choice.pts;
-  updateScoreDisplay();
-
-  // Show Feedback
-  const fbBox = document.getElementById("feedback-box");
-  fbBox.style.display = "block";
-  fbBox.className = "feedback-box fb-" + choice.type;
+  updateScore();
   
-  const titles = { good: "Great Job!", neutral: "Not Bad", poor: "Oh No!" };
-  document.getElementById("feedback-title").textContent = titles[choice.type] || "Result";
-  document.getElementById("feedback-text").innerHTML = choice.fb;
-
-  // Setup Next Button
-  const nextBtn = document.getElementById("btn-next");
-  nextBtn.style.display = "inline-block";
-  nextBtn.onclick = () => {
-    gameStepCount++;
-    if (choice.next === "final") {
-      showFinal();
-    } else {
-      currentStepId = choice.next;
+  document.getElementById('choiceList').style.display = 'none';
+  const fb = document.getElementById('feedbackBox');
+  fb.style.display = 'block';
+  fb.className = `feedback fb-${choice.type}`;
+  
+  document.getElementById('fbTitle').innerText = 
+    choice.type === "good" ? "Great Choice!" : 
+    choice.type === "neutral" ? "Not Bad" : "Wait!";
+    
+  document.getElementById('fbText').innerHTML = choice.fb;
+  
+  document.getElementById('nextBtn').onclick = () => {
+    currentIdx++;
+    if (currentIdx < steps.length) {
       renderStep();
+    } else {
+      showFinal();
     }
   };
 }
 
 function showFinal() {
-  updateProgressBar();
-  document.getElementById("progressBar").style.width = "100%";
-  showScreen("final");
+  document.getElementById('screen-game').classList.remove('active');
+  document.getElementById('screen-final').classList.add('active');
   
-  document.getElementById("finalScore").textContent = score;
-  
-  const band = bands.find(b => score >= b.min && score <= b.max) || bands[0];
-  
-  document.getElementById("finalTrophy").textContent = band.emoji;
-  const bb = document.getElementById("bandBox");
-  bb.style.borderColor = band.color;
-  
-  const bt = document.getElementById("bandTitle");
-  bt.textContent = band.title;
-  bt.style.color = band.color;
-  
-  document.getElementById("bandText").textContent = band.text;
-}
-
-function restartGame() {
-  score = 0;
-  gameStepCount = 0;
-  currentStepId = "start";
-  updateScoreDisplay();
-  document.getElementById("progressBar").style.width = "0%";
-  showScreen("landing");
+  let msg = "";
+  if (score >= 10) {
+    msg = "You are a Master Gardener! Your garden looks beautiful and all your plants are safe.";
+  } else if (score >= 5) {
+    msg = "Well done! You have a nice garden. You made some good choices.";
+  } else {
+    msg = "The garden had a difficult time. Next season, remember to check the weather and help your soil more.";
+  }
+  document.getElementById('finalMessage').innerText = msg;
 }
 </script>
 
