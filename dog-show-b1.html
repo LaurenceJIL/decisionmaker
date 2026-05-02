@@ -1,301 +1,313 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Dog Show Manager: Rating Challenge</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Grand Dog Show: B1 Challenge</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#fdfcf0;min-height:100vh;color:#333}
-  .container{max-width:600px;margin:0 auto;padding:20px}
-  .header{text-align:center;margin-bottom:20px;background:#fff;padding:15px;border-radius:12px;box-shadow:0 4px 6px rgba(0,0,0,0.05);position: sticky;top: 10px;z-index: 100;}
-  .rating-display {font-size: 1.8rem; font-weight: 800; color: #ffcc00; display: flex; align-items: center; justify-content: center; gap: 10px;}
-  .rating-label {font-size: 0.9rem; color: #888; text-transform: uppercase;}
-  .card{background:#fff;padding:25px;border-radius:15px;box-shadow:0 10px 25px rgba(0,0,0,0.1);margin-bottom:20px}
-  .scenario-title{font-size:0.9rem;color:#666;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
-  .question{font-size:1.25rem;font-weight:700;margin-bottom:20px;line-height:1.4}
-  .options-list{display:flex;flex-direction:column;gap:12px}
-  .option-btn{padding:15px;border:2px solid #eee;border-radius:10px;background:none;text-align:left;cursor:pointer;transition:all 0.2s;font-size:1rem;line-height:1.4}
-  .option-btn:hover:not(:disabled){border-color:#ffcc00;background:#fffdf0}
-  .option-btn.selected{border-color:#ffcc00;background:#fffdf0}
-  .option-btn:disabled{cursor:default}
-  .feedback{margin-top:20px;padding:15px;border-radius:10px;line-height:1.5;animation:fadeIn 0.5s}
-  .feedback.positive{background:#e6fffa;border:1px solid #38b2ac;color:#234e52}
-  .feedback.neutral{background:#fffaf0;border:1px solid #ed8936;color:#7b341e}
-  .feedback.negative{background:#fff5f5;border:1px solid #f56565;color:#742a2a}
-  .next-btn{display:block;width:100%;padding:15px;background:#ffcc00;border:none;border-radius:10px;font-weight:700;font-size:1.1rem;cursor:pointer;margin-top:20px;transition:background 0.2s}
-  .next-btn:hover{background:#e6b800}
-  .emergency{border:3px solid #f56565;background:#fff5f5}
-  .emergency-label{color:#f56565;font-weight:bold;margin-bottom:5px;display:block}
-  .final-screen{text-align:center}
-  .final-score{font-size:4rem;font-weight:900;margin:10px 0;color:#ffcc00}
-  .final-text{font-size:1.1rem;line-height:1.6;margin-bottom:30px;text-align:left}
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  :root {
+    --blue-dark: #1e3a5f; --blue-mid: #345e91; --gold: #d4af37;
+    --cream: #fdfaf5; --red: #b22222; --text: #2c3e50;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Lato', sans-serif; background-color: var(--cream); color: var(--text); line-height: 1.6; }
+  
+  /* ── CONSOLIDATED RATING HEADER ── */
+  .header { background: var(--blue-dark); color: white; padding: 20px; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+  .header-content { max-width: 800px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+  .rating-display { background: rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 30px; border: 1px solid var(--gold); }
+  .paw-visual { color: var(--gold); font-size: 1.4rem; letter-spacing: 3px; }
+  .score-num { font-weight: bold; margin-left: 10px; color: white; }
+
+  .container { max-width: 800px; margin: 30px auto; padding: 0 20px; }
+  .screen { display: none; }
+  .screen.active { display: block; }
+  
+  .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border-top: 6px solid var(--blue-mid); }
+  .emergency-card { border-top-color: var(--red); background: #fffafa; }
+  .label-emergency { color: var(--red); font-weight: bold; font-size: 0.9rem; text-transform: uppercase; display: block; margin-bottom: 5px; }
+
+  h2 { font-family: 'Playfair Display', serif; margin-bottom: 15px; color: var(--blue-dark); }
+  .description { font-size: 1.1rem; margin-bottom: 25px; }
+  .choice-list { display: grid; gap: 12px; }
+  .choice-btn { background: white; border: 2px solid #eee; padding: 16px; border-radius: 10px; cursor: pointer; text-align: left; font-size: 1rem; transition: 0.2s; }
+  .choice-btn:hover { border-color: var(--blue-mid); background: #f0f4f8; }
+
+  .feedback { margin-top: 25px; padding: 20px; border-radius: 10px; display: none; animation: fadeIn 0.4s; }
+  .fb-best { background: #e8f5e9; border-left: 5px solid #2e7d32; }
+  .fb-good { background: #f1f8e9; border-left: 5px solid #8bc34a; }
+  .fb-neutral { background: #fff8e1; border-left: 5px solid #ffc107; }
+  .fb-poor { background: #ffebee; border-left: 5px solid var(--red); }
+
+  .btn-action { background: var(--blue-dark); color: white; border: none; padding: 12px 30px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 15px; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 </style>
 </head>
 <body>
-<div id="root"></div>
-<script type="text/babel">
-const { useState } = React;
 
-const scenarios = [
-  {
-    id: 1,
-    title: "Scenario 1: The Venue",
-    question: "You need a place for 2,000 dogs. Which location do you choose for the show?",
-    options: [
-      { text: "A large farm with big indoor halls, green fields for exercise, and lots of parking space.", value: 0.2, feedback: "This is the perfect choice! It has everything you need for a safe and happy show. Dogs have space to run, and owners can park easily. Great job!" },
-      { text: "A modern city center building near trains. It is clean but has no grass or outdoor areas.", value: 0.1, feedback: "This is okay because it is easy to reach by train. However, dogs will be unhappy without grass. It might be difficult for a large show like this one." },
-      { text: "A beautiful old castle with small rooms and expensive carpets, but very little space for cars.", value: 0, feedback: "The castle looks lovely, but it is not practical. Small rooms are crowded, and no parking will make owners angry. It is better for a small party, not a dog show." },
-      { text: "A busy shopping mall parking lot with no shade and no water for the animals.", value: -0.5, feedback: "This is a terrible idea! The hot ground will hurt the dogs' paws, and there is no water. This is dangerous for the animals. Please choose a safer location." }
-    ]
-  },
-  {
-    id: 2,
-    title: "Scenario 2: The Date",
-    question: "When is the best time to hold your big outdoor dog show?",
-    options: [
-      { text: "In late spring when the weather is mild and the grass is fresh and green.", value: 0.2, feedback: "Excellent choice! The weather is not too hot or too cold. This is the safest time for dogs to be outside all day. Everyone will enjoy the fresh air." },
-      { text: "On a holiday weekend when many people are free to visit.", value: 0.1, feedback: "This is a good idea for getting more visitors. However, travel might be difficult and expensive for the dog owners. Make sure the venue is still available and affordable." },
-      { text: "In the middle of summer during the hottest week of the year.", value: 0, feedback: "This is very risky. High temperatures can cause heatstroke in many dog breeds. You will need to spend a lot of money on cooling and water to stay safe." },
-      { text: "In the middle of winter when it often snows and the ground is frozen.", value: -0.5, feedback: "This is a bad choice for an outdoor show. The dogs will be freezing, and the ice is dangerous for walking. You must think about the animals' comfort first." }
-    ]
-  },
-  {
-    id: 3,
-    title: "Scenario 3: Hiring Judges",
-    question: "How do you choose the people who will judge the dogs?",
-    options: [
-      { text: "Hire experts who have studied specific breeds for many years and have official certificates.", value: 0.2, feedback: "Perfect! Expert judges make the show professional. Owners trust their decisions because they know the breeds very well. This keeps the competition fair and respected by everyone involved." },
-      { text: "Use experienced judges from other countries to make the show feel international.", value: 0.1, feedback: "This is a nice idea! It makes your show feel special and important. Just remember that flying judges from other countries is very expensive and needs careful planning." },
-      { text: "Invite a famous TV star who loves dogs but does not know the official rules.", value: 0, feedback: "The star might bring more fans, but the dog owners will be unhappy. They want a fair judge who understands the rules, not just a famous face. Be careful!" },
-      { text: "Ask local dog owners to judge each other's pets to save money.", value: -0.5, feedback: "This is a mistake. People will think the judging is not fair because friends are judging friends. You need independent experts to make the show successful and honest." }
-    ]
-  },
-  {
-    id: 4,
-    title: "Scenario 4: The Schedule",
-    question: "Many owners have more than one dog. How do you plan the timing of the rings?",
-    options: [
-      { text: "Start all groups at different times so owners can move between rings easily.", value: 0.2, feedback: "This is very smart! It shows you understand the owners' needs. They can show all their dogs without rushing or missing their turn. Your show will run very smoothly." },
-      { text: "Group similar breeds together in the morning and others in the afternoon.", value: 0.1, feedback: "This is a logical way to organize the day. It helps a bit, but some owners might still have problems if they own different types of dogs. Good effort!" },
-      { text: "Start every single competition at exactly 9:00 AM to finish early.", value: 0, feedback: "This will cause chaos! Owners with two dogs will have to choose only one. People will be stressed and angry. It is better to spread the events out." },
-      { text: "Let the judges decide when to start their own rings on the day.", value: -0.5, feedback: "No, this is a disaster! Without a fixed schedule, nobody knows where to go or when. You must be the leader and provide a clear plan for everyone." }
-    ]
-  },
-  {
-    id: 5,
-    title: "Scenario 5: Food and Drink",
-    question: "What kind of food and water should you provide at the show?",
-    options: [
-      { text: "Many water stations for dogs and a variety of healthy food for people.", value: 0.2, feedback: "Great job! Keeping dogs hydrated is the most important thing. Providing good food for people will keep them happy and staying at your show for the whole day." },
-      { text: "Invite several local food trucks to sell different types of meals.", value: 0.1, feedback: "This is a fun idea! It creates a festival atmosphere and gives people many choices. Just make sure you also have plenty of free water for the dogs nearby." },
-      { text: "Sell expensive luxury meals and fancy bottled water for dogs.", value: 0, feedback: "This is a bit too much. Most owners bring their own special dog food. They just need free, clean water and simple, affordable food for themselves. Keep it practical." },
-      { text: "Only one small snack bar for people and no water stations for dogs.", value: -0.5, feedback: "This is dangerous! Dogs can get sick very quickly without water. You must provide water everywhere. People will also be unhappy if they are hungry and thirsty." }
-    ]
-  },
-  {
-    id: 6,
-    title: "Scenario 6: Safety Rules",
-    question: "How do you make sure all the dogs and people stay safe during the event?",
-    options: [
-      { text: "Have a vet on-site, clear safety signs, and a team of trained security guards.", value: 0.2, feedback: "Excellent! Having a vet is essential for any emergency. Security and signs help people know what to do. This makes your show professional and very safe for everyone." },
-      { text: "Hire a first-aid team for people but don't worry about a vet.", value: 0.1, feedback: "It is good to help people, but this is a dog show! You must have a vet. Dogs can have accidents or get stressed. A vet is a requirement." },
-      { text: "Just put up a few signs saying 'Be Careful' at the main entrance.", value: 0, feedback: "This is not enough. Signs cannot help in a real emergency. You need people who are trained to help if a dog gets sick or a person gets hurt." },
-      { text: "Tell everyone that they are responsible for their own safety and their dogs.", value: -0.5, feedback: "You cannot do this. As the organizer, you are legally responsible for safety. If you don't have a plan, you could get into a lot of trouble. Try again!" }
-    ]
-  },
-  {
-    id: "E1",
-    title: "EMERGENCY: A Dog Fight",
-    isEmergency: true,
-    question: "Two large dogs start fighting in the middle of a busy ring! What is your first action?",
-    options: [
-      { text: "Quickly send trained handlers to separate the dogs and call the vet immediately.", value: 0.2, feedback: "Perfect response! You acted fast and used experts. This stops the fight safely and ensures the dogs get medical help right away." },
-      { text: "Close the ring and move all other dogs and people to a safe distance.", value: 0.1, feedback: "This is a good safety move. It protects the public from getting hurt. However, you still need to deal with the fighting dogs quickly." },
-      { text: "Run into the ring yourself and try to pull the dogs apart by their collars.", value: 0, feedback: "This is very brave but very dangerous. You could be bitten badly. It is always better to let trained professionals handle a dog fight." },
-      { text: "Shout loudly at the owners to control their dogs and stop the fight.", value: -0.5, feedback: "Shouting often makes dogs more excited and aggressive. It doesn't help stop the fight and it scares the spectators. Try again!" }
-    ]
-  },
-  {
-    id: 7,
-    title: "Scenario 7: Advertising",
-    question: "How will you tell people about your dog show to get many visitors?",
-    options: [
-      { text: "Use social media, local newspapers, and put posters in every pet shop.", value: 0.2, feedback: "Great strategy! You are reaching both local people and dog lovers online. This variety will bring a lot of visitors and exhibitors." },
-      { text: "Create a simple website and wait for people to find it on Google.", value: 0.1, feedback: "A website is necessary, but people won't find it by magic. You need to share the link on social media to get visitors." },
-      { text: "Only tell your friends and family and hope they tell others.", value: 0, feedback: "This is not enough for a big show. You need 2,000 dogs! You must use professional advertising to reach enough people." },
-      { text: "Spend all your money on one big TV advertisement during the news.", value: -0.5, feedback: "This is a waste of money. TV ads are very expensive and untargeted. It is better to use cheaper, targeted pet advertising. Try again!" }
-    ]
-  },
-  {
-    id: 8,
-    title: "Scenario 8: Cleaning Up",
-    question: "A dog show can get very messy. How do you handle the waste?",
-    options: [
-      { text: "Provide many waste bins and hire a cleaning team to work all day.", value: 0.2, feedback: "Excellent! A clean show is a happy show. It prevents smells and diseases. Owners will appreciate that you care about the health of their pets." },
-      { text: "Have a few bins at the exit but nowhere else in the fields.", value: 0.1, feedback: "This is a start, but people won't walk to the exit every time their dog makes a mess. You need bins near every ring." },
-      { text: "Ask owners to take all their dog's waste home with them in bags.", value: 0, feedback: "This is not very nice for the owners. They are busy with their dogs and don't want to carry waste all day." },
-      { text: "Don't worry about it until the show is finished the next day.", value: -0.5, feedback: "This is a terrible idea! The venue will become very dirty and smelly. It is unhygienic and will make a bad impression. Try again!" }
-    ]
-  },
-  {
-    id: 9,
-    title: "Scenario 9: Prizes and Trophies",
-    question: "What should the winners receive at the end of the competition?",
-    options: [
-      { text: "Beautiful ribbons, official certificates, and some high-quality dog food.", value: 0.2, feedback: "Perfect! These are traditional prizes that owners love. The food is a practical gift that the dogs will enjoy." },
-      { text: "Give small plastic toys that are cheap and easy to buy in bulk.", value: 0.1, feedback: "This is okay for a small local show, but for a big event, owners expect something more professional." },
-      { text: "Give a large amount of cash to the top three winners only.", value: 0, feedback: "Giving cash can sometimes make people too competitive and aggressive. It is better to celebrate the dog's beauty and skill." },
-      { text: "Don't give any prizes because the honor of winning is enough.", value: -0.5, feedback: "No, people work very hard to train their dogs. They want something to show for their success. Try again!" }
-    ]
-  },
-  {
-    id: 10,
-    title: "Scenario 10: Weather Changes",
-    question: "It starts raining heavily during the outdoor show. What do you do?",
-    options: [
-      { text: "Move the main events into the indoor halls and provide towels for the dogs.", value: 0.2, feedback: "Great thinking! This keeps the dogs dry and safe. Providing towels is a very kind touch that owners will remember." },
-      { text: "Wait for 30 minutes under the trees to see if the rain stops.", value: 0.1, feedback: "This is a reasonable short-term plan. However, if the rain continues, you will need a better solution." },
-      { text: "Tell everyone to put on their coats and continue the show in the rain.", value: 0, feedback: "This is not ideal. Wet dogs are difficult to judge, and the grass will become muddy and slippery." },
-      { text: "Cancel the whole show immediately and send everyone home without refunds.", value: -0.5, feedback: "This is a very bad decision. People have traveled far and paid money. You must have a backup plan. Try again!" }
-    ]
-  },
-  {
-    id: 11,
-    title: "Scenario 11: Newcomer Help",
-    question: "A first-time owner is nervous and makes a mistake in the ring. How do you help?",
-    options: [
-      { text: "Ask the steward to quietly give them some friendly advice and encouragement.", value: 0.2, feedback: "Wonderful! This is how you build a friendly community. The owner will feel supported and will want to return." },
-      { text: "Stop the show and explain their mistake to everyone watching.", value: 0.1, feedback: "This is helpful for learning, but it might make the nervous owner feel very embarrassed. Quiet advice is better." },
-      { text: "Ignore them and let them fail so they learn for next time.", value: 0, feedback: "This is a bit cold. New people are the future of dog shows. If they have a bad experience, they might never come back." },
-      { text: "Disqualify them immediately for not following the official rules.", value: -0.5, feedback: "This is too strict for a minor mistake! You should be helping people learn, not punishing them. Try again!" }
-    ]
-  },
-  {
-    id: 12,
-    title: "Scenario 12: Sponsorship",
-    question: "A big dog food company wants to sponsor the show for a fee.",
-    options: [
-      { text: "Accept the money but make sure the company's signs don't block the rings.", value: 0.2, feedback: "Smart move! The money will help pay for the vet and prizes. As long as signs are well-placed, it's a win-win." },
-      { text: "Give the sponsor the best parking spots and free food all day.", value: 0.1, feedback: "This is a nice way to say thank you to your sponsor and keep them happy for next year." },
-      { text: "Refuse all sponsors because you want the show to be 100% private.", value: 0, feedback: "This is very difficult. Without sponsors, the entry fees for owners will have to be very high." },
-      { text: "Let the sponsor change the rules of the show to favor their favorite dogs.", value: -0.5, feedback: "Never do this! This is dishonest and will destroy the fairness of the competition. Try again!" }
-    ]
-  }
-];
+<header class="header">
+  <div class="header-content">
+    <h1 style="font-family: 'Playfair Display', serif; font-size: 1.4rem;">The Grand Dog Show</h1>
+    <div class="rating-display">
+      <span id="pawVisual" class="paw-visual"></span>
+      <span id="pawNum" class="score-num">3.0</span>
+    </div>
+  </div>
+</header>
 
-function App() {
-  const [currentIdx, setCurrentIdx] = useState(0);
-  const [rating, setRating] = useState(4.0);
-  const [selectedOption, setSelectedOption] = useState(null);
-  const [showFeedback, setShowFeedback] = useState(false);
-  const [isFinished, setIsFinished] = useState(false);
+<div class="container">
+  <section id="screen-start" class="screen active">
+    <div class="card" style="text-align: center;">
+      <h2>The Championship Begins</h2>
+      <p class="description">You are competing in the national dog show. You start with a <b>3.0 paw rating</b>. Every choice matters. If your rating drops to 0, you are disqualified! Good luck.</p>
+      <button class="btn-action" onclick="startGame()">Enter the Ring</button>
+    </div>
+  </section>
 
-  const currentScenario = scenarios[currentIdx];
-
-  const handleSelect = (idx) => {
-    if (showFeedback) return;
-    setSelectedOption(idx);
-    setShowFeedback(true);
-    
-    const val = currentScenario.options[idx].value;
-    // Update rating immediately for the current selection
-    setRating(prev => parseFloat((prev + val).toFixed(1)));
-  };
-
-  const handleNext = () => {
-    const val = currentScenario.options[selectedOption].value;
-    
-    if (val === -0.5) {
-      // "Choose Again" logic: Keep same scenario, reset selection
-      setSelectedOption(null);
-      setShowFeedback(false);
-    } else {
-      if (currentIdx < scenarios.length - 1) {
-        setCurrentIdx(prev => prev + 1);
-        setSelectedOption(null);
-        setShowFeedback(false);
-      } else {
-        setIsFinished(true);
-      }
-    }
-  };
-
-  const getFinalFeedback = () => {
-    if (rating >= 5.5) return "Your rating is spectacular! You are a Master Dog Show Manager. Owners and dogs alike are raving about your event online.";
-    if (rating >= 4.5) return "You are a highly-rated Manager! The show was a great success with only minor notes for improvement.";
-    return "You finished with a decent rating, but there's room to grow. Focus on safety and organization to reach those 5-paw reviews!";
-  };
-
-  if (isFinished) {
-    return (
-      <div className="container">
-        <div className="card final-screen">
-          <h1 className="question">Final Rating</h1>
-          <div className="final-score">{rating.toFixed(1)} 🐾</div>
-          <p className="final-text">{getFinalFeedback()}</p>
-          <button className="next-btn" onClick={() => window.location.reload()}>Restart Career</button>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="container">
-      <div className="header">
-        <div className="rating-label">Live Manager Rating</div>
-        <div className="rating-display">
-          <span>{rating.toFixed(1)}</span>
-          <span style={{color: '#ffcc00'}}>🐾</span>
-        </div>
-        <div style={{fontSize: '0.7rem', color: '#aaa', marginTop: '5px'}}>
-          Progress: {currentIdx + 1} / {scenarios.length}
-        </div>
-      </div>
-
-      <div className={`card ${currentScenario.isEmergency ? 'emergency' : ''}`}>
-        {currentScenario.isEmergency && <span className="emergency-label">🚨 CRITICAL INCIDENT</span>}
-        <div className="scenario-title">{currentScenario.title}</div>
-        <div className="question">{currentScenario.question}</div>
-        
-        <div className="options-list">
-          {currentScenario.options.map((opt, idx) => (
-            <button 
-              key={idx}
-              className={`option-btn ${selectedOption === idx ? 'selected' : ''}`}
-              onClick={() => handleSelect(idx)}
-              disabled={showFeedback}
-            >
-              {opt.text}
-            </button>
-          ))}
-        </div>
-
-        {showFeedback && (
-          <div className={`feedback ${
-            currentScenario.options[selectedOption].value > 0 ? 'positive' : 
-            currentScenario.options[selectedOption].value === 0 ? 'neutral' : 'negative'
-          }`}>
-            <strong>
-              {currentScenario.options[selectedOption].value === -0.5 ? "Critical Failure!" : "Impact:"}
-            </strong><br/>
-            {currentScenario.options[selectedOption].feedback}
-            <button className="next-btn" onClick={handleNext}>
-              {currentScenario.options[selectedOption].value === -0.5 ? "Revise Decision" : "Next Scenario"}
-            </button>
-          </div>
-        )}
+  <section id="screen-game" class="screen">
+    <div id="gameCard" class="card">
+      <span id="emLabel" class="label-emergency" style="display:none">⚠️ Emergency Situation</span>
+      <h2 id="stepTitle">Title</h2>
+      <p id="stepDesc" class="description"></p>
+      <div id="choiceList" class="choice-list"></div>
+      <div id="feedbackBox" class="feedback">
+        <p id="fbText"></p>
+        <button id="nextBtn" class="btn-action">Continue</button>
       </div>
     </div>
-  );
+  </section>
+
+  <section id="screen-over" class="screen">
+    <div class="card" style="text-align: center; border-top-color: var(--red);">
+      <h2>Game Over</h2>
+      <p id="overMessage" class="description"></p>
+      <button class="btn-action" onclick="location.reload()">Try Again</button>
+    </div>
+  </section>
+
+  <section id="screen-final" class="screen">
+    <div class="card" style="text-align: center;">
+      <h2>Show Conclusion</h2>
+      <p id="finalMessage" class="description"></p>
+      <button class="btn-action" onclick="location.reload()">Start New Season</button>
+    </div>
+  </section>
+</div>
+
+<script>
+let rating = 3.0;
+let currentIdx = 0;
+
+const steps = [
+  { title: "1. The Morning Brush", desc: "It is 7:00 AM on show day. How do you prepare your dog's coat?", choices: [
+    { text: "Spend an hour using a special shine brush and conditioning spray.", pts: 0.2, fb: "Your dog's coat looks incredibly shiny! The judges will notice this." },
+    { text: "Give a thorough brush with a standard grooming tool.", pts: 0.1, fb: "Good job. The dog looks neat and tidy." },
+    { text: "A quick 5-minute brush to remove the loose hair.", pts: 0, fb: "Acceptable, but the coat could be much better." },
+    { text: "Don't brush at all; the dog looks fine from yesterday.", pts: -0.5, fb: "Terrible choice! Your dog looks messy and unkept. Try a different approach." }
+  ]},
+  { title: "2. Entering the Building", desc: "There are hundreds of dogs barking and making noise. How do you lead your dog inside?", choices: [
+    { text: "Keep a short lead and use calm, quiet commands.", pts: 0.2, fb: "Perfect. Your dog stays focused on you despite the noise." },
+    { text: "Walk normally and talk to other owners.", pts: 0.1, fb: "The dog is a bit distracted, but you make it inside safely." },
+    { text: "Let the dog walk ahead of you on a long lead.", pts: 0, fb: "Your dog is pulling a lot. This doesn't look professional." },
+    { text: "Drag the dog through the door quickly.", pts: -0.5, fb: "Your dog is now stressed and scared. You must be more gentle. Try again." }
+  ]},
+  { isEmergency: true, title: "EMERGENCY: The Chihuahua Chaos", desc: "Suddenly, a group of 24 Chihuahuas escapes their crates! They are running everywhere and fighting. One runs toward your dog!", choices: [
+    { text: "Stay calm, pick up your dog or block the path, and move to a quiet corner.", pts: 0, fb: "Well handled. You kept your dog safe from the chaos." },
+    { text: "Try to kick the Chihuahuas away from your dog.", pts: -10, fb: "<b>DISQUALIFIED!</b> You cannot use violence at a dog show. Game Over." },
+    { text: "Start shouting loudly for help.", pts: -10, fb: "<b>DISQUALIFIED!</b> Your shouting caused a panic and made the dogs fight more. Game Over." },
+    { text: "Release your dog's lead so they can run away.", pts: -10, fb: "<b>DISQUALIFIED!</b> Never let go of your dog in a crowded building. Game Over." }
+  ]},
+  { title: "3. The Judge's Exam", desc: "The judge is checking your dog's teeth and muscles. What should your dog do?", choices: [
+    { text: "Stand perfectly still and look directly forward.", pts: 0.2, fb: "Excellent discipline! The judge is very impressed." },
+    { text: "Stand still but look around the room.", pts: 0.1, fb: "Good, though the judge prefers more focus." },
+    { text: "Wag its tail and try to lick the judge's hand.", pts: 0, fb: "Friendly, but not professional behavior for a show." },
+    { text: "Growl softly at the judge.", pts: -0.5, fb: "Dangerous! A show dog must never show aggression. Try again." }
+  ]},
+  { title: "4. Walking the Line", desc: "It's your turn to walk your dog in a straight line for the judge.", choices: [
+    { text: "Walk at a consistent pace with the dog's head up.", pts: 0.2, fb: "A beautiful movement. You and your dog look like a team." },
+    { text: "Walk at a steady pace, but the dog is looking at the floor.", pts: 0.1, fb: "The movement is good, but the posture could be better." },
+    { text: "Walk very slowly and look at your dog the whole time.", pts: 0, fb: "You look nervous, which makes the dog walk awkwardly." },
+    { text: "Run as fast as you can to show energy.", pts: -0.5, fb: "You left the dog behind! This looks chaotic. Try again." }
+  ]},
+  { title: "5. Lunch Break", desc: "Your dog is hungry after the morning session. What do you feed them?", choices: [
+    { text: "A small portion of their usual high-quality dry food.", pts: 0.2, fb: "Perfect. This keeps their energy stable without making them sick." },
+    { text: "A few pieces of plain, boiled chicken.", pts: 0.1, fb: "A nice treat, though a full meal might be better." },
+    { text: "Only fresh water for now.", pts: 0, fb: "The dog is still hungry, but it's better than an upset stomach." },
+    { text: "A burger from the snack bar.", pts: -0.5, fb: "Very unhealthy! Human food can make dogs sick before the final. Try again." }
+  ]},
+  { title: "6. Dealing with Heat", desc: "The building is getting very hot. Your dog is panting.", choices: [
+    { text: "Use a cooling mat and provide fresh, cool water.", pts: 0.2, fb: "Great care. Your dog looks much more comfortable now." },
+    { text: "Move to a shaded area near an open window.", pts: 0.1, fb: "This helps, but it is still quite warm." },
+    { text: "Use a small hand fan to blow air on the dog.", pts: 0, fb: "It's a nice gesture, but not very effective for a large dog." },
+    { text: "Pour a bucket of ice water over the dog's back.", pts: -0.5, fb: "Too extreme! This could shock the dog's system. Try again." }
+  ]},
+  { title: "7. The Distraction", desc: "Another dog nearby starts barking loudly during your pose.", choices: [
+    { text: "Use a quiet command to keep your dog's attention on you.", pts: 0.2, fb: "Fantastic focus. You ignored the distraction completely." },
+    { text: "Give your dog a small treat to keep them quiet.", pts: 0.1, fb: "Effective, though some judges dislike using treats in the ring." },
+    { text: "Ignore both dogs and hope for the best.", pts: 0, fb: "Your dog started to bark back, which lost you some points." },
+    { text: "Yell at the other owner to shut their dog up.", pts: -0.5, fb: "Unprofessional! You must control your own behavior. Try again." }
+  ]},
+  { isEmergency: true, title: "EMERGENCY: The Broken Lead", desc: "As you run, your leather lead snaps! Your dog is free in the ring!", choices: [
+    { text: "Immediately call your dog and grab their collar firmly.", pts: 0, fb: "Fast thinking! You prevented a disaster." },
+    { text: "Chase the dog around the ring shouting.", pts: -10, fb: "<b>DISQUALIFIED!</b> You caused a huge scene and the dog wouldn't come back. Game Over." },
+    { text: "Sit down and start crying.", pts: -10, fb: "<b>DISQUALIFIED!</b> You must take action to secure your animal. Game Over." },
+    { text: "Hope the judge catches the dog for you.", pts: -10, fb: "<b>DISQUALIFIED!</b> The dog is your responsibility. Game Over." }
+  ]},
+  { title: "8. The Stack (Posing)", desc: "The judge asks for a 'Stack' (a still pose). How do you position the legs?", choices: [
+    { text: "Adjust each leg perfectly so the dog looks balanced.", pts: 0.2, fb: "The dog looks like a statue. Absolutely flawless stack." },
+    { text: "Let the dog stand naturally but move the front paws.", pts: 0.1, fb: "Not bad, but the back legs are a bit too close together." },
+    { text: "Just tell the dog to 'Stay' where it is.", pts: 0, fb: "The dog is standing, but the pose doesn't show its best features." },
+    { text: "Push the dog's back down so it sits.", pts: -0.5, fb: "Wrong! A show dog should be standing, not sitting. Try again." }
+  ]},
+  { title: "9. Water Break", desc: "You need to give your dog water before the final round.", choices: [
+    { text: "Use your own clean travel bowl and bottled water.", pts: 0.2, fb: "The safest way to keep your dog hydrated and healthy." },
+    { text: "Use the tap water from the bathroom.", pts: 0.1, fb: "Fine, though some dogs don't like the taste of city water." },
+    { text: "Let your dog drink from a shared bowl on the floor.", pts: 0, fb: "Risky! Shared bowls can spread germs and illnesses." },
+    { text: "Let the dog lick condensation off the walls.", pts: -0.5, fb: "Disgusting and dangerous. Your dog needs real water. Try again." }
+  ]},
+  { title: "10. The Final Walk", desc: "This is the big moment. The lights are bright.", choices: [
+    { text: "Keep your head up, smile, and walk with confidence.", pts: 0.2, fb: "You look like a winner! Your confidence travels down the lead to the dog." },
+    { text: "Walk carefully and watch your dog's feet.", pts: 0.1, fb: "A bit cautious, but you didn't make any mistakes." },
+    { text: "Walk quickly while looking at the crowd.", pts: 0, fb: "You are distracted, and your dog is starting to wander." },
+    { text: "Trip over your own feet and drop the lead.", pts: -0.5, fb: "A clumsy mistake! You must stay focused. Try again." }
+  ]},
+  { title: "11. Meeting the Public", desc: "A child asks to pet your dog after the round.", choices: [
+    { text: "Ask the child to pet the dog gently under the chin.", pts: 0.2, fb: "Perfect. This is the safest way for a dog to meet a stranger." },
+    { text: "Say yes, but keep a very tight grip on the lead.", pts: 0.1, fb: "Safe, but the dog feels your tension." },
+    { text: "Let the child hug the dog's neck.", pts: 0, fb: "Risky. Many dogs do not like being hugged by strangers." },
+    { text: "Tell the child to go away rudely.", pts: -0.5, fb: "Mean! You are an ambassador for the sport. Be polite. Try again." }
+  ]},
+  { title: "12. The Results", desc: "The winners are being announced. How do you behave?", choices: [
+    { text: "Stand quietly and congratulate the winners sincerely.", pts: 0.2, fb: "True sportsmanship. Everyone respects you." },
+    { text: "Stand quietly and wait for your number.", pts: 0.1, fb: "Polite and professional." },
+    { text: "Check your phone while the judge is speaking.", pts: 0, fb: "A bit disrespectful to the event." },
+    { text: "Start complaining loudly that the judge is wrong.", pts: -0.5, fb: "Awful behavior! You might be banned next year. Try again." }
+  ]}
+];
+
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
 }
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(<App />);
+function updateHeader() {
+  rating = Math.min(5, Math.max(0, rating));
+  document.getElementById('pawNum').innerText = rating.toFixed(1);
+  const visual = document.getElementById('pawVisual');
+  visual.innerHTML = '';
+  
+  // Requirement: Max 5 paws rating
+  for (let i = 1; i <= 5; i++) {
+    visual.innerHTML += (i <= Math.floor(rating)) ? '🐾' : '☆';
+  }
+
+  if (rating <= 0) endGame("Your rating dropped to zero. You have been disqualified from the show.");
+}
+
+function startGame() {
+  document.getElementById('screen-start').classList.remove('active');
+  document.getElementById('screen-game').classList.add('active');
+  renderStep();
+}
+
+function renderStep() {
+  const data = steps[currentIdx];
+  const card = document.getElementById('gameCard');
+  const emLabel = document.getElementById('emLabel');
+  
+  card.className = data.isEmergency ? 'card emergency-card' : 'card';
+  emLabel.style.display = data.isEmergency ? 'block' : 'none';
+  
+  document.getElementById('stepTitle').innerText = data.title;
+  document.getElementById('stepDesc').innerText = data.desc;
+  document.getElementById('feedbackBox').style.display = 'none';
+  
+  const list = document.getElementById('choiceList');
+  list.innerHTML = '';
+  list.style.display = 'grid';
+
+  // Copy choices and shuffle them (Fisher-Yates)
+  let displayChoices = [...data.choices];
+  shuffle(displayChoices);
+
+  displayChoices.forEach(c => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.innerText = c.text;
+    btn.onclick = () => handleChoice(c);
+    list.appendChild(btn);
+  });
+}
+
+function handleChoice(choice) {
+  const isEmergency = steps[currentIdx].isEmergency;
+  
+  // Logic: Worst choice loses 0.5 and forces re-choose. Emergency bad choice is Game Over.
+  if (choice.pts <= -5) {
+    endGame(choice.fb);
+    return;
+  }
+
+  if (choice.pts === -0.5) {
+    rating -= 0.5;
+    updateHeader();
+    showFeedback(choice.fb, "fb-poor", false);
+    return;
+  }
+
+  // Best/Good/Average logic
+  if (!isEmergency) {
+    rating += choice.pts;
+  }
+  updateHeader();
+  
+  let type = "fb-neutral";
+  if (choice.pts === 0.2) type = "fb-best";
+  if (choice.pts === 0.1) type = "fb-good";
+  
+  showFeedback(choice.fb, type, true);
+}
+
+function showFeedback(text, className, canContinue) {
+  document.getElementById('choiceList').style.display = 'none';
+  const fb = document.getElementById('feedbackBox');
+  fb.style.display = 'block';
+  fb.className = `feedback ${className}`;
+  document.getElementById('fbText').innerHTML = `<b>${className === "fb-poor" ? "Incorrect" : "Result"}:</b> ${text}`;
+  
+  const nextBtn = document.getElementById('nextBtn');
+  nextBtn.innerText = canContinue ? "Continue →" : "Try Again";
+  nextBtn.onclick = () => {
+    if (canContinue) {
+      currentIdx++;
+      if (currentIdx < steps.length) renderStep();
+      else showWin();
+    } else {
+      renderStep();
+    }
+  };
+}
+
+function endGame(msg) {
+  document.getElementById('screen-game').classList.remove('active');
+  document.getElementById('screen-over').classList.add('active');
+  document.getElementById('overMessage').innerText = msg;
+}
+
+function showWin() {
+  document.getElementById('screen-game').classList.remove('active');
+  document.getElementById('screen-final').classList.add('active');
+  
+  // 50-60 words positive feedback[cite: 2]
+  const feedback = "Congratulations! Your performance throughout the competition was absolutely outstanding. Because of your patient training and smart choices, your dog performed with grace and confidence in every round. You managed difficult emergencies and kept your dog happy and healthy. You are a true professional and a credit to the sport of dog showing. Well done!";
+  
+  document.getElementById('finalMessage').innerText = feedback;
+}
+
+updateHeader();
 </script>
 </body>
 </html>
