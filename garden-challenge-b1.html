@@ -3,151 +3,39 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Spring Garden Challenge</title>
+<title>The Ultimate Spring Garden Challenge</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --green-dark: #2d5a27;
-    --green-mid: #4a8c3f;
-    --green-light: #7dba6f;
-    --earth: #8b5e3c;
-    --cream: #faf7f0;
-    --gold: #c9a84c;
-    --red: #c0392b;
-    --text: #1a2e1a;
+    --green-dark: #2d5a27; --green-mid: #4a8c3f; --green-light: #7dba6f;
+    --cream: #faf7f0; --gold: #c9a84c; --red: #c0392b; --text: #1a2e1a;
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    font-family: 'Lato', sans-serif;
-    background-color: var(--cream);
-    color: var(--text);
-    line-height: 1.6;
-  }
-
-  /* ── EMOJI SCORING HEADER ── */
-  .site-header {
-    background: var(--green-dark);
-    color: white;
-    padding: 15px 20px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-  }
-
-  .header-content {
-    max-width: 800px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .title-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .title-row h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.2rem;
-  }
-
-  .score-badge {
-    font-weight: bold;
-    color: var(--gold);
-    background: rgba(255,255,255,0.1);
-    padding: 4px 12px;
-    border-radius: 20px;
-  }
-
-  .emoji-line {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-    min-height: 35px;
-    background: rgba(0,0,0,0.2);
-    padding: 8px;
-    border-radius: 10px;
-    border: 1px solid rgba(255,255,255,0.1);
-  }
-
-  .garden-emoji {
-    font-size: 1.5rem;
-    animation: grow 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  }
-
-  @keyframes grow {
-    from { transform: scale(0); }
-    to { transform: scale(1); }
-  }
-
-  /* ── GAME CARDS ── */
-  .container {
-    max-width: 800px;
-    margin: 30px auto;
-    padding: 0 20px;
-  }
-
+  body { font-family: 'Lato', sans-serif; background-color: var(--cream); color: var(--text); line-height: 1.6; }
+  .site-header { background: var(--green-dark); color: white; padding: 15px 20px; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+  .header-content { max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
+  .title-row { display: flex; justify-content: space-between; align-items: center; }
+  .title-row h1 { font-family: 'Playfair Display', serif; font-size: 1.2rem; }
+  .score-badge { font-weight: bold; color: var(--gold); background: rgba(255,255,255,0.1); padding: 4px 12px; border-radius: 20px; }
+  .emoji-line { display: flex; flex-wrap: wrap; gap: 5px; min-height: 35px; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 10px; }
+  .garden-emoji { font-size: 1.5rem; animation: grow 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+  .container { max-width: 800px; margin: 30px auto; padding: 0 20px; }
   .screen { display: none; }
   .screen.active { display: block; }
-
-  .card {
-    background: white;
-    padding: 30px;
-    border-radius: 15px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.05);
-    border-bottom: 5px solid var(--green-mid);
-  }
-
+  .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.05); border-bottom: 5px solid var(--green-mid); }
+  .emergency { border: 3px solid var(--red); background: #fff5f5; }
+  .emergency-label { color: var(--red); font-weight: bold; text-transform: uppercase; margin-bottom: 10px; display: block; }
   h2 { font-family: 'Playfair Display', serif; margin-bottom: 15px; color: var(--green-dark); }
   .description { font-size: 1.1rem; margin-bottom: 25px; }
-
   .choice-list { display: grid; gap: 12px; }
-
-  .choice-btn {
-    background: white;
-    border: 2px solid #eee;
-    padding: 15px 20px;
-    border-radius: 10px;
-    cursor: pointer;
-    text-align: left;
-    font-size: 1rem;
-    transition: 0.2s;
-  }
-
-  .choice-btn:hover:not(:disabled) {
-    border-color: var(--green-light);
-    background: #f9fff9;
-  }
-
-  .feedback {
-    margin-top: 25px;
-    padding: 20px;
-    border-radius: 10px;
-    display: none;
-    animation: fadeIn 0.5s;
-  }
-
+  .choice-btn { background: white; border: 2px solid #eee; padding: 15px 20px; border-radius: 10px; cursor: pointer; text-align: left; font-size: 1rem; transition: 0.2s; }
+  .choice-btn:hover:not(:disabled) { border-color: var(--green-light); background: #f9fff9; }
+  .feedback { margin-top: 25px; padding: 20px; border-radius: 10px; display: none; }
   .fb-good { background: #eefbee; border: 1px solid var(--green-mid); color: #1e461e; }
   .fb-neutral { background: #fffdf2; border: 1px solid var(--gold); color: #5c4d1a; }
   .fb-poor { background: #fff5f5; border: 1px solid var(--red); color: #611a1a; }
-
-  .btn-next {
-    background: var(--green-dark);
-    color: white;
-    border: none;
-    padding: 12px 30px;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
-    margin-top: 15px;
-  }
-
-  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .btn-next { background: var(--green-dark); color: white; border: none; padding: 12px 30px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 15px; }
+  @keyframes grow { from { transform: scale(0); } to { transform: scale(1); } }
 </style>
 </head>
 <body>
@@ -155,32 +43,28 @@
 <header class="site-header">
   <div class="header-content">
     <div class="title-row">
-      <h1>🌸 My Spring Garden</h1>
+      <h1>🌻 Advanced Garden Challenge</h1>
       <div class="score-badge">Garden Points: <span id="numScore">0</span></div>
     </div>
-    <div class="emoji-line" id="emojiLine">
-      <!-- Garden items appear here as you gain points -->
-    </div>
+    <div class="emoji-line" id="emojiLine"></div>
   </div>
 </header>
 
 <div class="container">
-  <!-- START SCREEN -->
   <section id="screen-start" class="screen active">
     <div class="card" style="text-align: center;">
-      <h2>Welcome to the Garden!</h2>
-      <p class="description">Winter is over and spring is finally here. It is time to start your garden! Can you make the best choices to help your plants grow and keep the bees happy?</p>
-      <button class="btn-next" onclick="startGame()">Start Gardening</button>
+      <h2>The Full Growing Season</h2>
+      <p class="description">Managing a garden for a whole season takes patience and smart choices. Can you reach the final harvest with a perfect score? Watch out for emergencies!</p>
+      <button class="btn-next" onclick="startGame()">Start Your Journey</button>
     </div>
   </section>
 
-  <!-- GAME SCREEN -->
   <section id="screen-game" class="screen">
-    <div class="card">
+    <div id="gameCard" class="card">
+      <span id="emergencyLabel" class="emergency-label" style="display:none">🚨 Emergency Situation</span>
       <h2 id="stepTitle">Title</h2>
       <p class="description" id="stepDesc">Description</p>
       <div class="choice-list" id="choiceList"></div>
-
       <div id="feedbackBox" class="feedback">
         <h3 id="fbTitle">Result</h3>
         <p id="fbText" style="margin: 10px 0;"></p>
@@ -189,60 +73,92 @@
     </div>
   </section>
 
-  <!-- FINAL SCREEN -->
   <section id="screen-final" class="screen">
     <div class="card" style="text-align: center;">
-      <h2>Garden Season Finished!</h2>
-      <p class="description" id="finalMessage"></p>
-      <button class="btn-next" onclick="location.reload()">Try Again</button>
+      <h2>Season Evaluation</h2>
+      <p id="finalMessage" class="description"></p>
+      <button class="btn-next" onclick="location.reload()">Start New Season</button>
     </div>
   </section>
 </div>
 
 <script>
-const gardenItems = ["🌱", "🌿", "🍀", "🍃", "🌸", "🌼", "🌻", "🌺", "🌹", "🌷", "🐝", "🦋", "🍄", "🌳", "🧺", "🐦", "🍎", "🥕", "🍓", "🧤", "🚿"];
+const gardenItems = ["🌱", "🌿", "🍀", "🍃", "🌸", "🌼", "🌻", "🌺", "🌹", "🌷", "🐝", "🦋", "🍄", "🌳", "🧺", "🐦", "🍎", "🥕", "🍓", "🧤", "🚿", "🦆", "🌞", "💧"];
 
 const steps = [
-  {
-    title: "Step 1: Getting Ready",
-    desc: "The weather is getting warmer, but the ground is still a bit cold. What is the first thing you should do?",
-    choices: [
-      { text: "Clean and sharpen your garden tools.", pts: 3, type: "good", fb: "<b>Great!</b> Clean tools are very important. They help you work better and keep your plants healthy." },
-      { text: "Plant your tomato seeds outside in the garden immediately.", pts: 0, type: "poor", fb: "<b>Oh no!</b> It is still too cold for tomatoes. They will freeze and die during the night." },
-      { text: "Buy some pretty flowers from a shop to put in the garden.", pts: 1, type: "neutral", fb: "<b>Nice!</b> It makes the garden look pretty, but you have more important work to do first." }
-    ]
-  },
-  {
-    title: "Step 2: Planting Seeds",
-    desc: "You have a packet of sunflower seeds. What is the best way to plant them?",
-    choices: [
-      { text: "Plant them in small pots inside near a sunny window.", pts: 3, type: "good", fb: "<b>Perfect!</b> The seeds are warm and safe inside. They will grow strong before they go outside." },
-      { text: "Throw the seeds on the grass and hope they grow.", pts: 0, type: "poor", fb: "<b>Unlucky!</b> The birds saw you throw the seeds. They ate almost all of them for lunch." },
-      { text: "Wait one month before you do anything with the seeds.", pts: 1, type: "neutral", fb: "<b>Safe...</b> but if you wait too long, you might miss the best time for growing." }
-    ]
-  },
-  {
-    title: "Step 3: Helping the Soil",
-    desc: "Plants need food to grow big and strong. What should you add to the earth?",
-    choices: [
-      { text: "Add natural compost or manure to the soil.", pts: 3, type: "good", fb: "<b>Excellent!</b> This makes the soil rich and healthy. Your plants will love it." },
-      { text: "Do nothing. The soil looks fine to me.", pts: 1, type: "neutral", fb: "<b>Okay...</b> The plants will grow, but they won't be very big or healthy." },
-      { text: "Use a lot of strong chemicals to kill all the weeds first.", pts: -2, type: "poor", fb: "<b>Careful!</b> Strong chemicals can hurt the good bugs and the soil. It is better to use natural things." }
-    ]
-  },
-  {
-    title: "Step 4: A Cold Night",
-    desc: "The news says it will be very cold tonight! Your young plants are outside. What do you do?",
-    choices: [
-      { text: "Cover the small plants with a garden cloth or an old sheet.", pts: 3, type: "good", fb: "<b>Good job!</b> The cloth keeps the plants warm enough to survive the cold night." },
-      { text: "Give them a lot of very cold water before you go to bed.", pts: 0, type: "poor", fb: "<b>Oh dear!</b> Cold water makes the plants even colder. This was not a good idea." },
-      { text: "Go to sleep and don't worry about the weather.", pts: -1, type: "poor", fb: "<b>Oh no!</b> You forgot to protect your plants. Some of them died in the ice." }
-    ]
-  }
+  { title: "1. Tool Preparation", desc: "Before you touch the soil, what should you do with your equipment?", choices: [
+    { text: "Clean, oil, and sharpen all your tools.", pts: 3, type: "good", fb: "<b>Excellent!</b> Sharp tools make clean cuts, which helps plants heal faster[cite: 2]." },
+    { text: "Just wipe them with a dry cloth.", pts: 1, type: "neutral", fb: "<b>Okay...</b> They are cleaner, but dull tools can still damage your plants." },
+    { text: "Use them immediately, even if they are rusty.", pts: 0, type: "poor", fb: "<b>Bad idea!</b> Rusty or dirty tools can spread diseases to your new plants[cite: 2]." }
+  ]},
+  { title: "2. Sowing Seeds", desc: "You have delicate flower seeds. Where should they start?", choices: [
+    { text: "In small pots on a warm windowsill.", pts: 3, type: "good", fb: "<b>Smart!</b> This gives them a safe environment to grow before the weather is perfect[cite: 2]." },
+    { text: "Directly in the cold garden soil.", pts: 0, type: "poor", fb: "<b>Oh no!</b> Most delicate seeds will rot or freeze in cold, wet spring soil[cite: 2]." },
+    { text: "In a dark cupboard under the sink.", pts: 0, type: "poor", fb: "<b>Wait!</b> Seeds need light and warmth once they start to sprout." }
+  ]},
+  { title: "3. Soil Nutrition", desc: "The garden beds look a bit empty. How do you feed the ground?", choices: [
+    { text: "Mix in organic compost or aged manure.", pts: 3, type: "good", fb: "<b>Wonderful!</b> This adds nutrients and helps the soil hold water naturally[cite: 2]." },
+    { text: "Use a strong chemical fertilizer every day.", pts: -1, type: "poor", fb: "<b>Too much!</b> Over-fertilizing can burn the roots of your plants." },
+    { text: "Do nothing and hope the soil is okay.", pts: 1, type: "neutral", fb: "<b>Fine...</b> but your plants might not grow as large as they could." }
+  ]},
+  { isEmergency: true, title: "EMERGENCY: The Sudden Frost", desc: "The temperature is dropping to -2°C tonight! What is your immediate action?", choices: [
+    { text: "Cover all young plants with buckets or heavy cloth.", pts: 3, type: "good", fb: "<b>Perfect!</b> You saved the garden from freezing. Everything is safe[cite: 1, 2]." },
+    { text: "Water them heavily with warm water.", pts: -5, type: "poor", fb: "<b>Disaster!</b> Warm water will freeze into a block of ice. Try a different plan[cite: 1]." },
+    { text: "Leave them alone; plants should be tough.", pts: -5, type: "poor", fb: "<b>They died!</b> Most young spring plants cannot survive ice. Try again[cite: 1]." }
+  ]},
+  { title: "4. Watering Habits", desc: "It is a sunny week. When is the best time to water?", choices: [
+    { text: "Early in the morning.", pts: 3, type: "good", fb: "<b>Correct!</b> This gives plants time to drink before the sun gets too hot[cite: 2]." },
+    { text: "In the middle of the afternoon.", pts: 0, type: "poor", fb: "<b>Waste!</b> Most of the water evaporates before it reaches the roots[cite: 2]." },
+    { text: "Late at night.", pts: 1, type: "neutral", fb: "<b>Risky.</b> Wet leaves at night can cause mold or fungus to grow." }
+  ]},
+  { title: "5. Weeding", desc: "Small weeds are starting to grow around your vegetables.", choices: [
+    { text: "Pull them out by hand, including the root.", pts: 3, type: "good", fb: "<b>Good work!</b> This is the most effective way to keep them from coming back[cite: 2]." },
+    { text: "Cut the tops off with a lawnmower.", pts: 1, type: "neutral", fb: "<b>Temporary.</b> The roots are still there, so they will grow back in days[cite: 2]." },
+    { text: "Spray them with salt water.", pts: -1, type: "poor", fb: "<b>Stop!</b> Salt stays in the soil and can kill your vegetables too." }
+  ]},
+  { title: "6. Supporting Plants", desc: "Your peas and tomatoes are getting tall and falling over.", choices: [
+    { text: "Install wooden stakes or a wire trellis.", pts: 3, type: "good", fb: "<b>Nice!</b> This keeps the fruit off the ground and prevents the stems from snapping[cite: 2]." },
+    { text: "Tie them together in a big bunch.", pts: 1, type: "neutral", fb: "<b>Okay,</b> but they need air to breathe or they might get sick." },
+    { text: "Let them crawl across the ground.", pts: 0, type: "poor", fb: "<b>Watch out!</b> Bugs and rot will destroy your harvest if it touches the wet soil." }
+  ]},
+  { title: "7. Mulching", desc: "How can you keep the soil moist and stop weeds from growing?", choices: [
+    { text: "Spread a layer of wood chips or straw on the soil.", pts: 3, type: "good", fb: "<b>Great!</b> Mulch protects the soil from the sun and blocks weeds[cite: 2]." },
+    { text: "Cover the garden bed with plastic sheets.", pts: 0, type: "poor", fb: "<b>No!</b> Plastic stops air and rain from reaching the soil." },
+    { text: "Water twice as much as usual.", pts: 1, type: "neutral", fb: "<b>Hard work!</b> Mulch would save you a lot of time and water." }
+  ]},
+  { title: "8. Pest Control", desc: "You find tiny green bugs (aphids) eating your rose leaves.", choices: [
+    { text: "Spray them with a mixture of water and a little dish soap.", pts: 3, type: "good", fb: "<b>Excellent!</b> This is a safe, natural way to remove pests without hurting bees[cite: 2]." },
+    { text: "Use a heavy bug spray from the store.", pts: 1, type: "neutral", fb: "<b>Effective,</b> but be careful! It might kill the good bugs too[cite: 2]." },
+    { text: "Squish them all with your fingers.", pts: 2, type: "good", fb: "<b>Effective!</b> It takes time, but it works for small amounts of bugs." }
+  ]},
+  { isEmergency: true, title: "EMERGENCY: Hail Storm", desc: "A sudden storm is dropping small balls of ice! What do you do?", choices: [
+    { text: "Cover delicate plants with upturned pots or boxes.", pts: 3, type: "good", fb: "<b>Savior!</b> You protected the leaves from being shredded by the ice[cite: 1]." },
+    { text: "Run out and try to catch the hail.", pts: -5, type: "poor", fb: "<b>Ouch!</b> That is dangerous for you and does nothing for the plants. Try again[cite: 1]." },
+    { text: "Wait for the storm to pass and clean up later.", pts: -5, type: "poor", fb: "<b>Too late!</b> The plants are broken. You must act faster. Try again[cite: 1]." }
+  ]},
+  { title: "9. Attracting Pollinators", desc: "You want more bees and butterflies to visit your garden.", choices: [
+    { text: "Plant local flowers like lavender or sunflowers.", pts: 3, type: "good", fb: "<b>Beautiful!</b> Bees love these, and they will help your vegetables grow[cite: 2]." },
+    { text: "Put out a bowl of brightly colored candies.", pts: 0, type: "poor", fb: "<b>Bad!</b> Sugar and chemicals in candy are not good for insects." },
+    { text: "Paint your garden fence bright yellow.", pts: 1, type: "neutral", fb: "<b>Funny,</b> but real flowers provide the food they actually need." }
+  ]},
+  { title: "10. Deadheading", desc: "Your first flowers are turning brown and dying.", choices: [
+    { text: "Cut off the dead flowers so new ones can grow.", pts: 3, type: "good", fb: "<b>Correct!</b> This is called 'deadheading.' It tells the plant to make more flowers[cite: 2]." },
+    { text: "Pull the whole plant out of the ground.", pts: 0, type: "poor", fb: "<b>Stop!</b> The plant is still alive; it just finished one flower." },
+    { text: "Leave the dead flowers alone.", pts: 1, type: "neutral", fb: "<b>Fine,</b> but the plant will spend energy making seeds instead of new flowers." }
+  ]},
+  { title: "11. Vacation Care", desc: "You are going away for a weekend. The weather is hot.", choices: [
+    { text: "Ask a neighbor to water the garden once a day.", pts: 3, type: "good", fb: "<b>Perfect!</b> Consistent water is key to a happy garden while you are away[cite: 2]." },
+    { text: "Fill the garden beds with 10cm of water before you leave.", pts: -1, type: "poor", fb: "<b>Danger!</b> You might drown the roots or cause root rot." },
+    { text: "Hope that it rains while you are gone.", pts: 0, type: "poor", fb: "<b>Risk!</b> Hope is not a good garden strategy in a heatwave." }
+  ]},
+  { title: "12. The Harvest", desc: "Your strawberries are red and your lettuce is big.", choices: [
+    { text: "Pick them early in the morning for the best taste.", pts: 3, type: "good", fb: "<b>Yum!</b> Fruits and vegetables are sweetest and crunchiest in the morning[cite: 2]." },
+    { text: "Leave them for another week to see how big they get.", pts: 1, type: "neutral", fb: "<b>Careful!</b> If you wait too long, they might become bitter or the birds might eat them." },
+    { text: "Pull the plants out of the ground to get the fruit.", pts: 0, type: "poor", fb: "<b>No!</b> If you are careful, many plants will grow even more fruit after the first harvest." }
+  ]}
 ];
 
-let score = 0;
-let currentIdx = 0;
+let score = 0, currentIdx = 0;
 
 function startGame() {
   document.getElementById('screen-start').classList.remove('active');
@@ -254,10 +170,7 @@ function updateScore() {
   document.getElementById('numScore').innerText = score;
   const line = document.getElementById('emojiLine');
   line.innerHTML = '';
-  
-  // Requirement: show emojis for points gained
-  const displayCount = Math.max(0, score);
-  for (let i = 0; i < displayCount; i++) {
+  for (let i = 0; i < Math.max(0, score); i++) {
     const span = document.createElement('span');
     span.className = 'garden-emoji';
     span.innerText = gardenItems[i % gardenItems.length];
@@ -267,6 +180,12 @@ function updateScore() {
 
 function renderStep() {
   const data = steps[currentIdx];
+  const card = document.getElementById('gameCard');
+  const label = document.getElementById('emergencyLabel');
+  
+  card.className = data.isEmergency ? 'card emergency' : 'card';
+  label.style.display = data.isEmergency ? 'block' : 'none';
+  
   document.getElementById('stepTitle').innerText = data.title;
   document.getElementById('stepDesc').innerText = data.desc;
   document.getElementById('feedbackBox').style.display = 'none';
@@ -285,26 +204,30 @@ function renderStep() {
 }
 
 function handleChoice(choice) {
-  score += choice.pts;
-  updateScore();
+  const isEmergencyFail = steps[currentIdx].isEmergency && choice.pts < 0;
+  
+  if (!isEmergencyFail) {
+    score += choice.pts;
+    updateScore();
+  }
   
   document.getElementById('choiceList').style.display = 'none';
   const fb = document.getElementById('feedbackBox');
   fb.style.display = 'block';
   fb.className = `feedback fb-${choice.type}`;
-  
-  document.getElementById('fbTitle').innerText = 
-    choice.type === "good" ? "Great Choice!" : 
-    choice.type === "neutral" ? "Not Bad" : "Wait!";
-    
+  document.getElementById('fbTitle').innerText = isEmergencyFail ? "Emergency Failed!" : "Assessment";
   document.getElementById('fbText').innerHTML = choice.fb;
   
-  document.getElementById('nextBtn').onclick = () => {
-    currentIdx++;
-    if (currentIdx < steps.length) {
+  const nextBtn = document.getElementById('nextBtn');
+  nextBtn.innerText = isEmergencyFail ? "Try Again" : "Continue →";
+  
+  nextBtn.onclick = () => {
+    if (isEmergencyFail) {
       renderStep();
     } else {
-      showFinal();
+      currentIdx++;
+      if (currentIdx < steps.length) renderStep();
+      else showFinal();
     }
   };
 }
@@ -313,17 +236,11 @@ function showFinal() {
   document.getElementById('screen-game').classList.remove('active');
   document.getElementById('screen-final').classList.add('active');
   
-  let msg = "";
-  if (score >= 10) {
-    msg = "You are a Master Gardener! Your garden looks beautiful and all your plants are safe.";
-  } else if (score >= 5) {
-    msg = "Well done! You have a nice garden. You made some good choices.";
-  } else {
-    msg = "The garden had a difficult time. Next season, remember to check the weather and help your soil more.";
-  }
-  document.getElementById('finalMessage').innerText = msg;
+  // Positive feedback requirement: 50-60 words.
+  const feedback = "Congratulations! Your garden is a magnificent success. Because of your patient care and smart choices, your plants are blooming with vibrant colors and the local wildlife is thriving. You have shown that you truly understand the needs of a spring garden. Your neighbors are inspired by your hard work and beautiful green space. Well done, Master Gardener!";
+  
+  document.getElementById('finalMessage').innerText = feedback;
 }
 </script>
-
 </body>
 </html>
