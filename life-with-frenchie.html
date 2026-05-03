@@ -40,7 +40,7 @@ h1{font-size:26px;margin-bottom:0.5rem;text-align:center;font-weight:700;color:v
 <div class="shell" id="screen-intro">
   <div class="card">
     <h1>🐾 Life with French Bulldog 🐾</h1>
-    <p class="intro-text"> Welcome to the world of Marcel.</p>
+    <p class="intro-text">You've just moved in with your partner and her adorable French Bulldog. What could possibly go wrong? Spoiler: Everything. Navigate a week of chaos, destruction, and the protective fury of a woman who considers her dog to be 'my little baby.' Your sanity is on the line.</p>
     <button class="opt-btn" style="width:100%; text-align:center; background:var(--accent); color:white; font-weight:700;" onclick="startGame()">Welcome Home (Help me...)</button>
   </div>
 </div>
@@ -80,79 +80,79 @@ const POOL = [
   [
     { t: "You wake up to find the newly laid irrigation system completely dug up. The Frenchie sits proudly next to a pile of chewed plastic pipes.", choices: [
       { text: "Calmly pick up the pipes, sigh deeply, and go to the hardware store for replacements.", pts: 1, fb: "The only safe option. You fix the pipes in silence while the dog watches, plotting its next move." },
-      { text: "Yell at the dog and point at the destroyed pipes.", pts: 0, fb: "The woman of the house rushes out, hugging her 'little baby' and accusing you of traumatizing him." },
-      { text: "Try to make the dog replant the pipes by pushing its paws into the dirt.", pts: -1, fb: "The dog thinks this is a game, bites your finger, and the woman scolds you for playing too rough." },
-      { text: "Spray the dog with the garden hose as punishment.", pts: 62, fb: "DIVORCE IMMINENT: The woman of the house sees you 'drowning her angel'. You are banished to the shed." }
+      { text: "Yell at the dog and point at the destroyed pipes.", pts: 0, fb: "Darling Wife rushes out, hugging her 'little baby' and accusing you of traumatizing him." },
+      { text: "Try to make the dog replant the pipes by pushing its paws into the dirt.", pts: -1, fb: "The dog thinks this is a game, bites your finger, and Darling Wife scolds you for playing too rough." },
+      { text: "Spray the dog with the garden hose as punishment.", pts: 62, fb: "DIVORCE IMMINENT: Darling Wife sees you 'drowning her angel'. You are banished to the shed." }
     ]}
   ],
   // Slot 2: Flower Bed
   [
     { t: "The Frenchie has flattened your prize-winning petunias to create a personal, sun-warmed bed. He is snoring loudly.", choices: [
       { text: "Carefully plant new petunias around the sleeping dog, accepting this patch is now his domain.", pts: 1, fb: "Acceptance is key. The dog sleeps peacefully, and you manage to save three flowers." },
-      { text: "Pick the dog up and move him to the grass.", pts: 0, fb: "He immediately runs back, flattens more flowers. The woman says he 'prefers the aesthetics'." },
-      { text: "Put a small fence around the flower bed.", pts: -1, fb: "The Frenchie bulldozes the fence in seconds. The woman praises his 'incredible strength'." },
-      { text: "Threaten to turn the dog into a pair of slippers.", pts: 62, fb: "EVICTION: The woman of the house heard you. Your bags are packed and waiting on the porch." }
+      { text: "Pick the dog up and move him to the grass.", pts: 0, fb: "He immediately runs back, flattens more flowers. Darling Wife says he 'prefers the aesthetics'." },
+      { text: "Put a small fence around the flower bed.", pts: -1, fb: "The Frenchie bulldozes the fence in seconds. Darling Wife praises his 'incredible strength'." },
+      { text: "Threaten to turn the dog into a pair of slippers.", pts: 62, fb: "EVICTION: Darling Wife heard you. Your bags are packed and waiting on the porch." }
     ]}
   ],
   // Slot 3: Barbecue Toilet
   [
     { t: "You just finished building a beautiful brick barbecue. The Frenchie walks over, lifts his leg, and christens the fresh mortar.", choices: [
       { text: "Quietly wash the bricks with a sponge and pretend it never happened.", pts: 1, fb: "A wise choice. The barbecue is clean, and you avoid a lecture on 'natural canine instincts'." },
-      { text: "Shout 'No!' and clap your hands loudly.", pts: 0, fb: "The dog barks back. The woman yells from the window that you are 'ruining his self-esteem'." },
+      { text: "Shout 'No!' and clap your hands loudly.", pts: 0, fb: "The dog barks back. Darling Wife yells from the window that you are 'ruining his self-esteem'." },
       { text: "Try to catch the urine in a bucket mid-stream.", pts: -1, fb: "You miss, get your shoes wet, and the dog looks at you with deep contempt." },
-      { text: "Lock the dog inside the barbecue pit until the mortar dries.", pts: 62, fb: "ANIMAL CRUELTY: The woman calls the police. You are now the one locked up." }
+      { text: "Lock the dog inside the barbecue pit until the mortar dries.", pts: 62, fb: "ANIMAL CRUELTY: Darling Wife calls the police. You are now the one locked up." }
     ]}
   ],
   // Slot 4: Clothesline
   [
     { t: "The Frenchie is swinging from the clothesline, his teeth firmly clamped onto your favorite silk shirt.", choices: [
       { text: "Distract him by opening a bag of treats in the kitchen, letting the shirt fall.", pts: 1, fb: "Bribery works. The shirt is ruined, but you avoided a tug-of-war you would lose." },
-      { text: "Try to pull the shirt out of his mouth.", pts: 0, fb: "The shirt rips in half. The woman says you shouldn't buy such 'flimsy fabric'." },
-      { text: "Chase him around the yard while he drags the shirt through the mud.", pts: -1, fb: "He is faster than you. The woman laughs at your 'cute game of tag'." },
-      { text: "Peg the dog to the clothesline by his ears.", pts: 62, fb: "MONSTER: The woman rescues her baby and you are permanently banned from doing laundry." }
+      { text: "Try to pull the shirt out of his mouth.", pts: 0, fb: "The shirt rips in half. Darling Wife says you shouldn't buy such 'flimsy fabric'." },
+      { text: "Chase him around the yard while he drags the shirt through the mud.", pts: -1, fb: "He is faster than you. Darling Wife laughs at your 'cute game of tag'." },
+      { text: "Peg the dog to the clothesline by his ears.", pts: 62, fb: "MONSTER: Darling Wife rescues her baby and you are permanently banned from doing laundry." }
     ]}
   ],
   // Slot 5: Dead Rat Collection
   [
     { t: "You discover a neat pile of three dead rats under your pillow. The Frenchie sits nearby, expecting praise.", choices: [
       { text: "Smile weakly, say 'Good boy,' and secretly dispose of the rats when he isn't looking.", pts: 1, fb: "You survived the horror. The dog feels appreciated, and your bed is mostly sanitary again." },
-      { text: "Scream in terror and throw the pillow across the room.", pts: 0, fb: "The woman rushes in, comforts the dog for being startled, and ignores the rats." },
-      { text: "Try to explain to the dog that rats carry diseases.", pts: -1, fb: "He licks your face. The woman says he is just 'providing for the family'." },
-      { text: "Force the dog to eat the rats as a lesson.", pts: 62, fb: "VET EMERGENCY: The dog gets sick, the vet bill is $2000, and the woman makes you pay it." }
+      { text: "Scream in terror and throw the pillow across the room.", pts: 0, fb: "Darling Wife rushes in, comforts the dog for being startled, and ignores the rats." },
+      { text: "Try to explain to the dog that rats carry diseases.", pts: -1, fb: "He licks your face. Darling Wife says he is just 'providing for the family'." },
+      { text: "Force the dog to eat the rats as a lesson.", pts: 62, fb: "VET EMERGENCY: The dog gets sick, the vet bill is $2000, and Darling Wife makes you pay it." }
     ]}
   ],
   // Slot 6: Other Dogs
   [
     { t: "The Frenchie is aggressively humping the head of your elderly, arthritic Golden Retriever.", choices: [
       { text: "Gently lure the Frenchie away with a squeaky toy, saving the Golden Retriever's dignity.", pts: 1, fb: "Crisis averted. The Golden Retriever gives you a look of profound gratitude." },
-      { text: "Push the Frenchie off the Golden Retriever.", pts: 0, fb: "He immediately switches to humping your leg. The woman calls it 'dominance play'." },
-      { text: "Yell at the Golden Retriever to stand up for himself.", pts: -1, fb: "The Golden Retriever looks sad. The woman scolds you for victim-blaming." },
-      { text: "Spray them both with pepper spray to break it up.", pts: 62, fb: "BLINDNESS: Everyone is crying, including you. The woman is calling a divorce lawyer." }
+      { text: "Push the Frenchie off the Golden Retriever.", pts: 0, fb: "He immediately switches to humping your leg. Darling Wife calls it 'dominance play'." },
+      { text: "Yell at the Golden Retriever to stand up for himself.", pts: -1, fb: "The Golden Retriever looks sad. Darling Wife scolds you for victim-blaming." },
+      { text: "Spray them both with pepper spray to break it up.", pts: 62, fb: "BLINDNESS: Everyone is crying, including you. Darling Wife is calling a divorce lawyer." }
     ]}
   ],
   // Slot 7: Sofa Destruction
   [
     { t: "You come home to find the living room looks like it snowed. The Frenchie has exploded a feather cushion and is sleeping in the debris.", choices: [
       { text: "Silently get the vacuum cleaner and spend two hours cleaning up the feathers.", pts: 1, fb: "You accept your fate as the maid. The dog sleeps through the noise, dreaming of more cushions." },
-      { text: "Wake the dog up and show him the destroyed cushion.", pts: 0, fb: "He yawns and goes back to sleep. The woman says he was 'just nesting'." },
-      { text: "Try to stuff the feathers back into the ruined casing.", pts: -1, fb: "It looks terrible. The woman complains about your poor sewing skills." },
-      { text: "Glue the feathers to the dog to make him look like a chicken.", pts: 62, fb: "HUMILIATION: The woman is furious. You spend the night sleeping in the bathtub." }
+      { text: "Wake the dog up and show him the destroyed cushion.", pts: 0, fb: "He yawns and goes back to sleep. Darling Wife says he was 'just nesting'." },
+      { text: "Try to stuff the feathers back into the ruined casing.", pts: -1, fb: "It looks terrible. Darling Wife complains about your poor sewing skills." },
+      { text: "Glue the feathers to the dog to make him look like a chicken.", pts: 62, fb: "HUMILIATION: Darling Wife is furious. You spend the night sleeping in the bathtub." }
     ]}
   ],
   // Slot 8: Dinner Theft
   [
     { t: "You turn your back for one second, and the Frenchie swallows your entire steak whole off the dining table.", choices: [
       { text: "Sigh, make yourself a peanut butter sandwich, and watch him digest your expensive dinner.", pts: 1, fb: "A tragic but peaceful resolution. You are hungry, but the house is quiet." },
-      { text: "Try to pry his mouth open to get the steak back.", pts: 0, fb: "It's gone. The woman says you shouldn't have left it 'unattended'." },
-      { text: "Demand the dog apologizes.", pts: -1, fb: "He burps loudly. The woman thinks it's the cutest thing she's ever seen." },
-      { text: "Hold the dog upside down and shake him until he coughs it up.", pts: 62, fb: "HEIMLICH HORROR: The woman tackles you to the ground to save her 'choking baby'." }
+      { text: "Try to pry his mouth open to get the steak back.", pts: 0, fb: "It's gone. Darling Wife says you shouldn't have left it 'unattended'." },
+      { text: "Demand the dog apologizes.", pts: -1, fb: "He burps loudly. Darling Wife thinks it's the cutest thing she's ever seen." },
+      { text: "Hold the dog upside down and shake him until he coughs it up.", pts: 62, fb: "HEIMLICH HORROR: Darling Wife tackles you to the ground to save her 'choking baby'." }
     ]}
   ],
   // Slot 9: Great Escape
   [
     { t: "The Frenchie has dug a hole under the fence and is currently terrorizing the neighborhood mailman.", choices: [
       { text: "Run outside with a piece of cheese and trade it for the mailman's safety.", pts: 1, fb: "Cheese diplomacy works. The mailman lives to deliver another day." },
-      { text: "Yell at the dog to come back immediately.", pts: 0, fb: "He ignores you completely. The woman says he just 'wanted to say hello'." },
+      { text: "Yell at the dog to come back immediately.", pts: 0, fb: "He ignores you completely. Darling Wife says he just 'wanted to say hello'." },
       { text: "Apologize to the mailman while the dog bites his ankles.", pts: -1, fb: "The mailman pepper-sprays you by mistake. The dog escapes unharmed." },
       { text: "Let the dog eat the mailman to teach the postal service a lesson.", pts: 62, fb: "FELONY: The FBI is involved. You are charged with using a biological weapon." }
     ]}
@@ -161,16 +161,16 @@ const POOL = [
   [
     { t: "The Frenchie returns from his escape covered in thick, black swamp mud and runs straight for the white carpets.", choices: [
       { text: "Dive tackle the dog in the hallway and carry him straight to the bathtub.", pts: 1, fb: "You ruin your own clothes, but the carpet is saved. A noble sacrifice." },
-      { text: "Try to block his path with your body.", pts: 0, fb: "He runs between your legs, leaving muddy streaks everywhere. The woman calls it 'modern art'." },
-      { text: "Throw a towel over him like a net.", pts: -1, fb: "He shakes the towel off, spraying mud on the walls. The woman blames your 'aggressive technique'." },
-      { text: "Lock him outside in the freezing rain to wash off.", pts: 62, fb: "NEGLECT: The woman wraps him in a heated blanket and locks YOU outside in the rain." }
+      { text: "Try to block his path with your body.", pts: 0, fb: "He runs between your legs, leaving muddy streaks everywhere. Darling Wife calls it 'modern art'." },
+      { text: "Throw a towel over him like a net.", pts: -1, fb: "He shakes the towel off, spraying mud on the walls. Darling Wife blames your 'aggressive technique'." },
+      { text: "Lock him outside in the freezing rain to wash off.", pts: 62, fb: "NEGLECT: Darling Wife wraps him in a heated blanket and locks YOU outside in the rain." }
     ]}
   ],
   // Slot 11: Vet Waiting Room
   [
     { t: "At the vet, the Frenchie is screaming like a human child because another dog looked at him.", choices: [
       { text: "Feed him a continuous stream of treats until his mouth is too full to scream.", pts: 1, fb: "Expensive, but effective. The waiting room is finally quiet." },
-      { text: "Try to shush him by putting your finger to your lips.", pts: 0, fb: "He screams louder. The woman says he is 'expressing his trauma'." },
+      { text: "Try to shush him by putting your finger to your lips.", pts: 0, fb: "He screams louder. Darling Wife says he is 'expressing his trauma'." },
       { text: "Apologize loudly to everyone in the waiting room.", pts: -1, fb: "Nobody cares about your apology. They just want the noise to stop." },
       { text: "Put a muzzle on him made of duct tape.", pts: 62, fb: "ABUSE: The vet calls animal control. You are banned from the clinic forever." }
     ]}
@@ -179,25 +179,25 @@ const POOL = [
   [
     { t: "It is 3 AM. The Frenchie is running laps around the bedroom, bouncing off your face every time he passes the bed.", choices: [
       { text: "Pull the blanket over your head and wait for the storm to pass.", pts: 1, fb: "Survival mode activated. You get bruised, but you eventually fall back asleep." },
-      { text: "Turn on the lights and try to catch him.", pts: 0, fb: "You trip over a shoe and break your toe. The woman says you 'ruined his fun'." },
-      { text: "Yell 'Go to sleep!' at the top of your lungs.", pts: -1, fb: "The woman wakes up furious at YOU for shouting, while the dog continues running." },
-      { text: "Throw the dog out the second-story window.", pts: 62, fb: "MURDER: You are going to prison for a very long time. The woman testifies against you." }
+      { text: "Turn on the lights and try to catch him.", pts: 0, fb: "You trip over a shoe and break your toe. Darling Wife says you 'ruined his fun'." },
+      { text: "Yell 'Go to sleep!' at the top of your lungs.", pts: -1, fb: "Darling Wife wakes up furious at YOU for shouting, while the dog continues running." },
+      { text: "Throw the dog out the second-story window.", pts: 62, fb: "MURDER: You are going to prison for a very long time. Darling Wife testifies against you." }
     ]}
   ]
 ];
 
 const EMERGENCIES = [
   { t: "EMERGENCY: The Frenchie has managed to open the pantry and eat an entire box of dark chocolate truffles!", isEmerg: true, choices: [
-    { text: "Immediately rush him to the emergency vet for stomach pumping.", pts: 3, fb: "SAVED! The vet induces vomiting. The dog is fine, and the woman calls you a hero." },
-    { text: "Wait to see if he gets sick first.", pts: -100, fb: "TRAGEDY: Dark chocolate is highly toxic. The dog dies, and the woman destroys your life." },
+    { text: "Immediately rush him to the emergency vet for stomach pumping.", pts: 3, fb: "SAVED! The vet induces vomiting. The dog is fine, and Darling Wife calls you a hero." },
+    { text: "Wait to see if he gets sick first.", pts: -100, fb: "TRAGEDY: Dark chocolate is highly toxic. The dog dies, and Darling Wife destroys your life." },
     { text: "Give him some milk to neutralize the chocolate.", pts: -100, fb: "FATAL ERROR: Milk doesn't cure poisoning. The dog goes into cardiac arrest." },
-    { text: "Blame the other dogs for eating the chocolate.", pts: -100, fb: "COWARD: The Frenchie collapses while you are lying. The woman never forgives you." }
+    { text: "Blame the other dogs for eating the chocolate.", pts: -100, fb: "COWARD: The Frenchie collapses while you are lying. Darling Wife never forgives you." }
   ]},
   { t: "EMERGENCY: The Frenchie swallowed a squeaker from a toy and is now choking and turning blue!", isEmerg: true, choices: [
-    { text: "Perform the canine Heimlich maneuver immediately.", pts: 3, fb: "HEROIC! The squeaker flies out. The dog breathes again, and the woman weeps with gratitude." },
+    { text: "Perform the canine Heimlich maneuver immediately.", pts: 3, fb: "HEROIC! The squeaker flies out. The dog breathes again, and Darling Wife weeps with gratitude." },
     { text: "Try to pull it out with your bare fingers.", pts: -100, fb: "FATAL MISTAKE: You push the squeaker further down. The dog suffocates." },
     { text: "Call the vet and ask for advice over the phone.", pts: -100, fb: "TOO LATE: By the time the vet answers, the dog has stopped breathing." },
-    { text: "Run away and pretend you didn't see anything.", pts: -100, fb: "MONSTER: The woman finds the dog. She knows you were there. Your life is over." }
+    { text: "Run away and pretend you didn't see anything.", pts: -100, fb: "MONSTER: Darling Wife finds the dog. She knows you were there. Your life is over." }
   ]}
 ];
 
@@ -296,13 +296,13 @@ function showResults() {
   score.innerText = state.score;
 
   if (state.score >= 15) {
-    msg.innerText = "🏆 SAINT OF PATIENCE: You survived the week with your sanity intact! You mastered the art of appeasement, strategic bribery, and silent suffering. The woman of the house is impressed. You deserve a vacation.";
+    msg.innerText = "🏆 SAINT OF PATIENCE: You survived the week with your sanity intact! You mastered the art of appeasement, strategic bribery, and silent suffering. Darling Wife is impressed. You deserve a vacation.";
   } else if (state.score >= 8) {
     msg.innerText = "🐕 BATTLE-HARDENED SURVIVOR: You made it through the week bruised, muddy, and exhausted, but alive. You've learned that sometimes the best strategy is simply acceptance. The dog still owns you, but you've made peace with it.";
   } else if (state.score >= 0) {
-    msg.innerText = "😰 BARELY BREATHING: You survived, but just barely. Your clothes are ruined, your pride is shattered, and you're questioning every life choice that led you here. The woman of the house still loves her 'little baby' more than you.";
+    msg.innerText = "😰 BARELY BREATHING: You survived, but just barely. Your clothes are ruined, your pride is shattered, and you're questioning every life choice that led you here. Darling Wife still loves her 'little baby' more than you.";
   } else {
-    msg.innerText = "💔 TOTAL BREAKDOWN: You didn't make it. The dog won. The woman of the house is furious. Your belongings are in the driveway. Time to start over somewhere far away from French Bulldogs.";
+    msg.innerText = "💔 TOTAL BREAKDOWN: You didn't make it. The dog won. Darling Wife is furious. Your belongings are in the driveway. Time to start over somewhere far away from French Bulldogs.";
   }
 }
 </script>
