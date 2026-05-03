@@ -94,9 +94,9 @@ const POOL = [
       { text: "Threaten to turn the dog into a pair of slippers.", pts: 62, fb: "EVICTION: Darling Wife of the house heard you. Your bags are packed and waiting on the porch." }
     ]}
   ],
-  // Slot 3: Barbecue Toilet
+  // Slot 3: Barbecue Blessing
   [
-    { t: "You just finished building a beautiful brick barbecue. Marcel walks over, climbs on to the grill, and lays a blood streaked three-coiler.", choices: [
+    { t: "You just finished building a beautiful brick barbecue. Marcel walks over, climbs on to the grill, and starts to crimp out a #2.", choices: [
       { text: "Quietly wash the plate with a sponge and pretend it never happened.", pts: 1, fb: "A wise choice. The barbecue is clean, and you avoid a lecture on 'natural canine instincts'." },
       { text: "Shout 'No!' and clap your hands loudly.", pts: 0, fb: "The dog barks back. Darling Wife yells from the window that you are 'ruining his self-esteem'." },
       { text: "Try to catch the rope in a bucket mid-stream.", pts: -1, fb: "You knock the filth all over your shoes, and the dog looks at you with deep contempt and a smirk." },
@@ -112,7 +112,7 @@ const POOL = [
       { text: "Peg the dog to the clothesline by his ears.", pts: 62, fb: "MONSTER: Darling Wife rescues her baby and you are permanently banned from doing laundry." }
     ]}
   ],
-  // Slot 5: Dead Rat Collection
+  // Slot 5: Collection
   [
     { t: "You discover a neat pile of six dead rats on your pillow. Marcel sits nearby, expecting praise.", choices: [
       { text: "Smile weakly, say 'Good boy,' and secretly dispose of the rats when he isn't looking.", pts: 1, fb: "You survived the horror. The dog feels appreciated, and your bed is mostly sanitary again." },
@@ -130,7 +130,7 @@ const POOL = [
       { text: "Spray them both with pepper spray to break it up.", pts: 62, fb: "BLINDNESS: Everyone is crying, including you. Darling Wife is calling a divorce lawyer." }
     ]}
   ],
-  // Slot 7: Sofa Destruction
+  // Slot 7: Sofa Time
   [
     { t: "You come home to find the living room looks like it snowed. Marcel has exploded a feather cushion and is sleeping in the debris.", choices: [
       { text: "Silently get the vacuum cleaner and spend two hours cleaning up the feathers.", pts: 1, fb: "You accept your fate as the maid. The dog sleeps through the noise, dreaming of more cushions." },
@@ -139,7 +139,7 @@ const POOL = [
       { text: "Glue the feathers to the dog to make him look like a chicken.", pts: 62, fb: "HUMILIATION: Darling Wife is furious. You spend the night sleeping in the bathtub." }
     ]}
   ],
-  // Slot 8: Dinner Theft
+  // Slot 8: Dinner Time
   [
     { t: "You turn your back for one second, and Marcel swallows your entire wagyu tomahawk steak whole off the dining table.", choices: [
       { text: "Sigh, make yourself a peanut butter sandwich, and watch him digest your expensive dinner.", pts: 1, fb: "A tragic but peaceful resolution. You are hungry, but the house is quiet." },
@@ -187,10 +187,10 @@ const POOL = [
 ];
 
 const EMERGENCIES = [
-  { t: "EMERGENCY: You had friends over for a barbecue yesterday. Everyone had a great time. You did everything to make sure the fire was well and truly dead. It's 2 a.m. and, after furiously digging a 60 cm hole, Marcel has proved you wrong. He has flicked the last ember into the bushes and now a fire is smouldering into life.", isEmerg: true, choices: [
-    { text: "Wake everyone up and act immediately. Call emergency services (000 in Australia) and report the location of the fire. Grab water, dirt, or a fire extinguisher and try to smother the smouldering patch only if it’s still small and safe to approach. Keep everyone together, move cars and gas bottles away from the area, and prepare to evacuate if the wind changes or flames spread. Don’t assume it’s out until firefighters confirm it.", pts: 3, fb: "SAVED! The fire brigade arrive in ten minutes, by which time the fire is well and truly out. Darling Wife calls you a hero." },
+  { t: "EMERGENCY: It's 2 a.m. you wake to the smell of burning eucalyptus. You had a barbecue last night and did everything right to make sure the fire was completely extinguished. But you didn't count on Marcel digging 60 cm into the ground and digging up the last ember and flicking it a pile of dried leaves. They've started smoldering.", isEmerg: true, choices: [
+    { text: "Call emergency services and report the location. Grab water and dirt and try to smother the smouldering patch. Keep everyone together, move cars and gas bottles away from the area.", pts: 3, fb: "SAVED! The fire brigade arrive in ten minutes, confirmed the fire was completely out, and congratulated you on your exemplary fire-fighting skills . Darling Wife calls you a hero." },
     { text: "Just leave it. It’s probably only a tiny ember and the night air will put it out eventually.", pts: -100, fb: "TRAGEDY: It doesn't go out, Your house is burnt to the ground." },
-    { text: "Argue with Marcel about whose fault it is while the fire keeps spreading, instead of doing anything to stop it or calling for help.", pts: -100, fb: "GHOST TOWN: The fire spreads and gets out of control, eventually destroying the whole town." },
+    { text: "Argue with Marcel about whose fault it is while the smoulder turns into a fire and spreads.", pts: -100, fb: "GHOST TOWN: The fire spreads and gets out of control, eventually destroying the whole town." },
     { text: "Pour some petrol on it so it burns fast and gets rid of the dry bushes around it..", pts: -100, fb: "FRONT PAGE!: You make the national news. Darling wife and you are pictured scurrying into the court house, a smiling Marcel in your arms." }
   ]},
   { t: "EMERGENCY: Marcel swallowed a squeaker from a toy and is now choking and turning blue!", isEmerg: true, choices: [
