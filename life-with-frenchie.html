@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Life with Marcel, French Bulldog</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FFF8F3;--surface:#FFFFFF;--ink:#2D1810;--ink2:#6B4423;
+  --accent:#D4A574;--danger:#C41E3A;--success:#8B6F47;--warn:#E8A87C;
+  --r:16px;--shadow:0 10px 15px -3px rgba(0,0,0,0.1);
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);line-height:1.6;padding:1rem;display:flex;flex-direction:column;align-items:center;}
+.shell{width:100%;max-width:650px;margin-top:2rem;}
+.hidden{display:none !important;}
+.card{background:var(--surface);border-radius:var(--r);padding:2rem;box-shadow:var(--shadow);border:1px solid #E8DCC8;}
+h1{font-size:26px;margin-bottom:0.5rem;text-align:center;font-weight:700;color:var(--ink);}
+.day-label{display:block;text-align:center;color:var(--accent);font-weight:700;text-transform:uppercase;font-size:12px;margin-bottom:1.5rem;letter-spacing:1px;}
+.ui-bar{display:flex;justify-content:space-between;margin-bottom:1rem;font-family:'DM Mono',monospace;font-size:13px;color:var(--ink2);}
+.options-list{display:grid;gap:12px;margin-top:1.5rem;}
+.opt-btn{background:white;border:1px solid #D1C4B0;padding:14px;border-radius:10px;text-align:left;cursor:pointer;font-size:15px;transition:0.2s;color:var(--ink);}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:#FFF5ED;}
+.opt-btn:disabled{opacity:0.6;cursor:default;}
+.feedback{margin-top:1.5rem;padding:1.25rem;border-radius:10px;display:none;font-size:15px;border-left:5px solid transparent;}
+.fb-1{background:#E8F5E9;color:#2E7D32;border-color:var(--success);}
+.fb-0{background:#F5F5F5;color:var(--ink2);border-color:#D1C4B0;}
+.fb-neg1{background:#FFF3E0;color:#E65100;border-color:var(--warn);}
+.fb-62{background:#FFEBEE;color:#B71C1C;border-color:var(--danger);animation:shake 0.4s ease;}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.next-btn{margin-top:1.5rem;width:100%;background:var(--ink);color:white;border:none;padding:14px;border-radius:10px;font-weight:600;cursor:pointer;display:none;}
+.emerg-tag{background:var(--danger);color:white;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;display:inline-block;margin-bottom:10px;}
+.intro-text{color:var(--ink2);margin-bottom:1.5rem;font-size:15px;}
+</style>
+</head>
+<body>
+
+<div class="shell" id="screen-intro">
+  <div class="card">
+    <h1>🐾 Life with French Bulldog 🐾</h1>
+    <p class="intro-text">Welcome to the world of Frenchie.</p>
+    <button class="opt-btn" style="width:100%; text-align:center; background:var(--accent); color:white; font-weight:700;" onclick="startGame()">Welcome Home (Help me...)</button>
+  </div>
+</div>
+
+<div class="shell hidden" id="screen-game">
+  <div class="ui-bar">
+    <div id="stat-progress">Scenario 1/14</div>
+    <div id="stat-score">Sanity: 0 🐕</div>
+  </div>
+  <div class="card">
+    <span class="day-label" id="ui-day-text">Day 1</span>
+    <div id="ui-emerg-box"></div>
+    <p id="ui-scenario-text" style="font-size:17px;"></p>
+    <div class="options-list" id="ui-options"></div>
+    <div id="ui-feedback" class="feedback"></div>
+    <button class="next-btn" id="ui-btn-next" onclick="handleNext()">Take a Deep Breath & Continue</button>
+  </div>
+</div>
+
+<div class="shell hidden" id="screen-result">
+  <div class="card" style="text-align:center;">
+    <h1>Week's End Report</h1>
+    <div id="res-score" style="font-size:48px; font-weight:700; color:var(--accent); margin:10px 0;"></div>
+    <p id="res-msg" style="color:var(--ink2); margin-bottom:2rem; line-height:1.8;"></p>
+    <button class="opt-btn" style="width:100%; text-align:center;" onclick="location.reload()">Live Another Week</button>
+  </div>
+</div>
+
+<script>
+/**
+ * Life with French Bulldog: 12 Scenarios + 2 Emergencies
+ * Fisher-Yates shuffle for choice order
+ * One correct answer per scenario
+ */
+const POOL = [
+  // Slot 1: Irrigation System
+  [
+    { t: "You wake up to find the newly laid irrigation system completely dug up. Marcel sits proudly next to a pile of chewed plastic pipes.", choices: [
+      { text: "Calmly pick up the pipes, sigh deeply, and go to the hardware store for replacements.", pts: 1, fb: "The only safe option. You fix the pipes in silence while the dog watches, plotting its next move." },
+      { text: "Yell at the dog and point at the destroyed pipes.", pts: 0, fb: "Darling Wife of the house rushes out, hugging her 'little baby' and accusing you of traumatizing him." },
+      { text: "Try to make the dog replant the pipes by pushing its paws into the dirt.", pts: -1, fb: "The dog thinks this is a game, bites your finger, and Darling Wife scolds you for playing too rough." },
+      { text: "Spray the dog with the garden hose as punishment.", pts: 62, fb: "DIVORCE IMMINENT: Darling Wife of the house sees you 'drowning her angel'. You are banished to the shed." }
+    ]}
+  ],
+  // Slot 2: Flower Bed
+  [
+    { t: "Marcel has flattened your prize-winning petunias to create a personal, sun-warmed bed. He is snoring loudly.", choices: [
+      { text: "Carefully plant new petunias around the sleeping dog, accepting this patch is now his domain.", pts: 1, fb: "Acceptance is key. The dog sleeps peacefully, and you manage to save three flowers." },
+      { text: "Pick the dog up and move him to the grass.", pts: 0, fb: "He immediately runs back, flattens more flowers. Darling Wife says he 'prefers the aesthetics'." },
+      { text: "Put a small fence around the flower bed.", pts: -1, fb: "Marcel bulldozes the fence in seconds. Darling Wife praises his 'incredible strength'." },
+      { text: "Threaten to turn the dog into a pair of slippers.", pts: 62, fb: "EVICTION: Darling Wife of the house heard you. Your bags are packed and waiting on the porch." }
+    ]}
+  ],
+  // Slot 3: Barbecue Toilet
+  [
+    { t: "You just finished building a beautiful brick barbecue. Marcel walks over, climbs on to the grill, and lays a blood streaked three-coiler.", choices: [
+      { text: "Quietly wash the plate with a sponge and pretend it never happened.", pts: 1, fb: "A wise choice. The barbecue is clean, and you avoid a lecture on 'natural canine instincts'." },
+      { text: "Shout 'No!' and clap your hands loudly.", pts: 0, fb: "The dog barks back. Darling Wife yells from the window that you are 'ruining his self-esteem'." },
+      { text: "Try to catch the rope in a bucket mid-stream.", pts: -1, fb: "You miss, get your shoes wet, and the dog looks at you with deep contempt." },
+      { text: "Lock the dog inside the tool shed.", pts: 62, fb: "ANIMAL CRUELTY: Darling Wife calls the police. You are now the one locked up." }
+    ]}
+  ],
+  // Slot 4: Clothesline
+  [
+    { t: "Marcel is swinging from the clothesline, his teeth firmly clamped onto your favorite shirt.", choices: [
+      { text: "Distract him by opening a bag of treats in the kitchen, letting the shirt fall.", pts: 1, fb: "Bribery works. The shirt is ruined, but you avoided a tug-of-war you would lose." },
+      { text: "Try to pull the shirt out of his mouth.", pts: 0, fb: "The shirt rips in half. Darling Wife says you shouldn't buy such 'flimsy fabric'." },
+      { text: "Chase him around the yard while he drags the shirt through the mud.", pts: -1, fb: "He is faster than you. Darling Wife laughs at your 'cute game of tag'." },
+      { text: "Peg the dog to the clothesline by his ears.", pts: 62, fb: "MONSTER: Darling Wife rescues her baby and you are permanently banned from doing laundry." }
+    ]}
+  ],
+  // Slot 5: Dead Rat Collection
+  [
+    { t: "You discover a neat pile of six dead rats on your pillow. Marcel sits nearby, expecting praise.", choices: [
+      { text: "Smile weakly, say 'Good boy,' and secretly dispose of the rats when he isn't looking.", pts: 1, fb: "You survived the horror. The dog feels appreciated, and your bed is mostly sanitary again." },
+      { text: "Scream in terror and throw the pillow across the room.", pts: 0, fb: "Darling Wife rushes in, comforts the dog for being startled, and ignores the rats." },
+      { text: "Try to explain to the dog that rats carry diseases.", pts: -1, fb: "He licks your face. Darling Wife says he is just 'providing for the family'." },
+      { text: "Force the dog to eat the rats as a lesson.", pts: 62, fb: "VET EMERGENCY: The dog gets sick, the vet bill is $2000, and Darling Wife makes you pay it." }
+    ]}
+  ],
+  // Slot 6: Other Dogs
+  [
+    { t: "Marcel is aggressively humping the head of your elderly, arthritic Golden Retriever.", choices: [
+      { text: "Gently lure Marcel away with a squeaky toy, saving the Golden Retriever's dignity.", pts: 1, fb: "Crisis averted. The Golden Retriever gives you a look of profound gratitude." },
+      { text: "Push Marcel off the Golden Retriever.", pts: 0, fb: "He immediately switches to humping your leg. Darling Wife calls it 'dominance play'." },
+      { text: "Yell at the Golden Retriever to stand up for himself.", pts: -1, fb: "The Golden Retriever looks sad. Darling Wife scolds you for victim-blaming." },
+      { text: "Spray them both with pepper spray to break it up.", pts: 62, fb: "BLINDNESS: Everyone is crying, including you. Darling Wife is calling a divorce lawyer." }
+    ]}
+  ],
+  // Slot 7: Sofa Destruction
+  [
+    { t: "You come home to find the living room looks like it snowed. Marcel has exploded a feather cushion and is sleeping in the debris.", choices: [
+      { text: "Silently get the vacuum cleaner and spend two hours cleaning up the feathers.", pts: 1, fb: "You accept your fate as the maid. The dog sleeps through the noise, dreaming of more cushions." },
+      { text: "Wake the dog up and show him the destroyed cushion.", pts: 0, fb: "He yawns and goes back to sleep. Darling Wife says he was 'just nesting'." },
+      { text: "Try to stuff the feathers back into the ruined casing.", pts: -1, fb: "It looks terrible. Darling Wife complains about your poor sewing skills." },
+      { text: "Glue the feathers to the dog to make him look like a chicken.", pts: 62, fb: "HUMILIATION: Darling Wife is furious. You spend the night sleeping in the bathtub." }
+    ]}
+  ],
+  // Slot 8: Dinner Theft
+  [
+    { t: "You turn your back for one second, and Marcel swallows your entire wagyu tomahawk steak whole off the dining table.", choices: [
+      { text: "Sigh, make yourself a peanut butter sandwich, and watch him digest your expensive dinner.", pts: 1, fb: "A tragic but peaceful resolution. You are hungry, but the house is quiet." },
+      { text: "Try to pry his mouth open to get the steak back.", pts: 0, fb: "It's gone. Darling Wife says you shouldn't have left it 'unattended'." },
+      { text: "Demand the dog apologizes.", pts: -1, fb: "He burps loudly. Darling Wife thinks it's the cutest thing she's ever seen." },
+      { text: "Hold the dog upside down and shake him until he coughs it up.", pts: 62, fb: "HEIMLICH HORROR: Darling Wife tackles you to the ground to save her 'choking baby'." }
+    ]}
+  ],
+  // Slot 9: Great Escape
+  [
+    { t: "Marcel has dug a hole under the fence and is currently terrorizing the neighborhood mailman.", choices: [
+      { text: "Run outside with a piece of cheese and trade it for the mailman's safety.", pts: 1, fb: "Cheese diplomacy works. The mailman lives to deliver another day." },
+      { text: "Yell at the dog to come back immediately.", pts: 0, fb: "He ignores you completely. Darling Wife says he just 'wanted to say hello'." },
+      { text: "Apologize to the mailman while the dog bites his ankles.", pts: -1, fb: "The mailman pepper-sprays you by mistake. The dog escapes unharmed." },
+      { text: "Let the dog eat the mailman to teach the postal service a lesson.", pts: 62, fb: "FELONY: The FBI is involved. You are charged with using a biological weapon." }
+    ]}
+  ],
+  // Slot 10: Muddy Return
+  [
+    { t: "Marcel returns from his escape covered in thick, black swamp mud and runs straight for the white carpets.", choices: [
+      { text: "Dive tackle the dog in the hallway and carry him straight to the bathtub.", pts: 1, fb: "You ruin your own clothes, but the carpet is saved. A noble sacrifice." },
+      { text: "Try to block his path with your body.", pts: 0, fb: "He runs between your legs, leaving muddy streaks everywhere. Darling Wife calls it 'modern art'." },
+      { text: "Throw a towel over him like a net.", pts: -1, fb: "He shakes the towel off, spraying mud on the walls. Darling Wife blames your 'aggressive technique'." },
+      { text: "Lock him outside in the freezing rain to wash off.", pts: 62, fb: "NEGLECT: Darling Wife wraps him in a heated blanket and locks YOU outside in the rain." }
+    ]}
+  ],
+  // Slot 11: Vet Waiting Room
+  [
+    { t: "At the vet, Marcel is screaming like a human child because another dog looked at him.", choices: [
+      { text: "Feed him a continuous stream of treats until his mouth is too full to scream.", pts: 1, fb: "Expensive, but effective. The waiting room is finally quiet." },
+      { text: "Try to shush him by putting your finger to your lips.", pts: 0, fb: "He screams louder. Darling Wife says he is 'expressing his trauma'." },
+      { text: "Apologize loudly to everyone in the waiting room.", pts: -1, fb: "Nobody cares about your apology. They just want the noise to stop." },
+      { text: "Put a muzzle on him made of duct tape.", pts: 62, fb: "ABUSE: The vet calls animal control. You are banned from the clinic forever." }
+    ]}
+  ],
+  // Slot 12: Midnight Zoomies
+  [
+    { t: "It is 3 AM. Marcel is running laps around the bedroom, bouncing off your face every time he passes the bed.", choices: [
+      { text: "Pull the blanket over your head and wait for the storm to pass.", pts: 1, fb: "Survival mode activated. You get bruised, but you eventually fall back asleep." },
+      { text: "Turn on the lights and try to catch him.", pts: 0, fb: "You trip over a shoe and break your toe. Darling Wife says you 'ruined his fun'." },
+      { text: "Yell 'Go to sleep!' at the top of your lungs.", pts: -1, fb: "Darling Wife wakes up furious at YOU for shouting, while the dog continues running." },
+      { text: "Throw the dog out the second-story window.", pts: 62, fb: "MURDER: You are going to prison for a very long time. Darling Wife testifies against you." }
+    ]}
+  ]
+];
+
+const EMERGENCIES = [
+  { t: "EMERGENCY: You had friends over for a barbecue yesterday. Everyone had a great time. You did everything to make sure the fire was well and truly dead. It's 2 a.m. and, after furiously digging a 60 cm hole, Marcel has proved you wrong. He has flicked the last ember into the bushes and now a fire is smouldering into life.", isEmerg: true, choices: [
+    { text: "Wake everyone up and act immediately. Call emergency services (000 in Australia) and report the location of the fire. Grab water, dirt, or a fire extinguisher and try to smother the smouldering patch only if it’s still small and safe to approach. Keep everyone together, move cars and gas bottles away from the area, and prepare to evacuate if the wind changes or flames spread. Don’t assume it’s out until firefighters confirm it.", pts: 3, fb: "SAVED! The fire brigade arrive in ten minutes, by which time the fire is well and truly out. Darling Wife calls you a hero." },
+    { text: "Just leave it. It’s probably only a tiny ember and the night air will put it out eventually.", pts: -100, fb: "TRAGEDY: It doesn't go out, Your house is burnt to the ground." },
+    { text: "Argue with Marcel about whose fault it is while the fire keeps spreading, instead of doing anything to stop it or calling for help.", pts: -100, fb: "GHOST TOWN: The fire spreads and gets out of control, eventually destroying the whole town." },
+    { text: "Pour some petrol on it so it burns fast and gets rid of the dry bushes around it..", pts: -100, fb: "FRONT PAGE!: You make the national news. Darling wife and you are pictured scurrying into the court house, a smiling Marcel in your arms." }
+  ]},
+  { t: "EMERGENCY: Marcel swallowed a squeaker from a toy and is now choking and turning blue!", isEmerg: true, choices: [
+    { text: "Perform the canine Heimlich maneuver immediately.", pts: 3, fb: "HEROIC! The squeaker flies out. The dog breathes again, and Darling Wife weeps with gratitude." },
+    { text: "Try to pull it out with your bare fingers.", pts: -100, fb: "FATAL MISTAKE: You push the squeaker further down. The dog suffocates." },
+    { text: "Call the vet and ask for advice over the phone.", pts: -100, fb: "TOO LATE: By the time the vet answers, the dog has stopped breathing." },
+    { text: "Run away and pretend you didn't see anything.", pts: -100, fb: "MONSTER: Darling Wife finds the dog. She knows you were there. Your life is over." }
+  ]}
+];
+
+let state = { score: 0, idx: 0, activeSet: [] };
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function startGame() {
+  state.score = 0;
+  state.idx = 0;
+  // Get 12 random scenarios from pool
+  state.activeSet = POOL.map(slot => slot[Math.floor(Math.random() * slot.length)]);
+  // Inject Emergencies at positions 5 and 11
+  state.activeSet.splice(5, 0, EMERGENCIES[0]);
+  state.activeSet.splice(11, 0, EMERGENCIES[1]);
+
+  document.getElementById('screen-intro').classList.add('hidden');
+  document.getElementById('screen-game').classList.remove('hidden');
+  render();
+}
+
+function render() {
+  const current = state.activeSet[state.idx];
+  document.getElementById('stat-progress').innerText = `Scenario ${state.idx + 1}/14`;
+  document.getElementById('stat-score').innerText = `Sanity: ${state.score} 🐕`;
+  document.getElementById('ui-scenario-text').innerText = current.t;
+  
+  // Calculate day (0-4 = Day 1, 5-9 = Day 2, 10-14 = Day 3, etc.)
+  const dayNum = Math.floor(state.idx / 2) + 1;
+  document.getElementById('ui-day-text').innerText = `Day ${dayNum}`;
+  
+  const emerg = document.getElementById('ui-emerg-box');
+  emerg.innerHTML = current.isEmerg ? `<span class="emerg-tag">🚨 CRITICAL INCIDENT 🚨</span>` : "";
+
+  const box = document.getElementById('ui-options');
+  box.innerHTML = "";
+  
+  // Fisher-Yates shuffle for choice order
+  const opts = shuffle([...current.choices]);
+  opts.forEach(o => {
+    const b = document.createElement('button');
+    b.className = "opt-btn";
+    b.innerText = o.text;
+    b.onclick = () => handleChoice(o);
+    box.appendChild(b);
+  });
+
+  document.getElementById('ui-feedback').style.display = 'none';
+  document.getElementById('ui-btn-next').style.display = 'none';
+}
+
+function handleChoice(o) {
+  const fb = document.getElementById('ui-feedback');
+  fb.innerText = o.fb;
+  fb.style.display = 'block';
+
+  if (o.pts === -100) {
+    fb.className = "feedback fb-62";
+    document.getElementById('ui-btn-next').innerText = "View Results";
+    state.score = -50;
+    state.idx = 99; // Force end
+  } else if (o.pts === 62) {
+    fb.className = "feedback fb-62";
+    fb.innerText += " (Try a different choice if you want to survive!)";
+    return; // Don't advance
+  } else {
+    state.score += o.pts;
+    fb.className = `feedback fb-${o.pts === 1 ? '1' : (o.pts === 3 ? '1' : (o.pts === 0 ? '0' : 'neg1'))}`;
+  }
+
+  document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+  document.getElementById('ui-btn-next').style.display = 'block';
+}
+
+function handleNext() {
+  state.idx++;
+  if (state.idx < state.activeSet.length) {
+    render();
+  } else {
+    showResults();
+  }
+}
+
+function showResults() {
+  document.getElementById('screen-game').classList.add('hidden');
+  document.getElementById('screen-result').classList.remove('hidden');
+  
+  const msg = document.getElementById('res-msg');
+  const score = document.getElementById('res-score');
+  score.innerText = state.score;
+
+  if (state.score >= 15) {
+    msg.innerText = "🏆 SAINT OF PATIENCE: You survived the week with your sanity intact! You mastered the art of appeasement, strategic bribery, and silent suffering. Darling Wife of the house is impressed. You deserve a vacation.";
+  } else if (state.score >= 8) {
+    msg.innerText = "🐕 BATTLE-HARDENED SURVIVOR: You made it through the week bruised, muddy, and exhausted, but alive. You've learned that sometimes the best strategy is simply acceptance. The dog still owns you, but you've made peace with it.";
+  } else if (state.score >= 0) {
+    msg.innerText = "😰 BARELY BREATHING: You survived, but just barely. Your clothes are ruined, your pride is shattered, and you're questioning every life choice that led you here. Darling Wife of the house still loves her 'little baby' more than you.";
+  } else {
+    msg.innerText = "💔 TOTAL BREAKDOWN: You didn't make it. The dog won. Darling Wife of the house is furious. Your belongings are in the driveway. Time to start over somewhere far away from French Bulldogs.";
+  }
+}
+</script>
+
+</body>
+</html>
