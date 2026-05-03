@@ -189,15 +189,15 @@ const POOL = [
 const EMERGENCIES = [
   { t: "EMERGENCY: It's 2 a.m. you wake to the smell of burning eucalyptus. You had a barbecue last night and did everything right to make sure the fire was completely extinguished. But you didn't count on Marcel digging 60 cm into the ground and digging up the last ember and flicking it into a pile of dried leaves. They've started smoldering.", isEmerg: true, choices: [
     { text: "Call emergency services and report the location. Grab water and dirt and try to smother the smouldering patch. Keep everyone together, move cars and gas bottles away from the area.", pts: 3, fb: "SAVED! The fire brigade arrive in ten minutes, confirmed the fire was completely out, and congratulated you on your exemplary fire-fighting skills . Darling Wife calls you a hero." },
-    { text: "Just leave it. It’s probably only a tiny ember and the night air will put it out eventually.", pts: -100, fb: "TRAGEDY: It doesn't go out, Your house is burnt to the ground." },
-    { text: "Argue with Marcel about whose fault it is while the smoulder turns into a fire and spreads.", pts: -100, fb: "GHOST TOWN: The fire spreads and gets out of control, eventually destroying the whole town." },
-    { text: "Pour some petrol on it so it burns fast and gets rid of the dry bushes around it..", pts: -100, fb: "FRONT PAGE!: You make the national news. Darling wife and you are pictured scurrying into the court house, a smiling Marcel in your arms." }
+    { text: "Just leave it. It’s probably only a tiny ember and the night air will put it out eventually.", pts: -20, fb: "TRAGEDY: It doesn't go out, Your house is burnt to the ground." },
+    { text: "Argue with Marcel about whose fault it is while the smoulder turns into a fire and spreads.", pts: -20, fb: "GHOST TOWN: The fire spreads and gets out of control, eventually destroying the whole town." },
+    { text: "Pour some petrol on it so it burns fast and gets rid of the dry bushes around it..", pts: -20, fb: "FRONT PAGE!: You make the national news. Darling wife and you are pictured scurrying into the court house, a smiling Marcel in your arms." }
   ]},
   { t: "EMERGENCY: Marcel swallowed a squeaker from a toy and is now choking and turning blue!", isEmerg: true, choices: [
     { text: "Perform the canine Heimlich maneuver immediately.", pts: 3, fb: "HEROIC! The squeaker flies out. The dog breathes again, and Darling Wife weeps with gratitude." },
-    { text: "Try to pull it out with your bare fingers.", pts: -100, fb: "FATAL MISTAKE: You push the squeaker further down. The dog suffocates." },
-    { text: "Call the vet and ask for advice over the phone.", pts: -100, fb: "TOO LATE: By the time the vet answers, the dog has stopped breathing." },
-    { text: "Run away and pretend you didn't see anything.", pts: -100, fb: "MONSTER: Darling Wife finds the dog. She knows you were there. Your life is over." }
+    { text: "Try to pull it out with your bare fingers.", pts: -20, fb: "FATAL MISTAKE: You push the squeaker further down. The dog suffocates." },
+    { text: "Google 'How do I remove an obstruction from the throat of an idiotic French Bulldog.", pts: -20, fb: "TOO LATE: By the time you find an answer, the dog has stopped breathing. Darling Wife found the search query and 'wants to talk'." },
+    { text: "Run away and pretend you didn't see anything.", pts: -20, fb: "MONSTER: Darling Wife finds the dog. She knows you were there. T." }
   ]}
 ];
 
@@ -260,10 +260,10 @@ function handleChoice(o) {
   fb.innerText = o.fb;
   fb.style.display = 'block';
 
-  if (o.pts === -100) {
+  if (o.pts === -20) {
     fb.className = "feedback fb-62";
     document.getElementById('ui-btn-next').innerText = "View Results";
-    state.score = -50;
+    state.score = Minus a lot;
     state.idx = 99; // Force end
   } else if (o.pts === 62) {
     fb.className = "feedback fb-62";
