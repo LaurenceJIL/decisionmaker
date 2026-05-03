@@ -27,8 +27,7 @@ h1{font-size:26px;margin-bottom:0.5rem;text-align:center;font-weight:700;color:v
 .feedback{margin-top:1.5rem;padding:1.25rem;border-radius:10px;display:none;font-size:15px;border-left:5px solid transparent;}
 .fb-1{background:#E8F5E9;color:#2E7D32;border-color:var(--success);}
 .fb-0{background:#F5F5F5;color:var(--ink2);border-color:#D1C4B0;}
-.fb-neg1{background:#FFF3E0;color:#E65100;border-color:var(--warn);}
-.fb-62{background:#FFEBEE;color:#B71C1C;border-color:var(--danger);animation:shake 0.4s ease;}
+.fb-neg{background:#FFEBEE;color:#B71C1C;border-color:var(--danger);animation:shake 0.4s ease;}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
 .next-btn{margin-top:1.5rem;width:100%;background:var(--ink);color:white;border:none;padding:14px;border-radius:10px;font-weight:600;cursor:pointer;display:none;}
 .emerg-tag{background:var(--danger);color:white;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;display:inline-block;margin-bottom:10px;}
@@ -40,14 +39,14 @@ h1{font-size:26px;margin-bottom:0.5rem;text-align:center;font-weight:700;color:v
 <div class="shell" id="screen-intro">
   <div class="card">
     <h1>🐾 Life with French Bulldog 🐾</h1>
-    <p class="intro-text">Welcome to the world of Marcel.</p>
+    <p class="intro-text">Welcome to the world of Marcel. Can you survive the week?</p>
     <button class="opt-btn" style="width:100%; text-align:center; background:var(--accent); color:white; font-weight:700;" onclick="startGame()">Welcome Home (Help me...)</button>
   </div>
 </div>
 
 <div class="shell hidden" id="screen-game">
   <div class="ui-bar">
-    <div id="stat-progress">Scenario 1/14</div>
+    <div id="stat-progress">Scenario 1/23</div>
     <div id="stat-score">Sanity: 0 🐕</div>
   </div>
   <div class="card">
@@ -71,133 +70,209 @@ h1{font-size:26px;margin-bottom:0.5rem;text-align:center;font-weight:700;color:v
 
 <script>
 /**
- * Life with French Bulldog: 12 Scenarios + 2 Emergencies
- * Fisher-Yates shuffle for choice order
- * One correct answer per scenario
+ * Life with French Bulldog: modified scenario order and scoring
  */
 const POOL = [
-  // Slot 1: Irrigation System
-  [
-    { t: "You wake up to find the newly laid irrigation system completely dug up. Marcel sits proudly next to a pile of chewed plastic pipes.", choices: [
-      { text: "Calmly pick up the pipes, sigh deeply, and go to the hardware store for replacements.", pts: 1, fb: "The only safe option. You fix the pipes in silence while the dog watches, plotting its next move." },
-      { text: "Yell at the dog and point at the destroyed pipes.", pts: 0, fb: "Darling Wife of the house rushes out, hugging her 'little baby' and accusing you of traumatizing him." },
-      { text: "Try to make the dog replant the pipes by pushing its paws into the dirt.", pts: -1, fb: "The dog thinks this is a game, bites your finger, and Darling Wife scolds you for playing too rough." },
-      { text: "Spray the dog with the garden hose as punishment.", pts: 62, fb: "DIVORCE IMMINENT: Darling Wife of the house sees you 'drowning her angel'. You are banished to the shed." }
-    ]}
-  ],
-  // Slot 2: Flower Bed
-  [
-    { t: "Marcel has flattened your prize-winning petunias to create a personal, sun-warmed bed. He is snoring loudly.", choices: [
-      { text: "Carefully plant new petunias around the sleeping dog, accepting this patch is now his domain.", pts: 1, fb: "Acceptance is key. The dog sleeps peacefully, and you manage to save three flowers." },
-      { text: "Pick the dog up and move him to the grass.", pts: 0, fb: "He immediately runs back, flattens more flowers. Darling Wife says he 'prefers the aesthetics'." },
-      { text: "Put a small fence around the flower bed.", pts: -1, fb: "Marcel bulldozes the fence in seconds. Darling Wife praises his 'incredible strength'." },
-      { text: "Threaten to turn the dog into a pair of slippers.", pts: 62, fb: "EVICTION: Darling Wife of the house heard you. Your bags are packed and waiting on the porch." }
-    ]}
-  ],
-  // Slot 3: Barbecue Blessing
+  // Slot 1 (Moving to index 4 for Pos 5): Barbecue Blessing
   [
     { t: "You just finished building a beautiful brick barbecue. Marcel walks over, climbs on to the grill, and starts to crimp out a #2.", choices: [
       { text: "Quietly wash the plate with a sponge and pretend it never happened.", pts: 1, fb: "A wise choice. The barbecue is clean, and you avoid a lecture on 'natural canine instincts'." },
-      { text: "Shout 'No!' and clap your hands loudly.", pts: 0, fb: "The dog barks back. Darling Wife yells from the window that you are 'ruining his self-esteem'." },
-      { text: "Try to catch the rope in a bucket mid-stream.", pts: -1, fb: "You knock the filth all over your shoes, and the dog looks at you with deep contempt and a smirk." },
-      { text: "Lock the dog inside the tool shed.", pts: 62, fb: "ANIMAL CRUELTY: Darling Wife calls the police. You are now the one locked up." }
+      { text: "Shout 'No!' and clap your hands loudly.", pts: -100, fb: "The dog barks back. Darling Wife yells from the window that you are 'ruining his self-esteem'." },
+      { text: "Try to catch the rope in a bucket mid-stream.", pts: -100, fb: "You knock the filth all over your shoes, and the dog looks at you with deep contempt." },
+      { text: "Lock the dog inside the tool shed.", pts: -100, fb: "ANIMAL CRUELTY: Darling Wife calls the police. You are now the one locked up." }
     ]}
   ],
-  // Slot 4: Clothesline
+  // Slot 2: Clothesline
   [
     { t: "Marcel is swinging from the clothesline, his teeth firmly clamped onto your favorite shirt.", choices: [
       { text: "Distract him by opening a bag of treats in the kitchen, letting the shirt fall.", pts: 1, fb: "Bribery works. The shirt is ruined, but you avoided a tug-of-war you would lose." },
-      { text: "Try to pull the shirt out of his mouth.", pts: 0, fb: "The shirt rips in half. Darling Wife says you shouldn't buy such 'flimsy fabric'." },
-      { text: "Chase him around the yard while he drags the shirt through the mud.", pts: -1, fb: "He is faster than you. Darling Wife laughs at your 'cute game of tag'." },
-      { text: "Peg the dog to the clothesline by his ears.", pts: 62, fb: "MONSTER: Darling Wife rescues her baby and you are permanently banned from doing laundry." }
+      { text: "Try to pull the shirt out of his mouth.", pts: -100, fb: "The shirt rips in half. Darling Wife says you shouldn't buy such 'flimsy fabric'." },
+      { text: "Chase him around the yard while he drags the shirt through the mud.", pts: -100, fb: "He is faster than you. Darling Wife laughs at your 'cute game of tag'." },
+      { text: "Peg the dog to the clothesline by his ears.", pts: -100, fb: "MONSTER: Darling Wife rescues her baby and you are permanently banned from doing laundry." }
     ]}
   ],
-  // Slot 5: Collection
+  // Slot 3: Collection
   [
     { t: "You discover a neat pile of six dead rats on your pillow. Marcel sits nearby, expecting praise.", choices: [
       { text: "Smile weakly, say 'Good boy,' and secretly dispose of the rats when he isn't looking.", pts: 1, fb: "You survived the horror. The dog feels appreciated, and your bed is mostly sanitary again." },
-      { text: "Scream in terror and throw the pillow across the room.", pts: 0, fb: "Darling Wife rushes in, comforts the dog for being startled, and ignores the rats." },
-      { text: "Try to explain to the dog that rats carry diseases.", pts: -1, fb: "He licks your face. Darling Wife says he is just 'providing for the family'." },
-      { text: "Force the dog to eat the rats as a lesson.", pts: 62, fb: "VET EMERGENCY: The dog gets sick, the vet bill is $2000, and Darling Wife makes you pay it." }
+      { text: "Scream in terror and throw the pillow across the room.", pts: -100, fb: "Darling Wife rushes in, comforts the dog for being startled, and ignores the rats." },
+      { text: "Try to explain to the dog that rats carry diseases.", pts: -100, fb: "He licks your face. Darling Wife says he is just 'providing for the family'." },
+      { text: "Force the dog to eat the rats as a lesson.", pts: -100, fb: "VET EMERGENCY: The dog gets sick, and Darling Wife makes you pay the bill." }
     ]}
   ],
-  // Slot 6: Other Dogs
+  // Slot 4: Other Dogs
   [
     { t: "Marcel is aggressively humping the head of your elderly, arthritic Golden Retriever.", choices: [
       { text: "Gently lure Marcel away with a squeaky toy, saving the Golden Retriever's dignity.", pts: 1, fb: "Crisis averted. The Golden Retriever gives you a look of profound gratitude." },
-      { text: "Push Marcel off the Golden Retriever.", pts: 0, fb: "He immediately switches to humping your leg. Darling Wife calls it 'dominance play'." },
-      { text: "Yell at the Golden Retriever to stand up for himself.", pts: -1, fb: "The Golden Retriever looks sad. Darling Wife scolds you for victim-blaming." },
-      { text: "Spray them both with pepper spray to break it up.", pts: 62, fb: "BLINDNESS: Everyone is crying, including you. Darling Wife is calling a divorce lawyer." }
+      { text: "Push Marcel off the Golden Retriever.", pts: -100, fb: "He immediately switches to humping your leg. Darling Wife calls it 'dominance play'." },
+      { text: "Yell at the Golden Retriever to stand up for himself.", pts: -100, fb: "The Golden Retriever looks sad. Darling Wife scolds you for victim-blaming." },
+      { text: "Spray them both with pepper spray to break it up.", pts: -100, fb: "BLINDNESS: Everyone is crying, including you. Darling Wife is calling a divorce lawyer." }
+    ]}
+  ],
+  // Slot 5 (POSITION 5): Irrigation System[cite: 1]
+  [
+    { t: "You wake up to find the newly laid irrigation system completely dug up. Marcel sits proudly next to a pile of chewed plastic pipes.", choices: [
+      { text: "Calmly pick up the pipes, sigh deeply, and go to the hardware store for replacements.", pts: 1, fb: "The only safe option. You fix the pipes in silence while the dog watches." },
+      { text: "Yell at the dog and point at the destroyed pipes.", pts: -100, fb: "Darling Wife of the house rushes out, hugging her 'little baby' and accusing you of traumatizing him." },
+      { text: "Try to make the dog replant the pipes by pushing its paws into the dirt.", pts: -100, fb: "The dog thinks this is a game and bites your finger. Wife scolds you." },
+      { text: "Spray the dog with the garden hose as punishment.", pts: -100, fb: "DIVORCE IMMINENT: Darling Wife of the house sees you 'drowning her angel'. You are banished to the shed." }
+    ]}
+  ],
+  // Slot 6 (POSITION 6): Flower Bed[cite: 1]
+  [
+    { t: "Marcel has flattened your prize-winning petunias to create a personal, sun-warmed bed. He is snoring loudly.", choices: [
+      { text: "Carefully plant new petunias around the sleeping dog, accepting this patch is now his domain.", pts: 1, fb: "Acceptance is key. The dog sleeps peacefully, and you manage to save three flowers." },
+      { text: "Pick the dog up and move him to the grass.", pts: -100, fb: "He immediately runs back, flattens more flowers. Darling Wife says he 'prefers the aesthetics'." },
+      { text: "Put a small fence around the flower bed.", pts: -100, fb: "Marcel bulldozes the fence in seconds. Darling Wife praises his 'strength'." },
+      { text: "Threaten to turn the dog into a pair of slippers.", pts: -100, fb: "EVICTION: Darling Wife of the house heard you. Your bags are packed." }
     ]}
   ],
   // Slot 7: Sofa Time
   [
     { t: "You come home to find the living room looks like it snowed. Marcel has exploded a feather cushion and is sleeping in the debris.", choices: [
-      { text: "Silently get the vacuum cleaner and spend two hours cleaning up the feathers.", pts: 1, fb: "You accept your fate as the maid. The dog sleeps through the noise, dreaming of more cushions." },
-      { text: "Wake the dog up and show him the destroyed cushion.", pts: 0, fb: "He yawns and goes back to sleep. Darling Wife says he was 'just nesting'." },
-      { text: "Try to stuff the feathers back into the ruined casing.", pts: -1, fb: "It looks terrible. Darling Wife complains about your poor sewing skills." },
-      { text: "Glue the feathers to the dog to make him look like a chicken.", pts: 62, fb: "HUMILIATION: Darling Wife is furious. You spend the night sleeping in the bathtub." }
+      { text: "Silently get the vacuum cleaner and spend two hours cleaning up the feathers.", pts: 1, fb: "You accept your fate as the maid. The dog sleeps through the noise." },
+      { text: "Wake the dog up and show him the destroyed cushion.", pts: -100, fb: "He yawns and goes back to sleep. Darling Wife says he was 'just nesting'." },
+      { text: "Try to stuff the feathers back into the ruined casing.", pts: -100, fb: "It looks terrible. Darling Wife complains about your poor sewing skills." },
+      { text: "Glue the feathers to the dog to make him look like a chicken.", pts: -100, fb: "HUMILIATION: Darling Wife is furious. You spend the night sleeping in the bathtub." }
     ]}
   ],
   // Slot 8: Dinner Time
   [
     { t: "You turn your back for one second, and Marcel swallows your entire wagyu tomahawk steak whole off the dining table.", choices: [
       { text: "Sigh, make yourself a peanut butter sandwich, and watch him digest your expensive dinner.", pts: 1, fb: "A tragic but peaceful resolution. You are hungry, but the house is quiet." },
-      { text: "Try to pry his mouth open to get the steak back.", pts: 0, fb: "It's gone. Darling Wife says you shouldn't have left it 'unattended'." },
-      { text: "Demand the dog apologizes.", pts: -1, fb: "He burps loudly. Darling Wife thinks it's the cutest thing she's ever seen." },
-      { text: "Hold the dog upside down and shake him until he coughs it up.", pts: 62, fb: "HEIMLICH HORROR: Darling Wife tackles you to the ground to save her 'choking baby'." }
+      { text: "Try to pry his mouth open to get the steak back.", pts: -100, fb: "It's gone. Darling Wife says you shouldn't have left it 'unattended'." },
+      { text: "Demand the dog apologizes.", pts: -100, fb: "He burps loudly. Darling Wife thinks it's the cutest thing she's ever seen." },
+      { text: "Hold the dog upside down and shake him until he coughs it up.", pts: -100, fb: "HEIMLICH HORROR: Darling Wife tackles you to the ground to save her 'choking baby'." }
     ]}
   ],
   // Slot 9: Great Escape
   [
     { t: "Marcel has dug a hole under the fence and is currently terrorizing the neighborhood mailman.", choices: [
       { text: "Run outside with a piece of cheese and trade it for the mailman's safety.", pts: 1, fb: "Cheese diplomacy works. The mailman lives to deliver another day." },
-      { text: "Yell at the dog to come back immediately.", pts: 0, fb: "He ignores you completely. Darling Wife says he just 'wanted to say hello'." },
-      { text: "Apologize to the mailman while the dog bites his ankles.", pts: -1, fb: "The mailman pepper-sprays you by mistake. The dog escapes unharmed." },
-      { text: "Let the dog eat the mailman to teach the postal service a lesson.", pts: 62, fb: "FELONY: The FBI is involved. You are charged with using a biological weapon." }
+      { text: "Yell at the dog to come back immediately.", pts: -100, fb: "He ignores you completely. Darling Wife says he just 'wanted to say hello'." },
+      { text: "Apologize to the mailman while the dog bites his ankles.", pts: -100, fb: "The mailman pepper-sprays you by mistake. The dog escapes unharmed." },
+      { text: "Let the dog eat the mailman to teach the postal service a lesson.", pts: -100, fb: "FELONY: The FBI is involved. You are charged with using a biological weapon." }
     ]}
   ],
   // Slot 10: Muddy Return
   [
     { t: "Marcel returns from his escape covered in thick, black swamp mud and runs straight for the white carpets.", choices: [
       { text: "Dive tackle the dog in the hallway and carry him straight to the bathtub.", pts: 1, fb: "You ruin your own clothes, but the carpet is saved. A noble sacrifice." },
-      { text: "Try to block his path with your body.", pts: 0, fb: "He runs between your legs, leaving muddy streaks everywhere. Darling Wife calls it 'modern art'." },
-      { text: "Throw a towel over him like a net.", pts: -1, fb: "He shakes the towel off, spraying mud on the walls. Darling Wife blames your 'aggressive technique'." },
-      { text: "Lock him outside in the freezing rain to wash off.", pts: 62, fb: "NEGLECT: Darling Wife wraps him in a heated blanket and locks YOU outside in the rain." }
+      { text: "Try to block his path with your body.", pts: -100, fb: "He runs between your legs, leaving muddy streaks everywhere." },
+      { text: "Throw a towel over him like a net.", pts: -100, fb: "He shakes the towel off, spraying mud on the walls." },
+      { text: "Lock him outside in the freezing rain to wash off.", pts: -100, fb: "NEGLECT: Darling Wife wraps him in a heated blanket and locks YOU outside." }
     ]}
   ],
   // Slot 11: Vet Waiting Room
   [
     { t: "At the vet, Marcel is screaming like a human child because another dog looked at him.", choices: [
       { text: "Feed him a continuous stream of treats until his mouth is too full to scream.", pts: 1, fb: "Expensive, but effective. The waiting room is finally quiet." },
-      { text: "Try to shush him by putting your finger to your lips.", pts: 0, fb: "He screams louder. Darling Wife says he is 'expressing his trauma'." },
-      { text: "Apologize loudly to everyone in the waiting room.", pts: -1, fb: "Nobody cares about your apology. They just want the noise to stop." },
-      { text: "Put a muzzle on him made of duct tape.", pts: 62, fb: "ABUSE: The vet calls animal control. You are banned from the clinic forever." }
+      { text: "Try to shush him by putting your finger to your lips.", pts: -100, fb: "He screams louder. Darling Wife says he is 'expressing trauma'." },
+      { text: "Apologize loudly to everyone in the waiting room.", pts: -100, fb: "Nobody cares about your apology. They just want the noise to stop." },
+      { text: "Put a muzzle on him made of duct tape.", pts: -100, fb: "ABUSE: The vet calls animal control. You are banned from the clinic forever." }
     ]}
   ],
   // Slot 12: Midnight Zoomies
   [
     { t: "It is 3 AM. Marcel is running laps around the bedroom, bouncing off your face every time he passes the bed.", choices: [
-      { text: "Pull the blanket over your head and wait for the storm to pass.", pts: 1, fb: "Survival mode activated. You get bruised, but you eventually fall back asleep." },
-      { text: "Turn on the lights and try to catch him.", pts: 0, fb: "You trip over a shoe and break your toe. Darling Wife says you 'ruined his fun'." },
-      { text: "Yell 'Go to sleep!' at the top of your lungs.", pts: -1, fb: "Darling Wife wakes up furious at YOU for shouting, while the dog continues running." },
-      { text: "Throw the dog out the second-story window.", pts: 62, fb: "MURDER: You are going to prison for a very long time. Darling Wife testifies against you." }
+      { text: "Pull the blanket over your head and wait for the storm to pass.", pts: 1, fb: "Survival mode activated. You get bruised, but eventually fall back asleep." },
+      { text: "Turn on the lights and try to catch him.", pts: -100, fb: "You trip over a shoe and break your toe. Darling Wife says you 'ruined his fun'." },
+      { text: "Yell 'Go to sleep!' at the top of your lungs.", pts: -100, fb: "Darling Wife wakes up furious at YOU for shouting." },
+      { text: "Throw the dog out the second-story window.", pts: -100, fb: "MURDER: You are going to prison. Darling Wife testifies against you." }
+    ]}
+  ],
+  // Slot 13: Rare Trainers
+  [
+    { t: "You left your brand new, limited edition trainers on the floor for a second. Marcel found them, and now they resemble a chew toy.", choices: [
+      { text: "Sigh, accept your fate, and buy a new pair (if you can find them).", pts: 1, fb: "A costly lesson, but peace is maintained. You now store all shoes in a locked cabinet." },
+      { text: "Yell at Marcel and try to salvage the trainers.", pts: -100, fb: "He thinks it's a game, tears off another piece. Darling Wife says you 'should have put them away'." },
+      { text: "Hide the evidence and pretend you never owned them.", pts: -100, fb: "Darling Wife finds the shredded remains. She's more upset about your lying than the shoes." },
+      { text: "Put the shredded trainers on Marcel's head as a hat.", pts: -100, fb: "FASHION CRIME: Darling Wife posts it online, and you become a meme. Marcel looks surprisingly regal." }
+    ]}
+  ],
+  // Slot 14: Parents-in-Law Visit
+  [
+    { t: "Your son's future parents-in-law are over for lunch. Marcel is giving an almost constant and very public display of licking his 'boy bits' at the dining table.", choices: [
+      { text: "Discreetly distract Marcel with a high-value treat in another room.", pts: 1, fb: "Crisis averted. The in-laws are none the wiser, and Marcel is happily occupied." },
+      { text: "Try to shoo him away with your foot under the table.", pts: -100, fb: "He takes it as an invitation to lick your foot instead. The in-laws notice." },
+      { text: "Loudly announce that Marcel is 'just cleaning himself'.", pts: -100, fb: "The in-laws exchange uncomfortable glances. Your son looks mortified." },
+      { text: "Join Marcel in licking your own 'boy bits' to show solidarity.", pts: -100, fb: "THERAPY NEEDED: The in-laws leave immediately. Your son disowns you." }
+    ]}
+  ],
+  // Slot 15: Barking Complaints
+  [
+    { t: "You receive a passive-aggressive note from a neighbor complaining that Marcel barks for hours on end in a high-pitched whiny bark when you're out.", choices: [
+      { text: "Investigate doggy daycare options or enrichment toys for when you're away.", pts: 1, fb: "A proactive approach. Your neighbors appreciate the effort, and Marcel might be happier." },
+      { text: "Ignore the note; it's just a dog being a dog.", pts: -100, fb: "The complaints escalate to official warnings. Your neighbors now glare at you." },
+      { text: "Leave a note back saying 'Mind your own business'.", pts: -100, fb: "A neighborhood feud begins. Marcel barks even louder in protest." },
+      { text: "Buy a shock collar and use it every time you leave.", pts: -100, fb: "ANIMAL CRUELTY: Darling Wife calls the police. You are now the one locked up." }
+    ]}
+  ],
+  // Slot 16: Garage Dog Biscuits
+  [
+    { t: "You discover Marcel in the garage, having somehow opened the 20 kg bag of dog biscuits and eaten most of it. He looks like a furry balloon.", choices: [
+      { text: "Immediately call the vet for advice on overeating and potential bloat.", pts: 1, fb: "Quick thinking! The vet gives instructions, and Marcel makes a slow recovery." },
+      { text: "Yell at him for being greedy and try to make him throw up.", pts: -100, fb: "He just looks confused and then farts loudly. Darling Wife says you 'traumatized him'." },
+      { text: "Leave him to 'sleep it off'.", pts: -100, fb: "VET EMERGENCY: Marcel is now lethargic and in pain. You rush him to the emergency clinic." },
+      { text: "Blame Darling Wife for leaving the bag accessible.", pts: -100, fb: "DIVORCE IMMINENT: She reminds you it's 'your dog' and 'your garage'." }
+    ]}
+  ],
+  // Slot 17: Post-Biscuit Diarrhea
+  [
+    { t: "The 20 kg bag of biscuits has taken its toll. Marcel has explosive diarrhea all over the living room carpet.", choices: [
+      { text: "Don a hazmat suit (metaphorically) and meticulously clean every inch.", pts: 1, fb: "A disgusting task, but the carpet is saved. You consider buying stock in carpet cleaner." },
+      { text: "Try to clean it with a single paper towel.", pts: -100, fb: "It smears everywhere. The smell is unbearable. Darling Wife refuses to enter the room." },
+      { text: "Blame the cat.", pts: -100, fb: "The cat looks at you with disdain. Darling Wife knows it was Marcel." },
+      { text: "Move out and leave the house to Marcel.", pts: -100, fb: "HOMELESS: You now live in a tent. Marcel sends you postcards from your old house." }
+    ]}
+  ],
+  // Slot 18: The 'Gift' for the Neighbor
+  [
+    { t: "After the barking complaints, you find Marcel has left a 'present' on the complaining neighbor's doorstep. It's unmistakably Marcel's work.", choices: [
+      { text: "Discreetly remove the 'present' and leave a sincere apology note with a gift basket.", pts: 1, fb: "A diplomatic solution. The neighbor is appeased, and you avoid further conflict." },
+      { text: "Pretend you don't see it and hope the neighbor thinks it's a stray dog's doing.", pts: -100, fb: "The neighbor installs a security camera. You are caught red-handed." },
+      { text: "Add another 'present' next to it to assert dominance.", pts: -100, fb: "NEIGHBORHOOD WAR: You are now enemies. Marcel barks triumphantly." },
+      { text: "Blame the neighbor's own dog.", pts: -100, fb: "ESCALATION: The neighbor retaliates by leaving their dog's 'presents' on your doorstep." }
+    ]}
+  ],
+  // Slot 19: The Uninvited Guest
+  [
+    { t: "You're having a quiet evening, and suddenly Marcel appears with a stray cat he's 'befriended'. The cat is now terrified and hiding under the sofa.", choices: [
+      { text: "Gently coax the cat out, ensure its safety, and try to find its owner or a shelter.", pts: 1, fb: "A humane approach. The cat is safe, and Marcel seems proud of his new friend." },
+      { text: "Let them 'sort it out'.", pts: -100, fb: "CHAOS: The cat and Marcel engage in a furious chase, destroying your living room." },
+      { text: "Try to make the cat and Marcel share a bowl of milk.", pts: -100, fb: "The cat scratches Marcel, and Marcel howls. Darling Wife blames you for the 'trauma'." },
+      { text: "Adopt the cat without telling Darling Wife.", pts: -100, fb: "MARITAL STRIFE: Darling Wife discovers the cat. You are now sleeping on the sofa with Marcel and the cat." }
+    ]}
+  ],
+  // Slot 20: The Art Critic
+  [
+    { t: "You've just finished painting a masterpiece. Marcel walks by, sniffs the wet canvas, and then lifts his leg to mark it as his own.", choices: [
+      { text: "Sigh, take a photo for posterity, and then try to salvage what's left of your art.", pts: 1, fb: "A unique collaboration. Your art now has a 'natural' element. Darling Wife calls it 'avant-garde'." },
+      { text: "Yell at Marcel and try to wipe off the pee with your hand.", pts: -100, fb: "It smears the paint and the pee. Your masterpiece is ruined, and your hand smells." },
+      { text: "Frame it as 'abstract expressionism' and try to sell it.", pts: -100, fb: "ART SCANDAL: The art world is outraged. You are banned from all galleries." },
+      { text: "Paint a portrait of Marcel doing the same thing.", pts: -100, fb: "OBSESSION: Darling Wife suggests you get a new hobby. Or a therapist." }
     ]}
   ]
 ];
 
 const EMERGENCIES = [
-  { t: "EMERGENCY: It's 2 a.m. you wake to the smell of burning eucalyptus. You had a barbecue last night and did everything right to make sure the fire was completely extinguished. But you didn't count on Marcel digging 60 cm into the ground and digging up the last ember and flicking it into a pile of dried leaves. They've started smoldering.", isEmerg: true, choices: [
-    { text: "Call emergency services and report the location. Grab water and dirt and try to smother the smouldering patch. Keep everyone together, move cars and gas bottles away from the area.", pts: 3, fb: "SAVED! The fire brigade arrive in ten minutes, confirmed the fire was completely out, and congratulated you on your exemplary fire-fighting skills . Darling Wife calls you a hero." },
-    { text: "Just leave it. It’s probably only a tiny ember and the night air will put it out eventually.", pts: -20, fb: "TRAGEDY: It doesn't go out, Your house is burnt to the ground." },
-    { text: "Argue with Marcel about whose fault it is while the smoulder turns into a fire and spreads.", pts: -20, fb: "GHOST TOWN: The fire spreads and gets out of control, eventually destroying the whole town." },
-    { text: "Pour some petrol on it so it burns fast and gets rid of the dry bushes around it..", pts: -20, fb: "FRONT PAGE!: You make the national news. Darling wife and you are pictured scurrying into the court house, a smiling Marcel in your arms." }
+  { t: "EMERGENCY: A barbecue ember Marcel dug up has started a fire in the leaves!", isEmerg: true, choices: [
+    { text: "Call emergency services, smother the fire, and move gas bottles.", pts: 3, fb: "SAVED! The fire brigade congratulate you. Darling Wife calls you a hero." },
+    { text: "Just leave it. It’s probably only a tiny ember.", pts: -50, fb: "TRAGEDY: Your house is burnt to the ground." },
+    { text: "Argue with Marcel about whose fault it is.", pts: -50, fb: "GHOST TOWN: The fire spreads and destroys the whole town." },
+    { text: "Pour some petrol on it so it burns fast.", pts: -50, fb: "FRONT PAGE!: You make the national news for all the wrong reasons." }
   ]},
-  { t: "EMERGENCY: Marcel swallowed a squeaker from a toy and is now choking and turning blue!", isEmerg: true, choices: [
-    { text: "Perform the canine Heimlich maneuver immediately.", pts: 3, fb: "HEROIC! The squeaker flies out. The dog breathes again, and Darling Wife weeps with gratitude." },
-    { text: "Try to pull it out with your bare fingers.", pts: -20, fb: "FATAL MISTAKE: You push the squeaker further down. The dog suffocates." },
-    { text: "Google 'How do I remove an obstruction from the throat of an idiotic French Bulldog.", pts: -20, fb: "TOO LATE: By the time you find an answer, the dog has stopped breathing. Darling Wife found the search query and 'wants to talk'." },
-    { text: "Run away and pretend you didn't see anything.", pts: -20, fb: "MONSTER: Darling Wife finds the dog. She knows you were there. T." }
+  { t: "EMERGENCY: Marcel swallowed a squeaker and is now choking!", isEmerg: true, choices: [
+    { text: "Perform the canine Heimlich maneuver immediately.", pts: 3, fb: "HEROIC! The squeaker flies out. Darling Wife weeps with gratitude." },
+    { text: "Try to pull it out with your bare fingers.", pts: -50, fb: "FATAL MISTAKE: You push the squeaker further down. The dog suffocates." },
+    { text: "Google 'How do I remove an obstruction'.", pts: -50, fb: "TOO LATE: By the time you find an answer, the dog has stopped breathing." },
+    { text: "Run away and pretend you didn't see anything.", pts: -50, fb: "MONSTER: Darling Wife finds the dog. She knows you were there." }
+  ]},
+  { t: "EMERGENCY: Marcel has gotten into the medicine cabinet and swallowed an entire bottle of your blood pressure medication!", isEmerg: true, choices: [
+    { text: "Immediately call the vet and poison control with the medication details.", pts: 3, fb: "QUICK THINKING! The vet induces vomiting, and Marcel recovers. Darling Wife praises your composure." },
+    { text: "Wait and see if he shows symptoms.", pts: -50, fb: "CRITICAL OVERDOSE: Marcel collapses. Emergency surgery costs $8,000, and he barely survives." },
+    { text: "Give him activated charcoal from the kitchen.", pts: -50, fb: "WRONG DOSAGE: You make it worse. The vet says you should have called immediately." },
+    { text: "Hide the empty bottle so Darling Wife doesn't find out.", pts: -50, fb: "COVERUP DISASTER: Marcel gets sicker, and when you finally confess, Darling Wife is furious." }
   ]}
 ];
 
@@ -214,11 +289,11 @@ function shuffle(arr) {
 function startGame() {
   state.score = 0;
   state.idx = 0;
-  // Get 12 random scenarios from pool
-  state.activeSet = POOL.map(slot => slot[Math.floor(Math.random() * slot.length)]);
-  // Inject Emergencies at positions 5 and 11
-  state.activeSet.splice(5, 0, EMERGENCIES[0]);
-  state.activeSet.splice(11, 0, EMERGENCIES[1]);
+  // Map scenarios (Scenario 1 & 2 are at Pool indices 4 & 5, which are positions 5 & 6)[cite: 1]
+  state.activeSet = POOL.map(slot => slot[0]);   // Inject Emergencies at Pos 7, Pos 14, and Pos 23
+  state.activeSet.splice(6, 0, EMERGENCIES[0]);
+  state.activeSet.splice(13, 0, EMERGENCIES[1]);
+  state.activeSet.splice(22, 0, EMERGENCIES[2]);
 
   document.getElementById('screen-intro').classList.add('hidden');
   document.getElementById('screen-game').classList.remove('hidden');
@@ -227,11 +302,10 @@ function startGame() {
 
 function render() {
   const current = state.activeSet[state.idx];
-  document.getElementById('stat-progress').innerText = `Scenario ${state.idx + 1}/14`;
+  document.getElementById('stat-progress').innerText = `Scenario ${state.idx + 1}/23`;
   document.getElementById('stat-score').innerText = `Sanity: ${state.score} 🐕`;
   document.getElementById('ui-scenario-text').innerText = current.t;
   
-  // Calculate day (0-4 = Day 1, 5-9 = Day 2, 10-14 = Day 3, etc.)
   const dayNum = Math.floor(state.idx / 2) + 1;
   document.getElementById('ui-day-text').innerText = `Day ${dayNum}`;
   
@@ -241,7 +315,6 @@ function render() {
   const box = document.getElementById('ui-options');
   box.innerHTML = "";
   
-  // Fisher-Yates shuffle for choice order
   const opts = shuffle([...current.choices]);
   opts.forEach(o => {
     const b = document.createElement('button');
@@ -260,18 +333,14 @@ function handleChoice(o) {
   fb.innerText = o.fb;
   fb.style.display = 'block';
 
-  if (o.pts === -20) {
-    fb.className = "feedback fb-62";
-    document.getElementById('ui-btn-next').innerText = "View Results";
-    state.score = Minus a lot;
-    state.idx = 99; // Force end
-  } else if (o.pts === 62) {
-    fb.className = "feedback fb-62";
-    fb.innerText += " (Try a different choice if you want to survive!)";
-    return; // Don't advance
+  if (o.pts <= -50) {
+    fb.className = "feedback fb-neg";
+    state.score += o.pts;
+    document.getElementById('ui-btn-next').innerText = "View Final Report";
+    state.idx = 99; 
   } else {
     state.score += o.pts;
-    fb.className = `feedback fb-${o.pts === 1 ? '1' : (o.pts === 3 ? '1' : (o.pts === 0 ? '0' : 'neg1'))}`;
+    fb.className = `feedback fb-${o.pts === 1 || o.pts === 3 ? '1' : 'neg'}`;
   }
 
   document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
@@ -279,6 +348,10 @@ function handleChoice(o) {
 }
 
 function handleNext() {
+  if (state.idx === 99) {
+    showResults();
+    return;
+  }
   state.idx++;
   if (state.idx < state.activeSet.length) {
     render();
@@ -296,13 +369,13 @@ function showResults() {
   score.innerText = state.score;
 
   if (state.score >= 15) {
-    msg.innerText = "🏆 SAINT OF PATIENCE: You survived the week with your sanity intact! You mastered the art of appeasement, strategic bribery, and silent suffering. Darling Wife of the house is impressed. You deserve a vacation.";
-  } else if (state.score >= 8) {
-    msg.innerText = "🐕 BATTLE-HARDENED SURVIVOR: You made it through the week bruised, muddy, and exhausted, but alive. You've learned that sometimes the best strategy is simply acceptance. The dog still owns you, but you've made peace with it.";
-  } else if (state.score >= 0) {
-    msg.innerText = "😰 BARELY BREATHING: You survived, but just barely. Your clothes are ruined, your pride is shattered, and you're questioning every life choice that led you here. Darling Wife of the house still loves her 'little baby' more than you.";
+    msg.innerText = "🏆 SAINT OF PATIENCE: You survived with your sanity intact! Darling Wife of the house is genuinely impressed. Marcel has finally met his match.";
+  } else if (state.score >= 5) {
+    msg.innerText = "😰 BARELY BREATHING: You survived, but your pride is shattered. Darling Wife still loves her 'baby' more than you, and she's right.";
+  } else if (state.score >= -50) {
+    msg.innerText = "😱 HANGING BY A THREAD: One more incident and you're done. Darling Wife is considering couples therapy with Marcel.";
   } else {
-    msg.innerText = "💔 TOTAL BREAKDOWN: You didn't make it. The dog won. Darling Wife of the house is furious. Your belongings are in the driveway. Time to start over somewhere far away from French Bulldogs.";
+    msg.innerText = "💔 TOTAL BREAKDOWN: The dog won. Your belongings are in the driveway. Time to move away. Marcel sends you a sympathy card.";
   }
 }
 </script>
