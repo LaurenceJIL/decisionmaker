@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Music Festival Manager — B1 English Challenge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Sans+3:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0c12;--bg2:#121622;--bg3:#1a2030;
+  --gold:#f39c12;--gold2:#fbc531;--gold3:#fef5d1;
+  --teal:#00d2d3;--teal2:#48dbfb;
+  --purple:#8e44ad;--purple2:#9b59b6;
+  --green:#27ae60;--green2:#2ecc71;
+  --red:#e74c3c;--red2:#ff7675;
+  --white:#ffffff;--txt:#bdc3c7;
+  --font-serif:'Playfair Display',serif;--font-sans:'Source Sans 3',sans-serif;
+  --r:12px;--shadow:0 10px 30px rgba(0,0,0,0.7);
+}
+body{background:var(--bg);color:var(--txt);font-family:var(--font-sans);display:flex;justify-content:center;align-items:center;min-height:100vh;padding:20px;overflow-x:hidden}
+
+.card{background:var(--bg2);width:100%;max-width:850px;border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;border:1px solid rgba(255,255,255,0.05);display:none;animation:fadeIn 0.4s ease forwards}
+.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+header{background:var(--bg3);padding:30px;border-bottom:4px solid var(--purple);text-align:center}
+h1{font-family:var(--font-serif);color:var(--white);font-size:2rem;letter-spacing:1px;text-transform:uppercase}
+.subtitle{font-size:0.9rem;text-transform:uppercase;letter-spacing:3px;color:var(--teal);font-weight:bold;margin-top:8px}
+
+.content{padding:35px}
+.story-text{font-size:1.15rem;line-height:1.7;margin-bottom:25px;color:var(--white)}
+
+.grid-choice{display:grid;grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));gap:20px;margin-bottom:30px}
+.fest-opt{background:var(--bg3);border:2px solid transparent;border-radius:var(--r);padding:25px;cursor:pointer;transition:0.3s;text-align:center;position:relative}
+.fest-opt:hover{border-color:var(--purple);transform:translateY(-5px);background:rgba(142,68,173,0.1)}
+.fest-opt .icon{font-size:3rem;margin-bottom:12px;display:block}
+.fest-opt h3{color:var(--white);margin-bottom:5px;font-size:1.3rem}
+
+.options-stack{display:flex;flex-direction:column;gap:12px}
+.opt-btn{background:var(--bg3);border:1px solid rgba(255,255,255,0.1);padding:18px;border-radius:var(--r);color:var(--white);font-size:1.05rem;cursor:pointer;text-align:left;transition:0.2s;display:flex;align-items:center}
+.opt-btn:hover{background:rgba(255,255,255,0.05);border-color:var(--teal)}
+.opt-btn span{margin-right:15px;background:var(--bg);width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;color:var(--teal);font-weight:bold;flex-shrink:0;font-size:0.9rem;border:1px solid var(--teal)}
+
+.feedback{margin-top:25px;padding:25px;border-radius:var(--r);display:none;animation:slideUp 0.3s ease}
+@keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.fb-good{background:rgba(39,174,96,0.15);border:1px solid var(--green);color:var(--green2)}
+.fb-bad{background:rgba(231,76,60,0.15);border:1px solid var(--red);color:var(--red2)}
+.fb-retry{background:rgba(243,156,18,0.15);border:1px solid var(--gold);color:var(--gold2)}
+
+.btn-next{width:100%;margin-top:20px;padding:18px;background:var(--purple);border:none;border-radius:var(--r);color:var(--white);font-weight:900;font-size:1.1rem;cursor:pointer;text-transform:uppercase;letter-spacing:2px;transition:0.3s}
+.btn-next:hover{background:var(--teal);color:var(--bg)}
+
+.stats-bar{display:flex;justify-content:space-between;padding:15px 30px;background:rgba(0,0,0,0.4);font-weight:bold;font-size:0.9rem;border-bottom:1px solid rgba(255,255,255,0.1)}
+.stat-item .val{color:var(--teal); font-size: 1.3rem; letter-spacing: 1px; margin-left:8px}
+
+.emergency-mode header{background:var(--red); border-bottom-color: var(--white);}
+.emergency-mode h1{color:white;}
+.emergency-mode .subtitle{color:var(--gold3)}
+</style>
+</head>
+<body>
+
+<div class="card active" id="fest-screen">
+  <header>
+    <h1>Music Festival Manager</h1>
+    <div class="subtitle">Town Council Initiative</div>
+  </header>
+  <div class="content">
+    <p class="story-text">The Town Council wants to attract tourists and has insisted on a music festival. As the newly appointed tourism manager, you must organise an event and lead it to success. Every decision counts!</p>
+    <div class="grid-choice" id="fest-choices"></div>
+  </div>
+</div>
+
+<div class="card" id="game-screen">
+  <div class="stats-bar">
+    <div class="stat-item">PROGRESS <span class="val" id="cur-step">1/12</span></div>
+    <div class="stat-item" id="tally-label">NOTES: <span class="val" id="cur-score"></span></div>
+  </div>
+  <header id="game-header">
+    <h1 id="q-title">Stage 1</h1>
+  </header>
+  <div class="content">
+    <p class="story-text" id="q-desc"></p>
+    <div class="options-stack" id="options-cont"></div>
+    <div class="feedback" id="fb-box">
+      <p id="fb-text"></p>
+      <button class="btn-next" onclick="nextStep()" id="next-btn-el">Continue</button>
+      <button class="btn-next" style="display:none; background:var(--red); color:white" id="gameover-btn-el" onclick="restartGame()">Restart Career</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="win-screen">
+  <header>
+    <h1>The Final Review</h1>
+    <div class="subtitle" id="fest-title-final">Festival Name</div>
+  </header>
+  <div class="content" style="text-align:center">
+    <div style="font-size:5rem; margin-bottom:25px" id="final-emoji-display">🏆</div>
+    <h2 id="w-title" style="color:var(--white); font-size:1.8rem">Performance Review</h2>
+    <p class="story-text" id="w-desc" style="margin-top:25px"></p>
+    <button class="btn-next" onclick="restartGame()">Manage Another Genre</button>
+  </div>
+</div>
+
+<script>
+const FESTIVALS = [
+  { id: 'indie', title:'Echoes in the Park-Indie', icon: '🎸', emoji: '🎵' },
+  { id: 'metal', title:'Iron Thunder-Metal', icon: '🤘', emoji: '🎸' },
+  { id: 'jazz', title:'Blue Note Nights-Jazz', icon: '🎷', emoji: '🎶' },
+  { id: 'classical', title:'Symphony Under Stars-Classical', icon: '🎻', emoji: '🎼' },
+  { id: 'rap', title:'Block Life-Rap', icon: '🎤', emoji: '🎧' },
+  { id: 'pop', title:'Neon Pulse-Pop', icon: '✨', emoji: '🎹' }
+];
+
+const GAME_DATA = {
+  indie: {
+    scenarios: [
+      { q: "The Headliner", d: "A popular indie band is available, but they refuse to play if there are corporate sponsors. How do you fund the stage?", opts: [
+        { t: "Crowdfunding: Ask fans to support the 'pure' experience.", pts: 3, fb: "Brilliant! The fans feel ownership of the festival, and the band is happy to play for an authentic crowd." },
+        { t: "Local Arts Grant: Apply for government funding.", pts: 2, fb: "You secured the grant! It covers the basics, though you have to follow strict council rules." },
+        { t: "Secret Sponsorship: Hide the logos behind the stage.", pts: 1, fb: "The band found out and almost walked off. The atmosphere is tense, but the bills are paid." },
+        { t: "No Funding: Hope the band plays for free 'for the art'.", pts: -1, fb: "They laughed and blocked your number. You need a realistic financial plan." }
+      ]},
+      { q: "The Venue", d: "The council offers an old warehouse or a community garden. Which fits the 'Indie' vibe better?", opts: [
+        { t: "Community Garden: Intimate, green, and trendy.", pts: 3, fb: "Perfect! The acoustic sets sound amazing among the trees, and the photos look great on social media." },
+        { t: "Old Warehouse: Gritty, urban, and spacious.", pts: 2, fb: "A solid choice. It feels underground, though the acoustics are a bit echoey for the softer bands." },
+        { t: "The Local Library: Very quiet and intellectual.", pts: 1, fb: "The librarian keeps shushing the drummer. It's a bit too quiet for a festival." },
+        { t: "A Construction Site: Raw and industrial.", pts: -1, fb: "It's dangerous and loud. People can't hear the music over the drills. Choose a real venue." }
+      ]},
+      { q: "Marketing Strategy", d: "How do you reach the 'alternative' crowd without looking too corporate?", opts: [
+        { t: "Hand-drawn Posters: Put them up in record stores and cafes.", pts: 3, fb: "The DIY aesthetic is a hit! People are even taking the posters home as souvenirs." },
+        { t: "Social Media Influencers: Pay 'cool' bloggers to post about it.", pts: 2, fb: "It worked, but some fans think it feels a bit 'fake'. At least the tickets are selling." },
+        { t: "TV Commercials: Buy a slot during the evening news.", pts: 1, fb: "You spent a lot of money, but the indie crowd doesn't watch the news. Very low return." },
+        { t: "Skywriting: Write the name in the clouds.", pts: -1, fb: "It's too expensive and nobody knew what 'ECHOES' meant. Stick to the ground." }
+      ]},
+      { q: "Food & Drink", d: "What should be served at the 'Indie' food stalls?", opts: [
+        { t: "Vegan Street Food: Local, sustainable, and trendy.", pts: 3, fb: "The crowd loves it! You've gained a reputation for being an eco-friendly festival." },
+        { t: "Craft Beer & Organic Cider: Support local breweries.", pts: 2, fb: "A popular choice. The lines are long, but the quality is high." },
+        { t: "Standard Fast Food: Burgers and fries.", pts: 1, fb: "It's fine, but it feels a bit generic for such a 'unique' event." },
+        { t: "Raw Flour: For people to bake their own bread.", pts: -1, fb: "Nobody wants to bake bread at a concert. They are hungry and annoyed." }
+      ]},
+      { q: "The Sound Check", d: "The lead singer is complaining that the monitors aren't 'warm' enough.", opts: [
+        { t: "Hire a Vintage Tech: Use analog equipment for that 70s sound.", pts: 3, fb: "The singer is delighted! The sound quality is rich and the performance is soulful." },
+        { t: "Tell them to 'just deal with it'.", pts: 2, fb: "They performed, but they were grumpy and didn't interact with the crowd much." },
+        { t: "Turn the volume up to 11 to hide the quality.", pts: 1, fb: "Now everyone's ears are ringing and the sound is distorted. Not a great experience." },
+        { t: "Replace the singer with a robot.", pts: -1, fb: "This is an indie festival, not a sci-fi movie. The fans want real humans!" }
+      ]},
+      { q: "Merchandise", d: "What's the 'must-have' item at the merch stand?", opts: [
+        { t: "Limited Edition Vinyl: With a signed poster.", pts: 3, fb: "They sold out in 20 minutes! Collectors are already selling them for double online." },
+        { t: "Tote Bags: With a minimalist festival logo.", pts: 2, fb: "A practical and popular choice. Everyone is using them to carry their vegan snacks." },
+        { t: "Plastic Sunglasses: Cheap and colorful.", pts: 1, fb: "They feel a bit 'pop' for an indie festival, but some kids bought them." },
+        { t: "Used Tissues: From the lead singer's dressing room.", pts: -1, fb: "That's disgusting! Nobody wants that. Sell real merchandise." }
+      ]},
+      { q: "The Weather", d: "A light drizzle has started. How do you keep the 'mood'?", opts: [
+        { t: "Provide Branded Ponchos: And call it 'Atmospheric Rain'.", pts: 3, fb: "The crowd stays, and the photos of everyone in colorful ponchos look iconic." },
+        { t: "Move the show inside the small warehouse.", pts: 2, fb: "It's a bit cramped, but the intimacy makes the acoustic sets feel special." },
+        { t: "Do nothing and hope they like getting wet.", pts: 1, fb: "Half the crowd left to find shelter. You lost a lot of bar revenue." },
+        { t: "Try to blow the clouds away with giant fans.", pts: -1, fb: "You're wasting electricity and looking ridiculous. Physics doesn't work that way." }
+      ]},
+      { q: "The Surprise Act", d: "A famous band is in town and wants to play a secret 20-minute set.", opts: [
+        { t: "Announce it via a cryptic Tweet 10 minutes before.", pts: 3, fb: "The internet exploded! People are running to the stage. The hype is legendary." },
+        { t: "Put them on the main stage immediately.", pts: 2, fb: "It was a great surprise, but half the people were at the food stalls and missed it." },
+        { t: "Say no because it ruins your carefully planned schedule.", pts: 1, fb: "You missed a massive PR opportunity. The festival was 'fine', but not 'epic'." },
+        { t: "Ask them to pay you for the stage time.", pts: -1, fb: "They are a famous band! They don't pay you. You just lost a huge favor." }
+      ]},
+      { q: "Security", d: "A group of fans is trying to climb the trees to see the stage.", opts: [
+        { t: "Hire 'Friendly' Security: Who ask them to come down nicely.", pts: 3, fb: "No injuries and no bad vibes. The fans respected the 'community' feel." },
+        { t: "Put up 'No Climbing' signs and ignore them.", pts: 2, fb: "A few people fell and twisted their ankles. Not a great look for the medical tent." },
+        { t: "Call the riot police.", pts: 1, fb: "Total overkill. You ruined the peaceful vibe of the garden." },
+        { t: "Grease the trees with butter.", pts: -1, fb: "Now the trees are ruined and the fans are covered in grease. What a mess!" }
+      ]},
+      { q: "The Interview", d: "A major music magazine wants to interview you about the 'Indie Scene'.", opts: [
+        { t: "Focus on the Community: Talk about local talent and sustainability.", pts: 3, fb: "The article is glowing! You are now seen as a visionary manager." },
+        { t: "Talk about the money you made.", pts: 2, fb: "The fans think you're a 'sell-out', but the council is happy with the financial report." },
+        { t: "Complain about how difficult the bands are.", pts: 1, fb: "The bands saw the interview and now nobody wants to play for you next year." },
+        { t: "Pretend you are the lead singer of the headlining band.", pts: -1, fb: "They caught you immediately. You look like a fraud. Be yourself." }
+      ]},
+      { q: "The Cleanup", d: "The festival is over. The garden is full of organic trash.", opts: [
+        { t: "The 'Green Team' Volunteer Drive: Fans help clean for a free t-shirt.", pts: 3, fb: "The garden is cleaner than before the festival! The council is very impressed." },
+        { t: "Hire a professional crew to do it overnight.", pts: 2, fb: "It's clean, but the cost was high. Your profit margin is shrinking." },
+        { t: "Leave it for the council to deal with.", pts: 1, fb: "They sent you a massive fine and banned you from using the garden again." },
+        { t: "Burn the trash in the middle of the park.", pts: -1, fb: "The fire department is here and you are being arrested. This is a disaster." }
+      ]},
+      { q: "The Future", d: "The Mayor asks if 'Echoes' should become an annual event.", opts: [
+        { t: "Yes: But keep it small and high-quality.", pts: 3, fb: "Perfect. You've created a sustainable, prestigious brand for the town." },
+        { t: "Yes: Make it 10 times bigger next year!", pts: 2, fb: "The council is excited about the money, but the indie fans are worried it will become 'too mainstream'." },
+        { t: "Maybe: If we can find a bigger sponsor.", pts: 1, fb: "A bit indecisive. You need to show more passion for the project." },
+        { t: "No: It was too much work.", pts: -1, fb: "The local businesses are disappointed. They had their best weekend in years!" }
+      ]}
+    ],
+    emergencies: {
+      5: { q: "🚨 THE POWER CUT!", d: "The main stage has gone dark right before the final song!", opts: [
+        { t: "Acoustic Set: Have the band play in the middle of the crowd.", fail: false, fb: "Incredible! It was the most intimate, magical moment of the festival.", pts: 2 },
+        { t: "Tell everyone to go home and wait for an email.", fail: true, fb: "The crowd rioted and smashed the bar. The festival is banned. GAME OVER." },
+        { t: "Use a megaphone and have the drummer play a 20-minute solo.", fail: false, fb: "It was loud and strange, but it kept the crowd entertained until the power returned.", pts: 1 }
+      ]},
+      11: { q: "🚨 THE STOLEN GUITAR!", d: "The headliner's favorite vintage guitar has been stolen from the dressing room!", opts: [
+        { t: "Lock the gates and call the police to search everyone.", fail: false, fb: "You found it! The thief was a local prankster. The band is eternally grateful.", pts: 2 },
+        { t: "Offer a $5,000 reward for its return, no questions asked.", fail: false, fb: "It was returned in 5 minutes. Expensive, but the show went on.", pts: 1 },
+        { t: "Tell the band to 'just use a different one'.", fail: true, fb: "They refused to play and left the town. The fans are furious. GAME OVER." }
+      ]}
+    }
+  },
+  metal: {
+    scenarios: [
+      { q: "The Lineup", d: "You need a mix of 'Old School' and 'New Wave' metal. How do you balance the stages?", opts: [
+        { t: "The Legends Stage: Put the 80s icons on the main stage.", pts: 3, fb: "The 'Metalheads' are out in force! The atmosphere is respectful and loud." },
+        { t: "The Underground Tent: Focus on the loudest new bands.", pts: 2, fb: "The energy is insane! Lots of moshing, though the older fans are complaining about the noise." },
+        { t: "A 'Soft Metal' Stage: For people who don't like screaming.", pts: 1, fb: "Nobody went to that stage. This is a metal festival, not a spa!" },
+        { t: "Only hire one band and have them play for 12 hours.", pts: -1, fb: "The band collapsed after 3 hours. You need a full lineup." }
+      ]},
+      { q: "Sound Levels", d: "The neighbors are complaining about the 'Iron Thunder' sound check.", opts: [
+        { t: "Build a Sound Wall: Use shipping containers to block the noise.", pts: 3, fb: "Smart! The neighbors are quiet, and the sound inside the festival is even louder." },
+        { t: "Invite the neighbors for free: Give them earplugs and beer.", pts: 2, fb: "Most of them came and had a great time! A few still complained, but the Mayor is happy." },
+        { t: "Turn it down to a whisper.", pts: 1, fb: "The fans are booing. You can't have a quiet metal festival!" },
+        { t: "Tell the neighbors to move to a different town.", pts: -1, fb: "The council has received 500 complaints. You are in big trouble." }
+      ]},
+      { q: "Security", d: "The 'Mosh Pit' is getting a bit too aggressive. How do you manage it?", opts: [
+        { t: "The 'Pit Crew': Hire experienced metal fans to act as friendly security.", pts: 3, fb: "Perfect! They know the difference between 'fun' and 'danger'. Everyone is safe." },
+        { t: "Put up a fence around the pit.", pts: 2, fb: "It's safer, but the fans feel like they are in a cage. The energy dropped a bit." },
+        { t: "Ban moshing completely.", pts: 1, fb: "The fans ignored you and started a riot. You can't stop the pit!" },
+        { t: "Fill the pit with pillows.", pts: -1, fb: "This is embarrassing. The bands are laughing at you from the stage." }
+      ]},
+      { q: "Food & Drink", d: "What's on the menu for 5,000 hungry metal fans?", opts: [
+        { t: "The 'Viking Feast': Huge portions of roast meat and ale.", pts: 3, fb: "A massive success! The fans are full and happy. Sales are through the roof." },
+        { t: "Standard Burgers & Hot Dogs: Fast and efficient.", pts: 2, fb: "It works, but it's a bit boring. People wanted something more 'epic'." },
+        { t: "Salad Bar: Focus on health and wellness.", pts: 1, fb: "You sold three carrots all day. Metalheads want protein and carbs!" },
+        { t: "Raw Iron: To be 'truly metal'.", pts: -1, fb: "You cannot eat iron. The medical tent is full of people with broken teeth." }
+      ]},
+      { q: "Merchandise", d: "The black t-shirts are selling out. What else should you sell?", opts: [
+        { t: "Custom Leather Jackets: With the festival logo on the back.", pts: 3, fb: "They are expensive, but the fans are buying them as 'lifetime' souvenirs." },
+        { t: "Festival Earplugs: High-quality and branded.", pts: 2, fb: "A very smart move. You're protecting their ears and making a profit." },
+        { t: "Pink Tutus: As a joke.", pts: 1, fb: "A few people bought them for the 'irony', but most ignored them." },
+        { t: "Bottled Sweat: From the drummer of the headlining band.", pts: -1, fb: "That is horrifying. Stop being weird and sell real clothes." }
+      ]},
+      { q: "The Stage Design", d: "The headliner wants a giant fire-breathing dragon on stage.", opts: [
+        { t: "Hire a Pyrotechnics Expert: To make it safe and spectacular.", pts: 3, fb: "The dragon was the highlight of the night! The photos are on the front page of every magazine." },
+        { t: "Use a cardboard dragon and a flashlight.", pts: 2, fb: "The fans thought it was a funny 'low-budget' joke, but it wasn't very 'epic'." },
+        { t: "Say no because of the insurance cost.", pts: 1, fb: "The show was a bit boring. Metal needs spectacle!" },
+        { t: "Use a real dragon.", pts: -1, fb: "Dragons don't exist. You wasted the budget on a 'dragon hunter' who was actually just a guy with a net." }
+      ]},
+      { q: "The Weather", d: "It's 35 degrees and the fans are wearing all black leather.", opts: [
+        { t: "The 'Water Cannon': Spray the crowd with cool water during the sets.", pts: 3, fb: "The fans loved it! It kept the energy high and prevented heatstroke." },
+        { t: "Set up 'Cooling Tents' with industrial fans.", pts: 2, fb: "A good safety move, though the tents are very crowded and smell like sweaty leather." },
+        { t: "Tell them to take their clothes off.", pts: 1, fb: "Very unprofessional. The Mayor is not happy with the 'nudist' metal festival." },
+        { t: "Sell black umbrellas for $50 each.", pts: -1, fb: "This is price gouging. The fans are angry and throwing the umbrellas at the stage." }
+      ]},
+      { q: "The Press", d: "A local priest says the music is 'evil' and wants to protest.", opts: [
+        { t: "Invite the Priest: Show him the community spirit and the charity work.", pts: 3, fb: "He was surprised by how nice everyone was! He even joined the 'Viking Feast'." },
+        { t: "Ignore him and let him stand outside the gates.", pts: 2, fb: "He got some media attention, but the fans just walked past him. No real harm done." },
+        { t: "Have the band write a song about him.", pts: 1, fb: "It made the protest even bigger. You're just feeding the fire." },
+        { t: "Try to 'convert' him to metal by force.", pts: -1, fb: "This is harassment. The police are here. You are a manager, not a cult leader." }
+      ]},
+      { q: "The Guest Star", d: "A famous pop star wants to come and 'mosh' in the VIP area.", opts: [
+        { t: "Let them in: But make them wear a metal t-shirt.", pts: 3, fb: "The PR is amazing! 'Pop Star loves Iron Thunder' is trending worldwide." },
+        { t: "Keep them in a private box for safety.", pts: 2, fb: "They had a nice time, but the fans didn't even know they were there. Missed opportunity." },
+        { t: "Ban them because they aren't 'true metal'.", pts: 1, fb: "You look like a gatekeeper. The internet thinks you're elitist and boring." },
+        { t: "Make them play the triangle on the main stage.", pts: -1, fb: "The fans booed them off in 10 seconds. You ruined the set." }
+      ]},
+      { q: "Transportation", d: "The local trains have stopped working. How do the fans get home?", opts: [
+        { t: "The 'Metal Bus' Fleet: Hire 20 private buses to run all night.", pts: 3, fb: "The fans are grateful and safe. You even played metal music on the buses!" },
+        { t: "Let them camp in the field for one more night.", pts: 2, fb: "It's a bit messy, but it saved the day. The fans are having a giant bonfire now." },
+        { t: "Tell them to walk.", pts: 1, fb: "5,000 angry metalheads are walking through the quiet town at 2 AM. The neighbors are terrified." },
+        { t: "Tell them to fly home using their 'metal wings'.", pts: -1, fb: "Humans can't fly. You are being unhelpful and weird." }
+      ]},
+      { q: "The Final Act", d: "The headliner wants to smash their $10,000 guitar at the end.", opts: [
+        { t: "Swap it: Give them a cheap $50 copy for the final smash.", pts: 3, fb: "The crowd went wild! It looked real, and you saved the band a lot of money." },
+        { t: "Let them do it: It's part of the show.", pts: 2, fb: "A classic ending, but the band is now asking you to pay for the replacement." },
+        { t: "Stop the show and take the guitar away.", pts: 1, fb: "The most boring ending in history. The fans are disappointed." },
+        { t: "Smash the band's van instead.", pts: -1, fb: "The band is suing you. You just destroyed their only way home." }
+      ]},
+      { q: "The Legacy", d: "The festival is over. The field is a mud pit. What now?", opts: [
+        { t: "The 'Iron Garden': Turn the field into a permanent event space.", pts: 3, fb: "The town now has a world-class venue for all kinds of festivals. You're a hero!" },
+        { t: "Pay for a massive replanting project.", pts: 2, fb: "The field is green again, but it took all your profits. At least the Mayor is happy." },
+        { t: "Leave it as a mud pit and call it 'Art'.", pts: 1, fb: "The local farmers are furious. You've ruined the land." },
+        { t: "Pave the whole field with black asphalt.", pts: -1, fb: "The environmentalists are protesting and the town looks like a parking lot. Bad move." }
+      ]}
+    ],
+    emergencies: {
+      5: { q: "🚨 THE STAGE IS SINKING!", d: "The heavy equipment is causing the stage to sink into the mud!", opts: [
+        { t: "Stop the show and use industrial jacks to level it.", fail: false, fb: "It took an hour, but the stage is safe. The fans waited patiently with more beer.", pts: 2 },
+        { t: "Tell the band to stand on the high side and keep playing.", fail: true, fb: "The stage collapsed during the drum solo. Three people are injured. GAME OVER." },
+        { t: "Move the speakers to the ground to reduce the weight.", fail: false, fb: "It worked! The sound isn't as good, but the stage stopped sinking.", pts: 1 }
+      ]},
+      11: { q: "🚨 THE PYRO EXPLOSION!", d: "A firework has gone off early and set fire to the stage curtains!", opts: [
+        { t: "Use the automatic sprinklers and evacuate the stage.", fail: false, fb: "The fire is out! The band is wet, but everyone is safe. The show continued 30 minutes later.", pts: 2 },
+        { t: "Try to beat the fire out with your leather jacket.", fail: true, fb: "The jacket caught fire too. The whole stage is burning. GAME OVER." },
+        { t: "Tell the crowd it's 'part of the special effects'.", fail: false, fb: "They cheered! Luckily, the fire died out on its own before it became dangerous. Very lucky.", pts: 1 }
+      ]}
+    }
+  },
+  jazz: {
+    scenarios: [
+      { q: "The Opening Act", d: "Should you start with a traditional swing band or a modern fusion group?", opts: [
+        { t: "Traditional Swing: Get the older crowd dancing early.", pts: 3, fb: "The atmosphere is classy and fun! The town square feels like 1940s New York." },
+        { t: "Modern Fusion: Attract the younger 'cool' crowd.", pts: 2, fb: "The music is complex and interesting. The 'jazz snobs' are impressed, but some locals are confused." },
+        { t: "A guy playing a plastic recorder.", pts: 1, fb: "It's... unique. But it's not really the 'high-class' jazz the council wanted." },
+        { t: "Total Silence: To represent the 'notes they aren't playing'.", pts: -1, fb: "The audience is leaving. You can't sell tickets for silence!" }
+      ]},
+      { q: "The Venue", d: "The local park or the historic Town Hall?", opts: [
+        { t: "Town Hall: Perfect acoustics and a sophisticated vibe.", pts: 3, fb: "The sound is crystal clear. The audience feels like they are at a prestigious gala." },
+        { t: "The Park: Relaxed, with picnic blankets and wine.", pts: 2, fb: "A lovely community day, though the wind kept blowing the sheet music away." },
+        { t: "The Local Subway Station: For that 'authentic' busker feel.", pts: 1, fb: "It's too loud and smelly. People are just trying to get to work, not listen to Coltrane." },
+        { t: "A Helicopter: Flying over the town.", pts: -1, fb: "Nobody can hear the saxophone over the engine. What a waste of fuel!" }
+      ]},
+      { q: "Marketing", d: "How do you promote a 'Jazz' festival to a B1 audience?", opts: [
+        { t: "The 'Smooth & Sophisticated' Campaign: Focus on wine and culture.", pts: 3, fb: "You've attracted a high-spending crowd. The local restaurants are fully booked!" },
+        { t: "The 'Jazz for Everyone' Workshop: Free lessons for kids.", pts: 2, fb: "A great community move. The parents are happy, though the 'serious' fans think it's a bit childish." },
+        { t: "Posters with just a picture of a hat.", pts: 1, fb: "Nobody knew what it meant. Was it a hat festival? Very confusing." },
+        { t: "Shout 'JAZZ' at people in the street.", pts: -1, fb: "You are scaring the tourists. The police have asked you to stop." }
+      ]},
+      { q: "Food & Drink", d: "What's the best pairing for a night of jazz?", opts: [
+        { t: "Wine & Cheese Platters: High-quality and easy to eat.", pts: 3, fb: "Perfect. The audience is spending a lot of money at the bar and staying for the whole set." },
+        { t: "Coffee & Cocktails: For that 'Late Night Club' feel.", pts: 2, fb: "The energy is good, though some people are getting a bit too loud during the quiet solos." },
+        { t: "Hot Dogs & Beer: Keep it simple.", pts: 1, fb: "It feels a bit like a baseball game. The 'sophisticated' vibe is lost." },
+        { t: "Raw Coffee Beans: To chew on.", pts: -1, fb: "People are breaking their teeth and they are very caffeinated and angry." }
+      ]},
+      { q: "The Guest Star", d: "A world-famous trumpeter is in town, but he's known for being 'difficult'.", opts: [
+        { t: "The 'VIP Treatment': Give him a private dressing room and his favorite tea.", pts: 3, fb: "He played the best set of his life! The review in 'Jazz Times' is 5 stars." },
+        { t: "Tell him to 'be professional' and wait in the hall.", pts: 2, fb: "He played, but he refused to do an encore and complained about the town on stage." },
+        { t: "Replace him with a local student.", pts: 1, fb: "The student was okay, but the audience wanted the star. They are asking for a partial refund." },
+        { t: "Try to play the trumpet yourself.", pts: -1, fb: "You can't play the trumpet. It sounded like a dying elephant. The audience is horrified." }
+      ]},
+      { q: "The Atmosphere", d: "The lighting in the hall is too bright and 'clinical'.", opts: [
+        { t: "The 'Blue Note' Look: Use low blue and purple lights with some smoke.", pts: 3, fb: "Stunning! The hall looks like a classic 1950s jazz club. The mood is perfect." },
+        { t: "Candlelight: Put candles on every table.", pts: 2, fb: "Very romantic, but the fire marshal is worried about the curtains. Be careful!" },
+        { t: "Turn the lights off completely.", pts: 1, fb: "The musicians can't see their music and the audience is tripping over the chairs." },
+        { t: "Use a giant disco ball.", pts: -1, fb: "This is jazz, not disco! The musicians are distracted and the vibe is ruined." }
+      ]},
+      { q: "The Weather", d: "It's a beautiful night, but the mosquitoes are attacking the audience.", opts: [
+        { t: "Provide Citronella Candles: And call it 'Scented Jazz'.", pts: 3, fb: "The bugs are gone and the hall smells like lemons. A very classy solution." },
+        { t: "Move the show inside the Town Hall.", pts: 2, fb: "A safe move, but the 'Under the Stars' magic is gone for the night." },
+        { t: "Tell the audience to 'focus on the music, not the bites'.", pts: 1, fb: "Everyone is scratching and grumpy. They left after the first set." },
+        { t: "Hire a guy to swat the bugs with a giant net.", pts: -1, fb: "He's hitting the audience members by mistake. This is a disaster." }
+      ]},
+      { q: "The Jam Session", d: "The main show is over, but the musicians want to keep playing.", opts: [
+        { t: "The 'After-Hours' Club: Move to a local basement bar for a jam session.", pts: 3, fb: "Legendary! The fans who stayed had the experience of a lifetime. The town is buzzing." },
+        { t: "Let them play on the main stage until 3 AM.", pts: 2, fb: "The fans loved it, but the neighbors called the police about the noise. A bit risky." },
+        { t: "Tell them to go to bed.", pts: 1, fb: "You missed the chance for some real 'jazz magic'. The festival ended on a boring note." },
+        { t: "Charge the musicians $50 per minute to keep playing.", pts: -1, fb: "They are the talent! They don't pay you. They all left and won't come back next year." }
+      ]},
+      { q: "The Recording", d: "A local radio station wants to record the show for free.", opts: [
+        { t: "Accept: But only if they mention the town's name every 10 minutes.", pts: 3, fb: "Great PR! People all over the country are hearing about your beautiful town." },
+        { t: "Sell them the rights for $1,000.", pts: 2, fb: "You made some extra money, but the radio station decided not to play the whole show." },
+        { t: "Reject: Keep the music 'exclusive' for the people who paid.", pts: 1, fb: "Nobody outside the hall knows the festival happened. Very low impact." },
+        { t: "Record it on your phone and put it on YouTube.", pts: -1, fb: "The sound quality is terrible and the musicians are suing you for copyright." }
+      ]},
+      { q: "The Merchandise", d: "What's the best souvenir for a jazz fan?", opts: [
+        { t: "Branded Silk Scarves: Elegant and high-quality.", pts: 3, fb: "They sold out! The audience looks very sophisticated walking around town." },
+        { t: "Live CD of the Festival: Recorded on the first night.", pts: 2, fb: "A classic choice. People love taking the music home with them." },
+        { t: "Jazz-themed Socks.", pts: 1, fb: "A bit silly, but some people bought them as a joke." },
+        { t: "A bag of 'Jazz Air'.", pts: -1, fb: "You are selling an empty bag. People feel scammed and are asking for their money back." }
+      ]},
+      { q: "The Final Review", d: "The festival is over. How do you measure success?", opts: [
+        { t: "The 'Economic Impact' Report: Show how much the local shops made.", pts: 3, fb: "The Mayor is delighted! You've proven that jazz is good for business." },
+        { t: "Ask the musicians if they had a good time.", pts: 2, fb: "They loved it, but you don't have any data to show the council for next year's budget." },
+        { t: "Check if anyone famous Tweeted about it.", pts: 1, fb: "Nobody did. You feel a bit disappointed despite the good music." },
+        { t: "Assume it was perfect because you liked the music.", pts: -1, fb: "The council is asking where the $5,000 profit went. You need better records." }
+      ]},
+      { q: "The Future", d: "Should we expand to a 'Jazz & Blues' week next year?", opts: [
+        { t: "Yes: It's a natural fit and will attract even more tourists.", pts: 3, fb: "Excellent! You're building a real cultural legacy for the town." },
+        { t: "No: Keep it 'Pure Jazz' to maintain the high-class brand.", pts: 2, fb: "A safe choice. It will stay small and prestigious, but it won't grow much." },
+        { t: "Maybe: If the Mayor gives us a bigger hall.", pts: 1, fb: "A bit demanding. You should show what you can do with the current budget first." },
+        { t: "No: I'm tired of saxophones.", pts: -1, fb: "You're the manager! If you don't like the music, find a different job." }
+      ]}
+    ],
+    emergencies: {
+      5: { q: "🚨 THE PIANO IS OUT OF TUNE!", d: "The grand piano has been affected by the humidity and sounds terrible!", opts: [
+        { t: "Call a local tuner for an emergency 1-hour fix.", fail: false, fb: "He arrived in 10 minutes! The show was delayed slightly, but the sound was perfect.", pts: 2 },
+        { t: "Tell the pianist to 'play around the bad notes'.", fail: true, fb: "It sounded like a cat walking on the keys. The audience left in 5 minutes. GAME OVER." },
+        { t: "Switch to an electric keyboard for the night.", fail: false, fb: "The 'jazz snobs' were annoyed, but the music was in tune and the show went on.", pts: 1 }
+      ]},
+      11: { q: "🚨 THE NOISY NEIGHBOR!", d: "A neighbor is mowing their lawn right outside the Town Hall during a quiet solo!", opts: [
+        { t: "Go outside and offer them $50 to stop for two hours.", fail: false, fb: "It worked! He even came inside to listen to the rest of the show.", pts: 2 },
+        { t: "Try to drown them out by turning the speakers up.", fail: true, fb: "The feedback was deafening. The pianist stopped playing in protest. GAME OVER." },
+        { t: "Ask the audience to 'ignore the industrial remix'.", fail: false, fb: "They laughed, and luckily the neighbor finished 10 minutes later. A bit distracting.", pts: 1 }
+      ]}
+    }
+  },
+  classical: {
+    scenarios: [
+      { q: "The Program", d: "Should you focus on 'The Great Classics' (Beethoven, Mozart) or 'Modern Film Scores'?", opts: [
+        { t: "The Great Classics: Attract the serious music lovers and prestige.", pts: 3, fb: "The local elite are impressed. The festival is seen as a high-culture event." },
+        { t: "Film Scores: Attract families and younger listeners with 'Star Wars' and 'Harry Potter'.", pts: 2, fb: "The hall is packed with kids! It's a great community success, though some critics are grumpy." },
+        { t: "A 4-hour symphony of bird noises.", pts: 1, fb: "It was... interesting. But people wanted to hear an orchestra, not a forest." },
+        { t: "Only play the national anthem on a loop.", pts: -1, fb: "People are confused and bored. This is not a festival, it's a parade." }
+      ]},
+      { q: "The Venue", d: "The Town Cathedral or the Open-Air Amphitheatre?", opts: [
+        { t: "The Cathedral: Incredible natural reverb and a holy atmosphere.", pts: 3, fb: "The choir sounds like angels. The audience is moved to tears by the beauty." },
+        { t: "The Amphitheatre: Picnic vibes and fireworks at the end.", pts: 2, fb: "A fun summer night! Though a few planes flying over ruined the quiet parts of the violin solo." },
+        { t: "The Local Swimming Pool.", pts: 1, fb: "The acoustics are terrible and the smell of chlorine is distracting. Not very 'classical'." },
+        { t: "Inside a giant cardboard box.", pts: -1, fb: "The sound is muffled and it's a fire hazard. Choose a real building." }
+      ]},
+      { q: "The Conductor", d: "The famous conductor is demanding a bowl of only green M&Ms.", opts: [
+        { t: "The 'Professional' Approach: Provide the M&Ms and keep him happy.", pts: 3, fb: "He's a genius! His performance was flawless and he praised the town's hospitality." },
+        { t: "Tell him to 'grow up' and eat what everyone else eats.", pts: 2, fb: "He performed, but he was angry and didn't talk to the press. A bit of a PR fail." },
+        { t: "Replace him with the local high school band leader.", pts: 1, fb: "The orchestra was confused by her style. The music was a bit messy." },
+        { t: "Give him a bowl of green rocks.", pts: -1, fb: "He broke a tooth and is suing the town. You are a terrible host." }
+      ]},
+      { q: "Marketing", d: "How do you sell 'Classical Music' to a modern audience?", opts: [
+        { t: "The 'Relax & Recharge' Campaign: Focus on mental health and peace.", pts: 3, fb: "Brilliant! Stressed office workers are flocking to the town for a 'quiet weekend'." },
+        { t: "The 'Grand Spectacle': Focus on the 100-person orchestra and fireworks.", pts: 2, fb: "It looks exciting! You've sold a lot of tickets to people who 'don't usually like classical'." },
+        { t: "Posters with just a picture of a wig.", pts: 1, fb: "People thought it was a hair salon advertisement. Very confusing." },
+        { t: "Tell people they are 'uneducated' if they don't come.", pts: -1, fb: "That is very insulting! Nobody wants to come to your festival now." }
+      ]},
+      { q: "Food & Drink", d: "What's the appropriate snack for a symphony?", opts: [
+        { t: "Champagne & Canapés: During the intermission.", pts: 3, fb: "Very classy. You made a huge profit at the bar and the audience feels like royalty." },
+        { t: "Tea & Scones: For a traditional afternoon concert.", pts: 2, fb: "A lovely choice for the older crowd. The atmosphere is cozy and polite." },
+        { t: "Crunchy Potato Chips: In loud plastic bags.", pts: 1, fb: "The noise was terrible! The conductor stopped the music three times. Bad choice." },
+        { t: "Raw Garlic: To keep the vampires away.", pts: -1, fb: "The whole hall smells terrible. People are covering their noses and leaving." }
+      ]},
+      { q: "The Dress Code", d: "Should you insist on 'Black Tie' or 'Come as You Are'?", opts: [
+        { t: "Smart Casual: Encouraging but respectful.", pts: 3, fb: "A perfect balance. The hall looks nice, but nobody felt excluded or uncomfortable." },
+        { t: "Strict Black Tie: Tuxedos and evening gowns only.", pts: 2, fb: "It looked amazing, but you lost the younger crowd who didn't have the right clothes." },
+        { t: "Pajamas: For a 'Relaxing' concert.", pts: 1, fb: "It felt a bit silly. The musicians felt disrespected by the audience's lack of effort." },
+        { t: "Full Suits of Armor.", pts: -1, fb: "The clanking noise was louder than the violins. This is not a medieval festival!" }
+      ]},
+      { q: "The Weather", d: "A thunderstorm is predicted for the outdoor '1812 Overture'.", opts: [
+        { t: "Move to the Cathedral: And use the organ for the 'cannon' sounds.", pts: 3, fb: "Incredible! The thunder outside actually added to the drama of the music. A legendary night." },
+        { t: "Provide umbrellas and keep playing.", pts: 2, fb: "The violins got wet and the wood is ruined. An expensive mistake, but the show went on." },
+        { t: "Cancel and give everyone a CD of the music.", pts: 1, fb: "People are very disappointed. A CD is not a live experience." },
+        { t: "Try to stop the lightning with a giant metal pole.", pts: -1, fb: "That is a lightning rod! You almost killed the first violin player. Stop!" }
+      ]},
+      { q: "The Recording", d: "A prestigious classical label wants to record the 'Live in the Cathedral' album.", opts: [
+        { t: "Accept: But ensure the town's name is on the cover.", pts: 3, fb: "The album is a hit! Your town is now famous among classical music fans worldwide." },
+        { t: "Charge them $5,000 for the privilege.", pts: 2, fb: "You made some money, but they decided to record a different orchestra in a different town." },
+        { t: "Reject: The microphones are 'ugly' and ruin the view.", pts: 1, fb: "You missed a massive chance for permanent fame. The festival is over and forgotten." },
+        { t: "Record it yourself on a 1990s cassette tape.", pts: -1, fb: "The quality is terrible. It sounds like the orchestra is playing underwater. Nobody wants this." }
+      ]},
+      { q: "The Guest Soloist", d: "The star violinist has forgotten her $2 million Stradivarius at home!", opts: [
+        { t: "The 'Local Hero': Borrow a high-quality violin from the local music school.", pts: 3, fb: "She played beautifully! The school is proud and the audience didn't even notice the difference." },
+        { t: "Delay the show for 4 hours while she goes to get it.", pts: 2, fb: "The audience was very bored, but the sound of the real violin was worth the wait... barely." },
+        { t: "Tell her to 'air-violin' while a recording plays.", pts: 1, fb: "The audience saw the trick immediately. You look like a fraud." },
+        { t: "Give her a plastic toy violin from the gift shop.", pts: -1, fb: "It sounds like a squeaky door. The conductor has fainted from shame." }
+      ]},
+      { q: "The Merchandise", d: "What's the best souvenir for a classical fan?", opts: [
+        { t: "The 'Festival Program': A high-quality book with history and photos.", pts: 3, fb: "They sold out! People are keeping them on their coffee tables at home." },
+        { t: "A 'Bust' of the Conductor: Made of local stone.", pts: 2, fb: "A bit heavy to carry home, but the serious fans loved them." },
+        { t: "Classical Music Ringtone Vouchers.", pts: 1, fb: "Nobody uses those anymore. You have 5,000 unsold vouchers." },
+        { t: "A lock of the conductor's hair.", pts: -1, fb: "That is creepy and illegal. Stop it." }
+      ]},
+      { q: "The Final Review", d: "The Mayor wants to know if the town's 'Prestige' has increased.", opts: [
+        { t: "The 'Media Coverage' Report: Show the 5-star reviews in national papers.", pts: 3, fb: "The Mayor is delighted! The town is now a 'Cultural Capital'." },
+        { t: "Show him the bank account.", pts: 2, fb: "You made a profit, but he's more interested in the town's reputation than the money." },
+        { t: "Tell him you 'felt' like everyone was happy.", pts: 1, fb: "He needs facts, not feelings. You look a bit unprofessional." },
+        { t: "Tell him the town is still boring but the music was okay.", pts: -1, fb: "That is very rude! You are supposed to be promoting the town." }
+      ]},
+      { q: "The Future", d: "Should we start a 'Youth Orchestra' with the profits?", opts: [
+        { t: "Yes: Invest in the next generation of local talent.", pts: 3, fb: "Perfect! The town loves you for supporting the kids. A true legacy." },
+        { t: "No: Save the money for a bigger fireworks show next year.", pts: 2, fb: "A bit shallow. Fireworks are fun, but they don't build a community." },
+        { t: "Maybe: If we can find a cheaper conductor.", pts: 1, fb: "You're being a bit cheap. Quality costs money!" },
+        { t: "No: Classical music is for old people only.", pts: -1, fb: "You just insulted half your audience. The Mayor is looking for a new manager." }
+      ]}
+    ],
+    emergencies: {
+      5: { q: "🚨 THE COUGHING EPIDEMIC!", d: "The audience is coughing loudly during the quietest part of the symphony!", opts: [
+        { t: "Provide free cough drops and water at the entrance.", fail: false, fb: "The silence returned! The conductor thanked you with a nod from the stage.", pts: 2 },
+        { t: "Stop the music and tell everyone to 'be quiet or leave'.", fail: true, fb: "The audience felt insulted and left. The festival is a PR disaster. GAME OVER." },
+        { t: "Have the orchestra play louder to drown out the coughing.", fail: false, fb: "It worked, but the 'delicate' beauty of the piece was lost. A bit of a shame.", pts: 1 }
+      ]},
+      11: { q: "🚨 THE FALLING CHANDELIER!", d: "A large light fixture in the Cathedral is looking very unstable!", opts: [
+        { t: "Evacuate the area under the light and keep the show going.", fail: false, fb: "Quick thinking! Nobody was hurt and the show continued safely.", pts: 2 },
+        { t: "Try to catch it with your bare hands if it falls.", fail: true, fb: "It's made of glass and metal! You are in the hospital. GAME OVER." },
+        { t: "Tell the audience it's a 'Modern Art Installation'.", fail: false, fb: "They believed you! Luckily it didn't fall until after the show. Very lucky.", pts: 1 }
+      ]}
+    }
+  },
+  rap: {
+    scenarios: [
+      { q: "The Headliner", d: "A major rap star wants to perform, but his lyrics are 'too controversial' for the Town Council.", opts: [
+        { t: "The 'Clean' Set: Negotiate for a family-friendly performance.", pts: 3, fb: "He agreed! The show was high-energy but respectful. The Mayor is very impressed." },
+        { t: "The 'Late Night' Slot: Move him to 11 PM when the kids are in bed.", pts: 2, fb: "The fans loved the 'raw' performance, but the neighbors complained about the noise." },
+        { t: "Reject him and hire a 'Rap Puppet' instead.", pts: 1, fb: "The fans hated it. It was embarrassing and 'fake'. You lost all your 'street cred'." },
+        { t: "Tell him to change his name to 'The Happy Rapper'.", pts: -1, fb: "He insulted you on his new album. Now the whole world thinks you're a joke." }
+      ]},
+      { q: "The Venue", d: "The local basketball courts or the main town square?", opts: [
+        { t: "Basketball Courts: Authentic, urban, and perfect for the vibe.", pts: 3, fb: "The atmosphere is electric! The local kids feel like the festival is 'for them'." },
+        { t: "Town Square: Central and attracts the most tourists.", pts: 2, fb: "A good business move, though some of the older tourists were a bit scared of the loud bass." },
+        { t: "The Local Golf Club.", pts: 1, fb: "The members are complaining about the 'noise' and the fans feel out of place. Bad fit." },
+        { t: "Inside a giant shoe.", pts: -1, fb: "It's a shoe. People can't fit inside it. This is not a venue!" }
+      ]},
+      { q: "Marketing", d: "How do you build 'hype' for a rap festival?", opts: [
+        { t: "The 'Street Team': Hire local dancers and DJs to perform in the streets.", pts: 3, fb: "The town is buzzing! Everyone is talking about the 'Block Party'." },
+        { t: "Social Media 'Diss Track': Have two local rappers 'fight' online.", pts: 2, fb: "It created a lot of hype, but some people thought the 'fight' was real and got worried." },
+        { t: "Posters with just a picture of a microphone.", pts: 1, fb: "People thought it was a public speaking seminar. Very boring." },
+        { t: "Tell people they are 'too old' to understand the music.", pts: -1, fb: "You just insulted the people who pay the taxes! The council is furious." }
+      ]},
+      { q: "Food & Drink", d: "What's the best 'Street Food' for the Block Party?", opts: [
+        { t: "Gourmet Sliders & Loaded Fries: Easy to eat while dancing.", pts: 3, fb: "A massive hit! The lines are long and the profit margin is excellent." },
+        { t: "Local BBQ: Ribs and chicken wings.", pts: 2, fb: "Delicious, but everyone's hands are sticky and they are ruining the festival t-shirts." },
+        { t: "Fine Dining: 5-course meals with silver service.", pts: 1, fb: "Nobody wants to sit down for 2 hours during a rap concert. Sales were zero." },
+        { t: "Raw Ice Cubes: To 'stay cool'.", pts: -1, fb: "People are hungry and they are throwing the ice at the stage. Stop it." }
+      ]},
+      { q: "The Stage Design", d: "The headliner wants a 'Graffiti Wall' that fans can spray-paint during the show.", opts: [
+        { t: "The 'Legal' Wall: Provide the paint and a designated area.", pts: 3, fb: "Amazing! By the end of the night, you have a beautiful piece of community art." },
+        { t: "Tell them to 'just paint the town hall'.", pts: 2, fb: "The Mayor is furious! You've just cost the town $10,000 in cleaning bills." },
+        { t: "Say no because paint is 'messy'.", pts: 1, fb: "The stage looks boring and corporate. The fans feel the festival has no 'soul'." },
+        { t: "Give them invisible paint.", pts: -1, fb: "Nobody can see the art. The artist is insulted and the fans are confused." }
+      ]},
+      { q: "The Sound System", d: "The bass is so loud it's shaking the windows of the local hospital.", opts: [
+        { t: "The 'Bass Trap': Use sound-absorbing panels to direct the noise away.", pts: 3, fb: "Smart! The fans still feel the beat, but the patients can sleep. Everyone wins." },
+        { t: "Turn the bass off completely.", pts: 2, fb: "The music sounds 'thin' and the fans are complaining. Rap needs bass!" },
+        { t: "Tell the hospital to 'move the patients'.", pts: 1, fb: "That is incredibly heartless! The local news is calling you a 'monster'." },
+        { t: "Try to drown out the bass with a giant whistle.", pts: -1, fb: "Now it's just loud bass AND a loud whistle. You've made it worse!" }
+      ]},
+      { q: "The Guest Star", d: "A famous basketball player wants to come and 'rap' one song.", opts: [
+        { t: "The 'Half-Time' Show: Give him a 5-minute slot between acts.", pts: 3, fb: "The crowd went wild! The video is the #1 trending clip on YouTube today." },
+        { t: "Let him play the whole 1-hour set.", pts: 2, fb: "He's not a very good rapper. The fans got bored after 10 minutes." },
+        { t: "Ban him because he's 'not a real musician'.", pts: 1, fb: "You missed a massive PR opportunity. The fans are disappointed." },
+        { t: "Make him play the flute instead.", pts: -1, fb: "He's 7 feet tall and he broke the flute. This was a terrible idea." }
+      ]},
+      { q: "The Merchandise", d: "What's the 'Must-Have' item for the Block Party?", opts: [
+        { t: "Limited Edition 'Snapback' Hats: With the town's name.", pts: 3, fb: "They sold out! Every kid in the county is wearing your town's name now." },
+        { t: "Oversized Festival Hoodies: High-quality and warm.", pts: 2, fb: "A popular choice, though they were a bit expensive to produce." },
+        { t: "Festival-branded Gold Chains (Plastic).", pts: 1, fb: "They look a bit cheap and 'fake'. Not many people bought them." },
+        { t: "Used Sneakers: From the local gym.", pts: -1, fb: "That's disgusting! Nobody wants old shoes. Sell real merch." }
+      ]},
+      { q: "The Weather", d: "It's a heatwave! The asphalt on the basketball courts is melting.", opts: [
+        { t: "The 'Mist Tents': Provide cool water spray and free ice pops.", pts: 3, fb: "The fans stayed cool and the energy stayed high. A great safety move." },
+        { t: "Move the show to the local ice rink.", pts: 2, fb: "It's cool, but the 'street' vibe is totally lost. It feels like a kids' birthday party." },
+        { t: "Tell the fans to 'be tough'.", pts: 1, fb: "Three people fainted from heatstroke. The medical tent is overwhelmed." },
+        { t: "Pave the courts with ice cream.", pts: -1, fb: "It melted in 2 minutes. Now the fans are sticky and the court is a mess." }
+      ]},
+      { q: "The Workshop", d: "How do you involve the local youth in the festival?", opts: [
+        { t: "The 'Rap Battle' Contest: Let local kids compete for a prize.", pts: 3, fb: "Incredible! You've discovered a local star and the community is so proud." },
+        { t: "A 'Beat-Making' Class: Teaching them how to use music software.", pts: 2, fb: "Very popular! The kids loved it, though it was a bit expensive to rent the laptops." },
+        { t: "Have them pick up trash for free stickers.", pts: 1, fb: "That's not a workshop, that's just chores. The kids are bored." },
+        { t: "Tell them to 'stay away' from the stage.", pts: -1, fb: "You just lost the next generation of fans. The Mayor is very disappointed." }
+      ]},
+      { q: "The Final Review", d: "The festival is over. The Mayor is worried about 'Gang Culture'.", opts: [
+        { t: "The 'Community Spirit' Report: Show photos of the kids and the art.", pts: 3, fb: "The Mayor is relieved! He sees that the festival was about music and unity." },
+        { t: "Show him the profit from the ticket sales.", pts: 2, fb: "He's happy about the money, but he's still a bit worried about the town's image." },
+        { t: "Tell him he's 'too old' to understand.", pts: 1, fb: "That is very rude! You are definitely not getting a bonus this year." },
+        { t: "Tell him the town is now 'The Hood'.", pts: -1, fb: "He's calling the police and you are fired. Bad choice of words!" }
+      ]},
+      { q: "The Future", d: "Should we make the 'Block Party' a monthly event?", opts: [
+        { t: "Yes: But keep it in different neighborhoods each time.", pts: 3, fb: "Perfect! You're bringing music and business to the whole town. A true hero." },
+        { t: "No: Keep it once a year to make it 'special'.", pts: 2, fb: "A safe choice. It will stay a big event, but you're missing a chance for regular income." },
+        { t: "Maybe: If we can find a bigger sponsor.", pts: 1, fb: "A bit indecisive. You need to show more leadership." },
+        { t: "No: Rap is too loud for this town.", pts: -1, fb: "You just insulted your own festival! The fans are disappointed." }
+      ]}
+    ],
+    emergencies: {
+      5: { q: "🚨 THE MIC IS DEAD!", d: "The headliner's microphone has stopped working in the middle of his biggest song!", opts: [
+        { t: "The 'Beatbox' Save: Have the DJ keep the beat while the crowd sings the lyrics.", fail: false, fb: "Incredible! The crowd sang every word. It was the highlight of the night.", pts: 2 },
+        { t: "Stop the show and wait 20 minutes for a new cable.", fail: true, fb: "The crowd got bored and started throwing bottles. The show is cancelled. GAME OVER." },
+        { t: "Give him a megaphone from the security team.", fail: false, fb: "It sounded a bit distorted, but it fit the 'urban' vibe. The show went on.", pts: 1 }
+      ]},
+      11: { q: "🚨 THE STAGE RUSH!", d: "A group of fans has jumped over the fence and is trying to get on stage!", opts: [
+        { t: "The 'Dance-Off': Have the rapper invite them to dance for one song, then leave.", fail: false, fb: "Brilliant! You turned a security risk into a fun moment. Everyone is happy.", pts: 2 },
+        { t: "Call the police to arrest them immediately.", fail: true, fb: "The crowd saw the 'police brutality' and started a riot. The festival is ruined. GAME OVER." },
+        { t: "Turn the fire hose on them.", fail: false, fb: "They are wet and angry, but they went back to the crowd. A bit extreme, but it worked.", pts: 1 }
+      ]}
+    }
+  },
+  pop: {
+    scenarios: [
+      { q: "The Headliner", d: "A global pop princess is available, but she demands a pink dressing room and 100 white kittens.", opts: [
+        { t: "The 'Digital' Compromise: Use pink lights and a video of kittens on a loop.", pts: 3, fb: "She loved the 'creative' approach! She even posted a selfie with the 'video kittens'." },
+        { t: "The 'Real' Deal: Spend the budget on the pink paint and the kittens.", pts: 2, fb: "She's happy, but now you have no money left for the stage lights. The show looks a bit dark." },
+        { t: "Tell her to 'be a professional' and sit on a wooden chair.", pts: 1, fb: "She cancelled the show 1 hour before the start. You look like a fool." },
+        { t: "Give her 100 white rats instead.", pts: -1, fb: "She is terrified and her manager is calling the police. You are a disaster." }
+      ]},
+      { q: "The Venue", d: "The local stadium or the main town beach?", opts: [
+        { t: "The Beach: Perfect for 'Summer Pop' vibes and sunset photos.", pts: 3, fb: "The atmosphere is magical! The photos are trending on Instagram and the town looks like paradise." },
+        { t: "The Stadium: Professional, safe, and holds the most people.", pts: 2, fb: "A solid business move, though it feels a bit 'corporate' and 'cold' for a pop party." },
+        { t: "The Local Library.", pts: 1, fb: "The librarian is shushing the dancers. It's not the right 'vibe' for a pop concert." },
+        { t: "Inside a giant bubble.", pts: -1, fb: "The bubble popped in 5 minutes. Now everyone is wet and the equipment is ruined." }
+      ]},
+      { q: "Marketing", d: "How do you reach the 'Gen Z' audience for a pop festival?", opts: [
+        { t: "The 'TikTok' Challenge: Create a dance for the headliner's new song.", pts: 3, fb: "Millions of people are doing the dance! The festival is a global sensation." },
+        { t: "The 'Influencer' VIP Lounge: Invite 50 famous bloggers for free.", pts: 2, fb: "The PR is great, but the regular fans are annoyed that the 'best' area is full of people on their phones." },
+        { t: "Posters with just a picture of a star.", pts: 1, fb: "People thought it was an astronomy club. Very confusing." },
+        { t: "Tell people they are 'too old' to understand the music.", pts: -1, fb: "You just insulted the parents who are paying for the tickets! Bad move." }
+      ]},
+      { q: "Food & Drink", d: "What's the most 'Instagrammable' food for the festival?", opts: [
+        { t: "Rainbow Cupcakes & Glitter Cocktails: Colorful and fun.", pts: 3, fb: "Everyone is taking photos of their food! It's free marketing for the festival." },
+        { t: "Standard Pizza & Burgers: Fast and efficient.", pts: 2, fb: "It works, but it's not very 'pop'. People wanted something more 'sparkly'." },
+        { t: "Raw Kale Salads: Focus on health and wellness.", pts: 1, fb: "You sold three salads all day. Pop fans want sugar and carbs!" },
+        { t: "Edible Diamonds: For $500 each.", pts: -1, fb: "Nobody bought them. You've wasted the budget on shiny rocks." }
+      ]},
+      { q: "The Stage Design", d: "The headliner wants a giant 'Glitter Cannon' that fires every 10 minutes.", opts: [
+        { t: "The 'Eco-Glitter' Solution: Use biodegradable glitter to protect the beach.", pts: 3, fb: "Brilliant! The show looks amazing and the environmentalists are praising your 'Green' festival." },
+        { t: "Use real plastic glitter: It's cheaper and shinier.", pts: 2, fb: "It looked great, but the cleanup was a nightmare and the local fish are now 'sparkly'. The Mayor is angry." },
+        { t: "Say no because glitter is 'annoying'.", pts: 1, fb: "The show looks boring. Pop needs sparkle!" },
+        { t: "Use real sand instead of glitter.", pts: -1, fb: "You're blinding the audience! Everyone is in the medical tent with sand in their eyes." }
+      ]},
+      { q: "The Sound System", d: "The 'Pop Princess' wants to use 'Auto-Tune' for the whole show.", opts: [
+        { t: "The 'Modern' Approach: Let her use it. It's her 'sound'.", pts: 3, fb: "The fans loved it! It sounded exactly like the radio. A perfect pop experience." },
+        { t: "Tell her to 'sing for real' or leave.", pts: 2, fb: "She sang, but she hit some very bad notes. The reviews said she 'can't sing live'." },
+        { t: "Turn her microphone off and play the CD.", pts: 1, fb: "The audience saw her lips weren't moving. You look like a fraud." },
+        { t: "Replace her with a singing cat.", pts: -1, fb: "The cat just meowed for 1 hour. The audience is demanding a refund." }
+      ]},
+      { q: "The Guest Star", d: "A famous reality TV star wants to come and 'DJ' for 20 minutes.", opts: [
+        { t: "The 'Celebrity' Slot: Give them a 20-minute set before the headliner.", pts: 3, fb: "The crowd loved it! The PR is amazing and the 'hype' is legendary." },
+        { t: "Let them play the whole 2-hour set.", pts: 2, fb: "They don't know how to DJ. They just played the same song 10 times. The fans are bored." },
+        { t: "Ban them because they aren't a 'real' musician.", pts: 1, fb: "You missed a massive PR opportunity. The fans are disappointed." },
+        { t: "Make them sell hot dogs instead.", pts: -1, fb: "They are a millionaire! They don't want to sell hot dogs. You just lost a huge favor." }
+      ]},
+      { q: "The Merchandise", d: "What's the 'Must-Have' item for the Pop Party?", opts: [
+        { t: "Light-Up Wristbands: That flash in time with the music.", pts: 3, fb: "The beach looks like a sea of stars! The photos are the most beautiful thing the town has ever seen." },
+        { t: "Signed 'Pop Princess' Posters: Limited edition.", pts: 2, fb: "A popular choice, though they were a bit expensive to produce." },
+        { t: "Festival-branded Lip Balm.", pts: 1, fb: "A bit boring. Not many people bought them." },
+        { t: "A bag of the headliner's 'Breath'.", pts: -1, fb: "That is creepy and weird. Stop it." }
+      ]},
+      { q: "The Weather", d: "It's a beautiful day, but the 'Pop Princess' is worried about her hair in the wind.", opts: [
+        { t: "The 'Wind Shield': Build a glass wall at the front of the stage.", pts: 3, fb: "She's happy and her hair is perfect! The show went on without a problem." },
+        { t: "Tell her to 'wear a hat'.", pts: 2, fb: "She wore a giant hat that covered her face. The fans couldn't see her. A bit of a fail." },
+        { t: "Cancel the show because of the 'breeze'.", pts: 1, fb: "People are very disappointed. A breeze is not a reason to cancel a festival." },
+        { t: "Try to stop the wind with a giant fan blowing the other way.", pts: -1, fb: "Physics doesn't work that way. You're just wasting electricity." }
+      ]},
+      { q: "The Workshop", d: "How do you involve the local children in the festival?", opts: [
+        { t: "The 'Pop Star' Academy: Teaching them how to dance and sing.", pts: 3, fb: "Incredible! The kids performed a 5-minute dance before the main show. The parents are so proud." },
+        { t: "A 'Glitter Art' Class: Making sparkly posters.", pts: 2, fb: "The kids had fun, but they were covered in glitter for a week. The parents are a bit annoyed." },
+        { t: "Have them clean the stage for free stickers.", pts: 1, fb: "That's not a workshop, that's just chores. The kids are bored." },
+        { t: "Tell them 'pop is for adults only'.", pts: -1, fb: "You just lost the next generation of fans. The Mayor is very disappointed." }
+      ]},
+      { q: "The Final Review", d: "The festival is over. The Mayor is worried about the 'Noise' and the 'Glitter'.", opts: [
+        { t: "The 'Success' Report: Show the millions of social media views and the profit.", pts: 3, fb: "The Mayor is delighted! He sees that the festival has made the town famous." },
+        { t: "Show him the bank account.", pts: 2, fb: "He's happy about the money, but he's still a bit worried about the town's image." },
+        { t: "Tell him he's 'too old' to understand.", pts: 1, fb: "That is very rude! You are definitely not getting a bonus this year." },
+        { t: "Tell him the town is now 'Pop City'.", pts: -1, fb: "He's calling the police and you are fired. Bad choice of words!" }
+      ]},
+      { q: "The Future", d: "Should we make the 'Neon Pulse' a monthly event?", opts: [
+        { t: "Yes: But keep it in different locations each time.", pts: 3, fb: "Perfect! You're bringing music and business to the whole town. A true hero." },
+        { t: "No: Keep it once a year to make it 'special'.", pts: 2, fb: "A safe choice. It will stay a big event, but you're missing a chance for regular income." },
+        { t: "Maybe: If we can find a bigger sponsor.", pts: 1, fb: "A bit indecisive. You need to show more leadership." },
+        { t: "No: Pop is too loud for this town.", pts: -1, fb: "You just insulted your own festival! The fans are disappointed." }
+      ]}
+    ],
+    emergencies: {
+      5: { q: "🚨 THE COSTUME RIP!", d: "The headliner's main costume has ripped right before the big dance number!", opts: [
+        { t: "The 'Safety Pin' Save: Fix it quickly and call it 'Punk Pop'.", fail: false, fb: "The fans loved the 'new look'! She looked cool and the show went on.", pts: 2 },
+        { t: "Stop the show for 1 hour while a tailor arrives.", fail: true, fb: "The fans got bored and started leaving. The show is a disaster. GAME OVER." },
+        { t: "Tell her to 'just wear her jeans'.", fail: false, fb: "She was a bit grumpy, but the fans liked the 'casual' look. A bit of a shame.", pts: 1 }
+      ]},
+      11: { q: "🚨 THE STAGE STALKER!", d: "A fan has managed to get past security and is running toward the 'Pop Princess'!", opts: [
+        { t: "The 'Security' Save: Have the dancers surround her while security removes the fan.", fail: false, fb: "Brilliant! The audience thought it was part of the dance. Everyone is safe.", pts: 2 },
+        { t: "Call the police to arrest the fan immediately.", fail: true, fb: "The fan was actually a 12-year-old girl who just wanted a hug. The PR is terrible. GAME OVER." },
+        { t: "Turn the fire hose on the fan.", fail: false, fb: "They are wet and angry, but they went back to the crowd. A bit extreme, but it worked.", pts: 1 }
+      ]}
+    }
+  }
+};
+
+let state = {
+  fest: null,
+  score: 0,
+  step: 0,
+  activeOptions: [],
+  answered: false
+};
+
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+function startWith(f) {
+  state.fest = f;
+  document.getElementById('fest-screen').classList.remove('active');
+  document.getElementById('game-screen').classList.add('active');
+  updateTally();
+  loadStep();
+}
+
+function updateTally() {
+  const el = document.getElementById('cur-score');
+  el.innerHTML = `${state.score} ${state.fest.emoji}`;
+}
+
+function loadStep() {
+  state.answered = false;
+  document.getElementById('fb-box').style.display = 'none';
+  document.getElementById('gameover-btn-el').style.display = 'none';
+  document.getElementById('next-btn-el').style.display = 'block';
+  
+  let data;
+  const emg = GAME_DATA[state.fest.id].emergencies[state.step];
+  
+  if (emg) {
+    data = emg;
+    document.body.classList.add('emergency-mode');
+  } else {
+    data = GAME_DATA[state.fest.id].scenarios[state.step];
+    document.body.classList.remove('emergency-mode');
+    document.getElementById('cur-step').textContent = `${state.step + 1}/12`;
+  }
+
+  document.getElementById('q-title').textContent = data.q;
+  document.getElementById('q-desc').textContent = data.d;
+  
+  state.activeOptions = [...data.opts];
+  renderOptions();
+}
+
+function renderOptions() {
+  const cont = document.getElementById('options-cont');
+  cont.innerHTML = '';
+  const shuffled = shuffle([...state.activeOptions]);
+
+  shuffled.forEach((o, i) => {
+    const b = document.createElement('button');
+    b.className = 'opt-btn';
+    b.innerHTML = `<span>${String.fromCharCode(65 + i)}</span> ${o.t}`;
+    b.onclick = () => handleChoice(o, b);
+    cont.appendChild(b);
+  });
+}
+
+function handleChoice(o, btn) {
+  if (state.answered) return;
+  const fbBox = document.getElementById('fb-box');
+  const fbText = document.getElementById('fb-text');
+
+  if (o.pts === -1) {
+    state.score = Math.max(0, state.score - 1);
+    updateTally();
+    fbBox.style.display = 'block';
+    fbBox.className = 'feedback fb-retry';
+    fbText.textContent = o.fb;
+    state.activeOptions = state.activeOptions.filter(opt => opt !== o);
+    renderOptions();
+    return;
+  }
+
+  state.answered = true;
+  if (o.fail) {
+    fbBox.style.display = 'block';
+    fbBox.className = 'feedback fb-bad';
+    fbText.textContent = o.fb;
+    document.getElementById('next-btn-el').style.display = 'none';
+    document.getElementById('gameover-btn-el').style.display = 'block';
+  } else {
+    state.score += (o.pts || 0);
+    updateTally();
+    fbBox.style.display = 'block';
+    fbBox.className = 'feedback fb-good';
+    fbText.textContent = o.fb;
+  }
+  
+  document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+}
+
+function nextStep() {
+  state.step++;
+  if (state.step >= 12) {
+    showWin();
+  } else {
+    loadStep();
+  }
+}
+
+function showWin() {
+  document.getElementById('game-screen').classList.remove('active');
+  document.getElementById('win-screen').classList.add('active');
+  document.getElementById('fest-title-final').textContent = state.fest.title;
+  
+  const desc = document.getElementById('w-desc');
+  const title = document.getElementById('w-title');
+  const emoji = document.getElementById('final-emoji-display');
+
+  if (state.score >= 30) {
+    emoji.textContent = "🏆";
+    title.textContent = "A Global Sensation!";
+    desc.textContent = "Your festival was a masterpiece of management! By choosing high-quality, authentic options, you have secured the town's cultural and financial future. The Mayor is delighted, and music fans are already booking their flights for next year's event.";
+  } else if (state.score >= 15) {
+    emoji.textContent = "🌟";
+    title.textContent = "A Solid Community Success";
+    desc.textContent = "Great job! The festival was well-received by the locals and provided a significant boost to the town's image. While a few decisions were a bit safe, you managed the emergencies with grace and kept everyone safe. With a bigger budget next year, you could go global!";
+  } else {
+    emoji.textContent = "📈";
+    title.textContent = "Room for Improvement";
+    desc.textContent = "The festival finished without a total disaster, but the town's reputation hasn't grown much. Several low-quality choices left the fans feeling underwhelmed. Take some time to study event management principles and try again with a different genre next season.";
+  }
+}
+
+function restartGame() {
+  state = { fest: null, score: 0, step: 0, activeOptions: [], answered: false };
+  document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+  document.getElementById('fest-screen').classList.add('active');
+}
+
+function init() {
+  const cont = document.getElementById('fest-choices');
+  FESTIVALS.forEach(f => {
+    const div = document.createElement('div');
+    div.className = 'fest-opt';
+    div.innerHTML = `<span class="icon">${f.icon}</span><h3>${f.title}</h3>`;
+    div.onclick = () => startWith(f);
+    cont.appendChild(div);
+  });
+}
+
+window.onload = init;
+</script>
+
+</body>
+</html>
