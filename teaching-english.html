@@ -1,423 +1,369 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>A Full Day's Teaching — English Language Trainer (France)</title>
-<meta name="description" content="An interactive English language exercise for B2 learners. Play the role of a freelance English language trainer working in France — navigating a demanding day of sessions, admin, and professional decisions.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Mulish:ital,wght@0,300;0,400;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#F7F4EE;--surface:#FFFFFF;--surface2:#F0ECE3;--surface3:#E6E1D6;
-  --ink:#1A1916;--ink2:#5A5750;--ink3:#9A9790;
-  --rule:rgba(26,25,22,0.10);--rule2:rgba(26,25,22,0.18);
-  --green-bg:#E6F2DC;--green-bd:#7EB83E;--green-tx:#22480A;
-  --amber-bg:#FAF0DC;--amber-bd:#D8980A;--amber-tx:#5A3606;
-  --red-bg:#FAEBEB;--red-bd:#D87878;--red-tx:#680E0E;
-  --fatal-bd:#C02828;--fatal-tx:#450A0A;
-  --blue-bg:#E4EDF8;--blue-bd:#6098D0;--blue-tx:#0A3568;
-  --teal-bg:#E0EEEC;--teal-bd:#50ADAA;--teal-tx:#0C4542;
-  --terracotta:#C0623A;
-  --r:12px;--rs:8px;--rxl:18px;
-  --shadow:0 3px 16px rgba(0,0,0,0.07),0 1px 4px rgba(0,0,0,0.04);
-  --shadow-sm:0 1px 5px rgba(0,0,0,0.08);
-}
-html{scroll-behavior:smooth}
-body{font-family:'Mulish',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;line-height:1.6}
-body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.5}
-.shell{max-width:720px;margin:0 auto;padding:2.5rem 1.25rem 5rem;position:relative;z-index:1}
-.masthead{display:flex;align-items:center;justify-content:space-between;margin-bottom:2.25rem;padding-bottom:1.25rem;border-bottom:1px solid var(--rule)}
-.masthead-eyebrow{display:flex;align-items:center;gap:10px}
-.masthead-flag{font-size:18px;line-height:1}
-.masthead-title{font-family:'Playfair Display',Georgia,serif;font-size:19px;font-weight:500;color:var(--ink);letter-spacing:-0.01em}
-.masthead-sub{font-size:12px;color:var(--ink3);margin-top:2px}
-.level-badge{font-family:'DM Mono',monospace;font-size:11px;font-weight:500;background:var(--blue-bg);color:var(--blue-tx);border:1px solid var(--blue-bd);border-radius:20px;padding:4px 12px;letter-spacing:0.04em;flex-shrink:0}
-.card{background:var(--surface);border:1px solid var(--rule);border-radius:var(--rxl);box-shadow:var(--shadow);overflow:hidden}
-.card-bar{display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.5rem;border-bottom:1px solid var(--rule);background:var(--surface);gap:1rem}
-.char-name{font-family:'Playfair Display',Georgia,serif;font-size:16px;font-weight:500;color:var(--ink)}
-.char-role{font-size:12px;color:var(--ink2);margin-top:1px}
-.bar-right{display:flex;align-items:center;gap:12px;flex-shrink:0}
-.progress-track{display:flex;gap:4px;align-items:center}
-.dot{width:8px;height:8px;border-radius:50%;background:var(--surface3);border:1px solid var(--rule2);transition:background .35s,border-color .35s;flex-shrink:0}
-.dot.done{background:#7EB83E;border-color:#5A9018}
-.dot.active{background:#3D7AC0;border-color:#255EA8}
-.dot.emg{background:#C83838;border-color:#A01818}
-.score-chip{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;background:var(--green-bg);color:var(--green-tx);border:1px solid var(--green-bd);border-radius:20px;padding:4px 14px;min-width:64px;text-align:center;transition:all .25s}
-.card-body{padding:1.75rem;animation:slideIn .22s ease}
-@keyframes slideIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
-.time-label{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--terracotta);margin-bottom:.65rem;display:flex;align-items:center;gap:6px}
-.time-label::before{content:'';display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--terracotta);flex-shrink:0}
-.emg-banner{background:var(--red-bg);border:1px solid var(--red-bd);border-radius:var(--rs);padding:10px 14px;font-size:13px;color:var(--red-tx);font-weight:600;margin-bottom:1rem;display:flex;align-items:center;gap:10px}
-.emg-dot{width:18px;height:18px;flex-shrink:0;background:var(--red-tx);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff}
-.vocab-row{display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin-bottom:1.1rem}
-.vocab-label{font-size:12px;color:var(--ink3);flex-shrink:0}
-.vpill{font-family:'DM Mono',monospace;font-size:11px;background:var(--blue-bg);color:var(--blue-tx);border:1px solid var(--blue-bd);border-radius:20px;padding:2px 9px}
-.scenario{font-size:15px;line-height:1.82;color:var(--ink);margin-bottom:1.5rem}
-.scenario strong{font-weight:600}
-.scenario em{font-style:italic;color:var(--ink2)}
-.options{display:flex;flex-direction:column;gap:10px;margin-bottom:1.25rem}
-.opt{width:100%;text-align:left;padding:14px 16px;background:var(--surface);border:1px solid var(--rule2);border-radius:var(--rs);cursor:pointer;font-family:'Mulish',sans-serif;font-size:14px;color:var(--ink);line-height:1.65;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;transition:background .14s,border-color .14s,transform .1s,box-shadow .14s}
-.opt:hover:not(:disabled){background:var(--surface2);transform:translateY(-1px);box-shadow:var(--shadow-sm)}
-.opt:active:not(:disabled){transform:translateY(0)}
-.opt:disabled{cursor:default;transform:none;box-shadow:none}
-.opt.sel-g{background:var(--green-bg);border-color:var(--green-bd);color:var(--green-tx)}
-.opt.sel-o{background:var(--amber-bg);border-color:var(--amber-bd);color:var(--amber-tx)}
-.opt.sel-p{background:var(--red-bg);border-color:var(--red-bd);color:var(--red-tx)}
-.opt.sel-s{background:var(--amber-bg);border-color:var(--amber-bd);color:var(--amber-tx)}
-.opt.sel-f{background:var(--red-bg);border-color:var(--fatal-bd);color:var(--fatal-tx)}
-.opt-text{flex:1}
-.ptag{flex-shrink:0;font-family:'DM Mono',monospace;font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px;white-space:nowrap;margin-top:3px;opacity:0;transition:opacity .2s}
-.ptag.vis{opacity:1}
-.pt3{background:var(--green-bg);color:var(--green-tx);border:1px solid var(--green-bd)}
-.pt2{background:var(--amber-bg);color:var(--amber-tx);border:1px solid var(--amber-bd)}
-.pt1,.pt0{background:var(--red-bg);color:var(--red-tx);border:1px solid var(--red-bd)}
-.fbox{border-radius:var(--rs);font-size:14px;line-height:1.75;padding:14px 16px;margin-bottom:1.25rem;display:none;animation:fadeIn .25s ease}
-.fbox.show{display:block}
-@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
-.fb-g{background:var(--green-bg);border:1px solid var(--green-bd);color:var(--green-tx)}
-.fb-o{background:var(--amber-bg);border:1px solid var(--amber-bd);color:var(--amber-tx)}
-.fb-p{background:var(--red-bg);border:1px solid var(--red-bd);color:var(--red-tx)}
-.fb-f{background:var(--red-bg);border:2px solid var(--fatal-bd);color:var(--fatal-tx)}
-.nxt-wrap{display:flex;justify-content:flex-end}
-.nxt{padding:10px 22px;background:var(--ink);color:#fff;border:none;border-radius:var(--rs);font-family:'Mulish',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:background .14s,transform .1s;display:none;letter-spacing:.01em}
-.nxt:hover{background:#2E2D26}
-.nxt:active{transform:scale(.98)}
-.nxt.show{display:inline-block}
-.intro{padding:2.25rem 1.75rem}
-.intro-kicker{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:.75rem}
-.intro-title{font-family:'Playfair Display',Georgia,serif;font-size:32px;font-weight:700;letter-spacing:-.02em;line-height:1.18;color:var(--ink);margin-bottom:.75rem}
-.intro-title em{font-style:italic;color:var(--terracotta)}
-.intro-sub{font-size:15px;color:var(--ink2);line-height:1.75;margin-bottom:1.5rem}
-.intro-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:1.75rem}
-.chip{font-size:12px;color:var(--ink2);background:var(--surface2);border:1px solid var(--rule2);border-radius:20px;padding:4px 12px}
-.intro-divider{height:1px;background:var(--rule);margin-bottom:1.5rem}
-.char-card{background:var(--surface2);border:1px solid var(--rule);border-radius:var(--rs);padding:1rem 1.25rem;display:flex;align-items:flex-start;gap:1rem;margin-bottom:1.5rem}
-.char-avatar{width:44px;height:44px;flex-shrink:0;background:var(--blue-bg);border:1px solid var(--blue-bd);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--blue-tx)}
-.char-info-name{font-family:'Playfair Display',Georgia,serif;font-size:15px;font-weight:500;margin-bottom:2px}
-.char-info-role{font-size:12px;color:var(--ink2);margin-bottom:.5rem}
-.char-info-desc{font-size:13px;color:var(--ink2);line-height:1.68}
-.how-box{background:var(--surface2);border:1px solid var(--rule);border-radius:var(--rs);padding:1rem 1.25rem;margin-bottom:1.5rem}
-.how-label{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin-bottom:.5rem}
-.how-text{font-size:14px;line-height:1.78;color:var(--ink2)}
-.start-btn{width:100%;padding:15px 24px;background:var(--ink);color:#fff;border:none;border-radius:var(--rs);font-family:'Mulish',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:background .14s;letter-spacing:.01em}
-.start-btn:hover{background:#2E2D26}
-.final-screen{padding:2rem 1.75rem}
-.final-kicker{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:1.5rem;text-align:center}
-.score-block{text-align:center;margin-bottom:1.5rem}
-.score-num{font-family:'Playfair Display',Georgia,serif;font-size:80px;font-weight:700;letter-spacing:-.03em;line-height:1;color:var(--ink)}
-.score-denom{font-family:'DM Mono',monospace;font-size:17px;color:var(--ink3);margin-top:6px}
-.bar-track{height:8px;background:var(--surface3);border-radius:20px;overflow:hidden;margin:1.25rem 0}
-.bar-fill{height:8px;border-radius:20px;background:linear-gradient(90deg,#7EB83E,#52920E);width:0%;transition:width 1s cubic-bezier(.34,1.4,.64,1)}
-.final-band-row{text-align:center;margin-bottom:1.5rem}
-.band{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:5px 14px;border-radius:20px;display:inline-block}
-.b5{background:var(--green-bg);color:var(--green-tx);border:1px solid var(--green-bd)}
-.b4{background:var(--teal-bg);color:var(--teal-tx);border:1px solid var(--teal-bd)}
-.b3{background:var(--blue-bg);color:var(--blue-tx);border:1px solid var(--blue-bd)}
-.b2{background:var(--amber-bg);color:var(--amber-tx);border:1px solid var(--amber-bd)}
-.b1{background:var(--red-bg);color:var(--red-tx);border:1px solid var(--red-bd)}
-.final-grade{font-family:'Playfair Display',Georgia,serif;font-size:22px;font-weight:700;letter-spacing:-.01em;color:var(--ink);text-align:center;margin-bottom:1.25rem}
-.final-body{font-size:15px;line-height:1.82;color:var(--ink);margin-bottom:1rem}
-.final-body em{font-style:italic;font-weight:600}
-.tips-box{background:var(--surface2);border:1px solid var(--rule2);border-radius:var(--rs);padding:1rem 1.25rem;margin-bottom:1.5rem}
-.tips-label{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin-bottom:.5rem}
-.tips-text{font-size:14px;line-height:1.78;color:var(--ink2)}
-.tips-text em{font-style:italic;color:var(--ink)}
-.vocab-section{padding-top:1.25rem;border-top:1px solid var(--rule);margin-bottom:1.5rem}
-.vocab-sec-label{font-size:12px;color:var(--ink3);margin-bottom:.6rem}
-.vocab-grid{display:flex;flex-wrap:wrap;gap:5px}
-.replay-btn{width:100%;padding:13px 24px;background:var(--surface);color:var(--ink);border:1px solid var(--rule2);border-radius:var(--rs);font-family:'Mulish',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:background .14s;letter-spacing:.01em}
-.replay-btn:hover{background:var(--surface2)}
-.site-footer{text-align:center;margin-top:2rem;font-size:12px;color:var(--ink3);padding-bottom:3rem}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Trainer's Torment: A Week in ELT</title>
+    <style>
+        /* Base Palette & Legibility Improvements[cite: 2] */
+        :root {
+            --bg-main: #f1f5f9;
+            --text-dark: #0f172a;
+            --text-muted: #475569;
+            --primary: #4f46e5; /* Friendly Indigo */
+            --primary-hover: #4338ca;
+            --accent-blue: #2563eb;
+            --success-bg: #f0fdf4;
+            --success-text: #166534;
+            --error-bg: #fef2f2;
+            --error-text: #991b1b;
+            --emergency: #dc2626;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-main);
+            color: var(--text-dark);
+            line-height: 1.6;
+            padding: 1rem;
+        }
+
+        .container { max-width: 700px; margin: 2rem auto; }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* High-Contrast Header[cite: 2] */
+        .card-header {
+            background: var(--primary);
+            color: white;
+            padding: 1.75rem;
+            text-align: center;
+        }
+
+        /* Dedicated Score Area for Legibility[cite: 2] */
+        .score-container {
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 12px;
+            padding: 0.75rem;
+            margin-top: 1rem;
+            display: inline-block;
+            min-width: 200px;
+        }
+
+        .score-display { 
+            font-weight: 800; 
+            color: #fbbf24; /* Golden yellow for visibility */
+            font-size: 1.3rem;
+            display: block;
+        }
+
+        .emoji-tally { 
+            font-size: 1.4rem; 
+            margin-top: 0.25rem; 
+            letter-spacing: 3px;
+            display: block;
+        }
+
+        .card-content { padding: 2rem; }
+
+        .scenario-text {
+            font-style: italic;
+            background: #f8fafc;
+            color: var(--text-muted);
+            padding: 1.5rem;
+            border-left: 5px solid var(--accent-blue);
+            border-radius: 4px;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        .choices { display: flex; flex-direction: column; gap: 0.75rem; }
+
+        .choice-btn {
+            padding: 1rem 1.25rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            background: white;
+            color: var(--text-dark);
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            font-size: 1rem;
+        }
+
+        .choice-btn:hover:not(:disabled) { 
+            border-color: var(--primary); 
+            background: #eef2ff; 
+            transform: translateY(-1px);
+        }
+
+        .choice-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .feedback {
+            margin-top: 1.5rem;
+            padding: 1.25rem;
+            border-radius: 10px;
+            display: none;
+            font-weight: 500;
+        }
+
+        .good { background: var(--success-bg); color: var(--success-text); border: 1px solid #bbf7d0; }
+        .poor { background: var(--error-bg); color: var(--error-text); border: 1px solid #fecaca; }
+
+        .tag {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 0.75rem;
+        }
+
+        .online-tag { background: #dbeafe; color: #1e40af; }
+        .emergency-tag { 
+            background: #fee2e2; 
+            color: #b91c1c; 
+            border: 1px solid #fca5a5;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse { 0% {opacity: 1;} 50% {opacity: 0.7;} 100% {opacity: 1;} }
+
+        .btn-action {
+            margin-top: 1.5rem;
+            background: var(--text-dark);
+            color: white;
+            padding: 1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: 700;
+            font-size: 1.1rem;
+            transition: background 0.2s;
+        }
+
+        .btn-action:hover { background: #334155; }
+    </style>
 </head>
 <body>
-
-<div class="shell">
-  <header class="masthead">
-    <div class="masthead-eyebrow">
-      <span class="masthead-flag">🇫🇷</span>
-      <div>
-        <div class="masthead-title">Full Day Language Training</div>
-        <div class="masthead-sub">B2 Interaction Simulation</div>
-      </div>
-    </div>
-    <div class="level-badge">B2 UPPER-INT</div>
-  </header>
-
-  <div class="card" id="gc">
-    </div>
-
-  <footer class="site-footer">
-    Professional English Series • L'Escale Française
-  </footer>
-</div>
-
-<script>
-/* ══════════════════════════════════════════════════════════
-   DATA
-══════════════════════════════════════════════════════════ */
-const STEPS = {
-  s1: {
-    time: "08:15",
-    scenario: "You arrive at a tech company for a 3-hour morning session. The HR manager, <strong>Claire</strong>, informs you that the group size has suddenly doubled from 4 to 8, and two participants are significantly lower level than the others. How do you handle the start of the session?",
-    vocab: ["to accommodate","logistics","disparity"],
-    choices: [
-      { text: "Briefly welcome everyone, then run the planned session but provide extra 'scaffolded' worksheets and pair the weaker students with the strongest ones.", pts: 3, fb: "Excellent. You showed flexibility and used 'peer-teaching' to manage the level disparity without delaying the start.", type: "g" },
-      { text: "Ask the two lower-level students to observe today and promise to bring easier materials for the next session.", pts: 1, fb: "Poor. This is demotivating for the new arrivals and fails to 'accommodate' their needs immediately.", type: "p" },
-      { text: "Take 15 minutes to interview the new students while the others work on a warm-up, then adjust your lesson plan on the fly.", pts: 2, fb: "Good. Identifying their needs is professional, though it eats into the group's valuable contact time.", type: "o" }
-    ],
-    next: "s2"
-  },
-  s2: {
-    time: "11:45",
-    scenario: "Morning session over. You're in the breakroom when a student asks, <em>'Should I use \"regards\" or \"sincerely\" in this email to a client I've met twice?'</em> You have a lunch meeting across town in 20 minutes.",
-    vocab: ["register","formality","nuance"],
-    choices: [
-      { text: "Give a quick rule of thumb: 'Kind regards' for known contacts, 'Sincerely' for formal first-time letters, then excuse yourself for your meeting.", pts: 3, fb: "Perfect. You provided immediate value while maintaining your professional boundaries (and your schedule).", type: "g" },
-      { text: "Tell them you can't talk now but will email them a full guide on email etiquette later tonight.", pts: 2, fb: "Acceptable. It solves the problem eventually, but misses the chance for a quick, helpful 'on-the-spot' teaching moment.", type: "o" },
-      { text: "Stay and spend 10 minutes explaining the historical nuances of British vs American email sign-offs.", pts: 1, fb: "Risky. You're being helpful, but you're now likely to be late for your next professional commitment. Time management is key.", type: "o" }
-    ],
-    next: "s3"
-  },
-  s3: {
-    time: "13:30",
-    scenario: "Lunch was a 'needs analysis' with a potential new corporate client. They want a 20% discount on your standard rate because they're a 'start-up with high growth potential'.",
-    vocab: ["to negotiate","overhead","volume discount"],
-    choices: [
-      { text: "Agree immediately to secure the contract, hoping they provide more volume later.", pts: 1, fb: "Weak negotiation. Start-ups are volatile; you've lowered your 'market value' without a guaranteed return.", type: "p" },
-      { text: "Politely decline the discount but offer a 5% 'introductory' reduction if they book a block of 40 hours upfront.", pts: 3, fb: "Strong professional stance. You protected your rate while offering a 'volume discount' that helps your cash flow.", type: "g" },
-      { text: "Explain that your rates are fixed due to your high overheads and suggest they find a less experienced trainer.", pts: 2, fb: "Honest, but potentially too blunt. You might have missed a future partnership by not being slightly more flexible.", type: "o" }
-    ],
-    next: "em1"
-  },
-  em1: {
-    time: "15:00",
-    scenario: "<strong>CRISIS:</strong> You are halfway through an afternoon session when the company's Wi-Fi goes down. Your entire lesson plan was based on an interactive online quiz and a YouTube video case study.",
-    isEmg: true,
-    vocab: ["redundancy","contingency","to pivot"],
-    choices: [
-      { text: "Apologize and end the session early since the materials are inaccessible.", pts: 0, fb: "FATAL ERROR. A professional trainer always has a 'plan B'. This hurts your reputation.", type: "f", fatal: true },
-      { text: "Pivot to a 'unplugged' speaking activity using the whiteboard to brainstorm the key themes of the video instead.", pts: 3, fb: "Great recovery. You showed that your value comes from your teaching skills, not just your tech tools.", type: "g" },
-      { text: "Spend 15 minutes trying to fix the router and asking the IT department for help while the students wait.", pts: 1, fb: "Poor. You aren't the IT guy. Your job is to keep the students engaged, not fix the building's infrastructure.", type: "p" }
-    ],
-    next: "s4"
-  },
-  s4: {
-    time: "17:30",
-    scenario: "Final session done. You're exhausted. You've received an urgent email from a client asking for a progress report for 5 students by tomorrow morning. It wasn't in your calendar.",
-    vocab: ["administrative burden","deadline","deliverable"],
-    choices: [
-      { text: "Work until 9 PM tonight to finish the reports. The client's needs always come first.", pts: 2, fb: "Dedicated, but risks 'burnout'. You need to manage your personal time to stay effective in the long run.", type: "o" },
-      { text: "Reply immediately stating you'll have them ready by midday tomorrow, citing the short notice.", pts: 3, fb: "Professional. You acknowledged the 'deliverable' but set a realistic 'deadline' based on the late request.", type: "g" },
-      { text: "Ignore the email until tomorrow morning. If it wasn't scheduled, it's not your problem.", pts: 1, fb: "Unprofessional. Clear communication is essential, even if you can't meet the immediate request.", type: "p" }
-    ],
-    next: "s5"
-  },
-  s5: {
-    time: "19:00",
-    scenario: "You're at home. You realize you forgot to log your hours for the month on a client's complex online portal. If you don't do it by midnight, your payment will be delayed by 30 days.",
-    vocab: ["billing cycle","compliance","to rectify"],
-    choices: [
-      { text: "Log in immediately and complete the admin, despite the fatigue. Cash flow is the lifeblood of a freelancer.", pts: 3, fb: "Correct. Admin is the 'unseen' part of the job that ensures you can keep working.", type: "g" },
-      { text: "Decide to do it tomorrow and just accept the 30-day delay in payment.", pts: 1, fb: "Poor financial management. A freelancer must be 'compliant' with billing cycles to survive.", type: "p" },
-      { text: "Email the accountant directly tomorrow morning asking for an exception to be made.", pts: 2, fb: "Possible, but creates extra work for others and shows a lack of organization on your part.", type: "o" }
-    ],
-    next: "final"
-  }
-};
-
-/* ══════════════════════════════════════════════════════════
-   LOGIC
-══════════════════════════════════════════════════════════ */
-let s = 0, curr = "s1";
-const dots = ["s1","s2","s3","em1","s4","s5"];
-
-/**
- * Fisher-Yates Shuffle Algorithm
- * Ensures true mathematical randomness for answer positions.
- */
-function shuffleArray(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-  return array;
-}
-
-function init() {
-  document.getElementById('gc').innerHTML = `
-    <div class="intro">
-      <div class="intro-kicker">Freelance Career Sim</div>
-      <h1 class="intro-title">A Full Day's <em>Teaching</em></h1>
-      <p class="intro-sub">Navigate a 12-hour day as an English Language Trainer in France. Manage classroom dynamics, difficult negotiations, and technical crises.</p>
-      <div class="intro-chips">
-        <span class="chip">6 Scenarios</span>
-        <span class="chip">B2+ Vocabulary</span>
-        <span class="chip">Decision Based</span>
-      </div>
-      <div class="intro-divider"></div>
-      <div class="char-card">
-        <div class="char-avatar">TR</div>
-        <div class="char-info">
-          <div class="char-info-name">The Trainer</div>
-          <div class="char-info-role">Freelance Consultant</div>
-          <div class="char-info-desc">Expert in Business English. Currently juggling three different corporate contracts across the city.</div>
+    <div class="container">
+        <div id="game" class="card">
+            <div class="card-header">
+                <h1>The Trainer's Torment</h1>
+            </div>
+            <div class="card-content" style="text-align: center;">
+                <p style="margin-bottom: 2rem; color: var(--text-muted);">
+                    It's Monday morning. Another busy week ahead, the coffee is weak and luke warm, and you're feeling ready for the challenge. Sort of.
+                </p>
+                <button class="btn-action" onclick="startGame()">Trainers! Start your lessons!</button>
+            </div>
         </div>
-      </div>
-      <div class="how-box">
-        <div class="how-label">Mission</div>
-        <div class="how-text">Maintain your professional reputation and maximize your daily score (Max 18). Watch out for 'Fatal' professional errors.</div>
-      </div>
-      <button class="start-btn" onclick="renderStep()">Start the Day — 08:00</button>
-    </div>`;
-}
-
-function renderStep() {
-  const d = STEPS[curr];
-  // Shuffle the choices array before rendering buttons
-  const shuffledChoices = shuffleArray([...d.choices]);
-  
-  const dotsHtml = dots.map(id => {
-    let cls = "dot";
-    if(id === curr) cls += " active";
-    else if(dots.indexOf(id) < dots.indexOf(curr)) cls += " done";
-    if(STEPS[id].isEmg) cls += " emg";
-    return `<div class="${cls}"></div>`;
-  }).join('');
-
-  document.getElementById('gc').innerHTML = `
-    <div class="card-bar">
-      <div>
-        <div class="char-name">Alex Rivera</div>
-        <div class="char-role">Current Session</div>
-      </div>
-      <div class="bar-right">
-        <div class="progress-track">${dotsHtml}</div>
-        <div class="score-chip">${s} pts</div>
-      </div>
     </div>
-    <div class="card-body">
-      <div class="time-label">${d.time}</div>
-      ${d.isEmg ? `<div class="emg-banner"><div class="emg-dot">!</div><span>URGENT SITUATION</span></div>` : ''}
-      <div class="vocab-row">
-        <span class="vocab-label">Key Vocabulary:</span>
-        ${d.vocab.map(v => `<span class="vpill">${v}</span>`).join('')}
-      </div>
-      <div class="scenario">${d.scenario}</div>
-      <div class="options" id="opts">
-        ${shuffledChoices.map((c, i) => `
-          <button class="opt" onclick="handle('${curr}', ${d.choices.indexOf(c)}, this)">
-            <span class="opt-text">${c.text}</span>
-            <span class="ptag" id="tag${i}">+${c.pts}</span>
-          </button>
-        `).join('')}
-      </div>
-      <div class="fbox" id="fb"></div>
-      <div class="nxt-wrap">
-        <button class="nxt" id="nb" onclick="next()">Continue →</button>
-      </div>
-    </div>`;
-}
 
-function handle(stepId, idx, btn) {
-  const d = STEPS[stepId];
-  const c = d.choices[idx];
-  if(btn.disabled) return;
+    <script>
+        const SCENARIOS = [
+            { title: "The Human Dictionary", type: "In-Person", desc: "Marco refuses to move until he knows the etymology of every word in the instructions.", choices: [
+                { text: "Use pictures to get him moving and lower the affective filter.", points: 3, feedback: "Pedagogical victory!" },
+                { text: "Spend 15 minutes defining every preposition until everyone is crying.", points: 2, feedback: "You've created a monster. He expects a lecture on 'at' now." },
+                { text: "Tell Marco to 'just feel the vibe' and ignore him.", points: 1, feedback: "Rapport: Zero." },
+                { text: "Scream 'It's a function word, Marco!' and throw the book.", points: -1, feedback: "Unprofessional. Try again." }
+            ]},
+            { title: "The Zoom Ghost", type: "Online", desc: "Yuki claims she 'knows' the Present Perfect, then makes three errors in her next sentence.", choices: [
+                { text: "Show her a quick diagnostic task to gently prove the need for review.", points: 3, feedback: "Data doesn't lie. She's back to reality." },
+                { text: "Let her skip it and scroll on her phone in peace.", points: 2, feedback: "Path of least resistance, but no learning occurred." },
+                { text: "Force her to turn her camera on to watch her ignore you.", points: 1, feedback: "The tension is now high. Awkward." },
+                { text: "Mute her permanently and claim she was disconnected.", points: -1, feedback: "A bit dishonest, don't you think? Try again." }
+            ]},
+            { title: "The Ghost of Trainers Past", type: "In-Person", desc: "Philippe misses Sarah, who let them 'just chat about wine' for the whole hour.", choices: [
+                { text: "Acknowledge Sarah was great, but firmly redirect to the grammar task.", points: 3, feedback: "Professional and firm." },
+                { text: "Spend the hour gossiping about Sarah to win his love.", points: 2, feedback: "You are now his favorite friend, but his English is still terrible." },
+                { text: "Tell him Sarah was fired for being too fun.", points: 1, feedback: "Lies and drama. A classic recipe for HR meetings." },
+                { text: "Burst into tears and ask why you're not good enough.", points: -1, feedback: "Too much emotion for a Tuesday. Try again." }
+            ]},
+            { title: "The Executive Hostage", type: "Online", desc: "Amara (VP) is in a moving taxi and only wants to learn how to fire people in English.", choices: [
+                { text: "Validate the frustration and pivot to 'English for Firing'—at least it's relevant.", points: 3, feedback: "Found the intrinsic motivation!" },
+                { text: "Lecture her on the beauty of Shakespeare for 20 minutes.", points: 2, feedback: "She has muted you. You are talking to yourself." },
+                { text: "Tell her if she doesn't like it, she can leave the taxi.", points: 1, feedback: "She will literally fire you. Bold move." },
+                { text: "Ask her to fire you right now so you can go home.", points: -1, feedback: "A tempting thought, but keep working. Try again." }
+            ]},
+            { title: "EMERGENCY: The Blackout", type: "Online", isEmergency: true, desc: "Your internet dies. You rejoin via a shaky 4G hotspot. You look like an 8-bit character from 1992.", choices: [
+                { text: "Pivot to a listening-only task. Turn off camera to save data and lead a debate.", points: 4, feedback: "Crisis managed! You're a pro who doesn't need pixels to teach." },
+                { text: "Keep trying to screen-share a 4K video until your phone explodes.", points: 0, feedback: "That was... ambitious. Perhaps a touch optimistic regarding physics." },
+                { text: "Cry silently and hope they don't notice you're gone.", points: 0, gameOver: true, feedback: "The Director of Studies called. They've decided to 'explore other options.' GAME OVER." }
+            ]},
+            { title: "The Pen-Thrower", type: "In-Person", desc: "Dmitri makes a mistake with the Third conditional and shouts 'I am but a fool!' in the quiet office.", choices: [
+                { text: "Normalize the meltdown. Explain it's a sign of a brain growing.", points: 3, feedback: "Growth mindset coaching!" },
+                { text: "Give him a piece of chocolate and hope he stops shouting.", points: 2, feedback: "Behavior management at its simplest." },
+                { text: "Tell him he's right and maybe try a lower level.", points: 1, feedback: "You just crushed a man's soul." },
+                { text: "Throw your own pen at him to establish dominance.", points: -1, feedback: "Assault is generally discouraged. Try again." }
+            ]},
+            { title: "The Philosophical Skeptic", type: "Online", desc: "Chen is ranting in Zoom chat about why 'read' and 'read' are spelled the same.", choices: [
+                { text: "Acknowledge the chaos, then show a pattern that actually works.", points: 3, feedback: "Steered him away from the abyss." },
+                { text: "Try to explain the history of the Great Vowel Shift.", points: 2, feedback: "Everyone else has disconnected. History won." },
+                { text: "Tell him to write a letter to the King.", points: 1, feedback: "Cathartic, but not helpful." },
+                { text: "Agree and start spelling everything phonetically like a rebel.", points: -1, feedback: "We are paid to teach standard English. Try again." }
+            ]},
+            { title: "The L1 Conspiracy", type: "In-Person", desc: "Jean and Luc have been whispering in French for ten minutes during an English task.", choices: [
+                { text: "Explain that immersion is a choice they make, not a prison you manage.", points: 3, feedback: "Accountability shifted!" },
+                { text: "Start a 'fine' system where they pay 1€ for every French word.", points: 2, feedback: "You're 20€ richer, but they hate you." },
+                { text: "Apologize and promise to hover over them like a hawk.", points: 1, feedback: "You are now a nanny, not a trainer." },
+                { text: "Pretend you don't notice while you browse Reddit.", points: -1, feedback: "They are paying for this, you know. Try again." }
+            ]},
+            { title: "The Gotcha King", type: "In-Person", desc: "Laurent asks if 'shall' can be used with a plural gerund in the subjunctive. He is smirking.", choices: [
+                { text: "Admit it's a great question, promise to check a corpus, and move on.", points: 3, feedback: "Intellectual humility is your shield." },
+                { text: "Tell him that rule died with the British Empire.", points: 2, feedback: "Witty, but slightly aggressive." },
+                { text: "Make up a fake rule and hope he doesn't have Google.", points: 1, feedback: "He has Google. You are now 'The Trainer Who Lies'." },
+                { text: "Challenge him to a bare-knuckle boxing match in the lobby.", points: -1, feedback: "HR is watching. Try again." }
+            ]},
+            { title: "The B2 Mirage", type: "In-Person", desc: "The file says 'Upper Intermediate'. They can barely say 'Hello'.", choices: [
+                { text: "Stop, pivot to basic diagnostic tasks, and simplify everything.", points: 3, feedback: "Agile teaching. Saved the day." },
+                { text: "Blame HR loudly in front of the students.", points: 2, feedback: "Honest, but messy." },
+                { text: "Push through. 'They'll catch up!' you lie to yourself.", points: 1, feedback: "They didn't catch up. They just stopped blinking." },
+                { text: "Teach them the lyrics to 'Yellow Submarine' and call it a day.", points: -1, feedback: "Laziness is not a teaching method. Try again." }
+            ]},
+            { title: "The Digital Tardy", type: "Online", desc: "Raj joins 20 minutes late and asks to start from the beginning. Five others are waiting.", choices: [
+                { text: "Politely decline, offer the recording, and keep the group moving.", points: 3, feedback: "You protected the time of those who showed up." },
+                { text: "Tell Raj he's been a 'bad boy' and mute him.", points: 2, feedback: "A bit weird, but the lesson continued." },
+                { text: "Restart the whole lesson for Raj.", points: 1, feedback: "The other five are now playing Wordle." },
+                { text: "Unleash a 10-minute rant about the importance of punctuality.", points: -1, feedback: "Now you're also wasting everyone's time. Try again." }
+            ]},
+            { title: "The 'Practical' Crisis", type: "In-Person", desc: "A manager complains your lessons are 'too theoretical'. The student complaining never does homework.", choices: [
+                { text: "Provide engagement data and offer a new 'practical' needs analysis.", points: 3, feedback: "Stellar stakeholder management." },
+                { text: "Apologize and promise to only watch Netflix clips.", points: 2, feedback: "You've surrendered. You're now a glorified algorithm." },
+                { text: "Tell the manager the student is a liar.", points: 1, feedback: "Direct, but likely to end your contract." },
+                { text: "Write the manager a 5,000-word essay on the theory of learning.", points: -1, feedback: "You just proved their point. Try again." }
+            ]},
+            { title: "The Commuter Lesson", type: "Online", desc: "Isabelle is in a noisy airport lounge eating a sandwich. 'I'm listening!' she screams.", choices: [
+                { text: "Ask her to use the chat only today to avoid distracting the group.", points: 3, feedback: "Sanity preserved." },
+                { text: "Kick her out of the meeting.", points: 2, feedback: "Harsh, but peaceful." },
+                { text: "Try to teach through the noise of the Boeing 747 engines.", points: 1, feedback: "Everyone has a headache now." },
+                { text: "Ask her what kind of sandwich it is and start a 20-minute debate on bread.", points: -1, feedback: "This is not a food blog. Try again." }
+            ]},
+            { title: "EMERGENCY: The Blow-up", type: "In-Person", isEmergency: true, desc: "Two trainees start a genuine shouting match over an ethics debate. One slams the door and leaves.", choices: [
+                { text: "Take a 5-minute break. Debrief the emotion when they return, then reset.", points: 4, feedback: "Masterful emotional intelligence. You turned a disaster into a lesson." },
+                { text: "Pretend nothing happened and ask: 'So, any more thoughts on the gerund?'", points: 0, feedback: "One does admire your commitment to the curriculum in the face of total social collapse." },
+                { text: "Join the argument and tell the one who stayed that they are 'totally right'.", points: 0, gameOver: true, feedback: "The client company has canceled your contract for unprofessional conduct. GAME OVER." }
+            ]},
+            { title: "The Grammar Stickler", type: "In-Person", desc: "A student finds a tiny typo on slide 14. They stop the lesson to point it out and won't let it go.", choices: [
+                { text: "Thank them for the proofreading and turn it into a 'Spot the Error' game.", points: 3, feedback: "Great redirection!" },
+                { text: "Fix it silently and stare at them until they feel awkward.", points: 2, feedback: "Power move. Effective, if chilly." },
+                { text: "Explain that it was an 'intentional test' of their focus.", points: 1, feedback: "They don't believe you, but the lesson moved on." },
+                { text: "Tell them their shoes are ugly so you're even.", points: -1, feedback: "Petty. So very petty. Try again." }
+            ]},
+            { title: "The Friday Reflection", type: "Online", desc: "It's Friday 4 PM. You've been too 'nice' and no one learned anything. What's the plan?", choices: [
+                { text: "Set firmer boundaries and higher standards for next week.", points: 3, feedback: "Growth requires friction. Well done." },
+                { text: "Quit and become a goat farmer.", points: 2, feedback: "A valid career path in ELT." },
+                { text: "Double down on being 'The Fun Trainer' for good reviews.", points: 1, feedback: "You're a clown, not a coach." },
+                { text: "Just don't show up on Monday.", points: -1, feedback: "That's ghosting, not teaching. Try again." }
+            ]}
+        ];
 
-  s += c.pts;
-  document.querySelectorAll('.opt').forEach(b => {
-    b.disabled = true;
-    b.style.opacity = "0.6";
-  });
-  
-  btn.style.opacity = "1";
-  btn.classList.add('sel-' + c.type);
-  
-  const tag = btn.querySelector('.ptag');
-  tag.classList.add('vis', 'pt' + c.pts);
+        let currentStep = 0;
+        let score = 0;
+        let teacherGender = 0;
 
-  const fb = document.getElementById('fb');
-  fb.innerHTML = c.fb;
-  fb.className = `fbox show fb-${c.type}`;
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
 
-  if(c.fatal) {
-    document.getElementById('nb').style.display = "none";
-    setTimeout(() => {
-      alert("PROFESSIONAL REPUTATION LOST: " + c.fb);
-      restartGame();
-    }, 3000);
-  } else {
-    document.getElementById('nb').classList.add('show');
-  }
-}
+        function getEmojiRoman(num) {
+            if (num <= 0) return "🖊️";
+            let res = ""; let val = num; teacherGender = 0;
+            const map = [{v: 50, s: "🏫"}, {v: 40, s: "ALT🏫"}, {v: 10, s: "ALT"}, {v: 9, s: "🖊️ALT"}, {v: 5, s: "📖"}, {v: 4, s: "🖊️📖"}, {v: 1, s: "🖊️"}];
+            for (let i = 0; i < map.length; i++) {
+                while (val >= map[i].v) {
+                    if (map[i].s.includes("ALT")) {
+                        let t = teacherGender % 2 === 0 ? "👨‍🏫" : "👩‍🏫";
+                        res += map[i].s.replace("ALT", t); teacherGender++;
+                    } else res += map[i].s;
+                    val -= map[i].v;
+                }
+            }
+            return res;
+        }
 
-function next() {
-  curr = STEPS[curr].next;
-  if(curr === "final") renderFinal();
-  else renderStep();
-}
+        function startGame() { currentStep = 0; score = 0; render(); }
 
-function renderFinal() {
-  let grade, body, tips, bClass, bLabel;
-  const pct = (s / 18) * 100;
+        function render() {
+            const gameEl = document.getElementById('game');
+            if (currentStep >= SCENARIOS.length) { renderFinal(); return; }
+            const s = SCENARIOS[currentStep];
+            const shuffledChoices = shuffle([...s.choices]);
 
-  if(s >= 16) {
-    bLabel = "Elite Consultant"; bClass = "b5"; grade = "Master of the Market";
-    body = "Outstanding. You navigated the day with the poise of a seasoned professional. You managed to balance student needs, technical failures, and business growth without breaking a sweat.";
-    tips = "At this level, you should focus on <em>scaling</em> your business. Consider raising your hourly rates by 15% or developing your own proprietary materials.";
-  } else if(s >= 12) {
-    bLabel = "Solid Professional"; bClass = "b3"; grade = "Reliable & Effective";
-    body = "A very successful day. You made smart decisions in the classroom and generally protected your business interests. A few minor slips in negotiation or time management, but nothing serious.";
-    tips = "Try to be more assertive during <em>rate negotiations</em>. Remember, your specialized experience in Business English is a high-value asset.";
-  } else {
-    bLabel = "Struggling Freelancer"; bClass = "b1"; grade = "Survival Mode";
-    body = "You survived the day, but your professional boundaries and business processes are weak. You are at risk of burnout or financial instability if you don't tighten your operations.";
-    tips = "Work on your <em>Plan B</em> contingencies for technology. Also, ensure your administrative tasks are automated or scheduled to avoid late-night stress.";
-  }
+            gameEl.innerHTML = `
+                <div class="card-header">
+                    <h1>${s.title}</h1>
+                    <div class="score-container">
+                        <span class="score-display">Score: ${score}</span>
+                        <span class="emoji-tally">${getEmojiRoman(score)}</span>
+                    </div>
+                </div>
+                <div class="card-content">
+                    ${s.isEmergency ? '<span class="tag emergency-tag">EMERGENCY SITUATION</span>' : `<span class="tag online-tag">${s.type}</span>`}
+                    <div class="scenario-text">${s.desc}</div>
+                    <div class="choices" id="choices"></div>
+                    <div id="feedback" class="feedback"></div>
+                    <button id="next-btn" class="btn-action" style="display:none" onclick="next()">Next Scenario →</button>
+                </div>
+            `;
+            shuffledChoices.forEach((c) => {
+                const btn = document.createElement('button');
+                btn.className = 'choice-btn'; btn.innerText = c.text;
+                btn.onclick = () => handleChoice(c, btn);
+                document.getElementById('choices').appendChild(btn);
+            });
+        }
 
-  const vocab = [...new Set(Object.values(STEPS).flatMap(x => x.vocab || []))];
+        function handleChoice(choice, btn) {
+            const fb = document.getElementById('feedback');
+            if (choice.gameOver) { renderGameOver(choice.feedback); return; }
+            if (choice.points === -1) {
+                score += choice.points;
+                fb.innerHTML = `<strong>Attention:</strong> ${choice.feedback} <br><em>-1 point</em>`;
+                fb.className = "feedback poor"; fb.style.display = 'block';
+                btn.disabled = true;
+                updateDisplays();
+                return;
+            }
+            score += choice.points;
+            document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
+            fb.innerHTML = `<strong>Result:</strong> ${choice.feedback} <br><br> <em>+${choice.points} points</em>`;
+            fb.className = "feedback good"; fb.style.display = 'block';
+            document.getElementById('next-btn').style.display = 'block';
+            updateDisplays();
+        }
 
-  document.getElementById('gc').innerHTML = `
-    <div class="final-screen">
-      <div class="final-kicker">End of Day — 21:00</div>
-      <div class="score-block">
-        <div class="score-num" id="snum">0</div>
-        <div class="score-denom">out of 18</div>
-      </div>
-      <div class="bar-track"><div class="bar-fill" id="bfill"></div></div>
-      <div class="final-band-row"><span class="band ${bClass}">${bLabel}</span></div>
-      <div class="final-grade">${grade}</div>
-      <div class="final-body">${body}</div>
-      <div class="tips-box">
-        <div class="tips-label">Professional Development</div>
-        <div class="tips-text">${tips}</div>
-      </div>
-      <div class="vocab-section">
-        <div class="vocab-sec-label">Vocabulary Practised</div>
-        <div class="vocab-grid">${vocab.map(v=>`<span class="vpill">${v}</span>`).join('')}</div>
-      </div>
-      <button class="replay-btn" onclick="restartGame()">Restart Simulation</button>
-    </div>`;
+        function updateDisplays() {
+            document.querySelector('.score-display').innerText = `Score: ${score}`;
+            document.querySelector('.emoji-tally').innerText = getEmojiRoman(score);
+        }
 
-  let c = 0;
-  const el = document.getElementById('snum');
-  const t = setInterval(() => {
-    c++;
-    if(el) el.textContent = c;
-    if(c >= s) clearInterval(t);
-  }, 80);
-  setTimeout(() => { document.getElementById('bfill').style.width = pct + '%'; }, 200);
-}
-
-function restartGame() {
-  s = 0; curr = "s1";
-  init();
-}
-
-init();
-</script>
+        function next() { currentStep++; render(); }
+        function renderGameOver(msg) {
+            document.getElementById('game').innerHTML = `<div class="card-header" style="background:#991b1b"><h1>GAME OVER</h1></div>
+            <div class="card-content" style="text-align:center"><p style="font-size:1.2rem; margin-bottom:2rem">${msg}</p><button class="btn-action" onclick="location.reload()">Try Again</button></div>`;
+        }
+        function renderFinal() {
+            let rank = score > 40 ? "ELT Legend" : score > 25 ? "Competent Professional" : "Substitute Teacher";
+            document.getElementById('game').innerHTML = `<div class="card-header"><h1>Week Complete!</h1></div>
+            <div class="card-content" style="text-align:center"><h2>Final Score: ${score}</h2><div class="emoji-tally" style="margin:1rem 0">${getEmojiRoman(score)}</div>
+            <p style="font-size:1.1rem">Rank: <strong>${rank}</strong></p><button class="btn-action" onclick="location.reload()">Start New Week</button></div>`;
+        }
+    </script>
 </body>
 </html>
