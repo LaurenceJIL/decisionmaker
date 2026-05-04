@@ -87,7 +87,6 @@ let currentIdx = 0;
 let score = 0;
 let budget = 100;
 
-// All 16 scenarios (14 standard + 2 emergencies)
 const gameData = [
   {
     title: "Phase 1: Arrival at JFK",
@@ -130,7 +129,7 @@ const gameData = [
     desc: "The midtown sidewalks are packed. You need a quick, delicious bite.",
     choices: [
       { text: "A $1.86 (+tax) 'Dollar Slice' from a hole-in-the-wall pizzeria.", cost: 2, pts: 10, fb: "<b>Legendary value!</b> It’s hot, greasy, and perfect. You eat it while walking, successfully mimicking the fast-paced New York lifestyle." },
-      { text: "A  pastrami sandwich from a famous street cart.", cost: 10, pts: 15, fb: "<b>Flavor explosion!</b> The rye bread, mustard and pickles combo is addictive. You find a nearby bench and enjoy a hearty meal that keeps you full for hours." },
+      { text: "A pastrami sandwich from a famous street cart.", cost: 10, pts: 15, fb: "<b>Flavor explosion!</b> The rye bread, mustard and pickles combo is addictive. You find a nearby bench and enjoy a hearty meal that keeps you full for hours." },
       { text: "Attempt to catch a fish in the Hudson River for a free meal.", cost: 0, pts: 0, type: "poor", fb: "<b>Unsanitary and illegal!</b> The river quality isn't suitable for fishing your lunch, and you lack a permit. Don't be absurd!" }
     ]
   },
@@ -138,7 +137,7 @@ const gameData = [
     title: "🚨 EMERGENCY: The Found Designer Wallet",
     desc: "While walking through SoHo, you spot a luxury designer wallet on the ground. It contains $100 in cash but also a business card with a phone number.",
     choices: [
-      { text: "Call the number on the card and return the wallet to its owner.", cost: -50, pts: 25, type: "money", fb: "<b>Integrity pays off!</b> The owner is a grateful local executive who insists on giving you $50 as a reward for your honesty. Your budget increases!" },
+      { text: "Call the number on the card and return the wallet to its owner.", cost: 0, pts: 25, type: "neutral", fb: "<b>Integrity pays off!</b> The owner is a grateful local executive who is deeply moved by your honesty. You've made a positive impact and gained a great story." },
       { text: "Leave the wallet where it is. It's not your business.", cost: 0, pts: 5, type: "neutral", fb: "<b>Neutral Ground.</b> You avoid potential trouble, but you also miss an opportunity to help. You continue your walk undisturbed." },
       { text: "Take the cash and attempt to sell the designer wallet to a street vendor.", cost: 0, pts: 0, type: "expulsion", fb: "<b>ARRESTED!</b> The street vendor was actually an undercover officer targeting 'fencing' operations. You are charged with grand larceny, your visa is revoked, and you are deported immediately. GAME OVER." }
     ]
@@ -211,7 +210,7 @@ const gameData = [
     desc: "A man in a dark alley near Times Square offers to show you a 'secret underground gambling den' where you can double your money instantly, no risk.",
     choices: [
       { text: "Politely decline and walk quickly toward a well-lit area.", cost: 0, pts: 10, type: "neutral", fb: "<b>Street Smart!</b> You recognized a dangerous situation and removed yourself from it. You continue your night safely." },
-      { text: "Tell a nearby police officer about the suspicious activity.", cost: -20, pts: 15, type: "money", fb: "<b>Civic Duty!</b> The officer thanks you and mentions there’s a small 'reporting incentive' program for tourists who help spot illegal pop-ups. You get $20 for your time!" },
+      { text: "Tell a nearby police officer about the suspicious activity.", cost: 0, pts: 15, type: "neutral", fb: "<b>Civic Duty!</b> The officer thanks you for the tip. Your report helps the precinct keep the neighborhood safe for other travelers." },
       { text: "Agree to go with him. You want to see the 'real' New York.", cost: 0, pts: 0, type: "expulsion", fb: "<b>CRITICAL FAILURE.</b> It was a setup. You are caught in a massive police raid. Because you were participating in illegal gambling, your passport is seized. You are deported and banned from the USA for 10 years. GAME OVER." }
     ]
   },
@@ -261,18 +260,15 @@ function loadStep() {
     const btn = document.createElement("button");
     btn.className = "choice-btn";
     
-    // Check if can afford
     const canAfford = budget >= c.cost;
-    const isSpecial = (c.type === "money" || c.type === "expulsion" || c.type === "neutral");
+    const isSpecial = (c.type === "expulsion" || c.type === "neutral");
 
     if (!canAfford && !isSpecial && c.type !== "poor") {
         btn.disabled = true;
     }
 
     let priceDisplay = "";
-    if (c.type === "money") {
-        priceDisplay = `<span class="price-tag gain-tag">+$${Math.abs(c.cost)}</span>`;
-    } else if (c.cost > 0) {
+    if (c.cost > 0) {
         priceDisplay = `<span class="price-tag cost-tag">$${c.cost}</span>`;
     } else if (c.cost === 0 && !isSpecial) {
         priceDisplay = `<span class="price-tag cost-tag">FREE</span>`;
@@ -307,26 +303,21 @@ function selectChoice(choice) {
     return;
   }
 
-  // Update Stats
   budget -= choice.cost;
   score += choice.pts;
   
-  // UI Updates
   document.getElementById("scoreDisplay").innerText = score;
   document.getElementById("budgetDisplay").innerText = "$" + budget;
   
   fb.innerHTML = choice.fb;
-  fb.className = choice.type === "money" ? "feedback bonus" : "feedback";
+  fb.className = "feedback";
   fb.style.display = "block";
   
-  // Disable all buttons
   const btns = document.querySelectorAll(".choice-btn");
   btns.forEach(b => b.disabled = true);
 
-  // Show Next Button
   document.getElementById("nextBtn").style.display = "block";
   
-  // Progress bar
   const progress = ((currentIdx + 1) / gameData.length) * 100;
   document.getElementById("progressFill").style.width = progress + "%";
 }
@@ -347,7 +338,6 @@ function endGame(title, msg) {
     document.getElementById("nextBtn").onclick = () => location.reload();
     document.getElementById("nextBtn").style.display = "block";
     
-    // Set final title/desc in the box for clarity
     document.getElementById("stepTitle").innerText = title;
     document.getElementById("stepDesc").innerText = msg;
 }
