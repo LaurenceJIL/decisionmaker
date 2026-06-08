@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Launch Day — IT Management Challenge</title>
+<style>
+body{font-family:Arial,sans-serif;background:#0F1115;color:#fff;display:flex;justify-content:center;padding:20px}
+.shell{max-width:700px;width:100%}
+.card{background:#1A1D23;padding:24px;border-radius:12px}
+button{padding:12px 18px;cursor:pointer}
+.game-ui,.final-card{display:none}
+.option{display:block;width:100%;margin:8px 0;padding:12px;text-align:left}
+#feedback{margin-top:12px}
+</style>
+</head>
+<body>
+<div class="shell" id="intro">
+  <div class="card">
+    <h1>Launch Day</h1>
+    <p>The original file was truncated. This repaired version restores functionality.</p>
+    <button onclick="startGame()">Start the Launch</button>
+  </div>
+</div>
+
+<div class="shell game-ui" id="game">
+  <div class="card">
+    <div id="step"></div>
+    <h3 id="scenario"></h3>
+    <div id="vocab"></div>
+    <div id="options"></div>
+    <div id="feedback"></div>
+    <button id="next" onclick="nextStep()" style="display:none">Continue</button>
+  </div>
+</div>
+
+<div class="shell final-card" id="final">
+  <div class="card">
+    <h1>Finished</h1>
+    <div id="result"></div>
+  </div>
+</div>
+
+<script>
+const DECISIONS=[
+ {text:"Login traffic spike.",vocab:"Throttle = intentionally slow traffic.",options:[
+  {t:"Queue users",pts:3,fb:"Best choice"},
+  {t:"Remove limits",pts:1,fb:"Risky"},
+  {t:"Buy servers",pts:2,fb:"Works but costly"}]},
+ {text:"Money duplication exploit discovered.",vocab:"Exploit = security flaw.",options:[
+  {t:"Patch immediately",pts:3,fb:"Correct"},
+  {t:"Wait",pts:1,fb:"Damage increases"},
+  {t:"Warn users",pts:2,fb:"Partial mitigation"}]}
+];
+
+let idx=0,score=0;
+
+function startGame(){
+ document.getElementById("intro").style.display="none";
+ document.getElementById("game").style.display="block";
+ render();
+}
+
+function render(){
+ const d=DECISIONS[idx];
+ document.getElementById("step").textContent=`Decision ${idx+1} of ${DECISIONS.length}`;
+ document.getElementById("scenario").innerHTML=d.text;
+ document.getElementById("vocab").innerHTML=d.vocab;
+ const opts=document.getElementById("options");
+ opts.innerHTML="";
+ document.getElementById("feedback").textContent="";
+ document.getElementById("next").style.display="none";
+
+ d.options.forEach(o=>{
+   const b=document.createElement("button");
+   b.className="option";
+   b.textContent=o.t;
+   b.onclick=()=>choose(o);
+   opts.appendChild(b);
+ });
+}
+
+function choose(o){
+ score+=o.pts;
+ document.querySelectorAll(".option").forEach(x=>x.disabled=true);
+ document.getElementById("feedback").textContent=o.fb;
+ document.getElementById("next").style.display="block";
+}
+
+function nextStep(){
+ idx++;
+ if(idx>=DECISIONS.length){
+   document.getElementById("game").style.display="none";
+   document.getElementById("final").style.display="block";
+   document.getElementById("result").textContent=`Score: ${score}`;
+ } else {
+   render();
+ }
+}
+</script>
+</body>
+</html>

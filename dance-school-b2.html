@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ritmo Latino: B2 Studio Challenge (Repaired)</title>
+<style>
+body{font-family:Arial,sans-serif;background:#faf5f5;margin:0;padding:20px;display:flex;justify-content:center}
+.shell{max-width:700px;width:100%}.hidden{display:none}
+.card{background:#fff;padding:24px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.1)}
+.opt-btn,.next-btn{width:100%;padding:12px;margin-top:10px;cursor:pointer}
+.feedback{margin-top:15px;padding:12px;border:1px solid #ddd}
+</style>
+</head>
+<body>
+<div class="shell" id="intro">
+<div class="card">
+<h1>Dance Studio Management: B2 Challenge</h1>
+<p>Repaired build.</p>
+<button class="opt-btn" onclick="initGame()">Open the Ballroom</button>
+</div></div>
+
+<div class="shell hidden" id="game-ui">
+<div class="card">
+<div id="ui-progress"></div>
+<div id="ui-score"></div>
+<p id="ui-text"></p>
+<div id="ui-options"></div>
+<div id="ui-feedback" class="feedback" style="display:none"></div>
+<button id="ui-next" class="next-btn hidden" onclick="nextStep()">Continue</button>
+</div></div>
+
+<div class="shell hidden" id="result-ui">
+<div class="card">
+<h2>Final Evaluation</h2>
+<div id="final-rank"></div>
+<button onclick="location.reload()">Restart</button>
+</div></div>
+
+<script>
+"use strict";
+
+const SCENARIOS = [
+ {t:"A student wants to skip fundamentals and go straight to advanced tricks.",choices:[
+  {text:"Explain why fundamentals matter.",pts:2,fb:"Correct."},
+  {text:"Allow it for extra money.",pts:0,fb:"Unsafe."},
+  {text:"Send them elsewhere.",pts:1,fb:"Acceptable."}
+ ]},
+ {t:"The dance floor becomes slippery.",choices:[
+  {text:"Pause and clean it.",pts:2,fb:"Safety first."},
+  {text:"Tell people to be careful.",pts:0,fb:"Not enough."},
+  {text:"Limit difficult moves.",pts:1,fb:"Partial mitigation."}
+ ]}
+];
+
+let state = {index:0, score:0};
+
+function byId(id){
+ const el=document.getElementById(id);
+ if(!el) throw new Error("Missing element: "+id);
+ return el;
+}
+
+function initGame(){
+ byId("intro").classList.add("hidden");
+ byId("game-ui").classList.remove("hidden");
+ renderScenario();
+}
+
+function renderScenario(){
+ const s = SCENARIOS[state.index];
+ byId("ui-progress").textContent=`Scenario ${state.index+1}/${SCENARIOS.length}`;
+ byId("ui-score").textContent=`Reputation: ${state.score}`;
+ byId("ui-text").textContent=s.t;
+
+ const wrap=byId("ui-options");
+ wrap.innerHTML="";
+ byId("ui-feedback").style.display="none";
+ byId("ui-next").classList.add("hidden");
+
+ s.choices.forEach(c=>{
+   const b=document.createElement("button");
+   b.className="opt-btn";
+   b.textContent=c.text;
+   b.onclick=()=>choose(c);
+   wrap.appendChild(b);
+ });
+}
+
+function choose(choice){
+ state.score += Number(choice.pts)||0;
+
+ document.querySelectorAll("#ui-options button").forEach(b=>b.disabled=true);
+
+ const fb=byId("ui-feedback");
+ fb.textContent=choice.fb;
+ fb.style.display="block";
+
+ byId("ui-score").textContent=`Reputation: ${state.score}`;
+ byId("ui-next").classList.remove("hidden");
+}
+
+function nextStep(){
+ state.index++;
+ if(state.index >= SCENARIOS.length){
+   finishGame();
+ } else {
+   renderScenario();
+ }
+}
+
+function finishGame(){
+ byId("game-ui").classList.add("hidden");
+ byId("result-ui").classList.remove("hidden");
+ byId("final-rank").textContent =
+   state.score >= 3 ? "Excellent Director" : "Needs Improvement";
+}
+</script>
+</body>
+</html>

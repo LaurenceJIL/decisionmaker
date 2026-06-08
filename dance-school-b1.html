@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ritmo Latino: B1 Studio Challenge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FAF5F5;--surface:#FFFFFF;--surface2:#FFF8F8;
+  --ink:#2C1A1A;--ink2:#614E4E;--accent:#D9383A;--accent2:#A62426;
+  --green-bg:#EDFDF2;--green-tx:#117B42;--red-bg:#FDF2F2;--red-tx:#D9383A;
+  --amber-bg:#FEF6E9;--amber-tx:#B26214;--r:12px;--shadow:0 10px 15px -3px rgba(166,36,38,0.08);
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);line-height:1.6;padding:1rem;display:flex;flex-direction:column;align-items:center;}
+.shell{width:100%;max-width:640px;margin-top:2rem;}
+.hidden{display:none !important;}
+.card{background:var(--surface);border-radius:var(--r);padding:2rem;box-shadow:var(--shadow);border:1px solid rgba(217,56,58,0.1);}
+h1{font-size:24px;margin-bottom:0.5rem;color:var(--ink);font-weight:700;text-align:center;}
+.day-indicator{display:block;text-align:center;color:var(--accent);font-weight:700;text-transform:uppercase;letter-spacing:1px;font-size:14px;margin-bottom:1rem;}
+.game-header{display:flex;justify-content:space-between;margin-bottom:1rem;font-family:'DM Mono',monospace;font-size:13px;}
+.options-grid{display:grid;gap:12px;margin-top:1.5rem;}
+.opt-btn{background:white;border:1px solid #E4D5D5;padding:1rem;border-radius:8px;text-align:left;cursor:pointer;font-size:15px;transition:0.2s;color:var(--ink);}
+.opt-btn:hover:not(:disabled){background:var(--surface2);border-color:var(--accent);}
+.opt-btn:disabled{opacity:0.8;cursor:default;}
+.feedback{margin-top:1.5rem;padding:1.25rem;border-radius:8px;display:none;font-size:15px;}
+.fb-2{background:var(--green-bg);color:var(--green-tx);border:1px solid #AFECC5;}
+.fb-1{background:var(--amber-bg);color:var(--amber-tx);border:1px solid #FCE3A6;}
+.fb-0{background:var(--red-bg);color:var(--red-tx);border:1px solid #FCA2A4;}
+.next-btn{margin-top:1.5rem;width:100%;background:var(--ink);color:white;border:none;padding:14px;border-radius:8px;font-weight:600;cursor:pointer;display:none;}
+.emergency-badge{background:var(--accent);color:white;padding:4px 8px;border-radius:4px;font-size:11px;font-weight:700;display:inline-block;margin-bottom:10px;}
+</style>
+</head>
+<body>
+
+<div class="shell" id="intro">
+  <div class="card">
+    <h1>Dance School Management: B1 Challenge</h1>
+    <p>Welcome, Director. You are hosting a 3-day intensive Latin Dance weekend. Your goal is to maintain <b>Studio Reputation</b>, protect student safety, and create a friendly atmosphere. You will face 12 daily scenarios and 2 sudden emergencies.</p>
+    <button class="opt-btn" style="width:100%; text-align:center; background:var(--accent); color:white;" onclick="initGame()">Open the Ballroom</button>
+  </div>
+</div>
+
+<div class="shell hidden" id="game-ui">
+  <div class="game-header">
+    <div id="ui-progress">Scenario 1/14</div>
+    <div id="ui-score">Reputation: 0</div>
+  </div>
+  <div class="card">
+    <span class="day-indicator" id="ui-day">Day 1: Orientation</span>
+    <div id="ui-emergency"></div>
+    <p id="ui-text"></p>
+    <div class="options-grid" id="ui-options"></div>
+    <div id="ui-feedback" class="feedback"></div>
+    <button class="next-btn" id="ui-next" onclick="nextStep()">Continue Journey</button>
+  </div>
+</div>
+
+<div class="shell hidden" id="result-ui">
+    <div class="card" style="text-align:center;">
+      <h1>Final Evaluation</h1>
+      <div id="final-rank" style="font-size:32px; font-weight:700; color:var(--accent); margin:1rem 0;"></div>
+      <p id="final-desc"></p>
+      <button class="opt-btn" style="width:100%; text-align:center;" onclick="location.reload()">Restart Training</button>
+    </div>
+</div>
+
+<script>
+const POOL = [
+  // Slot 1: Day 1 Morning - Enrollment & Intentions
+  [
+    { t: "A new student asks if they can skip the 'boring' basic steps and go straight to advanced dance flips.", d:1, choices: [
+      { text: "Explain that basic footwork is necessary for rhythm and safety.", pts: 2, fb: "Excellent. You prioritized proper technique and safety." },
+      { text: "Allow them to skip the basics if they pay a higher entry fee.", pts: 0, fb: "Poor. You changed your high school standards just for extra money." },
+      { text: "Suggest that they look for an acrobatics school instead.", pts: 1, fb: "Acceptable. You kept your class quality but lost a customer." }
+    ]},
+    { t: "A student wants to take social bachata classes, but their partner feels worried about the close distance of the dance.", d:1, choices: [
+      { text: "Invite the partner to watch a class focused on distance rules and boundary setting.", pts: 2, fb: "Perfect. Transparency helps build trust with nervous partners." },
+      { text: "Tell the student to sign the forms anyway and ignore their partner's worries.", pts: 0, fb: "Irresponsible. A good dance instructor must respect personal feelings." },
+      { text: "Show them big competition trophies to prove the school is professional.", pts: 1, fb: "Fair, but trophies do not solve their specific worry about physical distance." }
+    ]},
+    { t: "An experienced street dancer comes to your social dance night and openly criticizes your formal style.", d:1, choices: [
+      { text: "Invite them to join and share their street-style perspective during a group discussion.", pts: 2, fb: "Great. A mature director welcomes different styles and viewpoints." },
+      { text: "Challenge them to a public dance battle to prove your school is better.", pts: 0, fb: "Hostile. This creates an atmosphere of aggressive competition instead of learning." },
+      { text: "Politely ask them to leave if they do not want to follow your rules.", pts: 1, fb: "Defensive. You kept the peace but missed a chance to learn." }
+    ]}
+  ],
+  // Slot 2: Day 1 Afternoon - Facilities & Floor Etiquette
+  [
+    { t: "A student arrives at a crowded salsa workshop with dirty, muddy shoes that ruin the clean wooden floor.", d:1, choices: [
+      { text: "Talk to them privately about floor hygiene and offer to lend them clean dance shoes.", pts: 2, fb: "Very professional. Keeping the floor clean prevents people from slipping." },
+      { text: "Shout at them in front of the whole class to set a strong example.", pts: 0, fb: "Demoralizing. Public humiliation makes students feel unwelcome." },
+      { text: "Ignore the problem today but make a general announcement about footwear later.", pts: 1, fb: "Tactful, but the wet mud stays on the floor and is dangerous right now." }
+    ]},
+    { t: "The main dance floor becomes very wet and slippery because the air conditioning is broken.", d:1, choices: [
+        { text: "Pause the class and ask the team to help wipe the floor quickly.", pts: 2, fb: "Proactive. You prioritized physical safety over the strict timeline." },
+        { text: "Continue the class normally but tell everyone to 'be careful' during fast turns.", pts: 0, fb: "Dangerous. Giving a simple verbal warning is not a real safety plan." },
+        { text: "Cancel the whole weekend event immediately and give everyone a full refund.", pts: 1, fb: "Honest, but maybe too reactive for a problem that can be fixed with a quick pause." }
+    ]},
+    { t: "A student refuses to remove a sharp, heavy ring during partner work, saying it matches their outfit.", d:1, choices: [
+        { text: "Explain that jewelry can scratch or hurt their partner during fast hand movements.", pts: 2, fb: "Wise. Safety rules must be strict during partner activities." },
+        { text: "Let them wear it but make them dance alone at the back of the room.", pts: 0, fb: "Irresponsible. They are still a danger to themselves if they fall." },
+        { text: "Ask them to cover the ring completely with athletic tape.", pts: 1, fb: "Compromising. Better than doing nothing, but a small risk remains." }
+    ]}
+  ],
+  // Slot 3: Day 1 Evening - Group Management
+  [
+    { t: "A famous guest instructor has very bad floor manners, cutting off other couples during the social night.", d:1, choices: [
+        { text: "Remind them privately that the studio values politeness and space awareness for everyone.", pts: 2, fb: "High integrity. You showed that school rules apply to famous guests too." },
+        { text: "Put them in the center of the next dance circle to keep them happy.", pts: 0, fb: "Wrong decision. You rewarded bad behavior, which ruins your school standards." },
+        { text: "Quietly give them an advanced partner to keep the disruption away from beginners.", pts: 1, fb: "Evasive. It temporarily hides the issue but doesn't fix the behavior." }
+    ]},
+    { t: "Two social dancers are arguing loudly about who made a mistake during a difficult turn sequence.", d:1, choices: [
+        { text: "Step in to break down the move slowly and show how both roles work together.", pts: 2, fb: "Excellent. You turned an angry argument into a helpful dance lesson." },
+        { text: "Tell them to stop shouting immediately or leave the building.", pts: 0, fb: "Too rigid. This stops the noise but doesn't fix the interpersonal conflict." },
+        { text: "Walk away and ignore them, hoping they will solve it themselves.", pts: 1, fb: "Passive. As the leader, you must control the social atmosphere." }
+    ]},
+    { t: "An advanced student is showing off by doing dangerous performance spins during a simple group warm-up.", d:1, choices: [
+        { text: "Remind them that the warm-up is for gentle preparation, not a stage show.", pts: 2, fb: "Direct. You kept the focus and safety of the group space." },
+        { text: "Encourage the rest of the class to stop and clap for them.", pts: 0, fb: "Bad choice. You are rewarding distracting and dangerous movements." },
+        { text: "Wait until the end of the day to speak with them in private.", pts: 1, fb: "Delayed. They could accidentally hit another student before the day ends." }
+    ]}
+  ],
+  // Slot 4: Day 1 Final - Discipline & Respect
+  [
+    { t: "A student consistently arrives fifteen minutes late to every single partner dance lesson.", d:1, choices: [
+        { text: "Explain that being on time shows respect for their partners who are waiting.", pts: 2, fb: "Correct. Framing punctuality as respect reinforces good school manners." },
+        { text: "Lock the doors exactly on time and do not let them in under any condition.", pts: 0, fb: "Too harsh. They paid for the class; try talking to them first." },
+        { text: "Let them join the group quietly without saying anything about the delay.", pts: 1, fb: "Weak management. You are letting your class standards drop." }
+    ]},
+    { t: "An advanced student is giving unwanted, mean criticism to a beginner during partner rotations.", d:1, choices: [
+        { text: "Remind the advanced student that the teacher gives feedback, and their job is to adapt.", pts: 2, fb: "Strong leadership. You protected the confidence of the beginner." },
+        { text: "Tell the beginner dancer that they need to get used to tough feedback.", pts: 0, fb: "Toxic. This attitude terrifies new students and makes them quit." },
+        { text: "Change their dance partners immediately without saying why.", pts: 1, fb: "Temporary solution. It stops the immediate issue but doesn't correct the bad behavior." }
+    ]},
+    { t: "The class loses concentration because there is a loud music festival in the street next door.", d:1, choices: [
+        { text: "Use the noise as a special 'focus challenge' to help them follow internal rhythm.", pts: 2, fb: "Brilliant adaptation. You used an environmental problem as a training tool." },
+        { text: "Go outside and start an angry argument with the street festival organizers.", pts: 0, fb: "Unprofessional. A school director should always stay calm and polite." },
+        { text: "End the class forty-five minutes early and apologize for the noise.", pts: 1, fb: "Giving up. You failed to provide the full service that your students paid for." }
+  ]} ],
+  // DAY 2: Progression & Adaptability
+  [ { t: "Day 2 Morning: A student complains that the basic practice drills are too repetitive.", d:2, choices: [
+      { text: "Explain that great dancing comes from practicing the foundational movements many times.", pts: 2, fb: "Classic wisdom. You stayed true to important training values." },
+      { text: "Change the whole lesson plan immediately to keep them entertained.", pts: 0, fb: "Capitulation. You are an educator, not an entertainer; don't break the plan." },
+      { text: "Add an extra complex turn to divert their attention away from the basics.", pts: 1, fb: "Fair, but make sure they don't forget the core steps." }
+  ]} ],
+  [ { t: "Day 2 Afternoon: You notice an intensive student has painful red marks on their wrists from heavy pulling.", d:2, choices: [
+      { text: "Pull them aside gently to ask if their partners are using too much force.", pts: 2, fb: "Essential care. Looking after physical health is part of your duty." },
+      { text: "Ignore the marks because partner dancing always involves some physical tension.", pts: 0, fb: "Negligent. Bad arm pulling can cause long-term muscle injuries." },
+      { text: "Ask them about the marks loudly in front of the whole class.", pts: 1, fb: "Intrusive. You need to use softer communication skills for personal health issues." }
+  ]} ],
+  [ { t: "Day 2 Evening: A local TV news reporter asks to film a short live segment of your dance class.", d:2, choices: [
+      { text: "Agree, but select a simple routine that shows safe and fun social dancing.", pts: 2, fb: "Good marketing and responsible education for the public." },
+      { text: "Change your lesson to show dramatic, dangerous movie stunts to look cool.", pts: 0, fb: "Dishonest. You are misinforming the public about real social dance safety." },
+      { text: "Refuse the reporter, saying that dance schools should always stay secret.", pts: 1, fb: "Isolationist. You missed a great opportunity to grow your small business." }
+  ]} ],
+  [ { t: "Day 2 Final: A guest instructor hired for the evening party arrives clearly drunk.", d:2, choices: [
+      { text: "Immediately cancel their workshop and arrange a safe ride home for them.", pts: 2, fb: "Non-negotiable. Alcohol consumption and professional partner coaching do not mix." },
+      { text: "Let them teach the class anyway while you watch them very closely.", pts: 0, fb: "Reckless. You endangered your students by letting an impaired person lead them." },
+      { text: "Tell the student body that the instructor has a sudden bad headache.", pts: 1, fb: "Dishonest. You should be clearer about your professional standards." }
+  ]} ],
+  // DAY 3: Mastery & Community Integration
+  [ { t: "Day 3 Morning: A student asks to learn 'magic connection tricks' that they read about on a blog.", d:3, choices: [
+      { text: "Explain that a good connection comes from clear weight shifts and listening to your partner.", pts: 2, fb: "Rational. You focused the room on real physical principles, not magic." },
+      { text: "Pretend the magic trick is real and charge them $100 to learn it.", pts: 0, fb: "Fraudulent. This is predatory management designed to exploit students." },
+      { text: "Show them a standard movement and say it is the secret trick.", pts: 1, fb: "Vague. You should be more direct about real dance mechanics." }
+  ]} ],
+  [ { t: "Day 3 Afternoon: The level test is today. A long-term student fails the rhythm part.", d:3, choices: [
+      { text: "Explain nicely that rhythm is essential, and offer a clear plan for a re-test later.", pts: 2, fb: "Compassionate but firm. You protected the value of your certificate." },
+      { text: "Give them the advanced level badge anyway because they are a loyal customer.", pts: 0, fb: "Weak structure. You just made the certificate worthless for everyone else." },
+      { text: "Tell them their timing is terrible and they should choose a different hobby.", pts: 0, fb: "Toxic. A good director builds confidence, they do not destroy it." }
+  ]} ],
+  [ { t: "Day 3 Evening: A rival dance school invites you to co-host a friendly joint competition.", d:3, choices: [
+      { text: "Accept, as long as the competition rules prioritize safety and good connection.", pts: 2, fb: "Diplomatic. This builds community spirit and tests skills safely." },
+      { text: "Refuse the invitation because you are afraid your students might lose.", pts: 0, fb: "Cowardly. You are letting your own ego affect your students' growth." },
+      { text: "Accept and tell your team to win at any cost, even if it is dangerous.", pts: 1, fb: "Too aggressive. Friendly events should stay friendly and safe." }
+  ]} ],
+  [ { t: "Day 3 Final: The weekend event ends. How do you close the final evening showcase?", d:3, choices: [
+      { text: "Lead a big group circle dance and say a short speech about the cultural roots of the music.", pts: 2, fb: "Perfect closing. You left them with a sense of community and purpose." },
+      { text: "Turn off the music immediately when the time finishes and walk out.", pts: 0, fb: "Cold. You did not provide proper closure for a long, intense weekend." },
+      { text: "Use the final speech time to aggressively push people to buy t-shirts at the desk.", pts: 1, fb: "Too commercial. It ruins the friendly spirit of the event." }
+  ]} ]
+];
+
+const EMERGENCIES = [
+  { t: "EMERGENCY: A dancer collapses during a fast spin routine and becomes completely unconscious.", isEmerg: true, d:2, choices: [
+      { text: "Stop the music, start First Aid, and tell a helper to call 911/112 immediately.", pts: 2, fb: "Correct. Life safety and professional medical help are your top priorities." },
+      { text: "Tell the other couples to keep dancing so they do not lose their focus.", pts: 0, fb: "Criminal negligence. You have failed completely as a human leader." },
+      { text: "Ask an untrained student to drive the unconscious person to the hospital.", pts: 0, fb: "Dangerous. They need a professional ambulance, not a student driver." }
+  ]},
+  { t: "EMERGENCY: A fire starts in the electrical box right next to the main sound speakers!", isEmerg: true, d:3, choices: [
+      { text: "Press the fire alarm and guide an orderly evacuation out of the building.", pts: 2, fb: "Excellent crisis response. You stayed calm and saved lives." },
+      { text: "Try to finish teaching the final dance steps before leaving the room.", pts: 0, fb: "Fatal mistake. Fire moves much faster than your dance choreography." },
+      { text: "Run out the back door immediately and leave the students to find the way out.", pts: 0, fb: "Disgraceful. The director must be the last person to leave the room safety." }
+  ]}
+];
+
+let gameState = {
+  score: 0,
+  index: 0,
+  scenarios: []
+};
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function initGame() {
+  gameState.score = 0;
+  gameState.index = 0;
+  
+  // Choose 1 random from each slot (total 12)
+  gameState.scenarios = POOL.map(slot => slot[Math.floor(Math.random() * slot.length)]);
+  
+  // Inject Emergencies at exact positions
+  gameState.scenarios.splice(5, 0, EMERGENCIES[0]);
+  gameState.scenarios.splice(11, 0, EMERGENCIES[1]);
+
+  document.getElementById('intro').classList.add('hidden');
+  document.getElementById('game-ui').classList.remove('hidden');
+  renderScenario();
+}
+
+function renderScenario() {
+  const current = gameState.scenarios[gameState.index];
+  document.getElementById('ui-progress').innerText = `Scenario ${gameState.index + 1} / 14`;
+  document.getElementById('ui-score').innerText = `Reputation: ${gameState.score}`;
+  document.getElementById('ui-day').innerText = `Seminar Day ${current.d}`;
+  document.getElementById('ui-text').innerText = current.t;
+  
+  const emerg = document.getElementById('ui-emergency');
+  emerg.innerHTML = current.isEmerg ? `<span class="emergency-badge">🚨 CRITICAL INCIDENT</span>` : "";
+
+  const optContainer = document.getElementById('ui-options');
+  optContainer.innerHTML = "";
+  
+  const shuffledOpts = shuffle([...current.choices]);
+  
+  shuffledOpts.forEach(o => {
+    const btn = document.createElement('button');
+    btn.className = "opt-btn";
+    btn.innerText = o.text;
+    btn.onclick = () => handleChoice(o);
+    optContainer.appendChild(btn);
+  });
+
+  document.getElementById('ui-feedback').style.display = 'none';
+  document.getElementById('ui-next').style.display = 'none';
+}
+
+function handleChoice(choice) {
+  gameState.score += choice.pts;
+  const fb = document.getElementById('ui-feedback');
+  fb.innerHTML = `<b>Score: +${choice.pts}</b><br>${choice.fb}`;
+  fb.className = `feedback fb-${choice.pts}`;
+  fb.style.display = 'block';
+  
+  document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+  document.getElementById('ui-next').style.display = 'block';
+}
+
+function nextStep() {
+  gameState.index++;
+  if (gameState.index < gameState.scenarios.length) {
+    renderScenario();
+  } else {
+    showResults();
+  }
+}
+
+function showResults() {
+  document.getElementById('game-ui').classList.add('hidden');
+  document.getElementById('result-ui').classList.remove('hidden');
+  
+  const rank = document.getElementById('final-rank');
+  const desc = document.getElementById('final-desc');
+  const s = gameState.score;
+
+  if (s >= 24) {
+      rank.innerText = "Maestro Director";
+      desc.innerText = "Perfect score! You showed excellent judgment. Your school is a safe, polite, and high-quality place to learn. You are a credit to the dance community.";
+  } else if (s >= 15) {
+      rank.innerText = "Competent Instructor";
+      desc.innerText = "Good job! You lead with honesty and care. You made a few minor mistakes in management, but your students are safe and learning well.";
+  } else {
+      rank.innerText = "Amateur Promoter";
+      desc.innerText = "Your studio is struggling. You prioritized quick money or your own ego over safety and real dance tradition. Fix your rules before your school fails.";
+  }
+}
+</script>
+</body>
+</html>

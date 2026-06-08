@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Put Your Town on the Map! — B2 Event Management Sim</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght=700;900&family=Source+Sans+3:ital,wght=0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0e1018;--bg2:#161a28;--bg3:#1e2438;
+  --gold:#e8b84b;--gold2:#f5d07a;--gold3:#fbecc0;
+  --teal:#2ec4b6;--teal2:#6ee0d8;
+  --coral:#e05c3a;--coral2:#f09070;
+  --green:#3cb371;--green2:#90ee90;
+  --red:#cc3333;--red2:#ffaaaa;
+  --white:#ffffff;--txt:#d1d5db;
+  --font-serif:'Playfair Display',serif;--font-sans:'Source Sans 3',sans-serif;
+  --r:12px;--shadow:0 10px 30px rgba(0,0,0,0.5);
+}
+body{background:var(--bg);color:var(--txt);font-family:var(--font-sans);display:flex;justify-content:center;align-items:center;min-height:100vh;padding:20px;overflow-x:hidden}
+
+.card{background:var(--bg2);width:100%;max-width:800px;border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;border:1px solid rgba(255,255,255,0.05);display:none;animation:fadeIn 0.4s ease forwards}
+.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+header{background:var(--bg3);padding:25px;border-bottom:3px solid var(--gold);text-align:center}
+h1{font-family:var(--font-serif);color:var(--gold);font-size:1.8rem;letter-spacing:0.5px}
+.subtitle{font-size:0.9rem;text-transform:uppercase;letter-spacing:2px;color:var(--gold3);opacity:0.8;margin-top:5px}
+
+.content{padding:30px}
+.story-text{font-size:1.1rem;line-height:1.6;margin-bottom:20px;color:var(--white)}
+
+.grid-choice{display:grid;grid-template-columns:repeat(auto-fit, minmax(230px, 1fr));gap:15px;margin-bottom:30px}
+.fest-opt{background:var(--bg3);border:2px solid transparent;border-radius:var(--r);padding:20px;cursor:pointer;transition:0.3s;text-align:center}
+.fest-opt:hover{border-color:var(--teal);transform:translateY(-3px)}
+.fest-opt .icon{font-size:2.5rem;margin-bottom:8px;display:block}
+.fest-opt h3{color:var(--white);margin-bottom:5px;font-size:1.2rem}
+
+.options-stack{display:flex;flex-direction:column;gap:10px}
+.opt-btn{background:var(--bg3);border:1px solid var(--bg3);padding:15px;border-radius:var(--r);color:var(--white);font-size:1rem;cursor:pointer;text-align:left;transition:0.2s;display:flex;align-items:center}
+.opt-btn:hover{background:var(--bg2);border-color:var(--teal)}
+.opt-btn span{margin-right:12px;background:var(--bg);width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:50%;color:var(--gold);font-weight:bold;flex-shrink:0;font-size:0.9rem}
+
+.feedback{margin-top:20px;padding:20px;border-radius:var(--r);display:none;animation:slideUp 0.3s ease}
+@keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.fb-good{background:rgba(60,179,113,0.1);border:1px solid var(--green);color:var(--green2)}
+.fb-bad{background:rgba(204,51,51,0.1);border:1px solid var(--red);color:var(--red2)}
+.fb-retry{background:rgba(232,184,75,0.1);border:1px solid var(--gold);color:var(--gold2)}
+
+.btn-next{width:100%;margin-top:15px;padding:16px;background:var(--gold);border:none;border-radius:var(--r);color:var(--bg);font-weight:900;font-size:1rem;cursor:pointer;text-transform:uppercase;letter-spacing:1px;transition:0.3s}
+.btn-next:hover{background:var(--white)}
+
+.stats-bar{display:flex;justify-content:space-between;padding:12px 25px;background:rgba(0,0,0,0.2);font-weight:bold;font-size:0.85rem;border-bottom:1px solid rgba(255,255,255,0.05)}
+.stat-item .val{color:var(--gold); font-size: 1.2rem; letter-spacing: 2px;}
+
+.emergency-mode header{background:var(--red); border-bottom-color: var(--white);}
+.emergency-mode h1{color:white;}
+</style>
+</head>
+<body>
+
+<div class="card active" id="fest-screen">
+  <header>
+    <h1>PUT YOUR TOWN ON THE MAP</h1>
+    <div class="subtitle">Tourism & Event Management Sim</div>
+  </header>
+  <div class="content">
+    <p class="story-text">The Mayor has challenged you to execute a world-class public event. Select your industry specialization and maximize our town's global reputation!</p>
+    <div class="grid-choice" id="fest-choices"></div>
+  </div>
+</div>
+
+<div class="card" id="game-screen">
+  <div class="stats-bar">
+    <div class="stat-item">PROJECT TIMELINE <span class="val" id="cur-step">1/12</span></div>
+    <div class="stat-item" id="tally-label">TOTAL REVENUE: <span class="val" id="cur-score"></span></div>
+  </div>
+  <header id="game-header">
+    <h1 id="q-title">Stage 1</h1>
+  </header>
+  <div class="content">
+    <p class="story-text" id="q-desc"></p>
+    <div class="options-stack" id="options-cont"></div>
+    <div class="feedback" id="fb-box">
+      <p id="fb-text"></p>
+      <button class="btn-next" onclick="nextStep()" id="next-btn-el">Move Forward</button>
+      <button class="btn-next" style="display:none; background:var(--red); color:white" id="gameover-btn-el" onclick="restartGame()">Try Again</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="win-screen">
+  <header>
+    <h1>THE FINAL EVALUATION</h1>
+    <div class="subtitle" id="fest-title-final">Festival Name</div>
+  </header>
+  <div class="content" style="text-align:center">
+    <div style="font-size:4rem; margin-bottom:20px" id="final-emoji-display">🏆</div>
+    <h2 id="w-title">Performance Review</h2>
+    <p class="story-text" id="w-desc" style="margin-top:20px"></p>
+    <button class="btn-next" onclick="restartGame()">Launch an Alternative Campaign</button>
+  </div>
+</div>
+
+<script>
+const FESTIVALS = [
+  { id: 'food', title: 'Taste of the Valley', icon: '🍲', emoji: '🥗' },
+  { id: 'run', title: 'The Peak Marathon', icon: '👟', emoji: '🏅' },
+  { id: 'ufo', title: 'The Arrival', icon: '🛸', emoji: '👽' },
+  { id: 'theatre', title: 'Curtain Call', icon: '🎭', emoji: '🎟️' },
+  { id: 'art', title: 'Canvas & Cobblestones', icon: '🎨', emoji: '🖼️' },
+  { id: 'history', title: 'Kings & Knights', icon: '🏰', emoji: '⚔️' }
+];
+
+const GAME_DATA = {
+  food: {
+    scenarios: [
+      { q: "Phase 1: Ingredient Sourcing", d: "Preparation is underway! A local agricultural collective offers organic produce, but the premium pricing doubles that of an industrial supplier. What is your strategy?", opts: [
+        { t: "100% Locally Sourced Organic: Prioritize the regional agricultural community.", pts: 3, fb: "The local community is absolutely thrilled. You have secured premium ingredients that guarantee exceptional culinary standards." },
+        { t: "Implement a 50/50 split: Reserve local organic ingredients exclusively for primary dishes.", pts: 2, fb: "A sensible compromise. You successfully optimize your budget while maintaining local community buy-in." },
+        { t: "Industrial Wholesale Sourcing: Minimize expenditure to maximize profit margins.", pts: 1, fb: "Fiscally disciplined, but gastronomic critics are already publicly questioning the authenticity of your ingredients." },
+        { t: "Acquire Expired Surplus: Purchase near-date inventory to aggressively slash overheads.", pts: -1, fb: "A reckless gamble! The municipal health inspector has raised flags. Select a more sustainable alternative." }
+      ]},
+      { q: "Phase 2: Marketing Strategy", d: "You need to generate significant media hype. A celebrity chef offers to endorse the event, but demands a private jet charter. How do you respond?", opts: [
+        { t: "Negotiate terms: Offer a prestigious masterclass slot in lieu of the jet charter.", pts: 3, fb: "The chef agrees! You mitigate financial risk while successfully securing a prominent figure to capture national media coverage." },
+        { t: "Authorize the expenditure: The resulting publicity will easily offset the steep cost.", pts: 2, fb: "The chef's arrival triggers a media frenzy. It is an expensive investment, but the festival is currently trending nationwide." },
+        { t: "Highlight local culinary talents as independent 'hidden gems' instead.", pts: 1, fb: "The resulting atmosphere is highly community-focused. Local residents are proud to see regional talent celebrated." },
+        { t: "Contract an impersonator to deceive the festival attendees.", pts: -1, fb: "The audience feels completely swindled. This is a severe PR disaster. Recruit a legitimate professional." }
+      ]},
+      { q: "Phase 3: Crowd Logistics", d: "The festival launch is one week away. How will you organize the culinary booths in the primary public square?", opts: [
+        { t: "Themed Gastronomic Zones: Categorize booths systematically by cuisine type.", pts: 3, fb: "Excellent! The flow of foot traffic is optimized, enabling visitors to navigate the venue effortlessly." },
+        { t: "Circular Traffic Corridor: Design a layout that channels visitors past every single vendor.", pts: 2, fb: "Great for boosting vendor revenue, though certain attendees criticize the lengthy commute for basic items." },
+        { t: "First-come, first-served allocation: Permit vendors to claim locations autonomously.", pts: 1, fb: "The layout is somewhat disorganized. Three competing burger trucks are crowded together while dessert stalls remain hidden." },
+        { t: "Obstruct the emergency exits: Maximize internal capacity within the dining zone.", pts: -1, fb: "This constitutes a severe safety hazard! Security personnel are alarmed. You must modify the layout immediately." }
+      ]},
+      { q: "Phase 4: Staff Training", d: "The temporary workforce has arrived for onboarding. How do you prepare them to handle public inquiries?", opts: [
+        { t: "Comprehensive Morning Briefing: Equipt staff with site maps and detailed FAQ sheets.", pts: 3, fb: "The staff are exceptionally helpful and confident. Visitors are receiving outstanding customer service." },
+        { t: "Appoint dedicated supervisors to oversee unguided personnel.", pts: 2, fb: "This helps manage operations, but supervisors are overstretched because entry-level staff lack fundamental training." },
+        { t: "Instruct them simply to maintain a positive attitude and begin working immediately.", pts: 1, fb: "Widespread confusion ensues. Staff members are providing conflicting directions regarding venue amenities." },
+        { t: "Terminate any employee who requests clarification or asks a question.", pts: -1, fb: "You are now facing an acute staffing shortage! You need to adopt a far more professional management style." }
+      ]},
+      { q: "Phase 5: Grand Opening", d: "The gates are open! A multi-national beverage corporation offers a last-minute sponsorship deal for exclusive distribution rights.", opts: [
+        { t: "Reject the offer: Retain independent local craft breweries and artisanal juice bars.", pts: 3, fb: "The unique regional drinks are a tremendous success. Visitors praise the authentic 'Taste of the Valley' experience." },
+        { t: "Propose a partial contract: Corporate soft drinks, but local options for alcoholic beverages.", pts: 2, fb: "A well-balanced solution. You secure substantial corporate funding while preserving regional identity." },
+        { t: "Accept exclusive terms: Secure the capital and eliminate all local beverage options.", pts: 1, fb: "The project budget is healthy, but the festival now feels like a generic corporate trade show." },
+        { t: "Monopolize resources: Charge a mandatory $10 per bottle of tap water.", pts: -1, fb: "Public outrage is intensifying! This is viewed as blatant price gouging, causing a rapid decline in consumer volume." }
+      ]},
+      { q: "Phase 6: The Lunch Rush Peak", d: "Attendees are complaining vociferously about the complete lack of seating infrastructure to consume their gourmet meals.", opts: [
+        { t: "Communal Banqueting Tables: Facilitate a shared, interactive dining experience.", pts: 3, fb: "The atmosphere is superb! Strangers are actively socializing and exchanging recommendations on food choices." },
+        { t: "Procure additional chairs to scatter haphazardly around the public square.", pts: 2, fb: "Functional, though the aesthetic is rather unorganized. At least guests are no longer dining on the pavement." },
+        { t: "Advise patrons to bring personal blankets to utilize the surrounding lawns.", pts: 1, fb: "Adequate for younger crowds, but elderly visitors are struggling with accessibility and departing early." },
+        { t: "Implement a seating tariff: Charge premium rates per ten minutes of usage.", pts: -1, fb: "This is perceived as incredibly exploitative. Disgruntled visitors are exiting the venue in protest." }
+      ]},
+      { q: "Phase 7: Afternoon Ambience", d: "What style of musical accompaniment will you schedule to optimize visitor engagement during peak afternoon hours?", opts: [
+        { t: "A regional folk ensemble: Reinforce the authentic 'Valley' cultural identity.", pts: 3, fb: "Superb choice! The acoustic music complements the dining experience and establishes a sophisticated atmosphere." },
+        { t: "A professional DJ performance: Spin high-energy, contemporary club tracks.", pts: 2, fb: "The energetic vibe appeals to younger crowds, but it is slightly too loud for guests attempting to converse." },
+        { t: "Broadcast a pre-recorded digital audio playlist on a continuous loop.", pts: 1, fb: "Sufficient to fill the silence, but it feels low-budget. Live music would have introduced a layer of exclusivity." },
+        { t: "Blast heavy metal music at maximum decibels across the venue.", pts: -1, fb: "The noise pollution prevents basic conversation! Guests are rapidly finishing their food and fleeing the site." }
+      ]},
+      { q: "Phase 8: Point of Sale (POS) Systems", d: "Vendor queues are lengthening rapidly. How will you streamline the transaction processing?", opts: [
+        { t: "Integrated Digital Tokens: Deploy a dedicated event application or contactless RFID wristbands.", pts: 3, fb: "Highly efficient! Vendors eliminate cash-handling errors, and transaction times are dramatically reduced." },
+        { t: "Hybrid Cash & Card: Allow individual vendors to manage transactions independently.", pts: 2, fb: "Simple to implement, but queues stagnate due to erratic cellular connectivity on standard credit card terminals." },
+        { t: "Traditional Paper Coupons: Establish central ticket booths at the main entrance.", pts: 1, fb: "An outdated method. Patrons are frustrated by having to wait in two separate lines before getting food." },
+        { t: "An absolute Honesty Box system: Rely entirely on user integrity to self-report payments.", pts: -1, fb: "The vast majority of participants neglected to pay. You have sustained devastating financial losses." }
+      ]},
+      { q: "Phase 9: Waste Management", d: "As the opening day concludes, the public square is buried under a mountain of litter. How do you resolve this?", opts: [
+        { t: "Implement a Zero-Waste Initiative: Mandate compostable packaging and clearly sorted disposal bins.", pts: 3, fb: "The venue remains pristine. Your eco-friendly branding successfully attracts eco-conscious demographics." },
+        { t: "Contract an enterprise cleaning crew to perform overnight venue restoration.", pts: 2, fb: "The square is immaculate every morning, though the operational cost is eating heavily into your profit margins." },
+        { t: "Recruit volunteers to collect litter in exchange for complimentary admission tickets.", pts: 1, fb: "Cost-effective, but the lack of professional oversight means several zones are missed, prompting complaints regarding hygiene." },
+        { t: "Discreetly discharge all corporate waste into the local river under the cover of darkness.", pts: -1, fb: "Illegitimate and ecologically destructive! Investigative journalists caught you on camera. Rectify this immediately." }
+      ]},
+      { q: "Phase 10: Inclement Weather Crisis", d: "The meteorological forecast indicates an imminent 60% probability of torrential rainfall on the final day.", opts: [
+        { t: "Secure industrial all-weather marquees to shelter the primary dining sectors.", pts: 3, fb: "An outstanding proactive measure! Despite the rain, the festival remains populated and dry. Attendees are thoroughly impressed." },
+        { t: "Retail branded umbrellas and rain ponchos at the main gate to maximize revenue.", pts: 2, fb: "You generated auxiliary profit, though guests remain visibly uncomfortable due to waterlogged conditions underfoot." },
+        { t: "Adopt a passive approach, hoping the weather clears without intervention.", pts: 1, fb: "The storm struck as predicted. The public square cleared within minutes, causing a catastrophic drop in revenue." },
+        { t: "Fund pseudo-scientific cloud-seeding chemical rockets to artificially disperse the storm.", pts: -1, fb: "An expensive, failed venture. The rain intensified, and you now lack the budget to procure basic emergency tents." }
+      ]},
+      { q: "Phase 11: The Grand Finale", d: "The closing evening has arrived. What signature attraction will conclude the event?", opts: [
+        { t: "Orchestrate an immersive, synchronized LED lantern parade illuminating the skyline.", pts: 3, fb: "A breathtaking spectacle! Thousands of glowing lanterns create an ideal viral social media opportunity for the town." },
+        { t: "Deliver a standardized corporate gratitude announcement from the main stage.", pts: 2, fb: "Professional and polite, though somewhat uninspired compared to the vibrant events of the past week." },
+        { t: "Deliver an exhaustive four-hour monologue detailing your personal management philosophy.", pts: 1, fb: "The audience evaporated within minutes. Your presentation style is remarkably tedious." },
+        { t: "Unleash a colony of 1,000 agitated cats onto the main stage.", pts: -1, fb: "Completely irrational. The performers are injured, and the panicked crowd is stampeding toward the exits." }
+      ]},
+      { q: "Phase 12: Performance Evaluation", d: "The campaign is over. The Mayor demands empirical evidence of the project's success.", opts: [
+        { t: "Quantitative Analysis: Present comprehensive survey feedback and detailed sales telemetry.", pts: 3, fb: "Exceptional! You provide undeniable data to convince the Mayor and prospective corporate investors of your success." },
+        { t: "Evaluate the bank balance: Conclude success based entirely on raw capital surplus.", pts: 2, fb: "You generated revenue, but you lack qualitative insights to understand customer retention or future areas of growth." },
+        { t: "Solicit feedback exclusively from a close acquaintance to gauge performance.", pts: 1, fb: "They provided flattering praise, but their opinion is highly subjective and biased. Professional metrics are required." },
+        { t: "Declare the event flawless and disregard all constructive public criticism.", pts: -1, fb: "The regional press is publishing highly critical reviews. You must learn to analyze feedback constructively." }
+      ]}
+    ],
+    emergencies: {
+      5: { q: "🚨 EPIDEMIC OUTBREAK!", d: "Ten guests are currently receiving treatment in the medical tent due to suspected contamination from the seafood vendor. The news is spreading rapidly!", opts: [
+        { t: "Suspend the vendor's license instantly and issue a transparent public apology.", fail: false, fb: "Your proactive transparency mitigates public panic. The health department commends your swift crisis management.", pts: 2 },
+        { t: "Attribute the symptoms to external weather factors and encourage continued consumption.", fail: true, fb: "Dozens more fall ill. The festival is forcibly shut down by authorities, and you face severe legal action. GAME OVER." },
+        { t: "Distribute complimentary alcoholic beverages to distract dissatisfied guests.", fail: false, fb: "A highly unconventional distraction, but it temporarily maintains public order until health officials stabilize the crisis.", pts: 1 }
+      ]},
+      11: { q: "🚨 MAIN STAGE CONFLAGRATION!", d: "A culinary demonstration triggers a flash fire, engulfing the primary marquee in flames!", opts: [
+        { t: "Execute a controlled evacuation and transition operations to the auxiliary outdoor stage.", fail: false, fb: "Your emergency evacuation protocol functions flawlessly. The performance resumes under open skies.", pts: 2 },
+        { t: "Attempt to suppress the chemical fire independently using a single bucket of water.", fail: true, fb: "The fire spreads exponentially. The entire infrastructure burns down, leaving the town in severe debt. GAME OVER." },
+        { t: "Cancel the final performance immediately and process wholesale ticket refunds.", fail: false, fb: "Disappointing for guests, but safety remains paramount. Your reputation for strict risk management remains intact.", pts: 1 }
+      ]}
+    }
+  },
+  run: {
+    scenarios: [
+      { q: "Phase 1: Route Optimization", d: "Elite competitive runners demand a steep, challenging mountain trail, whereas participating families require a flat urban road. What is your decision?", opts: [
+        { t: "Dual-Route Strategy: Coordinate a competitive half-marathon alongside a recreational 5k course.", pts: 3, fb: "Superb! You simultaneously attract world-class athletes and local residents, filling local hotels to maximum capacity." },
+        { t: "The Rugged Mountain Trail: Target dedicated endurance athletes exclusively.", pts: 2, fb: "The competitive athletes are highly satisfied, but the event feels exclusionary, reducing general tourist turnout." },
+        { t: "The Flat Urban Road: Keep the course completely accessible for the general public.", pts: 1, fb: "A pleasant community gathering, but serious competitors boycott the event, preventing it from achieving elite status." },
+        { t: "Anarchy Model: Instruct participants to navigate the town entirely at their own discretion.", pts: -1, fb: "An absolute logistical disaster. Runners are disoriented and lost. You must establish a clearly defined course." }
+      ]},
+      { q: "Phase 2: Corporate Sponsorship", d: "A local automotive dealership offers significant funding on the condition that their loudest diesel commercial truck leads the race.", opts: [
+        { t: "Negotiate a compromise: Feature their latest electric vehicle model as the official lead car.", pts: 3, fb: "Brilliant. The solution is silent, eco-friendly, and fulfills corporate sponsorship obligations without bothering the runners." },
+        { t: "Accept the terms unconditionally: Permit the loud truck to spearhead the race corridor.", pts: 2, fb: "The athletes are forced to inhale exhaust fumes, but the dealership's substantial injection of capital stabilizes your budget." },
+        { t: "Decline the sponsorship: Utilize a standard bicycle to lead the race instead.", pts: 1, fb: "The runners appreciate the clean air, but losing that corporate capital leaves your operational budget extremely tight." },
+        { t: "Permit the sponsor to drive the vehicle across the finish line to claim first place.", pts: -1, fb: "An automobile cannot win an athletic marathon! The outraged athletes are abandoning the competition in protest." }
+      ]},
+      { q: "Phase 3: Volunteer Recruitment", d: "You require 100 course marshals to manage key intersections. How will you source this workforce?", opts: [
+        { t: "Partner with the regional high school to offer certified community service hours.", pts: 3, fb: "The students are highly energetic, and their parents populate the spectator zones. An exceptional community milestone!" },
+        { t: "Offer high-quality, branded event t-shirts to any citizen willing to assist.", pts: 2, fb: "You recruit a sufficient workforce, although the manufacturing overhead for the apparel significantly exceeds expectations." },
+        { t: "Contract an enterprise security firm to deploy professional personnel.", pts: 1, fb: "They execute their duties with mechanical efficiency, but they do not encourage the athletes. The atmosphere feels sterile." },
+        { t: "Abduct random pedestrians from the local park and compel them to work.", pts: -1, fb: "This constitutes a severe criminal offense! Legal authorities are now interrogating you instead of securing the race track." }
+      ]},
+      { q: "Phase 4: Traffic Management", d: "The designated race course intersects the primary arterial highway leading into the municipality. How do you mitigate the disruption?", opts: [
+        { t: "Full Highway Closure: Divert all vehicular traffic systematically for a four-hour window.", pts: 3, fb: "Runner safety is fully guaranteed, and the urban center transforms into a vibrant, pedestrian-only festival zone." },
+        { t: "Rolling Closures: Block intersections progressively only when the runners are actively passing.", pts: 2, fb: "Logistically taxing for law enforcement, but it maintains essential traffic flow while the marathon proceeds." },
+        { t: "Instruct runners to utilize public pavements and obey standard pedestrian traffic lights.", pts: 1, fb: "The competitive runners are furious because their pacing is ruined. This resembles a casual stroll rather than an elite race." },
+        { t: "Neglect to inform local drivers: Allow vehicles and athletes to navigate the highway simultaneously.", pts: -1, fb: "Total chaos! Vehicles are trapped in the middle of a moving crowd of runners. This is catastrophically dangerous." }
+      ]},
+      { q: "Phase 5: Race Day Telemetry", d: "The athletes are assembling at the starting line! How will you monitor and record their official finishing times?", opts: [
+        { t: "RFID Electronic Chip Timing: Provide precise, automated telemetry for all participants.", pts: 3, fb: "The athletes are delighted to receive their verified split times via automated SMS immediately upon crossing the finish line." },
+        { t: "Manual Chronometers: Hire a team of 20 staff members to operate traditional stopwatches manually.", pts: 2, fb: "Functional, but significant disputes arise regarding the accuracy of placements within high-density mid-pack finishes." },
+        { t: "The Honor System: Request that competitors self-report their personal times upon completion.", pts: 1, fb: "An absurd volume of participants claimed to have broken world records. The resulting data is completely compromised." },
+        { t: "Estimate finishing times based arbitrarily on the physical exhaustion of the runner.", pts: -1, fb: "The athletes are absolutely insulted! This is a professional sporting event, not a subjective game of chance." }
+      ]},
+      { q: "Phase 6: Hydration Strategy", d: "The competition is underway! How will you manage the vital hydration stations along the course?", opts: [
+        { t: "Utilize fully biodegradable cups filled with natural local spring water.", pts: 3, fb: "The 'Eco-Marathon' becomes your signature brand. Sustainable tourism surges, and the town remains completely litter-free." },
+        { t: "Distribute standard plastic bottles and deploy a massive clean-up crew post-race.", pts: 2, fb: "Logistically effective for the runners, but the environmental waste upsets local residents. At least it is eventually cleared." },
+        { t: "Mandate that runners carry personal hydration equipment, providing no water stations.", pts: 1, fb: "You eliminated overhead costs, but several athletes collapsed from acute dehydration, presenting a major liability risk." },
+        { t: "Distribute desalinated seawater sourced directly from the local coast.", pts: -1, fb: "Serving hypertonic salt water to dehydrated athletes is a health hazard! The competitors are furious." }
+      ]},
+      { q: "Phase 7: Medical Infrastructure", d: "The municipal hospital administration expresses deep concern regarding potential heat stroke casualties.", opts: [
+        { t: "Contract a private paramedic service to deploy dedicated mobile ambulances on-site.", pts: 3, fb: "Exceptional risk mitigation. They successfully treat multiple cases of heat exhaustion rapidly without burdening public hospitals." },
+        { t: "Establish a rudimentary first aid tent staffed by two uncertified volunteers.", pts: 2, fb: "Sufficient to treat minor abrasions, but the personnel were completely overwhelmed when a competitor suffered a severe syncopic episode." },
+        { t: "Instruct competitors to display mental fortitude and actively avoid getting injured.", pts: 1, fb: "Highly irresponsible management. The Mayor is deeply concerned regarding the town's legal liability exposures." },
+        { t: "Provide a single box of adhesive bandages at the 20-kilometer marker.", pts: -1, fb: "That is an insultingly inadequate medical response for an endurance marathon! You must implement a legitimate medical protocol." }
+      ]},
+      { q: "Phase 8: Digital Media Amplification", d: "The event is unfolding live. How will you broadcast this experience to a global audience?", opts: [
+        { t: "High-Definition Live Stream: Broadcast the finish line continuously on municipal digital channels.", pts: 3, fb: "Thousands of viewers are tuning in globally! The town is presented as a vibrant, dynamic hub for athletic tourism." },
+        { t: "Publish a static photograph of the champion forty-eight hours post-event.", pts: 2, fb: "An acceptable archive, but you completely failed to leverage the live momentum and digital engagement of the actual race." },
+        { t: "Rely entirely on participants to post personal content using their own devices.", pts: 1, fb: "Some organic content is generated, but the exhausted runners consistently neglect to tag the town's official handles." },
+        { t: "Confiscate all mobile devices to preserve the historical 'purity' of athletic competition.", pts: -1, fb: "Nobody is aware that your event even occurred! You have effectively decimated your own marketing apparatus." }
+      ]},
+      { q: "Phase 9: The Finish Line Experience", d: "The frontrunners are crossing the finish line! What reception awaits them?", opts: [
+        { t: "Commemorative Medals, Nutritional Refreshments, and a Live Entertainment Stage.", pts: 3, fb: "The atmosphere is electric! Runners remain within the municipality to celebrate, injecting substantial revenue into local retail businesses." },
+        { t: "A basic bottle of water and a standardized cardboard directional sign.", pts: 2, fb: "Functional, but uninspired. Participants depart immediately upon finishing, resulting in a lost opportunity for local commerce." },
+        { t: "Present an unexpected invoice for hidden 'Course Maintenance Fees'.", pts: 1, fb: "The athletes are thoroughly confused and insulted. This is a disastrous method to conclude a grueling race." },
+        { t: "Construct a massive pit of deep mud that runners must crawl through to finish.", pts: -1, fb: "This is a classic road marathon, not a military obstacle course! The exhausted runners are highly insulted." }
+      ]},
+      { q: "Phase 10: Post-Race Economic Engagement", d: "The race has concluded. How will you incentivize visitors to remain in town for the remainder of the afternoon?", opts: [
+        { t: "Inaugurate a Culinary Food Truck Festival featuring local restauranteurs in the central park.", pts: 3, fb: "The famished athletes are ecstatic! They remain on-site for hours, spending capital alongside their families." },
+        { t: "Schedule an elite award ceremony inside the restrictive municipal council chambers.", pts: 2, fb: "The professional winners attend, but the remaining 1,900 recreational runners immediately leave to return home." },
+        { t: "Issue a digital voucher for a complimentary beverage redeemable at a remote petrol station.", pts: 1, fb: "A well-intentioned gesture, but the location is five kilometers away. Zero utilization was recorded." },
+        { t: "Deactivate the public infrastructure immediately and order the crowds to disperse.", pts: -1, fb: "You have just cost local restaurants and hospitality businesses thousands of dollars in potential post-event sales!" }
+      ]},
+      { q: "Phase 11: Merchandising & Branding", d: "Participants are eager to purchase premium souvenirs to commemorate their athletic achievement.", opts: [
+        { t: "Retail high-performance technical running shirts featuring prominent municipal branding.", pts: 3, fb: "Inventory sold out completely within an hour! Elite runners nationwide are now walking billboards for your town." },
+        { t: "Manufacture low-grade plastic tokens and retail them at premium luxury prices.", pts: 2, fb: "You generated short-term profit margins, but consumers criticize the cheap texture, diminishing your brand's prestige." },
+        { t: "Offer professional race photographs for an exorbitant premium fee of $50 per digital file.", pts: 1, fb: "Prohibitively expensive. The vast majority of runners simply bypass your paywall by screenshotting the watermarked previews." },
+        { t: "Attempt to auction the competitors' unwashed athletic footwear back to them.", pts: -1, fb: "Unsanitary and completely absurd. Nobody intends to purchase their own discarded, sweat-soaked apparel." }
+      ]},
+      { q: "Phase 12: Long-Term Strategic Planning", d: "The Mayor requests a formal recommendation regarding whether to institutionalize this event annually.", opts: [
+        { t: "Approve: Expand the registration capacity to accommodate 5,000 international runners next season.", pts: 3, fb: "The town is prepared! This competition is now officially integrated into the national sporting calendar as a premier event." },
+        { t: "Approve conditionally: Maintain identical capacity limits to preserve a sense of exclusivity.", pts: 2, fb: "A conservative, low-risk approach. It will remain a pleasant local tradition but will not catalyze broader macroeconomic growth." },
+        { t: "Express indecision: Postpone the verdict until an anchor corporate sponsor can be secured.", pts: 1, fb: "Highly indecisive leadership. The town council expects a decisive strategic vision from their event director." },
+        { t: "Reject the proposal: Cite personal administrative fatigue as the sole deciding factor.", pts: -1, fb: "Local commercial enterprises are deeply disappointed. They generated more revenue this weekend than during the previous month!" }
+      ]}
+    ],
+    emergencies: {
+      5: { q: "🚨 UNANTICIPATED BLIZZARD!", d: "An unseasonal, severe arctic weather front has struck the high mountain pass where the athletes are actively competing!", opts: [
+        { t: "Mobilize the specialized alpine rescue team immediately and terminate the competition.", fail: false, fb: "Safety remains your paramount concern! All athletes are evacuated successfully, praising your rapid emergency response.", pts: 2 },
+        { t: "Instruct the athletes to accelerate their pace to maintain optimal body temperature.", fail: true, fb: "Dozens of competitors develop severe hypothermia. National media labels you an incompetent manager. GAME OVER.", pts: 0 },
+        { t: "Divert the active runners down toward the lower valley alternative roads.", fail: false, fb: "A logistically chaotic mid-race modification, but the entire field finishes safely in temperate conditions. Commendable adaptability.", pts: 1 }
+      ]},
+      11: { q: "🚨 TELEMETRY SYSTEM COLLAPSE!", d: "The main database server and electronic RFID timing hardware have crashed simultaneously! You cannot verify the winner.", opts: [
+        { t: "Review the backup high-speed video footage at the finish line to manually reconstruct the rankings.", fail: false, fb: "The auditing process requires all night, but the results are flawless. The athletes profoundly appreciate your dedication.", pts: 2 },
+        { t: "Declare a universal tie, issuing a first-place trophy to every participating athlete.", fail: false, fb: "The elite professionals are annoyed, but the general public embraces the utopian sentiment. A uniquely positive resolution.", pts: 1 },
+        { t: "Arbitrarily select the runner who visually appears the most athletic and award them the prize.", fail: true, fb: "The competitive community immediately detects the fabrication, triggering a public riot at the winner's podium. GAME OVER.", pts: 0 }
+      ]}
+    }
+  },
+  ufo: {
+    scenarios: [
+      { q: "Phase 1: The Phenomenon", d: "A highly sophisticated crop formation has materialized in an agricultural field. How will you capitalize on this?", opts: [
+        { t: "Scientific Validation: Convene a prominent astrophysics professor to conduct empirical research.", pts: 3, fb: "This intellectual framing captures national media attention, drawing thousands of highly analytical tourists to the site." },
+        { t: "Extraterrestrial Celebration: Coordinate an outdoor festival and retail themed cocktails.", pts: 2, fb: "An incredibly festive atmosphere! You successfully attract young demographics, though serious investigators boycott the event." },
+        { t: "Establish an exorbitant gate tariff simply to observe the perimeter from a distance.", pts: 1, fb: "You generated immediate liquid capital, but consumers perceive it as an exploitative tourist trap, leaving negative reviews online." },
+        { t: "Mow the entire agricultural field immediately and deny the event ever occurred.", pts: -1, fb: "You have systematically obliterated the town's premier viral marketing asset! The Mayor is completely speechless." }
+      ]},
+      { q: "Phase 2: Symposium Panelists", d: "You must secure credible guest speakers for the 'First Contact' international symposium. Whom do you invite?", opts: [
+        { t: "A retired commercial airline pilot who claims verified airborne radar anomalies.", pts: 3, fb: "The audience is completely spellbound! His professional presentation preserves the critical element of mysterious plausibility." },
+        { t: "A local theatrical performer outfitted in an elaborate alien costume.", pts: 2, fb: "Amusing for families with children, but academic researchers conclude your convention lacks professional credibility." },
+        { t: "An eccentric individual who asserts they were abducted by an intelligent kitchen appliance.", pts: 1, fb: "Certainly memorable. The crowd is highly entertained by the absurdity, though your academic prestige suffers.", pts: -1 },
+        { t: "Select an unvetted pedestrian completely at random from the municipal transit station.", pts: -1, fb: "They spent their hour monologue describing their domestic pet. Disgruntled attendees are demanding immediate ticket refunds." }
+      ]},
+      { q: "Phase 3: Hospitality Infrastructure", d: "The municipal hotel capacity is entirely exhausted. Where will the arriving demographics find accommodation?", opts: [
+        { t: "The Celestial Campground: Establish an organized campsite network within the public park boundaries.", pts: 3, fb: "Perfect! Attendees are thrilled to sleep under open skies, which significantly enhances the immersive atmosphere of the event." },
+        { t: "Launch an 'Artisanal Extraterrestrial Homestay' program utilizing local spare bedrooms.", pts: 2, fb: "An outstanding grassroots initiative. Arriving tourists and local residents establish lucrative socioeconomic connections." },
+        { t: "Instruct visitors to spend the night inside their personal vehicles within commercial retail car parks.", pts: 1, fb: "Commercial business owners are highly irritated, and your visitors experience physical discomfort, dampening their enthusiasm." },
+        { t: "Authorize attendees to set up camp directly inside the fragile crop formation itself.", pts: -1, fb: "The arriving crowds have completely trampled the unique phenomenon they traveled to witness! The primary asset is ruined." }
+      ]},
+      { q: "Phase 4: Media Relations", d: "A sensationalist tabloid media outlet requests an exclusive interview asserting that extraterrestrial life is verified.", opts: [
+        { t: "Grant the interview but maintain an ambiguous, highly enigmatic positioning.", pts: 3, fb: "The resulting sensational headlines cause an exponential surge in curiosity-driven tourist arrivals the following morning." },
+        { t: "Issue a definitive statement exposing the entire phenomenon as an elaborate practical joke.", pts: 2, fb: "Factually honest, but you have systematically extinguished the public excitement, causing half your tourist population to leave." },
+        { t: "Bribe the journalists to publish a fabricated expose claiming the Mayor is an undercover alien agent.", pts: 1, fb: "The Mayor is absolutely furious regarding this defamation. Your professional position is now in jeopardy." },
+        { t: "Evade all journalistic inquiries and refuse to issue a public statement.", pts: -1, fb: "The media published a highly damaging narrative claiming the town is concealing a dark conspiracy. Public anxiety escalates." }
+      ]},
+      { q: "Phase 5: Astronomical Observation", d: "The nocturnal sky observation event is about to commence. How will you structure the experience?", opts: [
+        { t: "Procure high-powered astronomical telescopes and contract a certified astronomer to guide the crowd.", pts: 3, fb: "Breathtaking! Guests successfully view planetary rings, validating the educational premium of their ticket price." },
+        { t: "Instruct the disorganized crowd to look upward and shout whenever they perceive movement.", pts: 2, fb: "Highly chaotic. Attendees are predominantly misidentifying commercial airliners and low-orbit communication satellites." },
+        { t: "Retail inexpensive green plastic spectacles marketed as 'Artisanal Extraterrestrial Vision Goggles'.", pts: 1, fb: "The product obscures all visibility. Consumers recognize it as an uninspired gimmick, damaging your professional integrity." },
+        { t: "Direct high-powered industrial laser pointers directly into the eyes of the assembled audience.", pts: -1, fb: "This constitutes an egregious medical safety violation! You are causing physical injury to your patrons. Terminate this immediately." }
+      ]},
+      { q: "Phase 6: Gastronomic Innovations", d: "The themed 'Cosmic Gastronomy Café' is launching. What comprises your primary menu?", opts: [
+        { t: "Dehydrated astronaut rations paired with structurally complex 'Nebula' pastries.", pts: 3, fb: "The unique culinary concept is highly popular on social media platforms, driving exceptional organic digital promotion." },
+        { t: "Standard hamburger patties served on novel, artificially colored green buns.", pts: 2, fb: "Simple, scalable, and highly cost-effective. The presentation aligns sufficiently with the festive theme of the venue." },
+        { t: "Serve unheated, gelatinous soup marketed under the name 'Extraterrestrial Slime'.", pts: 1, fb: "A significant percentage of consumers find the texture unappealing, resulting in sluggish revenue metrics." },
+        { t: "Harvest geological rocks and topsoil directly from the field to serve as nutritional delicacies.", pts: -1, fb: "You cannot serve contaminated soil as food! The municipal health department is shutting down your food operations instantly." }
+      ]},
+      { q: "Phase 7: Security Protocol", d: "An organized group of enthusiasts dressed in formal business suits is obstructing the main ticketing gate.", opts: [
+        { t: "Formalize their presence: Deputize the group as the official theatrical security detail for the event.", pts: 3, fb: "Brilliant strategy! They assume their roles perfectly, and patrons are eager to document the experience with photographs." },
+        { t: "Politely request that they relocate to the perimeter to allow standard transit access.", pts: 2, fb: "They cooperate with your request, although a valuable opportunity to enhance the atmospheric immersion is lost." },
+        { t: "Summon municipal law enforcement to have the group forcibly arrested for public loitering.", pts: 1, fb: "An unnecessary escalation. The enthusiasts were entirely peaceful, and the aggressive response makes the town appear hostile." },
+        { t: "Engage in physical combat with their leadership independently on the pavement.", pts: -1, fb: "You were soundly defeated and sustained visible injuries. This is an egregiously unprofessional display for an executive." }
+      ]},
+      { q: "Phase 8: Retail Merchandising", d: "The official souvenir retail outlet is highly congested. What product will you prioritize for inventory?", opts: [
+        { t: "High-margin, luminescent 'I Believe' apparel that glows in the dark.", pts: 3, fb: "An absolute commercial triumph! The nighttime crowd is highly synchronized, creating a spectacular visual landscape." },
+        { t: "Distribute rudimentary aluminum foil hats for a premium $5 novelty fee.", pts: 2, fb: "An excellent humorous gimmick. Patrons generate substantial organic PR across social media networks via selfies." },
+        { t: "Package ordinary gravel from the adjacent driveway and label them as 'Authentic Meteorites'.", pts: 1, fb: "Ethically questionable. Consumers eventually realize the fabrication, leading to a decline in customer satisfaction." },
+        { t: "Excavate and monetize actual sections of the unique crop formation turf.", pts: -1, fb: "The attraction field is now a barren mud pit because you liquidated the asset! There is no longer any visual phenomenon left to see." }
+      ]},
+      { q: "Phase 9: The Contested Artifact", d: "An attendee discovers an anomalous metallic object (actually a discarded soda container). How do you manage this?", opts: [
+        { t: "Encase it in a secure glass display archive labeled as an 'Anomalous Unidentified Artifact'.", pts: 3, fb: "Factually accurate phrasing! Long queues materialize as guests engage in passionate intellectual debates regarding its origins." },
+        { t: "Publicly declare the object to be a vital component of an alien interstellar propulsion drive.", pts: 2, fb: "An absolute fabrication, but it intensifies the hype. You must simply hope no physical scientist conducts an audit." },
+        { t: "Dispose of the item immediately in the standard municipal refuse bin.", pts: 1, fb: "You forfeited an exceptional opportunity to introduce a captivating mystery attraction at zero operational cost." },
+        { t: "Attempt to ingest the metallic object to acquire superhuman biological capabilities.", pts: -1, fb: "You have been hospitalized due to internal injuries. Metal is entirely non-consumable." }
+      ]},
+      { q: "Phase 10: The Atmospheric Transmission", d: "The festival attendance is peaking. How will you coordinate a symbolic communication message to outer space?", opts: [
+        { t: "Construct a massive 'Welcome' installation utilizing synchronized LED grids within the valley.", pts: 3, fb: "The aerial drone footage is magnificent, securing top billing on national media broadcasts and elevating the town's prestige." },
+        { t: "Broadcast the signal of a local AM/FM radio station directly toward the upper atmosphere.", pts: 2, fb: "A creative concept, though any potential recipient will likely be thoroughly confused by our hyper-local weather reports." },
+        { t: "Coordinate the entire crowd to shout a synchronized greeting toward the sky simultaneously.", pts: 1, fb: "The acoustic volume was impressive, but it did not leave the upper atmosphere. At least it enhanced crowd engagement." },
+        { t: "Destroy the Mayor's personal luxury vehicle by plunging it into a volcano as a pagan sacrifice.", pts: -1, fb: "The Mayor is filing criminal charges. Your employment contract is terminated immediately." }
+      ]},
+      { q: "Phase 11: The Concluding Parade", d: "The final evening has arrived. What event will serve as the spectacular culmination of the project?", opts: [
+        { t: "Orchestrate an immersive, synchronized LED lantern parade illuminating the skyline.", pts: 3, fb: "A breathtaking spectacle! Thousands of glowing lanterns create an ideal viral social media opportunity for the town." },
+        { t: "Organize a competitive costume masquerade evaluating the most sophisticated alien concept.", pts: 2, fb: "Highly interactive and economical. The community displays outstanding creativity, which keeps public morale elevated." },
+        { t: "Compel the Mayor to deliver an intensive presentation regarding local municipal property taxes.", pts: 1, fb: "The entire audience fell asleep instantly. This represents an exceptionally uninspired conclusion to a sci-fi event." },
+        { t: "Simulate a hostile alien colonization using unmapped military-grade pyrotechnics.", pts: -1, fb: "You triggered mass public panic! Attendees are fleeing the venue in terror, resulting in severe infrastructure damage." }
+      ]},
+      { q: "Phase 12: Long-Term Legacy", d: "The event has successfully concluded. What is your strategy for the historic crop site moving forward?", opts: [
+        { t: "Institutionalize the site as a permanent 'Anomalous Phenomenon Park' complete with a retail storefront.", pts: 3, fb: "Outstanding strategic vision! The town now commands a sustainable, year-round tourism asset that generates steady employment." },
+        { t: "Monetize the topsoil by selling small packets of 'consecrated earth' to departing tourists.", pts: 2, fb: "You generated auxiliary short-term profit margins, but the field now resembles an unstable construction excavation site." },
+        { t: "Abandon the site entirely to allow natural seasonal rain to erode the formations.", pts: 1, fb: "An inefficient use of resources. You missed an exceptional opportunity to solidify the town's long-term tourism brand." },
+        { t: "Hold the hypothetical extraterrestrials accountable for the waste cleanup and send them an invoice.", pts: -1, fb: "The hypothetical entities ignored your invoice, and the town is still buried under litter. Initiate clean-up protocols." }
+      ]}
+    ],
+    emergencies: {
+      5: { q: "🚨 FEDERAL AGENCY INTERVENTION!", d: "Unidentified individuals wearing formal suits have arrived, attempting to quarantine the entire phenomenon site!", opts: [
+        { t: "Demand official identification credentials and summon national media broadcasting crews.", fail: false, fb: "The individuals were merely performance pranksters! The resulting media coverage elevates the festival's fame exponentially.", pts: 2 },
+        { t: "Abandon your executive post immediately and conceal yourself in the dense woods.", fail: true, fb: "You abandoned your duties. Without executive leadership, the event degenerates into civil unrest. GAME OVER.", pts: 0 },
+        { t: "Offer the agents free vouchers for the themed cafe if they agree to vacate the premises.", fail: false, fb: "They were starving! They accepted the food and departed immediately. A highly unorthodox but effective resolution.", pts: 1 }
+      ]},
+      11: { q: "🚨 ATMOSPHERIC ASSET COLLAPSE!", d: "The massive helium-filled UFO installation has severed its anchor lines and is drifting toward high-voltage power grids!", opts: [
+        { t: "Contact emergency services immediately to coordinate a controlled technical recovery.", fail: false, fb: "Outstanding crisis management! First responders secure the asset safely, prompting applause from the crowd.", pts: 2 },
+        { t: "Allow the asset to drift, treating the incident as a planned theatrical display for social media.", fail: false, fb: "You successfully converted an operational failure into a viral digital media moment, though safety risks were elevated.", pts: 1 },
+        { t: "Attempt to neutralize the floating helium asset using a traditional bow and arrow.", fail: true, fb: "You missed the target entirely, destroying the Mayor's formal attire. You face immediate termination. GAME OVER.", pts: 0 }
+      ]}
+    }
+  },
+  theatre: {
+    scenarios: [
+      { q: "Phase 1: Script Selection", d: "A local playwright submits an experimental script focusing on 'The Historical Evolution of Plumbing'. How do you proceed?", opts: [
+        { t: "Revise the script: Adapt the material into a satirical historical comedy about the town's founders.", pts: 3, fb: "An unmitigated success! It was intellectually engaging, highly comedic, and deeply resonated with the local populace." },
+        { t: "Produce the script verbatim: Market it as an avant-garde intellectual experience.", pts: 2, fb: "The performance was certainly polarizing. Casual viewers departed early, but dedicated theatrical critics praised the novelty." },
+        { t: "Reject the submission entirely and license a generic corporate production for the hundredth time.", pts: 1, fb: "A safe, risk-averse choice, but the community is disappointed by the complete lack of creative innovation." },
+        { t: "Incinerate the manuscript dramatically in front of the distraught author.", pts: -1, fb: "An act of egregious unprofessionalism. The author is devastated, and the regional arts council is filing a formal complaint." }
+      ]},
+      { q: "Phase 2: Wardrobe Capital Allocation", d: "You require 50 complex medieval costumes, but your current departmental budget is entirely depleted. What is your solution?", opts: [
+        { t: "Establish a Community Wardrobe Guild: Mobilize local artisans and volunteers to manufacture apparel.", pts: 3, fb: "The garments are exquisite, and the collaborative process fosters immense civic pride and community buy-in." },
+        { t: "Incorporate a post-modern minimalist aesthetic: Instruct actors to wear modern denim and rely on monologue.", pts: 2, fb: "The critics lauded the creative choice as 'stark' and 'confrontational'. You successfully eliminated major overhead costs!" },
+        { t: "Procure low-grade synthetic apparel from an inexpensive commercial novelty retailer.", pts: 1, fb: "The performance looks uninspired. The historical knights look completely unconvincing in flimsy plastic armor." },
+        { t: "Exfiltrate historical artifacts illegally from the local curated museum collections.", pts: -1, fb: "The museum administration has contacted law enforcement. Your role is event director, not a common thief!" }
+      ]},
+      { q: "Phase 3: Spatial Scouting", d: "Select the optimal venue to stage the highly anticipated nighttime psychological thriller play.", opts: [
+        { t: "The Historic Castle Ruins: Leverage natural shadows and stone architecture to optimize atmosphere.", pts: 3, fb: "Incredible artistic direction! The natural acoustic resonance and eerie environment elevate the performance to a masterpiece." },
+        { t: "The Secondary School Gymnasium: Highly accessible with extensive seating capacity.", pts: 2, fb: "Logistically sound, though the ambient aroma of athletic equipment significantly detracted from the artistic immersion." },
+        { t: "An active municipal transit vehicle: Execute the performance amidst daily public commuters.", pts: 1, fb: "The public simply wished to commute in peace. The actors struggled to maintain balance whenever the vehicle turned sharply." },
+        { t: "A restrictive storage closet: Accommodate only a single spectator per performance cycle.", pts: -1, fb: "Your ticket revenue capacity is mathematically limited to ten people per day. The project is facing financial insolvency." }
+      ]},
+      { q: "Phase 4: Tariff Architecture", d: "Determine the pricing strategy for premium front-row seating on opening night.", opts: [
+        { t: "Implement a sliding-scale donation model with a highly recommended target value of $20.", pts: 3, fb: "The venue is operating at maximum capacity! Grateful patrons consistently exceed the target contribution amount." },
+        { t: "Establish a standardized flat tariff of $30: Ensure equitable market-rate access.", pts: 2, fb: "A solid commercial decision. You successfully offset operational overheads and generate a modest profit margin for the town." },
+        { t: "Offer complimentary admission conditional on viewing 30 minutes of commercial advertisements first.", pts: 1, fb: "The audience is deeply irritated by the corporate messaging, which completely ruins the creative tone of the production." },
+        { t: "Set an exclusive tariff of one million dollars per seat to attract elite global billionaires.", pts: -1, fb: "Zero tickets were liquidated. The premium seating tier remains entirely vacant, forcing actors to perform to an empty room." }
+      ]},
+      { q: "Phase 5: Opening Night Crisis", d: "The principal lead actor has developed severe acute laryngitis hours before the curtain rises! What is your contingency plan?", opts: [
+        { t: "Activate the understudy: Give a passionate young local performer their professional debut.", pts: 3, fb: "An absolute triumph! The audience is captivated by the narrative of a local hero stepping up, and the execution is flawless." },
+        { t: "Incorporate puppetry: Utilize a non-vocal puppet while the actor whispers lines from off-stage.", pts: 2, fb: "Highly eccentric, but avant-garde critics interpreted the decision as a profound metaphor for human autonomy. Night saved!" },
+        { t: "Cancel the performance entirely and distribute low-cost confectionery to the crowd as compensation.", pts: 1, fb: "The public is thoroughly dissatisfied. Cheap candy cannot compensate for a highly anticipated three-hour dramatic production." },
+        { t: "Compel the aphonic actor to perform using improvised sign language without preparation.", pts: -1, fb: "The narrative becomes completely unintelligible. The production descends into an unmitigated disaster." }
+      ]},
+      { q: "Phase 6: Street Theatre Activation", d: "How will you capture the attention of demographic segments who do not traditionally patronize the theatre?", opts: [
+        { t: "Deploy fire-breathers and acrobat performers to execute high-energy routines in the public square.", pts: 3, fb: "The central square is packed with families! This vibrant display successfully drives immediate ticket sales for primary plays." },
+        { t: "Position living statue performers who remain completely motionless for extended durations.", pts: 2, fb: "A traditional artistic element. Passersby enjoy capturing images, though it fails to drive significant box-office conversions." },
+        { t: "Instruct actors to physically capture pedestrians and drag them forcibly into the auditorium.", pts: 1, fb: "You are causing public alarm! This aggressive marketing strategy alienates potential customers and damages public trust." },
+        { t: "Deploy silent mime artists to actively obstruct the public footpaths.", pts: -1, fb: "The public is universally irritated. Confrontational street mimes are completely counterproductive to community engagement." }
+      ]},
+      { q: "Phase 7: Intermission Hospitality", d: "What style of refreshments will you offer during the mid-performance intermission to sustain the creative momentum?", opts: [
+        { t: "Curated Culinary Pairings: Serve specialized chocolates and historical ales matching the play's setting.", pts: 3, fb: "Outstanding attention to detail! The thematic alignment drives exceptional revenue velocity at the hospitality bars." },
+        { t: "Provide standardized processed popcorn and commercial carbonated soft drinks.", pts: 2, fb: "Adequate, though the experience feels more like a generic cinema lobby rather than an upscale theatrical event." },
+        { t: "Offer zero refreshment options: Assert that artistic expression should suffice as nutrition.", pts: 1, fb: "Attendees are fatigued and irritable during the second act. Hospitality revenue metrics are completely flat." },
+        { t: "Serve raw, unpeeled onions to induce involuntary crying during the upcoming tragic scenes.", pts: -1, fb: "The entire auditorium smells awful! The sensory pollution completely undermines the actors' ability to focus." }
+      ]},
+      { q: "Phase 8: Infrastructure Failure", d: "The main electrical grid suffers an absolute blackout right in the middle of the second act!", opts: [
+        { t: "Transition to Candlelight: Instantly deploy 500 wax candles to establish a rustic Gothic aesthetic.", pts: 3, fb: "Visually spectacular! The audience is spellbound, describing the resulting atmosphere as deeply intimate and historic." },
+        { t: "Request that the audience illuminate the stage using their personal mobile phone flashlights.", pts: 2, fb: "Improvised but functional. The crowd embraces the collaborative effort, allowing the production to conclude successfully." },
+        { t: "Instruct the actors to bellow their lines at maximum volume into total darkness.", pts: 1, fb: "The lack of visual engagement causes massive cognitive strain. Guests begin departing the venue within ten minutes." },
+        { t: "Dismiss the audience immediately, advising them to conceptualize the conclusion independently at home.", pts: -1, fb: "You have forfeited your entire box-office revenue. Resolve the infrastructure crisis professionally!" }
+      ]},
+      { q: "Phase 9: Educational Integration", d: "How will you involve the youth demographic of the municipality within the festival framework?", opts: [
+        { t: "Youth Drama Intensives: Allow students to perform a brief showcase prior to the professional curtain-raiser.", pts: 3, fb: "Brilliant! Proud parents fill the auditorium to maximum capacity, driving unprecedented ticket sales." },
+        { t: "Proffer theatrical makeup workshops: Transform children's faces into fantasy monsters.", pts: 2, fb: "The youth are highly entertained, though they spend the evening causing minor disruptions among elderly patrons." },
+        { t: "Utilize the youth as uncompensated janitorial labor to sanitize the stage post-performance.", pts: 1, fb: "This is not an educational workshop; it is simply tedious manual labor. The youth are completely uninspired." },
+        { t: "Restrict access entirely: Declare that dramatic arts are exclusively reserved for sophisticated adults.", pts: -1, fb: "You have alienated the future consumer base of the arts! The Mayor demands an inclusive, family-friendly strategy." }
+      ]},
+      { q: "Phase 10: Critical Reviews", d: "A notoriously severe national theatrical critic is scheduled to evaluate your flagship production. How do you manage their arrival?", opts: [
+        { t: "The Authentic Paradigm: Seat the critic directly amidst the standard public audience.", pts: 3, fb: "The critic praised the raw, authentic energy of the crowd. You have secured a coveted five-star national review!" },
+        { t: "The VIP Protocol: Offer complimentary champagne and isolate them within an exclusive private box.", pts: 2, fb: "They experienced a comfortable evening, but their review notes that the event felt sterile and overly corporate." },
+        { t: "Attempt to influence their objectivity by delivering a substantial cache of untraceable currency.", pts: 1, fb: "They accepted the capital and immediately published an expose denouncing your unethical behavior. A catastrophic ethical crisis!" },
+        { t: "Incarcerate the critic within the subterranean storage facility to prevent publication.", pts: -1, fb: "This constitutes a severe criminal offense! You are facing incarceration, not a prestigious artistic accolade." }
+      ]},
+      { q: "Phase 11: The Concluding Gala", d: "The final evening has arrived. How do you close the festival?", opts: [
+        { t: "The Grand Masked Ball: Instruct all attendees to don elaborate costumes and dance in the square.", pts: 3, fb: "The perfect ending! The town square looked like a scene from a movie." },
+        { t: "Deliver a standardized corporate gratitude announcement from the main stage.", pts: 2, fb: "Professional and polite, though somewhat uninspired compared to the vibrant events of the past week." },
+        { t: "Deliver an exhaustive four-hour monologue detailing your personal management philosophy.", pts: 1, fb: "The audience evaporated within minutes. Your presentation style is remarkably tedious." },
+        { t: "Unleash a colony of 1,000 agitated cats onto the main stage.", pts: -1, fb: "Completely irrational. The performers are injured, and the panicked crowd is stampeding toward the exits." }
+      ]},
+      { q: "Phase 12: Long-Term Infrastructure Strategy", d: "The project has concluded. What is the long-term plan for the local theatrical arts scene?", opts: [
+        { t: "Institutionalize operations: Reinvest profits to establish a permanent municipal performing arts center.", pts: 3, fb: "Superb strategy! The town is now a permanent cultural destination, and you are celebrated as an exceptional visionary." },
+        { t: "Adopt a cautious stance: Postpone expansion until consumer demand can be audited next season.", pts: 2, fb: "Slightly risk-averse. By delaying development, you risk losing the active public momentum generated by the festival." },
+        { t: "Decommission the program: Declare that performing arts are financially unsustainable and complex.", pts: 1, fb: "The regional creative community is deeply discouraged. They are left without a platform for their work." },
+        { t: "Condition development entirely on renaming the entire municipal infrastructure after yourself.", pts: -1, fb: "An egregious display of narcissism. The Mayor is actively seeking a far more community-minded administrator." }
+      ]}
+    ],
+    emergencies: {
+      5: { q: "🚨 STRUCTURAL PLATFORM COLLAPSE!", d: "The primary timber stage has fractured under the structural load of a twenty-person choreography ensemble!", opts: [
+        { t: "Pivot the performance directly onto the surrounding lawns, rebranding it as organic 'Eco-Theatre'.", fail: false, fb: "The audience is captivated by the intense intimacy of the setting! Your rapid adaptability saves the production.", pts: 2 },
+        { t: "Order the ensemble to persist with their routines on the compromised wooden platform.", fail: true, fb: "Multiple performers fall through the stage, sustaining severe injuries. The organization faces crippling lawsuits. GAME OVER.", pts: 0 },
+        { t: "Requisition the Mayor's executive desk to serve as an improvised miniature stage.", fail: false, fb: "The Mayor is visibly annoyed by the misuse of public property, but the show continues. It is spatially restrictive but functional.", pts: 1 }
+      ]},
+      11: { q: "🚨 PRIMARY ACTOR INTOXICATION!", d: "The lead star has celebrated prematurely and is currently incapable of maintaining balance on stage!", opts: [
+        { t: "Confine the actor to a wheelchair, adjusting the script to indicate the character sustained an injury.", fail: false, fb: "The audience praises the creative choice, interpreting it as a brilliant post-modern recontextualization. Crisis averted!", pts: 2 },
+        { t: "Permit the incapacitated actor to proceed with the live performance, hoping for optimal results.", fail: true, fb: "They forgot their monologues and fell into the orchestra pit. The performance is a public humiliation. GAME OVER.", pts: 0 },
+        { t: "Step onto the stage personally and read the script lines openly from a reference manual.", fail: false, fb: "Your dramatic execution lacks professional polish, but the public deeply respects your determination to ensure the show proceeds.", pts: 1 }
+      ]}
+    }
+  },
+  art: {
+    scenarios: [
+      { q: "Phase 1: Curation Strategy", d: "Should you anchor your exhibition around a celebrated local landscape painter or a highly controversial avant-garde sculptor?", opts: [
+        { t: "The Traditional Painter: Emphasize the regional history and geographical beauty of the valley.", pts: 3, fb: "The local populace experiences immense pride, and arriving tourists appreciate the authentic regional narrative." },
+        { t: "The Controversial Sculptor: Maximize public discourse by introducing an eccentric modern installation.", pts: 2, fb: "National cultural journalists arrive to analyze the 'Giant Metallic Banana'. It is polarizing, but highly publicized." },
+        { t: "Dedicate the central gallery wall entirely to completely blank sheets of white paper.", pts: 1, fb: "Artistic purists labeled the display 'confrontational', but everyday patrons conclude you simply neglected to install the art." },
+        { t: "Display elementary drawings manufactured exclusively by your three-year-old relative.", pts: -1, fb: "This fails to meet the criteria for an elite public art exhibition. The Mayor is visibly disappointed in your curation." }
+      ]},
+      { q: "Phase 2: Urban Spatial Allocation", d: "Where will you authorize the creation of the high-profile public street murals?", opts: [
+        { t: "The Brutalist Concrete Surfaces of the Industrial Manufacturing District.", pts: 3, fb: "Magnificent urban revitalization! You have converted a sterile zone into a premier tourist corridor. The Mural Walk is a massive success." },
+        { t: "The Central Commercial Square: Deploy temporary wooden display partitions.", pts: 2, fb: "The location commands high foot traffic, but the temporary installations lack the raw authenticity of genuine urban street art." },
+        { t: "The Public Sidewalks: Utilize water-soluble chalk mediums that dissolve during rain events.", pts: 1, fb: "The visual aesthetic was superb for an hour, but a sudden shower converted your premium exhibition into an unorganized puddle." },
+        { t: "The Mayor's Private Residence: Execute the graffiti art without securing prior authorization.", pts: -1, fb: "The Mayor has initiated police intervention. Visual expression is only classified as public art when it is fully authorized!" }
+      ]},
+      { q: "Phase 3: Luminescent Calibration", d: "The interior exhibition gallery feels excessively dim and uninviting. How do you resolve this?", opts: [
+        { t: "Install individual, adjustable professional halogen spotlights for each artwork.", pts: 3, fb: "The presentation is flawless. The color profiles are optimized, establishing a high-end commercial gallery atmosphere." },
+        { t: "Unseal all architectural windows to rely exclusively on ambient natural daylight.", pts: 2, fb: "Visually pleasant during peak hours, but you are forced to terminate gallery operations at 4 PM due to declining light." },
+        { t: "Equip every entering patron with a single wax candle to illuminate their path.", pts: 1, fb: "Atmospheric and romantic, but guests are consistently damaging valuable canvases with hot wax drippings." },
+        { t: "Instruct visitors to utilize their creative imagination inside the absolute darkness.", pts: -1, fb: "Attendees cannot visually perceive the exhibits! They are exiting the venue in frustration and demanding immediate refunds." }
+      ]},
+      { q: "Phase 4: Interpretive Education", d: "How will you educate the general public regarding the abstract conceptual art on display?", opts: [
+        { t: "Symphonic Artist Monologues: Schedule live panels where the creators explain their creative processes.", pts: 3, fb: "Patrons profoundly appreciate learning the underlying narratives, significantly elevating the perceived value of the collection." },
+        { t: "Broadcast an instructional documentary video detailing basic painting techniques on a digital screen.", pts: 2, fb: "Moderately educational, though critics note that consumers could easily access identical content on digital platforms at home." },
+        { t: "Provide an unindexed manual of technical art history facts at the main entrance.", pts: 1, fb: "Zero engagement recorded. Patrons simply utilized the heavy literature as improvised fans because the ventilation was poor." },
+        { t: "Adopt an elitist posture: Tell confused patrons that intellectual deficiency prevents their understanding.", pts: -1, fb: "This is remarkably condescending! Your responsibility is to cultivate public engagement, not insult your demographic." }
+      ]},
+      { q: "Phase 5: Audience Engagement", d: "The festival doors are open! How will you actively involve attendees within the creative framework?", opts: [
+        { t: "The Collaborative Canvas: Invite every participant to contribute a singular brushstroke to a shared mural.", pts: 3, fb: "Superb execution! By the closing weekend, the municipality possesses a monument manufactured collectively by 1,000 citizens." },
+        { t: "Interactive Ceramic Workshops: Allow patrons to manufacture personal earthenware vessels.", pts: 2, fb: "Highly popular. Attendees value the opportunity to depart with a tangible, personalized memento they created independently." },
+        { t: "Request that patrons stand entirely motionless for sixty minutes to simulate static statues.", pts: 1, fb: "Widespread disinterest. Guests mobilized to observe professional artwork, not to endure physical discomfort and boredom." },
+        { t: "Provide every attendee with a high-capacity paint bucket and instruct them to vandalize the town.", pts: -1, fb: "The entire municipality is covered in chaotic paint! The municipal cleanup invoice will require millions from public funds." }
+      ]},
+      { q: "Phase 6: The Monumental Mural", d: "A prestigious international artist proposes painting a post-modern mural onto the facade of the historic church.", opts: [
+        { t: "Negotiate alternative geography: Suggest the municipal Town Hall facade instead.", pts: 3, fb: "The Town Hall looks stunning, and you successfully avoided an intensive cultural conflict with the traditional parish council." },
+        { t: "Authorize the proposal: Allow the artist to modify the historic religious structure unconditionally.", pts: 2, fb: "The artwork is objectively spectacular, but half the local community is deeply insulted by the alteration of a heritage site." },
+        { t: "Reject the application outright: Order the international artist to vacate the municipality.", pts: 1, fb: "You forfeited a prime opportunity to secure a world-class cultural landmark. The town remains aesthetically uninspired." },
+        { t: "Authorize the artist to apply their chemical paints directly onto the local domestic canine population.", pts: -1, fb: "The animals are colorful, but their owners are absolutely outraged. This is an egregious violation of basic ethical standards." }
+      ]},
+      { q: "Phase 7: Gallery Hospitality", d: "What style of catering will you execute for the exclusive opening night vernissage this evening?", opts: [
+        { t: "Edible Art Concepts: Serve conceptual appetizers designed to mimic iconic historical masterpieces.", pts: 3, fb: "The creative confectionery is a viral sensation on digital networks, generating exceptional organic publicity for your campaign." },
+        { t: "Premium Wine and Cheese Pairing: Execute the traditional, sophisticated gallery standard.", pts: 2, fb: "Highly professional and universally expected. Patrons enjoy a comfortable evening and feel a sense of elite status." },
+        { t: "Provide low-cost industrial hot dogs and generic carbonated sodas.", pts: 1, fb: "The hospitality completely undermines the upscale tone of the exhibition. The ambient atmosphere feels remarkably cheap." },
+        { t: "Serve industrial paint solvent under the pretense that its aroma evokes creative inspiration.", pts: -1, fb: "That substance is highly toxic! You are endangering the lives of your prestigious guests. Cease operations immediately." }
+      ]},
+      { q: "Phase 8: Acoustic Curation", d: "What style of auditory accompaniment will you schedule within the outdoor sculpture garden?", opts: [
+        { t: "A solo classical cellist: Maintain a serene, contemplative, and sophisticated environment.", pts: 3, fb: "Flawless curation. The peaceful music permits deep intellectual reflection, allowing guests to analyze the art undisturbed." },
+        { t: "Ambient Environmental Soundscapes: Broadcast loops of natural birdsong and gentle precipitation.", pts: 2, fb: "Slightly unusual, but it successfully relaxes the crowd, though a few guests mistakenly check the roof for structural leaks." },
+        { t: "A high-decibel contemporary rock ensemble performance.", pts: 1, fb: "The intense volume prevents intellectual focus. The garden should serve as a space for thought, not a rock concert." },
+        { t: "Broadcast the acoustic recording of an active chainsaw on a continuous loop.", pts: -1, fb: "This does not constitute art; it is simply a severe auditory assault. The terrified crowd is evacuating the garden immediately." }
+      ]},
+      { q: "Phase 9: Atmospheric Risk Mitigation", d: "The outdoor sculpture park is suddenly subjected to high-velocity gale winds!", opts: [
+        { t: "Secure the fragile structural installations immediately using heavy sandbags and specialized cables.", pts: 3, fb: "Exceptional proactive management. The collection remains undamaged, and operations resume seamlessly once the storm clears." },
+        { t: "Evacuate the smaller displays to the interior gallery and terminate access to the garden sector.", pts: 2, fb: "A safe, responsible decision. You sustained a minor decline in consumer volume, but you successfully protected the inventory." },
+        { t: "Take no action: Assert that the destructive weather adds an organic element of chaos to the artwork.", pts: 1, fb: "A premium statue valued at $10,000 toppled over and shattered completely. The independent creator is legally distraught." },
+        { t: "Attempt to neutralize the storm by operating an industrial electric fan against the oncoming wind.", pts: -1, fb: "Basic laws of physics render this completely useless. You have wasted electricity and compromised your professional credibility." }
+      ]},
+      { q: "Phase 10: Revenue Generation", d: "How will the cultural campaign generate capital to offset its substantial operational overheads?", opts: [
+        { t: "A High-Profile Charity Auction: Liquidate donated works to fund the local youth educational infrastructure.", pts: 3, fb: "Brilliant! You raise $50,000 in liquid capital, and the community celebrates your commitment to public development." },
+        { t: "Establish an upscale retail gift shop specializing in high-quality prints and archival postcards.", pts: 2, fb: "A reliable, steady revenue stream. The vast majority of visitors purchase a souvenir print to commemorate their experience." },
+        { t: "Implement a mandatory entry tariff of $100 per person to access the building.", pts: 1, fb: "The main gallery is entirely vacant. Creative expression must remain accessible to the community, not restricted to the elite." },
+        { t: "Exfiltrate the exhibited masterpieces illegally and liquidate them on the international black market.", pts: -1, fb: "You have crossed into severe criminal enterprise! Federal law enforcement has assumed management of your venue." }
+      ]},
+      { q: "Phase 11: The Atmospheric Projection", d: "How will you conclude the municipal Art Week with an unforgettable artistic milestone?", opts: [
+        { t: "A High-Tech Projection Mapping Show: Transform the historic architecture into moving digital canvases.", pts: 3, fb: "Absolutely magnificent! The entire town center is glowing with light, securing unprecedented national media acclaim." },
+        { t: "Coordinate a traditional awards ceremony recognizing the 'Most Outstanding Independent Creator'.", pts: 2, fb: "Polite and professional. The recipient expresses profound gratitude, and local residents cheer the recognition of talent." },
+        { t: "Deliver an extensive monologue detailing your personal aesthetic preferences in art.", pts: 1, fb: "You spoke continuously for an hour. Attendees consistently checked their chronometers and slipped out the back exits." },
+        { t: "Incinerate the entire collection of exhibited artwork in a massive public bonfire.", pts: -1, fb: "An egregious cultural atrocity! The creative community is profoundly horrified, and the town is left in absolute shock." }
+      ]},
+      { q: "Phase 12: Long-Term Infrastructure Strategy", d: "The project has concluded. What is the long-term plan for the local theatrical arts scene?", opts: [
+        { t: "Permanent Theatre: Use the profits to build a local stage.", pts: 3, fb: "Excellent! The town is now a permanent cultural destination. You are a hero!" },
+        { t: "Maybe: Let's wait and see if people still like theatre next year.", pts: 2, fb: "A bit cautious. You might miss the chance to grow while the 'hype' is high." },
+        { t: "No: Theatre is too messy and expensive.", pts: 1, fb: "The local actors are disappointed. They wanted a home for their work." },
+        { t: "Only if the theatre is dedicated to you.", pts: -1, fb: "You are very arrogant. The Mayor is looking for a more humble manager." }
+      ]}
+    ],
+    emergencies: {
+      5: { q: "🚨 ARTISANAL HEIST!", d: "A centerpiece masterpiece valued at one million dollars has vanished from the high-security gallery vault!", opts: [
+        { t: "Seal all exit corridors instantly and summon municipal detective units to conduct a forensic sweep.", fail: false, fb: "The perpetrator was intercepted at the perimeter perimeter with the canvas concealed! You saved the festival's integrity.", pts: 2 },
+        { t: "Attempt to paint a counterfeit replica independently prior to the arrival of the patrons.", fail: true, fb: "The original creator immediately identified your crude fabrication, triggering a national media scandal. GAME OVER.", pts: 0 },
+        { t: "Announce a substantial financial reward for its safe return with an absolute 'no questions asked' policy.", fail: false, fb: "The asset was returned anonymously within an hour. An expensive solution, but the high-value asset remains intact.", pts: 1 }
+      ]},
+      11: { q: "🚨 VANDALISM EVENT!", d: "An unidentified individual has applied permanent spray paint to modify the central public sculpture!", opts: [
+        { t: "Rebrand the modification publicly as a 'Spontaneous Contemporary Social Commentary'.", fail: false, fb: "The public praises your progressive interpretation, converting a malicious act into a curation triumph! Brilliant.", pts: 2 },
+        { t: "Apply high-concentration industrial corrosive chemicals to strip the paint from the surface.", fail: true, fb: "The volatile chemicals melted the structural polymer of the sculpture, reducing it to a liquid puddle. GAME OVER.", pts: 0 },
+        { t: "Station an unguided security asset directly in front of the damage to block public visibility.", fail: false, fb: "Somewhat awkward visual arrangement, but it successfully prevents mainstream attendees from witnessing the defacement.", pts: 1 }
+      ]}
+    }
+  },
+  history: {
+    scenarios: [
+      { q: "Phase 1: Historical Epoch Selection", d: "Should your campaign center around the dramatic Medieval Era or the innovation of the Victorian Industrial Age?", opts: [
+        { t: "Medieval Tournaments: Leverage the universal appeal of ancient fortresses and armored combat.", pts: 3, fb: "The live jousting competition is an absolute commercial triumph! Thousands of families cross regional borders to attend." },
+        { t: "The Victorian Industrial Age: Focus on early steam machinery and localized technical innovations.", pts: 2, fb: "The niche 'Steampunk' subculture embraces the theme completely, cultivating a highly unique visual aesthetic.", pts: 1 },
+        { t: "The Paleolithic Era: Present a minimalist concept where actors don fur wraps and strike stones.", pts: 1, fb: "The execution proved remarkably tedious. There are severe limits to how much public engagement a stone can generate." },
+        { t: "The Far Future Century: Introduce a concepts that have not historically occurred yet.", pts: -1, fb: "This simulation is strictly restricted to historical preservation! You are in the incorrect century. The Mayor is baffled." }
+      ]},
+      { q: "Phase 2: Battlefield Geography Scouting", d: "Where will you schedule the large-scale military battle re-enactment performance?", opts: [
+        { t: "The Historical Castle Meadow: A highly authentic, spacious, and logistically sound outdoor terrain.", pts: 3, fb: "Flawless spatial management! The spectacle of 100 tactical knights charging across the plains is absolutely unforgettable." },
+        { t: "The Central Public Square: Position the combat directly within the primary commercial district.", pts: 2, fb: "Highly dramatic, though multiple commercial storefront windows were unfortunately shattered by erratic archery projectiles." },
+        { t: "The Municipal Library Archive: Maintain a quiet, highly disciplined academic environment.", pts: 1, fb: "You cannot execute a medieval cavalry clash inside an archive! The head librarian is actively censuring your soldiers." },
+        { t: "The Interior Corridors of the Active Multi-lane National Highway.", pts: -1, fb: "This is an egregiously dangerous violation of basic safety laws! Law enforcement has halted combat and placed you under arrest." }
+      ]},
+      { q: "Phase 3: Wardrobe Logistics Failure", d: "The professional period costumes have failed to arrive on schedule! How do you salvage the opening ceremony?", opts: [
+        { t: "Improvise Bed-Sheet Togas: Pivot the theme instantly to proclaim an unannounced 'Ancient Roman Epoch'.", pts: 3, fb: "Superb managerial agility! You modified the entire conceptual theme within sixty minutes, and the public loved the novelty." },
+        { t: "Request that the local populace assemble wearing their oldest personal apparel to create a grassroots aesthetic.", pts: 2, fb: "The visual style is somewhat unorganized, but it establishes an authentic community-driven 'folk history' atmosphere." },
+        { t: "Order the performers to execute the historical pageantry exclusively in their undergarments.", pts: 1, fb: "The audience is visibly uncomfortable. This is entirely detached from the educational standard consumers paid to witness." },
+        { t: "Abandon your operational responsibilities and conceal yourself within the ancient castle moat.", pts: -1, fb: "You are the executive director! Your responsibility is to resolve operational crises, not hide from administrative pressure." }
+      ]},
+      { q: "Phase 4: Dignitary Invitations", d: "Which high-profile individual will you secure to officially inaugurate the festival to maximize public prestige?", opts: [
+        { t: "The oldest resident of the municipality: Leverage their genuine living memories of the region's development.", pts: 3, fb: "Deeply moving. Their authentic presentation regarding the town's evolution brings a profound emotional resonance to the crowd." },
+        { t: "A distinguished university history professor specialized in regional socio-economics.", pts: 2, fb: "Highly educational, though the lecture was remarkably dense. Younger demographics began shifting their attention to mobile apps." },
+        { t: "An individual outfitted in a massive, unindexed giant poultry mascot costume.", pts: 1, fb: "Entirely irrelevant. Giant commercial chickens were notably absent from 14th-century records. The choice was simply bizarre." },
+        { t: "The 'Apparition of the Sovereign': Employ a hidden staff member to speak behind a heavy curtain.", pts: -1, fb: "The presentation failed to convince anyone. Attendees simply assumed your audio infrastructure was malfunctioning." }
+      ]},
+      { q: "Phase 5: Market Square Ambience", d: "The historical market is fully operational. What style of acoustic curation will accompany peak trading hours?", opts: [
+        { t: "A solo lute performer: Instruct them to navigate the crowds performing traditional melodies.", pts: 3, fb: "Flawless choices. The gentle acoustic layer successfully transforms the commercial market into an authentic historic village." },
+        { t: "A traditional bagpipe ensemble: Execute high-volume, traditional military marches.", pts: 2, fb: "Highly energetic! However, the extreme decibels prevent vendors from communicating prices, causing a minor drop in transactions." },
+        { t: "A high-intensity electronic techno remix of ancient classical compositions.", pts: 1, fb: "Younger demographics embraced the energy, but traditional historical purists criticized the choice as a complete disaster." },
+        { t: "Enforce absolute public silence to represent the bleak realities of the 'Dark Ages'.", pts: -1, fb: "This is a commercial market festival, not a solemn monastery! Activate your audio infrastructure immediately." }
+      ]},
+      { q: "Phase 6: Banqueting Gastronomy", d: "What menu profile will you authorize for the premium 'Sovereign's Banqueting Gala' this evening?", opts: [
+        { t: "Rustic Roast Meats and Artisanal Breads: Served exclusively on heavy timber platters.", pts: 3, fb: "The immersive atmosphere is exceptional! Patrons genuinely feel they have traveled across centuries to dine." },
+        { t: "Modern Commercial Pizza: Rebrand the item textually as 'Medieval Heritage Flatbread'.", pts: 2, fb: "Consumers easily identified the modern fast food, but they accommodated the gimmick because the flavor was outstanding." },
+        { t: "Serve zero food allocations: Assert that historical famines must be simulated for absolute authenticity.", pts: 1, fb: "Your contemporary guests are starving right now. They are rapidly exiting the venue to locate modern fast-food outlets." },
+        { t: "Serve decomposed cabbage layers to provide an absolute gritty representation of historical poverty.", pts: -1, fb: "The banqueting hall smells precisely like a waste processing facility. Widespread consumer outrage recorded." }
+      ]},
+      { q: "Phase 7: Youth Educational Integration", d: "How will you communicate historical data to the youth demographic in an engaging manner?", opts: [
+        { t: "Interactive Archery Clinics: Deploy certified instructors using specialized safety bows.", pts: 3, fb: "The premier attraction of the festival! Every child is eager to simulate Robin Hood, generating immense family satisfaction." },
+        { t: "Calligraphy Masterclasses: Instruct youth to utilize traditional feather quills and inkwells.", pts: 2, fb: "A refined, quiet educational activity. Parents profoundly appreciate the sophisticated parchment art brought home." },
+        { t: "An intensive, three-hour academic lecture parsing 'Medieval Property and Tax Law Jurisprudence'.", pts: 1, fb: "The entire youth audience is completely unconscious. Even your hired educational instructor has fallen asleep." },
+        { t: "Compel the youth to physically clean the narrow, soot-choked chimneys of the old estate.", pts: -1, fb: "This constitutes child labor! The industrial practices of the 19th century are illegal. Terminate this program immediately." }
+      ]},
+      { q: "Phase 8: The Discovered Artifact", d: "A local agriculturalist unearths a corroded iron object (actually a discarded metal pipe). How do you display it?", opts: [
+        { t: "Label the item as an 'Unidentified Tool of the Period' within a secure museum archive case.", pts: 3, fb: "Highly professional and ethically sound. Patrons thoroughly enjoy debating the hypothetical utility of the object." },
+        { t: "Publicly declare the object to be the personal, verified combat sword of the ancient king.", pts: 2, fb: "The youth are captivated, but visiting academic historians are openly mocking your fraudulent museum curation." },
+        { t: "Utilize the corroded iron pipe as an improvised stirring instrument for the banquet soup.", pts: 1, fb: "An absolute violation of basic sanitation standards. The municipal health inspector has issued a severe warning." },
+        { t: "Attempt to export the artifact to the British Museum demanding a luxury premium fee of $1 million.", pts: -1, fb: "Curators verified the item is a component of a 1995 Ford Fiesta. You have compromised your professional credibility." }
+      ]},
+      { q: "Phase 9: Extreme Thermal Crisis", d: "An intense summer heatwave strikes the venue! Your armored performers are visibly suffering inside their metal suits.", opts: [
+        { t: "Reduce combat durations significantly and establish complimentary hydration networks across the site.", pts: 3, fb: "Superb crisis management. You protect your workforce while ensuring spectators remain comfortable and hydrated." },
+        { t: "Order the performers to strip off their historical armor and engage in combat wearing modern t-shirts.", pts: 2, fb: "The visual authenticity looks somewhat absurd, but it successfully mitigates the immediate risk of thermal collapse." },
+        { t: "Inform your workforce that royal decrees command them to endure physical suffering without complaint.", pts: 1, fb: "Two performers have been hospitalized with severe heat stroke. The Mayor is investigating your operational neglect." },
+        { t: "Attempt to freeze the entire castle moat to cool the surrounding regional air column.", pts: -1, fb: "Thermodynamics render this impossible. You have completely depleted the municipality's commercial ice reserves for nothing." }
+      ]},
+      { q: "Phase 10: Souvenir Commercialization", d: "The historical trade stalls are preparing to close. What product will you prioritize for final sales?", opts: [
+        { t: "Handmade timber shields embellished with the verified municipal coat of arms.", pts: 3, fb: "Complete inventory liquidation! Children throughout the municipality are displaying your brand, optimizing organic marketing." },
+        { t: "Publish an anthology book compiling hyper-local folklore, myths, and historical ghost stories.", pts: 2, fb: "An outstanding high-margin souvenir. Consumers read the literature at home, ensuring long-term brand retention." },
+        { t: "Import mass-manufactured synthetic knight helmets fabricated from low-grade components.", pts: 1, fb: "The items fractured within minutes of utility. Consumers conclude they have wasted their capital on garbage." },
+        { t: "Package standard topsoil from the castle courtyard and attempt to market it as 'Premium Historic Dirt'.", pts: -1, fb: "You are attempting to monetize basic dirt once again. Your commercial strategy is completely uninspired." }
+      ]},
+      { q: "Phase 11: The Historic Procession", d: "How will you coordinate the closing ceremony to conclude History Week spectacularly?", opts: [
+        { t: "A Dramatic Torchlight Procession ascending the contours of the historic castle hill.", pts: 3, fb: "Absolutely mesmerizing! The synchronized line of fire resembles a premium cinematic sequence, driving massive digital reach." },
+        { t: "Stage a chronological historical fashion review tracing apparel evolution across ten centuries.", pts: 2, fb: "Highly sophisticated and educational. The crowd appreciates the performance, and local designers receive recognition." },
+        { t: "Deliver an intensive monologue detailing your personal knowledge of chronological historical dates.", pts: 1, fb: "You misstated multiple foundational dates, and a local educator corrected your errors publicly. Quite embarrassing." },
+        { t: "Orchestrate an authentic, legally binding historical witch trial targeting local citizens.", pts: -1, fb: "This is the 21st century! Civil rights laws strictly prohibit this behavior. Legal authorities are approaching your position." }
+      ]},
+      { q: "Phase 12: Macroeconomic Legacy Strategy", d: "The project has concluded. What is your recommendation regarding the permanent timber village infrastructure?", opts: [
+        { t: "Preserve the installation permanently as a working 'Living History Museum' employing local guides.", pts: 3, fb: "Outstanding strategic vision! You have secured a year-round tourism asset and generated 20 sustainable local jobs." },
+        { t: "Deconstruct the timber village instantly and liquidate the raw lumber material to local contractors.", pts: 2, fb: "You generated short-term capital recovery, but the venue reverts to a sterile, boring public space." },
+        { t: "Abandon the timber infrastructure completely to decompose naturally under seasonal rainfall patterns.", pts: 1, fb: "The abandoned site has become an eyesore. Adjacent homeowners are filing formal complaints regarding property devaluation." },
+        { t: "Incinerate the entire timber village to theatrically simulate the 'Great Historic Fire' of the town.", pts: -1, fb: "You have systematically destroyed $50,000 of valuable municipal property! Your management contract is terminated immediately." }
+      ]}
+    ],
+    emergencies: {
+      5: { q: "🚨 EQUINE ESCAPE!", d: "The tournament horses have breached their containment fencing and are currently stampeding through the local supermarket aisle!", opts: [
+        { t: "Utilize fresh carrots to calmly guide the animals back to their designated pasture fields.", fail: false, fb: "The animals cooperated perfectly, preventing any physical injuries. The drone video has gone viral globally!", pts: 2 },
+        { t: "Attempt to rope the stampeding animals independently using an improvised lasso tool.", fail: false, fb: "You missed the target, but your movements distracted the animals long enough for professional handlers to secure them.", pts: 1 },
+        { t: "Lock the supermarket main doors and rebrand the incident as an immersive 'Socio-Agricultural Exhibit'.", fail: true, fb: "The panicked animals destroyed thousands of dollars of commercial inventory. The corporate brand is suing the municipality. GAME OVER.", pts: 0 }
+      ]},
+      11: { q: "🚨 SUBTERRANEAN ANOMALY!", d: "Widespread panic emerges as guests claim a ghost is haunting the dungeon! (It is actually a fractured steam line).", opts: [
+        { t: "Repair the technical valve instantly and announce that the paranormal entity has been successfully vanquished.", fail: false, fb: "The public embraces the narrative, and the subterranean facility is verified safe. Exceptional crisis mitigation.", pts: 2 },
+        { t: "Implement an emergency auxiliary tariff, charging guests an extra $10 to experience the 'Haunted Dungeon'.", fail: false, fb: "You generated short-term revenue, but the high-pressure steam line subsequently ruptured, minorly injuring a guest. High-risk management.", pts: 1 },
+        { t: "Flee the venue screaming at the public that the ancient castle is subject to a malevolent curse.", fail: true, fb: "Your unprofessional panic triggered a severe crowd stampede. Multiple patrons were injured at the exit corridors. GAME OVER.", pts: 0 }
+      ]}
+    }
+  }
+};
+
+let state = {
+  fest: null,
+  score: 0,
+  step: 0,
+  activeOptions: [],
+  answered: false
+};
+
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+function startWith(f) {
+  state.fest = f;
+  document.getElementById('fest-screen').classList.remove('active');
+  document.getElementById('game-screen').classList.add('active');
+  updateTally();
+  loadStep();
+}
+
+function updateTally() {
+  const el = document.getElementById('cur-score');
+  el.innerHTML = `${state.score} ${state.fest.emoji}`;
+}
+
+function loadStep() {
+  state.answered = false;
+  document.getElementById('fb-box').style.display = 'none';
+  document.getElementById('gameover-btn-el').style.display = 'none';
+  document.getElementById('next-btn-el').style.display = 'block';
+  
+  let data;
+  const emg = GAME_DATA[state.fest.id].emergencies[state.step];
+  
+  if (emg) {
+    data = emg;
+    document.body.classList.add('emergency-mode');
+  } else {
+    data = GAME_DATA[state.fest.id].scenarios[state.step];
+    document.body.classList.remove('emergency-mode');
+    document.getElementById('cur-step').textContent = `${state.step + 1}/12`;
+  }
+
+  document.getElementById('q-title').textContent = data.q;
+  document.getElementById('q-desc').textContent = data.d;
+  
+  state.activeOptions = [...data.opts];
+  renderOptions();
+}
+
+function renderOptions() {
+  const cont = document.getElementById('options-cont');
+  cont.innerHTML = '';
+  const shuffled = shuffle([...state.activeOptions]);
+
+  shuffled.forEach((o, i) => {
+    const b = document.createElement('button');
+    b.className = 'opt-btn';
+    b.innerHTML = `<span>${String.fromCharCode(65 + i)}</span> ${o.t}`;
+    b.onclick = () => handleChoice(o, b);
+    cont.appendChild(b);
+  });
+}
+
+function handleChoice(o, btn) {
+  if (state.answered) return;
+  const fbBox = document.getElementById('fb-box');
+  const fbText = document.getElementById('fb-text');
+
+  if (o.pts === -1) {
+    state.score = Math.max(0, state.score - 1);
+    updateTally();
+    fbBox.style.display = 'block';
+    fbBox.className = 'feedback fb-retry';
+    fbText.textContent = o.fb;
+    state.activeOptions = state.activeOptions.filter(opt => opt !== o);
+    renderOptions();
+    return;
+  }
+
+  state.answered = true;
+  if (o.fail) {
+    fbBox.style.display = 'block';
+    fbBox.className = 'feedback fb-bad';
+    fbText.textContent = o.fb;
+    document.getElementById('next-btn-el').style.display = 'none';
+    document.getElementById('gameover-btn-el').style.display = 'block';
+  } else {
+    state.score += (o.pts || 0);
+    updateTally();
+    fbBox.style.display = 'block';
+    fbBox.className = 'feedback fb-good';
+    fbText.textContent = o.fb;
+  }
+  
+  document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+}
+
+function nextStep() {
+  state.step++;
+  if (state.step >= 12) {
+    showWin();
+  } else {
+    loadStep();
+  }
+}
+
+function showWin() {
+  document.getElementById('game-screen').classList.remove('active');
+  document.getElementById('win-screen').classList.add('active');
+  document.getElementById('fest-title-final').textContent = state.fest.title;
+  
+  const desc = document.getElementById('w-desc');
+  const title = document.getElementById('w-title');
+  const emoji = document.getElementById('final-emoji-display');
+
+  if (state.score >= 30) {
+    emoji.textContent = "🏆";
+    title.textContent = "An Unmitigated Global Success!";
+    desc.textContent = "Your administrative campaign was an absolute masterpiece of strategic planning and fiscal execution! By prioritizing premium, sustainable solutions, you have successfully secured the municipality's economic prosperity for the next decade. The Mayor is absolutely delighted, and international tourists are already reserving accommodations for next year's event.";
+  } else if (state.score >= 15) {
+    emoji.textContent = "🌟";
+    title.textContent = "A Commendable Regional Event";
+    desc.textContent = "Outstanding execution! The festival was exceptionally well-received by local residents and provided a significant boost to the town's public brand. While several decisions were somewhat risk-averse, you navigated operational emergencies with immense grace and preserved public safety. With an expanded capital allocation next season, your campaign could easily go global!";
+  } else {
+    emoji.textContent = "📈";
+    title.textContent = "Substantial Room for Optimization";
+    desc.textContent = "The event successfully concluded without a catastrophic operational failure, but the town's macro reputation has failed to grow significantly. Multiple low-quality compromises left arriving visitors feeling thoroughly underwhelmed. Devote time to analyzing contemporary event management principles and launch an alternative theme next season.";
+  }
+}
+
+function restartGame() {
+  state = { fest: null, score: 0, step: 0, activeOptions: [], answered: false };
+  document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+  document.getElementById('fest-screen').classList.add('active');
+}
+
+function init() {
+  const cont = document.getElementById('fest-choices');
+  FESTIVALS.forEach(f => {
+    const div = document.createElement('div');
+    div.className = 'fest-opt';
+    div.innerHTML = `<span class="icon">${f.icon}</span><h3>${f.title}</h3>`;
+    div.onclick = () => startWith(f);
+    cont.appendChild(div);
+  });
+}
+
+window.onload = init;
+</script>
+
+</body>
+</html>

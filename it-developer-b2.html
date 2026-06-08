@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deployment Day — English for Developers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0F1115; --surface:#1A1D23; --surface2:#252932; --surface3:#2E3440;
+  --ink:#FFFFFF; --ink2:#A0AEC0; --ink3:#718096;
+  --line:rgba(255,255,255,0.1); --accent:#7C3AED; --accent2:#6D28D9;
+  --green-bg:#1C3025;--green-bd:#48BB78;--green-tx:#9AE6B4;
+  --amber-bg:#2D2816;--amber-bd:#D69E2E;--amber-tx:#F6E05E;
+  --red-bg:#2D1B1B;--red-bd:#E53E3E;--red-tx:#FEB2B2;
+  --r:12px; --rs:8px; --shadow:0 4px 20px rgba(0,0,0,0.4);
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);line-height:1.6;display:flex;flex-direction:column;align-items:center;padding:2rem 1rem;}
+.shell{width:100%;max-width:680px;}
+
+/* INTRO */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:2.5rem;box-shadow:var(--shadow);}
+h1{font-size:32px;font-weight:500;margin-bottom:1rem;letter-spacing:-0.02em;}
+.intro-text{color:var(--ink2);margin-bottom:2rem;font-size:16px;}
+.btn-start{background:var(--accent);color:#fff;border:none;padding:1rem 2rem;border-radius:var(--rs);font-size:16px;font-weight:500;cursor:pointer;transition:0.2s;}
+.btn-start:hover{background:var(--accent2);transform:translateY(-2px);}
+
+/* GAME */
+.game-ui{display:none;width:100%;}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;padding:0 0.5rem;}
+.score-box{font-family:'DM Mono',monospace;background:var(--surface2);padding:0.5rem 1rem;border-radius:20px;border:1px solid var(--line);font-size:14px;}
+.step-indicator{color:var(--ink3);font-size:12px;text-transform:uppercase;letter-spacing:0.1em;}
+
+.scenario-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:2rem;margin-bottom:1.5rem;box-shadow:var(--shadow);}
+.emergency-tag{display:inline-block;background:var(--red-bg);color:var(--red-tx);border:1px solid var(--red-bd);padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;margin-bottom:1rem;text-transform:uppercase;}
+.scenario-text{font-size:17px;margin-bottom:1.5rem;}
+.vocab-box{background:var(--surface2);padding:1rem;border-radius:var(--rs);margin-bottom:1.5rem;font-size:13px;border-left:3px solid var(--accent);}
+.vocab-box b{color:var(--accent);margin-right:5px;}
+
+.options{display:grid;gap:12px;}
+.opt-btn{background:var(--surface2);border:1px solid var(--line);color:var(--ink);padding:1.25rem;border-radius:var(--rs);text-align:left;cursor:pointer;font-size:15px;transition:0.2s;display:flex;justify-content:space-between;align-items:center;}
+.opt-btn:hover:not(:disabled){background:var(--surface3);border-color:var(--ink3);}
+.opt-btn:disabled{cursor:default;opacity:0.7;}
+
+.feedback{margin-top:1.5rem;padding:1.5rem;border-radius:var(--rs);display:none;animation:fadeIn 0.3s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.fb-good{background:var(--green-bg);border:1px solid var(--green-bd);color:var(--green-tx);}
+.fb-mid{background:var(--amber-bg);border:1px solid var(--amber-bd);color:var(--amber-tx);}
+.fb-bad{background:var(--red-bg);border:1px solid var(--red-bd);color:var(--red-tx);}
+
+.next-btn{margin-top:1.5rem;background:var(--ink);color:var(--bg);border:none;padding:1rem 2rem;border-radius:var(--rs);font-weight:600;cursor:pointer;display:none;width:100%;}
+
+/* FINAL */
+.final-card{display:none;text-align:center;}
+.final-score{font-size:64px;font-family:'DM Mono',monospace;margin:1rem 0;}
+</style>
+</head>
+<body>
+
+<div class="shell" id="intro">
+  <div class="card">
+    <h1>Deployment Day</h1>
+    <p class="intro-text">You are the Engineering Product Manager for a major enterprise SaaS platform. Today is the rollout of a massive structural update. The api gateways are melting, corporate clients are flooding the support desks, and the executive leadership team is watching closely. Your choices will determine if this deployment is a textbook success or a catastrophic outage.</p>
+    <button class="btn-start" onclick="startGame()">Initialize Rollout Sequence</button>
+  </div>
+</div>
+
+<div class="shell game-ui" id="game">
+  <div class="header">
+    <div class="step-indicator" id="step-count">Decision 1 of 8</div>
+    <div class="score-box">Score: <span id="score">0</span></div>
+  </div>
+  
+  <div class="scenario-card">
+    <div id="emergency-tag"></div>
+    <div class="scenario-text" id="scenario-text"></div>
+    <div class="vocab-box" id="vocab-box"></div>
+    <div class="options" id="options"></div>
+    <div class="feedback" id="feedback"></div>
+    <button class="next-btn" id="next-btn" onclick="nextStep()">Continue Shift</button>
+  </div>
+</div>
+
+<div class="shell final-card" id="final">
+  <div class="card">
+    <h1>Deployment Summary</h1>
+    <div class="final-score" id="fin-num">0</div>
+    <h2 id="fin-grade">Rank</h2>
+    <p class="intro-text" id="fin-body"></p>
+    <button class="btn-start" onclick="location.reload()">Reboot Project</button>
+  </div>
+</div>
+
+<script>
+const DECISIONS = [
+  {
+    text: "It's 08:00 AM. 500,000 active instances are attempting to authenticate simultaneously. The authentication microservices are starting to <b>throttle</b>. Your lead devops engineer suggests lifting all rate-limits, but it might overwhelm the primary database cluster.",
+    vocab: "<b>Throttle:</b> To intentionally restrict data throughput or slow down a process to prevent infrastructure collapse.",
+    options: [
+      { t: "Implement an algorithmic queuing and back-off system immediately to pace inbound traffic.", pts: 3, fb: "Correct! Throttling traffic gracefully via a queue mitigates the 'thundering herd' phenomenon and preserves database integrity." },
+      { t: "Lift all rate-limits completely. Allow all connections and hope the architecture auto-scales in time.", pts: 1, fb: "Disaster. The primary database locked up within 3 minutes due to connection pool exhaustion. Total downtime: 2 hours." },
+      { t: "Provision high-compute backup servers manually, even though it significantly breaches budget limits.", pts: 2, fb: "Expensive, but effective. You managed to stay online, but corporate finance is raising serious flags about the sudden 'cloud infrastructure spend'." }
+    ]
+  },
+  {
+    text: "A prominent corporate integration partner discovers a <b>game-breaking exploit</b>—a critical logic flaw in an endpoint that permits unauthorized users to duplicate account balances. It is being actively discussed on public developer forums.",
+    vocab: "<b>Exploit:</b> Exploiting a software bug, vulnerability, or design flaw to execute unauthorized actions or gain illicit access.",
+    options: [
+      { t: "Ship an immediate emergency hotfix and suspend the accounts that leveraged the vulnerability.", pts: 3, fb: "Proactive. You protected data integrity and demonstrated a zero-tolerance policy regarding security compliance." },
+      { t: "Postpone the fix temporarily; deploying the patch would require bringing core production services offline.", pts: 1, fb: "The platform's data integrity is compromised. System state calculations are corrupted, and corporate clients are furious." },
+      { t: "Issue an official technical advisory warning that users exploiting the system flaw will face legal termination.", pts: 2, fb: "A middle ground. It curbed exploitation among corporate users, but substantial damage to the ledger data had already occurred." }
+    ]
+  },
+  {
+    text: "The technical communications lead reports that user community channels are becoming highly <b>toxic</b>. Customers are complaining about the massive 60GB download size of the mandatory local desktop client update.",
+    vocab: "<b>Toxic:</b> Markedly hostile, malicious, or damaging behavior within an user base or online ecosystem.",
+    options: [
+      { t: "Publish an explicit engineering dev blog detailing the structural necessity of the local assets and apologize.", pts: 3, fb: "Transparency fosters client confidence. Professional stakeholders appreciate a well-documented technical explanation." },
+      { t: "Temporarily restrict comment access on the official customer portal until support tickets decrease.", pts: 1, fb: "Censorship backlash! The 'Streisand Effect' triggers, and negative publicity escalates rapidly across public social channels." },
+      { t: "Provide a complimentary premium feature credit to all affected clients as compensation for their patience.", pts: 2, fb: "Financial concessions helped calm corporate accounts, though some system admins viewed it as an attempt to hide structural issues." }
+    ]
+  },
+  {
+    text: "The institutional feedback period has opened. Early enterprise <b>metacritic</b> evaluations and vendor reviews are lower than projected due to performance degradation on older operating systems.",
+    vocab: "<b>Embargo:</b> A contractual agreement prohibiting the publication of specific project or review details until a designated timestamp.",
+    options: [
+      { t: "Announce an immediate 'Optimization Roadmap' scheduled for the next 4-week sprint cycle.", pts: 3, fb: "A strategic roadmap restores investor confidence. You acknowledged the underlying technical debt and formally committed to a resolution." },
+      { t: "Publicly argue with enterprise reviewers on professional forums, insisting they are deploying the app incorrectly.", pts: 1, fb: "PR Nightmare. You have severely damaged the company's brand and become a cautionary tale in software engineering." },
+      { t: "Pivot marketing and enterprise sales teams to target high-tier cloud computing infrastructures exclusively.", pts: 2, fb: "Niche, but safe. You successfully bypassed legacy clients, but alienated a significant sector of your prospective enterprise market." }
+    ]
+  },
+  {
+    text: "An enterprise-tier 'Whale' account (contributing 15% of annual recurring revenue) threatens contract termination unless you immediately restore historical log tables that were <b>corrupted</b> during a regional database synchronization failure.",
+    vocab: "<b>Corrupted:</b> Errors introduced into computer data during storage, processing, or transmission, rendering it unreadable or invalid.",
+    options: [
+      { t: "Assign a senior data engineer to manually rebuild the historical data tables from cold storage backups.", pts: 3, fb: "Excellent SLA fulfillment. You successfully protected your most vital source of recurring enterprise revenue." },
+      { t: "Inform them that automated table restoration is unfeasible and offer platform service credits instead.", pts: 2, fb: "They reluctantly accepted the platform credits, but their projected accounts expansion spend was heavily minimized." },
+      { t: "Instruct them to file a formal technical support ticket and await processing in the standard 48-hour tier queue.", pts: 1, fb: "They terminated their contract entirely. They migrated their full data pipeline and 20,000 corporate seats to a direct competitor." }
+    ]
+  },
+  {
+    text: "The Lead Software Architect is severely <b>burnt out</b>. They have logged a 100-hour work week and just accidentally committed a serious routing syntax error to the production UI branch. They are requesting medical leave.",
+    vocab: "<b>Burnt out:</b> Acute mental and physical exhaustion caused by prolonged stress or excessive work hours.",
+    options: [
+      { t: "Deny the request. 'The global production deployment takes priority over individual circumstances.'", pts: 1, fb: "Cruel management. They resigned from the company entirely the following week. Team morale dropped to an absolute zero." },
+      { t: "Enforce an immediate mandatory stand-down and issue a directive stating 'Team well-being precedes deliverables.'", pts: 3, fb: "Genuine leadership. The engineering division respects your integrity, and you successfully mitigated systemic 'crunch culture'." },
+      { t: "Authorize them to take a 4-hour rest period in the building breakroom before returning to fix the code deployment.", pts: 2, fb: "A temporary mitigation strategy. The immediate fix was pushed, but you are merely postponing an inevitable staffing crisis." }
+    ]
+  },
+  {
+    text: "CRITICAL ALERT: A disgruntled former developer has uploaded the repository's entire proprietary <b>Source Code</b> to a public public file-sharing site.",
+    vocab: "<b>Source Code:</b> The fundamental, human-readable structural instructions written by a programmer that compile into executable software.",
+    options: [
+      { t: "Call the legal team to issue DMCA 'Takedowns' and contact the police.", pts: 0, fb: "Correct. This is a severe intellectual property breach and cybercrime issue, not a standard system optimization bug." },
+      { t: "Try to 'buy back' the code from the leaker using Bitcoin.", pts: 0, fb: "Never negotiate with malicious actors. You lose corporate capital, and the security breach remains unpatched." },
+      { t: "Panic and shut down all servers globally for 24 hours.", pts: 0, fb: "Extreme overreaction. You destroyed system availability agreements, and the proprietary code is still publicly mirrored online." }
+    ]
+  },
+  {
+    text: "The deployment cycle is concluding. You have remaining allocation room for 10% of the operational quarterly budget. You can allocate it to a 'Team Appreciation Bonus', 'Infrastructure Upgrades', or an 'Enterprise Ad Campaign'.",
+    vocab: "<b>Budget:</b> The predetermined financial capital allocated for specific project execution or operational maintenance.",
+    options: [
+      { t: "Infrastructure Upgrades. Improving load balancing and database scaling is paramount for long-term customer retention.", pts: 3, fb: "Smart decision. The software architecture is now highly optimized. Solid organic retention rates push market cap to record highs." },
+      { t: "Enterprise Ad Campaign. We must acquire a larger volume of client leads to offset heavy implementation overheads.", pts: 2, fb: "Inbound traffic increased significantly, but concurrent session lag expanded proportionately. A high-risk, double-edged sword." },
+      { t: "Team Appreciation Bonus. The engineering department deserves compensation after enduring intense deployment stress.", pts: 1, fb: "Great for engineering morale, but key production nodes failed at midnight and no on-call engineer was monitoring the alert system." }
+    ]
+  }
+];
+
+let S = { score: 0, step: 0, answered: false, inEmergency: false, shuffledOptions: [] };
+
+/* FISHER-YATES SHUFFLE ALGORITHM */
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+function startGame() {
+  document.getElementById('intro').style.display = 'none';
+  document.getElementById('game').style.display = 'block';
+  renderStep();
+}
+
+function renderStep() {
+  S.answered = false;
+  const data = DECISIONS[S.step];
+  
+  document.getElementById('step-count').textContent = `Decision ${S.step + 1} of ${DECISIONS.length}`;
+  document.getElementById('scenario-text').innerHTML = data.text;
+  document.getElementById('vocab-box').innerHTML = data.vocab;
+  document.getElementById('feedback').style.display = 'none';
+  document.getElementById('next-btn').style.display = 'none';
+  
+  const et = document.getElementById('emergency-tag');
+  if (S.step === 6) {
+    et.innerHTML = '<span class="emergency-tag">Emergency Crisis</span>';
+  } else {
+    et.innerHTML = '';
+  }
+
+  const optContainer = document.getElementById('options');
+  optContainer.innerHTML = '';
+
+  /* UPDATE: Shuffle the options before rendering */
+  S.shuffledOptions = shuffleArray([...data.options]);
+
+  S.shuffledOptions.forEach((opt, idx) => {
+    const b = document.createElement('button');
+    b.className = 'opt-btn';
+    b.innerHTML = `<span>${opt.t}</span>`;
+    b.onclick = () => handleChoice(idx);
+    optContainer.appendChild(b);
+  });
+}
+
+function handleChoice(idx) {
+  if (S.answered) return;
+  S.answered = true;
+  
+  const selectedOpt = S.shuffledOptions[idx];
+  S.score += selectedOpt.pts;
+  document.getElementById('score').textContent = S.score;
+  
+  const fb = document.getElementById('feedback');
+  fb.style.display = 'block';
+  fb.textContent = selectedOpt.fb;
+  
+  if (selectedOpt.pts === 3) fb.className = 'feedback fb-good';
+  else if (selectedOpt.pts === 2) fb.className = 'feedback fb-mid';
+  else fb.className = 'feedback fb-bad';
+
+  // If Decision 7 (Source Code leak) and they picked wrong
+  if (S.step === 6 && selectedOpt.t !== "Call the legal team to issue DMCA 'Takedowns' and contact the police.") {
+    showGameOver(selectedOpt.fb);
+    return;
+  }
+
+  document.getElementById('next-btn').style.display = 'block';
+  const btns = document.querySelectorAll('.opt-btn');
+  btns.forEach(b => b.disabled = true);
+}
+
+function nextStep() {
+  if (S.step < DECISIONS.length - 1) {
+    S.step++;
+    renderStep();
+  } else {
+    showFinal();
+  }
+}
+
+function showGameOver(msg) {
+  document.getElementById('game').style.display = 'none';
+  document.getElementById('final').style.display = 'block';
+  document.getElementById('fin-num').textContent = "❌";
+  document.getElementById('fin-grade').textContent = "Terminated";
+  document.getElementById('fin-body').textContent = msg;
+}
+
+function showFinal() {
+  document.getElementById('game').style.display = 'none';
+  document.getElementById('final').style.display = 'block';
+  document.getElementById('fin-num').textContent = S.score;
+  
+  let g, b;
+  if (S.score >= 20) {
+    g = "Engineering Executive";
+    b = "You are a master of enterprise software delivery. You balanced architecture stability, corporate relations, and engineering burnout perfectly. Your English vocabulary in technical operational crises is excellent.";
+  } else if (S.score >= 14) {
+    g = "Competent Manager";
+    b = "A successful deployment cycle! You committed a few costly configuration errors, but the platform remains operational and major clients are retained. Solid work.";
+  } else {
+    g = "Overwhelmed Lead";
+    b = "The update is technically live, but production performance is degraded. Corporate users are experiencing instability and the engineering team is exhausted. You will need a significant amount of emergency hotfixes to stabilize the platform.";
+  }
+  document.getElementById('fin-grade').textContent = g;
+  document.getElementById('fin-body').textContent = b;
+}
+</script>
+
+</body>
+</html>

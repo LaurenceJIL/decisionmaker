@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>New York City Adventure — Three-Day Challenge</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght=700&family=Lato:wght=400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ny-yellow: #fbc02d;
+    --ny-blue: #0d47a1;
+    --ny-grey: #37474f;
+    --danger: #c0392b;
+    --text: #2c3e50;
+    --bg: #f0f2f5;
+  }
+
+  body { font-family: 'Lato', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; align-items: center; }
+  .header { background: var(--ny-grey); color: white; width: 100%; padding: 15px; text-align: center; position: sticky; top: 0; z-index: 10; border-bottom: 5px solid var(--ny-yellow); }
+  
+  .stats-bar { display: flex; justify-content: space-around; background: #fff; width: 100%; padding: 10px 0; border-bottom: 2px solid #ddd; font-weight: bold; }
+  .stat-item { display: flex; align-items: center; gap: 5px; }
+
+  .progress-bar { width: 100%; height: 8px; background: #ddd; }
+  .progress-fill { height: 100%; background: var(--ny-yellow); width: 0%; transition: 0.5s; }
+
+  .game-container { max-width: 800px; width: 90%; margin: 20px auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); min-height: 400px; }
+  .choice-list { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+
+  .choice-btn { 
+    padding: 18px; border: 2px solid #eee; border-radius: 8px; background: white; 
+    cursor: pointer; font-size: 1rem; text-align: left; transition: 0.2s;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .choice-btn:hover:not(:disabled) { border-color: var(--ny-yellow); background: #fffde7; transform: translateX(5px); }
+  .choice-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+  
+  .price-tag { padding: 2px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: bold; }
+  .cost-tag { background: #eee; color: #333; }
+
+  .feedback { margin-top: 20px; padding: 20px; border-radius: 8px; display: none; line-height: 1.6; border-left: 5px solid var(--ny-yellow); font-size: 1.05rem; }
+  .feedback.error { border-left-color: var(--danger); background-color: #fdf2f2; }
+  .btn-next { display: none; margin-top: 20px; padding: 15px 30px; background: var(--ny-grey); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; font-size: 1.1rem; }
+
+  .vocab-section { margin-top: 30px; background: #f9f9f9; padding: 20px; border-radius: 10px; text-align: left; border-top: 4px solid var(--ny-yellow); }
+  .vocab-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px; }
+  .vocab-item { font-size: 0.95rem; line-height: 1.4; }
+  .vocab-item b { color: var(--ny-grey); }
+
+  #landingPage {
+    position: fixed; inset: 0; z-index: 100;
+    background: var(--ny-blue);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 30px;
+  }
+
+  .landing-inner { max-width: 680px; width: 100%; text-align: center; color: white; }
+  .landing-title { font-family: 'Playfair Display', serif; font-size: 3.5rem; margin-bottom: 10px; color: var(--ny-yellow); }
+  .landing-btn { padding: 17px 48px; background: var(--ny-yellow); color: #000; font-weight: 700; border: none; border-radius: 6px; cursor: pointer; margin-top: 20px; text-transform: uppercase; }
+</style>
+</head>
+<body>
+
+<div id="landingPage">
+  <div class="landing-inner">
+    <h1 class="landing-title">NYC 3-Day Ultimate Adventure</h1>
+    <p>Welcome to the ultimate trip to the "Big Apple"! You have a budget of <strong>$600</strong> to survive and enjoy 3 days in the city.</p>
+    <p>Try to gain the most <b>Fun Points</b> without running out of cash across 12 unique decisions and unexpected emergencies!</p>
+    <button class="landing-btn" onclick="startGame()">Start Adventure →</button>
+  </div>
+</div>
+
+<div class="header">
+  <h1>🗽 My New York Journey</h1>
+</div>
+
+<div class="stats-bar">
+  <div class="stat-item">⭐ Fun Points: <span id="scoreDisplay">0</span></div>
+  <div class="stat-item">💰 Money: <span id="budgetDisplay">$600</span></div>
+</div>
+
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+<div class="game-container" id="gameWindow">
+  <h2 id="stepTitle">Loading...</h2>
+  <p id="stepDesc">Preparing your itinerary...</p>
+  <div class="choice-list" id="choiceList"></div>
+  <div class="feedback" id="feedbackBox"></div>
+  <button class="btn-next" id="nextBtn" onclick="nextStep()">Continue →</button>
+</div>
+
+<script>
+let currentStepIndex = 0;
+let score = 0;
+let budget = 600;
+
+const gameData = [
+  // DAY 1
+  {
+    title: "Day 1 — Step 1: Airport Arrival",
+    desc: "You just landed at JFK Airport! How will you travel to your hotel in Manhattan?",
+    choices: [
+      { text: "Take the AirTrain and Subway.", cost: 12, pts: 10, fb: "<b>Smart and economical!</b> You avoid the legendary NYC traffic and mix with real locals on the train." },
+      { text: "Hail a classic Yellow Taxi.", cost: 75, pts: 20, fb: "<b>Iconic!</b> You cross the bridge with a spectacular view of the skyline, though it takes a bite out of your budget." },
+      { text: "Book an express private limousine tour.", cost: 180, pts: 35, fb: "<b>Luxurious!</b> You arrive like a celebrity with free refreshments, but wow, that was expensive!" },
+      { text: "Try to walk to Manhattan along the highway.", cost: 0, pts: 0, type: "poor", fb: "<b>Danger!</b> Highways are unsafe for walking and it would take over 5 hours. Choose a proper mode of transport!" }
+    ]
+  },
+  {
+    title: "Day 1 — Step 2: Morning Sightseeing",
+    desc: "The morning weather is beautiful. Where is your first destination?",
+    choices: [
+      { text: "Climb up the Top of the Rock Observation Deck.", cost: 45, pts: 25, fb: "<b>Breathtaking!</b> From the 70th floor, you get an incredible panoramic view of Central Park and the entire island." },
+      { text: "Take a walking architecture tour of Grand Central Terminal.", cost: 15, pts: 15, fb: "<b>Fascinating!</b> You learn about the secret track systems and gaze up at the stunning celestial ceiling." },
+      { text: "Stroll around the public plazas of Rockefeller Center.", cost: 0, pts: 10, fb: "<b>Lovely!</b> It doesn't cost a cent to see the famous statues and watch the vibrant buzz of midtown." },
+      { text: "Climb up an active construction crane for a better view.", cost: 0, pts: 0, type: "poor", fb: "<b>Terrible idea!</b> That is highly dangerous and completely illegal. Stick to public observation areas!" }
+    ]
+  },
+  {
+    title: "Day 1 — Step 3: Lunch on the Go",
+    desc: "Your stomach is rumbling near Times Square. What are you eating?",
+    choices: [
+      { text: "Grab a fast, classic NYC 'Slice' of street pizza.", cost: 5, pts: 15, fb: "<b>Delicious!</b> Folding it hot into your mouth on a street corner makes you feel like a genuine New Yorker." },
+      { text: "Sit down at a themed Broadway diner.", cost: 35, pts: 18, fb: "<b>Entertaining!</b> The waiters sing musical numbers while serving you a huge burger and fries." },
+      { text: "Buy a quick lamb gyro from a famous Halal cart.", cost: 12, pts: 15, fb: "<b>Savory!</b> The white sauce smells absolute paradise and keeps you fueled up easily for the rest of the day." },
+      { text: "Rummage through a trash can looking for fresh leftovers.", cost: 0, pts: 0, type: "poor", fb: "<b>Gross!</b> You have plenty of budget for real food. Treat yourself to a sanitary meal!" }
+    ]
+  },
+  {
+    title: "Day 1 — Step 4: Evening Grand Finale",
+    desc: "Night falls and the city lights up. How will you wrap up Day 1?",
+    choices: [
+      { text: "Buy premium orchestra tickets to see a Broadway Show.", cost: 140, pts: 40, fb: "<b>Spectacular!</b> The live orchestra, custom costumes, and stellar singing blow you away completely." },
+      { text: "Walk through Times Square to experience the neon lights.", cost: 0, pts: 15, fb: "<b>Electric!</b> The square is incredibly bright and crowded, providing amazing photo opportunities for free." },
+      { text: "Go to a cozy rooftop lounge overlooking Manhattan.", cost: 30, pts: 20, fb: "<b>Sophisticated!</b> You sip a cool drink while watching the city traffic pulse below like veins of light." },
+      { text: "Try to sneak backstage by pretending to be an actor.", cost: 0, pts: 0, type: "poor", fb: "<b>No way!</b> Security stops you immediately at the stage door. Pick an option open to the public!" }
+    ]
+  },
+  // EMERGENCY 1
+  {
+    title: "🚨 EMERGENCY: Lost Subway Card!",
+    desc: "Oh no! Your physical Transit Card fell out of your pocket somewhere in the busy crowds of downtown!",
+    choices: [
+      { text: "Pay to buy a replacement pass at the station machine.", cost: 20, pts: 5, fb: "<b>Problem solved!</b> It hurts your wallet a little bit, but you are back on track instantly." },
+      { text: "Use your phone's contactless payment at the turnstile.", cost: 3, pts: 12, fb: "<b>Brilliant tech!</b> You realize modern turnstiles accept mobile wallets. Cheap, fast, and no hassle." },
+      { text: "Jump over the turnstile gate to save money.", cost: 0, pts: 0, type: "poor", fb: "<b>Busted!</b> A transit worker yells at you. Don't risk a heavy fine or getting arrested. Choose a legal path!" }
+    ]
+  },
+  // DAY 2
+  {
+    title: "Day 2 — Step 5: Morning Exploration",
+    desc: "Welcome to Day 2! It's a crisp morning. Where are you heading?",
+    choices: [
+      { text: "Rent a bicycle to tour the loop around Central Park.", cost: 25, pts: 22, fb: "<b>Exhilarating!</b> You cruise past Bethesda Fountain and Strawberry Fields, covering tons of scenic ground." },
+      { text: "Visit the emotional 9/11 Memorial & Museum.", cost: 30, pts: 25, fb: "<b>Moving!</b> The reflecting pools and history exhibits provide a deeply powerful and unforgettable experience." },
+      { text: "Walk across the historic Brooklyn Bridge.", cost: 0, pts: 18, fb: "<b>Scenic beauty!</b> The suspension cables frame the skyline perfectly, and walking across to Brooklyn is completely free." },
+      { text: "Try to jump into the Central Park Reservoir for a swim.", cost: 0, pts: 0, type: "poor", fb: "<b>Stop!</b> Swimming there is strictly forbidden and very disrespectful. Pick a real park activity!" }
+    ]
+  },
+  {
+    title: "Day 2 — Step 6: Hip Neighborhood Lunch",
+    desc: "You wander into the trendy streets of SoHo and Chinatown. What's for lunch?",
+    choices: [
+      { text: "Feast on authentic soup dumplings in Chinatown.", cost: 18, pts: 20, fb: "<b>Incredible flavors!</b> The hot broth bursts out beautifully with every single bite. Outstanding value!" },
+      { text: "Dine at an upscale, trendy SoHo bistro.", cost: 55, pts: 22, fb: "<b>Chic!</b> You spot a famous influencer at the next table while enjoying a delicious avocado salad." },
+      { text: "Grab pastrami on rye at a world-famous old-school deli.", cost: 32, pts: 25, fb: "<b>Mouthwatering!</b> The sandwich is piled incredibly high with hot meat. A true cultural institution." },
+      { text: "Buy a novelty plastic display bagel from a shop window.", cost: 10, pts: 0, type: "poor", fb: "<b>Silky mistake!</b> That is fake food made for decoration. You need real nutrients to keep exploring!" }
+    ]
+  },
+  {
+    title: "Day 2 — Step 7: Afternoon Culture",
+    desc: "Time for some world-class culture and art. Which museum calls your name?",
+    choices: [
+      { text: "Explore the vast Metropolitan Museum of Art (The Met).", cost: 30, pts: 28, fb: "<b>Stunning!</b> You explore ancient Egyptian temples and magnificent European paintings for hours." },
+      { text: "Check out modern masterpieces at MoMA.", cost: 25, pts: 22, fb: "<b>Inspiring!</b> Seeing famous works by Van Gogh and Warhol up close gets your creative juices flowing." },
+      { text: "Browse contemporary local galleries in Chelsea.", cost: 0, pts: 15, fb: "<b>Cutting edge!</b> Walking through these independent art spaces is free and exposes you to wild new ideas." },
+      { text: "Paint graffiti on the side of a historic building.", cost: 0, pts: 0, type: "poor", fb: "<b>Vandalism!</b> You'll be arrested before you can even finish. Choose a legal way to appreciate art!" }
+    ]
+  },
+  {
+    title: "Day 2 — Step 8: Night Out in Brooklyn",
+    desc: "You cross over into Brooklyn for evening entertainment. What's the plan?",
+    choices: [
+      { text: "Attend an indie rock concert in Williamsburg.", cost: 45, pts: 25, fb: "<b>Energetic!</b> The crowd is full of life and the underground band puts on an absolutely electric performance." },
+      { text: "Relax at Brooklyn Bridge Park at sunset.", cost: 0, pts: 18, fb: "<b>Picture perfect!</b> You watch the financial district skyscrapers light up across the river as darkness falls." },
+      { text: "Book an elite skyline dinner cruise around the harbor.", cost: 110, pts: 35, fb: "<b>Glorious!</b> Elegant dining combined with sailing right past the illuminated Statue of Liberty." },
+      { text: "Challenge a local street gang to a breakdance battle.", cost: 0, pts: 0, type: "poor", fb: "<b>Unwise!</b> This isn't a movie musical. You will just embarrass yourself or get hurt. Pick an actual activity!" }
+    ]
+  },
+  // EMERGENCY 2
+  {
+    title: "🚨 EMERGENCY: Flash Rainstorm!",
+    desc: "The clouds break open and a massive torrential downpour floods the avenues!",
+    choices: [
+      { text: "Buy an overpriced umbrella from a street vendor.", cost: 15, pts: 5, fb: "<b>Sheltered!</b> It breaks by the end of the day, but it keeps you dry enough to continue your journey." },
+      { text: "Duck into a free public library or museum lobby to wait it out.", cost: 0, pts: 10, fb: "<b>Resourceful!</b> You save money, stay perfectly dry, and browse historic books while waiting for the sun." },
+      { text: "Stand under a broken gutter and get completely soaked.", cost: 0, pts: 0, type: "gameover", fb: "<b>TRIP OVER!</b> You catch a terrible cold, your clothes are ruined, and you spend the rest of your trip sick in bed. Game Over!" }
+    ]
+  },
+  // DAY 3
+  {
+    title: "Day 3 — Step 9: Morning Icons",
+    desc: "It's your final day! Time to visit the ultimate symbols of America.",
+    choices: [
+      { text: "Take the ferry to Liberty Island & Ellis Island.", cost: 25, pts: 30, fb: "<b>Historic!</b> Standing right underneath the Statue of Liberty gives you genuine chills of amazement." },
+      { text: "Walk the High Line elevated park in Chelsea.", cost: 0, pts: 20, fb: "<b>Innovative!</b> Walking on an old elevated train track transformed into a lush garden paradise is spectacular." },
+      { text: "Splurge on a helicopter tour over Manhattan.", cost: 210, pts: 50, fb: "<b>Ultimate Rush!</b> Fly high above the skyscrapers! Exceptionally expensive, but an absolute lifetime memory." },
+      { text: "Try to swim across the Hudson River to Liberty Island.", cost: 0, pts: 0, type: "poor", fb: "<b>Dangerous!</b> The river currents are deadly and commercial shipping boats fill the harbor. Use the ferry!" }
+    ]
+  },
+  {
+    title: "Day 3 — Step 10: Final Souvenir Lunch",
+    desc: "Where are you having your final lunch to pick up memory items?",
+    choices: [
+      { text: "Eat at Chelsea Market and buy artisanal crafts.", cost: 40, pts: 20, fb: "<b>Trendy food hall!</b> You eat a fresh lobster roll and buy unique handmade gifts for friends." },
+      { text: "Get a classic hot dog and pretzel from an iconic cart.", cost: 8, pts: 12, fb: "<b>Classic NYC!</b> Quick, salty, cheap, and simple. You buy a small $5 tourist t-shirt right nearby." },
+      { text: "Visit a high-end chocolate shop in Greenwich Village.", cost: 50, pts: 22, fb: "<b>Decadent!</b> You eat world-class truffles and purchase beautifully wrapped gift boxes to take home." },
+      { text: "Steal a traffic cone as a souvenir.", cost: 0, pts: 0, type: "poor", fb: "<b>Illegal!</b> Taking city property will get you in trouble with the NYPD. Buy a normal souvenir instead!" }
+    ]
+  },
+  {
+    title: "Day 3 — Step 11: Afternoon Chill",
+    desc: "The trip is wrapping up. How do you spend your final afternoon hours?",
+    choices: [
+      { text: "Visit the Vessel and shopping mall at Hudson Yards.", cost: 10, pts: 15, fb: "<b>Futuristic!</b> The architecture is striking, and you enjoy window shopping in the massive modern complex." },
+      { text: "Listen to live acoustic musicians in Washington Square Park.", cost: 0, pts: 18, fb: "<b>Bohemian vibes!</b> You sit by the historic stone arch while beautiful piano melodies echo through the air." },
+      { text: "Take a scenic ride on the Roosevelt Island Tramway.", cost: 3, pts: 20, fb: "<b>Great hidden value!</b> The cable car soaring parallel to the bridge provides astonishing views for just a transit fare." },
+      { text: "Lie down in the middle of Fifth Avenue traffic to relax.", cost: 0, pts: 0, type: "poor", fb: "<b>Absurd!</b> You'll cause a major accident. Find a peaceful park bench instead!" }
+    ]
+  },
+  {
+    title: "Day 3 — Step 12: The Farewell Evening",
+    desc: "Your final hour before heading back to the airport. What is your goodbye ritual?",
+    choices: [
+      { text: "Have a toast at a world-famous jazz club in Greenwich Village.", cost: 45, pts: 30, fb: "<b>Smooth sounds!</b> Savoring live woodwinds and piano chords is the ultimate soulful goodbye to Manhattan." },
+      { text: "Watch the stars from the wooden piers of DUMBO.", cost: 0, pts: 15, fb: "<b>Peaceful reflections!</b> You look back across the dark water at the lit skyscrapers, promising to return soon." },
+      { text: "Enjoy a luxury multi-course steakhouse dinner.", cost: 120, pts: 35, fb: "<b>Magnificent feast!</b> Premium sizzling prime cuts and top-tier service celebrate the end of a grand voyage." },
+      { text: "Hide inside a subway locker so you never have to leave.", cost: 0, pts: 0, type: "poor", fb: "<b>Impossibly silly!</b> Lockers are small and you eventually have to go home. Say goodbye properly!" }
+    ]
+  }
+];
+
+const vocabulary = [
+  { word: "Skyscraper", def: "A very tall building with many floors." },
+  { word: "Observation Deck", def: "A high place where people go to see the view." },
+  { word: "Souvenir", def: "Something you buy to remember a place." },
+  { word: "Turnstile", def: "The gate that spins to let passengers enter the subway station." },
+  { word: "Spectacular", def: "Very beautiful or impressive to watch." },
+  { word: "Suspension Bridge", def: "A bridge hung from large cables, like the Brooklyn Bridge." }
+];
+
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
+function loadStep() {
+  const step = gameData[currentStepIndex];
+  document.getElementById("stepTitle").innerText = step.title;
+  document.getElementById("stepDesc").innerHTML = step.desc;
+  
+  const list = document.getElementById("choiceList");
+  list.innerHTML = "";
+  
+  const shuffledChoices = [...step.choices];
+  shuffleArray(shuffledChoices);
+  
+  shuffledChoices.forEach((c) => {
+    const btn = document.createElement("button");
+    btn.className = "choice-btn";
+    const canAfford = budget >= c.cost;
+    
+    // Safety check: Don't lock out "poor" or "gameover" choices based on cash
+    if (!canAfford && c.type !== "poor" && c.type !== "gameover") {
+        btn.disabled = true;
+    }
+
+    btn.innerHTML = `<span>${c.text} ${(!canAfford && c.type !== "poor" && c.type !== "gameover") ? '<b style="color:red">(Too expensive!)</b>' : ''}</span>
+      <span class="price-tag cost-tag">$${c.cost}</span>`;
+    
+    btn.onclick = () => selectChoice(c);
+    list.appendChild(btn);
+  });
+  
+  document.getElementById("feedbackBox").style.display = "none";
+  document.getElementById("nextBtn").style.display = "none";
+  
+  // Update progress bar
+  const progress = (currentStepIndex / gameData.length) * 100;
+  document.getElementById("progressFill").style.width = progress + "%";
+}
+
+function selectChoice(choice) {
+  const fb = document.getElementById("feedbackBox");
+  
+  if (choice.type === "gameover") {
+    fb.innerHTML = choice.fb;
+    fb.className = "feedback error";
+    fb.style.display = "block";
+    document.querySelectorAll(".choice-btn").forEach(b => b.disabled = true);
+    document.getElementById("nextBtn").innerText = "Restart Adventure ↩";
+    document.getElementById("nextBtn").onclick = () => location.reload();
+    document.getElementById("nextBtn").style.display = "block";
+    return;
+  }
+
+  if (choice.type === "poor") {
+    fb.innerHTML = choice.fb;
+    fb.className = "feedback error";
+    fb.style.display = "block";
+    return;
+  }
+
+  // Process standard valid selection
+  budget -= choice.cost;
+  score += choice.pts;
+  
+  document.getElementById("scoreDisplay").innerText = score;
+  document.getElementById("budgetDisplay").innerText = "$" + budget;
+  
+  fb.innerHTML = choice.fb;
+  fb.className = "feedback";
+  fb.style.display = "block";
+  
+  document.querySelectorAll(".choice-btn").forEach(b => b.disabled = true);
+  document.getElementById("nextBtn").style.display = "block";
+}
+
+function nextStep() {
+  currentStepIndex++;
+  if (currentStepIndex >= gameData.length) {
+    renderFinalScreen();
+  } else {
+    loadStep();
+  }
+}
+
+function renderFinalScreen() {
+  let title, message;
+  
+  if (score >= 260) {
+    title = "🥇 King of New York!";
+    message = "Incredible! You absolutely conquered the Big Apple. You balanced elite sightseeing luxury with iconic experiences and managed your cash flow perfectly.";
+  } else if (score >= 160) {
+    title = "🥈 Seasoned Traveler";
+    message = "Fantastic job! You enjoyed a diverse, exciting, and balanced three-day itinerary. You navigated the emergencies beautifully.";
+  } else {
+    title = "🥉 NYC Survivor";
+    message = "You made it back home! It was a chaotic trip and you missed a few big opportunities, but you gained valuable experience navigating the city streets.";
+  }
+
+  let vocabHTML = `<div class="vocab-section"><h3>Useful Vocabulary Learned:</h3><div class="vocab-grid">`;
+  vocabulary.forEach(v => { vocabHTML += `<div class="vocab-item"><b>${v.word}:</b> ${v.def}</div>`; });
+  vocabHTML += `</div></div>`;
+
+  document.getElementById("gameWindow").innerHTML = `
+    <h2 style="color:var(--ny-blue)">${title}</h2>
+    <p>${message}</p>
+    <hr>
+    <div style="font-size: 1.2rem; margin: 20px 0;">
+      <p>Final Fun Points: <b>${score}</b></p>
+      <p>Remaining Budget: <b>$${budget}</b></p>
+    </div>
+    ${vocabHTML}
+    <button class="btn-next" style="display:block" onclick="location.reload()">Plan Another Trip ↩</button>
+  `;
+  document.getElementById("progressFill").style.width = "100%";
+}
+
+function startGame() { 
+  document.getElementById("landingPage").style.display = "none"; 
+  loadStep();
+}
+</script>
+</body>
+</html>

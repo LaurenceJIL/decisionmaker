@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Culture Architect: 12-Day Marathon</title>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700&family=Space+Mono&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0F172A;--surface:#1E293B;--primary:#6366F1;--accent:#F59E0B;
+  --text:#F1F5F9;--success:#10B981;--danger:#EF4444;--radius:16px;
+}
+body{font-family:'Lexend',sans-serif;background:var(--bg);color:var(--text);margin:0;padding:20px;display:flex;justify-content:center;}
+.container{width:100%;max-width:950px;}
+.card{background:var(--surface);padding:35px;border-radius:var(--radius);box-shadow:0 20px 25px -5px rgba(0,0,0,0.3);border:1px solid #334155;position:relative;}
+
+.stats-grid {display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 30px;}
+.stat-card {background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; text-align: center; border: 1px solid #475569;}
+.stat-val {display: block; font-size: 1.5rem; font-weight: 700; font-family: 'Space Mono', monospace;}
+.stat-label {font-size: 0.75rem; text-transform: uppercase; color: #94A3B8; letter-spacing: 1px;}
+
+.day-badge {background: var(--primary); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-bottom: 15px; display: inline-block;}
+h1 {font-size: 1.8rem; margin: 0 0 15px 0; color: var(--accent);}
+.scenario-text {font-size: 1.1rem; line-height: 1.6; color: #CBD5E1; margin-bottom: 30px; min-height: 80px;}
+
+.choice-list {display: grid; gap: 12px;}
+.choice-btn {
+    background: #334155; border: 1px solid #475569; color: white; padding: 18px; text-align: left;
+    border-radius: 12px; cursor: pointer; transition: 0.2s; font-size: 1rem; line-height: 1.4;
+}
+.choice-btn:hover:not(:disabled) {background: #475569; border-color: var(--primary); transform: translateX(5px);}
+.choice-btn:disabled {opacity: 0.6; cursor: default;}
+
+.feedback {margin-top: 25px; padding: 20px; border-radius: 12px; display: none; border-left: 5px solid var(--primary); background: rgba(99, 102, 241, 0.1);}
+.next-btn {
+    background: var(--success); color: white; border: none; padding: 15px 30px; 
+    border-radius: 8px; cursor: pointer; font-weight: 700; margin-top: 20px; width: 100%;
+}
+.hidden {display: none;}
+.glossary {margin-top: 40px; font-size: 0.85rem; color: #94A3B8; border-top: 1px solid #334155; padding-top: 20px;}
+.glossary b {color: var(--accent);}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <div id="intro-screen" class="card">
+        <h1>The Culture Architect</h1>
+        <p>You have been allocated 12 days to coordinate the company's annual "Innovation Summit." Your primary objectives are to maintain high employee <b>Morale</b>, stay strictly within the designated <b>Budget</b>, and maximize overall <b>Innovation</b>. A single poor judgment call could result in your immediate dismissal.</p>
+        <button class="next-btn" onclick="startSim()">Begin Day 1</button>
+    </div>
+
+    <div id="game-screen" class="card hidden">
+        <div class="stats-grid">
+            <div class="stat-card"><span class="stat-label">Day</span><span id="stat-d" class="stat-val">1/12</span></div>
+            <div class="stat-card"><span class="stat-label">Morale</span><span id="stat-m" class="stat-val">50</span></div>
+            <div class="stat-card"><span class="stat-label">Budget</span><span id="stat-b" class="stat-val">$5,000</span></div>
+            <div class="stat-card"><span class="stat-label">Innovation</span><span id="stat-i" class="stat-val">0</span></div>
+        </div>
+
+        <div id="day-container">
+            <span class="day-badge" id="day-badge">Monday</span>
+            <div class="scenario-text" id="scenario-text">Scenario loading...</div>
+            <div class="choice-list" id="choice-list"></div>
+            
+            <div id="feedback-box" class="feedback">
+                <p id="feedback-text"></p>
+                <button class="next-btn" id="next-day-btn" onclick="nextDay()">End Day</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="end-screen" class="card hidden">
+        <h1 id="end-title">Simulation Complete</h1>
+        <p id="end-body"></p>
+        <button class="next-btn" onclick="location.reload()">Restart Simulation</button>
+    </div>
+
+    <div class="glossary">
+        <p><b>Glossary:</b> 
+        <b>Burn Rate:</b> The speed at which a project consumes its available financial resources. | 
+        <b>Buy-in:</b> Securing commitment or agreement from interested parties regarding a proposal. | 
+        <b>Bandwidth:</b> The cognitive capacity, energy, or time required to manage extra responsibilities. | 
+        <b>Scalability:</b> The capacity of a system or process to cope with a growing amount of work gracefully.</p>
+    </div>
+</div>
+
+<script>
+const DAYS = [
+    {
+        name: "Day 1: The Venue Selection",
+        text: "You must secure a suitable location for the upcoming summit. The CEO demands high visual prestige, whereas the CFO insists on cost-cutting measures.",
+        choices: [
+            {text: "Book a state-of-the-art hotel downtown.", m: 5, b: -2500, i: 15, fb: "The team is thrilled by the advanced amenities, but your burn rate has dramatically accelerated."},
+            {text: "Host the entire event in the company cafeteria.", m: -15, b: -200, i: 2, fb: "The workforce feels unappreciated, openly questioning if leadership truly values their contributions."},
+            {text: "Rent a creative, collaborative co-working hub.", m: 10, b: -1000, i: 8, fb: "A sensible compromise. The environment feels contemporary and fresh while keeping expenses reasonable."}
+        ]
+    },
+    {
+        name: "Day 2: Selecting the Keynote Speaker",
+        text: "You need to secure an impressive keynote presenter. Who will you choose to invite?",
+        choices: [
+            {text: "Hire a prominent celebrity social media influencer.", m: 20, b: -3000, i: 0, fb: "Attendees are delighted to take photos, but no valuable knowledge regarding innovation was shared."},
+            {text: "Feature the company's own internal Chief Technology Officer", m: 0, b: 0, i: 20, fb: "The presentation is highly sophisticated and costs nothing, though certain staff members find the delivery rather dry."},
+            {text: "Book a highly respected industry authority.", m: 5, b: -1200, i: 10, fb: "An elegant and professional approach that successfully enhances the company's brand image."}
+        ]
+    },
+    {
+        name: "Day 3: Catering Emergency",
+        text: "Your primary catering supplier unexpectedly pulled out of the agreement. You must arrange meals for 200 attendees by tomorrow morning.",
+        choices: [
+            {text: "Order premium, organic individual meal boxes.", m: 10, b: -1500, i: 0, fb: "The catering is exceptional and highly fashionable, which noticeably boosts employee buy-in."},
+            {text: "Arrange a standard pizza delivery for the entire group.", m: -5, b: -400, i: 0, fb: "While the attendees are fed, the subsequent post-lunch fatigue severely hinders afternoon engagement."},
+            {text: "Request that staff members bring homemade dishes to share.", m: -25, b: 0, i: -5, fb: "This is viewed as an organizational failure; employees feel they are being forced to cover your responsibilities."}
+        ]
+    },
+    {
+        name: "Day 4: Staffing and Employee Bandwidth",
+        text: "Your core planning committee has been working grueling 12-hour shifts. Signs of severe exhaustion are becoming obvious.",
+        choices: [
+            {text: "Contract freelance event coordinators to share the workload.", m: 15, b: -1000, i: 0, fb: "Workplace pressure instantly eases, allowing your core staff the necessary bandwidth to recover."},
+            {text: "Provide complimentary refreshments and urge them to persist.", m: -10, b: -50, i: 5, fb: "A senior developer resigned in frustration. This intense workload is simply not sustainable or scalable."},
+            {text: "Postpone low-priority assignments to focus exclusively on the summit.", m: 5, b: 0, i: -2, fb: "A cautious decision, though external departments have started complaining about delayed responses."}
+        ]
+    },
+    {
+        name: "Day 5: Event Memorabilia and Gift Bags",
+        text: "What type of corporate merchandise will you distribute to the attendees?",
+        choices: [
+            {text: "Distribute premium leather notebooks paired with sleek executive pens.", m: 10, b: -800, i: 2, fb: "This leaves an excellent impression, making the workforce feel the brand is genuinely high-end."},
+            {text: "Purchase inexpensive plastic toys featuring the company logo.", m: -5, b: -200, i: -2, fb: "Most items are discarded before the first break, resulting in a completely wasted budget allocation."},
+            {text: "Offer no physical gifts, introducing a commemorative digital token instead.", m: 0, b: -50, i: 12, fb: "The engineering team finds the concept fascinating, whereas the sales division remains thoroughly perplexed."}
+        ]
+    },
+    {
+        name: "Day 6: Critical System Bug",
+        text: "The dedicated event mobile application crashed entirely during the final technical rehearsal.",
+        choices: [
+            {text: "Authorize double-pay rates for an engineer to resolve the issue overnight.", m: 0, b: -600, i: 10, fb: "The application functions flawlessly now, but your financial resources are dropping rapidly."},
+            {text: "Revert to traditional printed schedules and physical notices.", m: -5, b: -100, i: -10, fb: "An old-fashioned solution, but it guarantees reliability. Your innovation rating suffers a setback."},
+            {text: "Ignore the glitch and proceed, hoping it functions on the day of the event.", m: -10, b: 0, i: -5, fb: "The app crashed again during the live presentation, thoroughly disrupting the CEO's opening address."}
+        ]
+    },
+    {
+        name: "Day 7: External Public Relations Opportunity",
+        text: "A prominent technology publication has requested an exclusive interview regarding the innovation summit.",
+        choices: [
+            {text: "Devote significant hours to compiling an exhaustive media kit.", m: 5, b: -200, i: 15, fb: "Excellent public exposure! The company successfully positions itself as a forward-thinking market leader."},
+            {text: "Decline the interview invitation to focus entirely on administrative logistics.", m: 0, b: 0, i: 0, fb: "You remain strictly on schedule, but external audiences remain completely unaware of your initiatives."},
+            {text: "Delegate the media interview to an inexperienced junior staff member.", m: -5, b: 0, i: 5, fb: "They provided contradictory statements, leaving the internal PR department scrambling to correct the narrative."}
+        ]
+    },
+    {
+        name: "Day 8: Executive Intervention",
+        text: "The CEO requests that a custom ice sculpture of the corporate emblem be installed at the entrance.",
+        choices: [
+            {text: "Acquiesce to the request immediately.", m: 2, b: -900, i: 0, fb: "The CEO is highly satisfied, though your remaining financial balance is looking dangerously depleted."},
+            {text: "Propose a dynamic digital hologram display of the logo as an alternative.", m: 5, b: -400, i: 15, fb: "The executive is deeply impressed by your forward-thinking initiative, earning you great professional buy-in!"},
+            {text: "Politely turn down the request, citing strict budgetary constraints.", m: -5, b: 0, i: 0, fb: "Your budget remains secure, but the executive perceives your management style as lacking broader creative vision."}
+        ]
+    },
+    {
+        name: "Day 9: Transportation Logistics",
+        text: "The shuttle buses designated to transport attendees to the venue have suddenly broken down.",
+        choices: [
+            {text: "Arrange premium private rides for all participants.", m: 15, b: -1200, i: 0, fb: "An exceptional, high-end experience for attendees, but your financial balance has taken a serious hit."},
+            {text: "Instruct attendees to complete the 15-minute journey on foot.", m: -20, b: 0, i: 0, fb: "Unexpected rain causes everyone to arrive completely soaked and irritable. Morale experiences a sharp drop."},
+            {text: "Organize an active, outdoor walking networking session for the group.", m: 5, b: 0, i: 5, fb: "You effectively transformed an operational failure into an engaging professional networking opportunity. Sophisticated!"}
+        ]
+    },
+    {
+        name: "Day 10: Unanticipated Schedule Shift",
+        text: "The board of directors unexpectedly declared a company-wide half-day holiday, reducing your preparation window by 50%.",
+        choices: [
+            {text: "Incentivize staff volunteers to work through the holiday by offering premium pay.", m: -5, b: -700, i: 0, fb: "The objectives are met, but several team members are showing distinct signs of approaching burnout."},
+            {text: "Scale back the setup complexity by removing advanced technical installations.", m: 0, b: 0, i: -10, fb: "The setup looks somewhat modest, but everything is fully operational and prepared on schedule."},
+            {text: "Work continuously for 24 hours yourself to ensure everything is completed.", m: 10, b: 0, i: 5, fb: "The team deeply respects your profound commitment, though you appear completely drained of energy."}
+        ]
+    },
+    {
+        name: "Day 11: The Pre-Summit Social",
+        text: "It is the evening prior to the launch. Will you execute an initial networking social?",
+        choices: [
+            {text: "Host an extravagant party featuring a live DJ and open bar.", m: 25, b: -1500, i: 0, fb: "Fantastic atmosphere! Unfortunately, half the organizing team is visibly exhausted on the actual day of the summit."},
+            {text: "Coordinate a sophisticated, low-key coffee and networking event.", m: 10, b: -300, i: 5, fb: "A calm and constructive gathering. Every attendee leaves feeling well-prepared for the main event tomorrow."},
+            {text: "Cancel any preliminary events, instructing everyone to return home early.", m: -5, b: 0, i: 0, fb: "The staff is well-rested, but you missed a crucial window to build collective enthusiasm."}
+        ]
+    },
+    {
+        name: "Day 12: THE SUMMIT LAUNCH",
+        text: "The main event is underway. Concurrently, a direct competitor has just unveiled a highly comparable product line.",
+        choices: [
+            {text: "Instantly adjust the keynote presentation to highlight your rival's systemic flaws.", m: 5, b: 0, i: 20, fb: "An incredibly assertive move! You have successfully re-aligned the company's competitive messaging within an hour."},
+            {text: "Proceed exactly as originally arranged.", m: 5, b: 0, i: 5, fb: "A highly successful event. You maintained professional composure and remained concentrated on your own objectives."},
+            {text: "Panick and cancel the remaining afternoon collaborative workshops.", m: -20, b: 0, i: -10, fb: "Concluding the event prematurely was widely interpreted by industry observers as an admission of defeat."}
+        ]
+    }
+];
+
+let state = {
+    d: 1,
+    m: 50,
+    b: 5000,
+    i: 0
+};
+let choiceLocked = false;
+
+/**
+ * Fisher-Yates Shuffle Algorithm
+ * Ensures answer choices are truly randomized.
+ */
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+function startSim() {
+    document.getElementById('intro-screen').classList.add('hidden');
+    document.getElementById('game-screen').classList.remove('hidden');
+    renderDay();
+}
+
+function renderDay() {
+    choiceLocked = false;
+    if (state.d > DAYS.length) {
+        endSim();
+        return;
+    }
+
+    const day = DAYS[state.d - 1];
+    document.getElementById('day-badge').innerText = day.name;
+    document.getElementById('scenario-text').innerText = day.text;
+    
+    const list = document.getElementById('choice-list');
+    list.innerHTML = '';
+    
+    const shuffledChoices = shuffleArray([...day.choices]);
+
+    shuffledChoices.forEach(c => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.innerText = c.text;
+        btn.onclick = () => handleChoice(c);
+        list.appendChild(btn);
+    });
+
+    document.getElementById('feedback-box').style.display = 'none';
+    updateStats();
+}
+
+function handleChoice(c) {
+    if (choiceLocked) return;
+    choiceLocked = true;
+    state.m += c.m;
+    state.b += c.b;
+    state.i += c.i;
+
+    if (state.m < 0) state.m = 0;
+    if (state.i < 0) state.i = 0;
+
+    const btns = document.querySelectorAll('.choice-btn');
+    btns.forEach(b => b.disabled = true);
+
+    document.getElementById('feedback-text').innerText = c.fb;
+    document.getElementById('feedback-box').style.display = 'block';
+
+    updateStats();
+
+    if (state.b < -500) {
+        triggerGameOver("The Chief Financial Officer discovered your account was over $500 short. You have been dismissed for severe fiscal mismanagement.");
+    } else if (state.m <= 5) {
+        triggerGameOver("The entire workforce coordinated a formal petition demanding your resignation. Morale has disintegrated to a point where all operations have ceased.");
+    }
+}
+
+function updateStats() {
+    document.getElementById('stat-d').innerText = `${state.d}/${DAYS.length}`;
+    document.getElementById('stat-m').innerText = state.m;
+    document.getElementById('stat-b').innerText = `$${state.b}`;
+    document.getElementById('stat-i').innerText = state.i;
+}
+
+function nextDay() {
+    state.d++;
+    renderDay();
+}
+
+function triggerGameOver(msg) {
+    document.getElementById('game-screen').classList.add('hidden');
+    document.getElementById('end-screen').classList.remove('hidden');
+    document.getElementById('end-title').innerText = "🛑 TERMINATION OF CONTRACT";
+    document.getElementById('end-body').innerText = msg;
+}
+
+function endSim() {
+    document.getElementById('game-screen').classList.add('hidden');
+    document.getElementById('end-screen').classList.remove('hidden');
+    
+    let score = (state.m + state.i) / 2;
+    let rank, msg;
+
+    if (score > 60 && state.b >= 0) {
+        rank = "🌟 THE LEGENDARY ARCHITECT";
+        msg = "You have demonstrated exceptional leadership capacity. By successfully navigating 12 days of operational chaos, you have left the organizational structure considerably stronger.";
+    } else if (score > 30) {
+        rank = "👍 THE SURVIVOR";
+        msg = "While execution was occasionally flawed and your capital reserves remain highly depleted, you successfully concluded the assignment. Respectable work.";
+    } else {
+        rank = "⚠️ THE BUREAUCRAT";
+        msg = "The event has officially concluded, but workforce morale remains noticeably low. Multiple staff members are actively exploring external employment opportunities.";
+    }
+
+    document.getElementById('end-title').innerText = rank;
+    document.getElementById('end-body').innerText = `${msg} Final Performance Metrics - Morale: ${state.m}, Innovation: ${state.i}, Remaining Capital: $${state.b}`;
+}
+</script>
+</body>
+</html>
