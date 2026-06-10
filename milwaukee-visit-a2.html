@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Milwaukee Adventure — A2 Level 3-Day Trip</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght=700&family=Lato:wght=400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --mke-cream: #f5f2eb;
+    --mke-blue: #002f6c;
+    --mke-gold: #b38f4f;
+    --danger: #c0392b;
+    --text: #2c3e50;
+    --bg: #ebeeec;
+  }
+
+  body { font-family: 'Lato', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; align-items: center; }
+  .header { background: var(--mke-blue); color: white; width: 100%; padding: 15px; text-align: center; position: sticky; top: 0; z-index: 10; border-bottom: 5px solid var(--mke-gold); }
+  
+  .stats-bar { display: flex; justify-content: space-around; background: #fff; width: 100%; padding: 10px 0; border-bottom: 2px solid #ddd; font-weight: bold; }
+  .stat-item { display: flex; align-items: center; gap: 5px; }
+
+  .progress-bar { width: 100%; height: 8px; background: #ddd; }
+  .progress-fill { height: 100%; background: var(--mke-gold); width: 0%; transition: 0.5s; }
+
+  .game-container { max-width: 800px; width: 90%; margin: 20px auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); min-height: 400px; }
+  .choice-list { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+
+  .choice-btn { 
+    padding: 18px; border: 2px solid #eee; border-radius: 8px; background: white; 
+    cursor: pointer; font-size: 1rem; text-align: left; transition: 0.2s;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .choice-btn:hover:not(:disabled) { border-color: var(--mke-gold); background: #fffdf2; transform: translateX(5px); }
+  .choice-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+  
+  .price-tag { padding: 2px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: bold; }
+  .cost-tag { background: #eee; color: #333; }
+
+  .feedback { margin-top: 20px; padding: 20px; border-radius: 8px; display: none; line-height: 1.6; border-left: 5px solid var(--mke-gold); font-size: 1.05rem; }
+  .feedback.error { border-left-color: var(--danger); background-color: #fdf2f2; }
+  .btn-next { display: none; margin-top: 20px; padding: 15px 30px; background: var(--mke-blue); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; font-size: 1.1rem; }
+
+  .vocab-section { margin-top: 30px; background: #f9f9f9; padding: 20px; border-radius: 10px; text-align: left; border-top: 4px solid var(--mke-gold); }
+  .vocab-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px; }
+  .vocab-item { font-size: 0.95rem; line-height: 1.4; }
+  .vocab-item b { color: var(--mke-blue); }
+
+  #landingPage {
+    position: fixed; inset: 0; z-index: 100;
+    background: var(--mke-blue);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 30px;
+  }
+
+  .landing-inner { max-width: 680px; width: 100%; text-align: center; color: white; }
+  .landing-title { font-family: 'Playfair Display', serif; font-size: 3.5rem; margin-bottom: 10px; color: var(--mke-gold); }
+  .landing-btn { padding: 17px 48px; background: var(--mke-gold); color: white; font-weight: 700; border: none; border-radius: 6px; cursor: pointer; margin-top: 20px; text-transform: uppercase; }
+</style>
+</head>
+<body>
+
+<div id="landingPage">
+  <div class="landing-inner">
+    <h1 class="landing-title">Milwaukee Trip</h1>
+    <p>Welcome to the Cream City! You have <strong>$400</strong> for a 3-day trip by Lake Michigan.</p>
+    <p>Try to earn many <b>Fun Points</b>. Don't spend all your money!</p>
+    <button class="landing-btn" onclick="startGame()">Start Trip →</button>
+  </div>
+</div>
+
+<div class="header">
+  <h1>🍺 My Milwaukee Journey</h1>
+</div>
+
+<div class="stats-bar">
+  <div class="stat-item">⭐ Fun Points: <span id="scoreDisplay">0</span></div>
+  <div class="stat-item">💰 Money: <span id="budgetDisplay">$400</span></div>
+</div>
+
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+<div class="game-container" id="gameWindow">
+  <h2 id="stepTitle">Loading...</h2>
+  <p id="stepDesc">Loading the game...</p>
+  <div class="choice-list" id="choiceList"></div>
+  <div class="feedback" id="feedbackBox"></div>
+  <button class="btn-next" id="nextBtn" onclick="nextStep()">Continue →</button>
+</div>
+
+<script>
+let currentStepIndex = 0;
+let score = 0;
+let budget = 400;
+
+const gameData = [
+  // DAY 1
+  {
+    title: "Day 1 — Step 1: Arriving in Milwaukee",
+    desc: "You arrive at Milwaukee Mitchell International Airport. How do you want to travel to your hotel downtown?",
+    choices: [
+      { text: "Take the local MCTS bus route.", cost: 2, pts: 10, fb: "<b>Good job!</b> This is very cheap and easy. You can travel like a real Milwaukee resident." },
+      { text: "Call a rideshare car or taxi.", cost: 35, pts: 20, fb: "<b>Exciting!</b> You see the beautiful Lake Michigan coast from the window, but it costs more." },
+      { text: "Rent a luxury sports car for the weekend.", cost: 180, pts: 35, fb: "<b>Amazing!</b> You cruise down the streets looking stylish, but it takes a huge bite out of your budget." },
+      { text: "Walk along the busy interstate highway with your heavy luggage.", cost: 0, pts: 0, type: "poor", fb: "<b>Stop!</b> Walking on an interstate highway is dangerous and illegal. Choose a proper transport option!" }
+    ]
+  },
+  {
+    title: "Day 1 — Step 2: Morning Walk",
+    desc: "The sun is shining over the water. Where do you want to go first?",
+    choices: [
+      { text: "Visit the Milwaukee Art Museum to see the giant 'wings' open.", cost: 22, pts: 25, fb: "<b>Beautiful!</b> The spectacular white building opens its massive sails over Lake Michigan. Inside, the art is world-class." },
+      { text: "Explore the historic Milwaukee Public Market concourse.", cost: 0, pts: 15, fb: "<b>Interesting!</b> It is free to enter. You see many local vendors selling cheese, bakery items, and fresh seafood." },
+      { text: "Walk along the downtown Riverwalk path.", cost: 0, pts: 10, fb: "<b>Nice!</b> It is free. You can take a photo next to the famous 'Bronze Fonz' statue and enjoy the river view." },
+      { text: "Climb a tall construction crane near the river to look at the city.", cost: 0, pts: 0, type: "poor", fb: "<b>No!</b> That is illegal trespassing and very dangerous. You could easily fall. Choose a safe option!" }
+    ]
+  },
+  {
+    title: "Day 1 — Step 3: Lunch Time",
+    desc: "You are hungry. What typical Wisconsin food do you want for lunch?",
+    choices: [
+      { text: "Buy hot, fried cheese curds from a local tavern.", cost: 10, pts: 15, fb: "<b>Delicious!</b> You eat them hot. The fresh cheese squeaks when you bite it. A true Wisconsin tradition!" },
+      { text: "Eat a famous Wisconsin butter burger at a lively diner.", cost: 15, pts: 18, fb: "<b>Fun!</b> The burger is rich, juicy, and served with delicious crinkle-cut fries." },
+      { text: "Order a classic German bratwurst sausage from a street cart.", cost: 8, pts: 15, fb: "<b>Great choice!</b> The grilled sausage smells amazing and gives you plenty of energy for the afternoon." },
+      { text: "Ask diners outside a restaurant for their left-over food.", cost: 0, pts: 0, type: "poor", fb: "<b>Oh no!</b> That is uncomfortable and impolite. You have enough money to buy your own fresh lunch. Try again!" }
+    ]
+  },
+  {
+    title: "Day 1 — Step 4: The First Night",
+    desc: "It is dark now and the city lights reflect on Lake Michigan. What do you want to do?",
+    choices: [
+      { text: "Buy a ticket for a historic theater show downtown.", cost: 65, pts: 30, fb: "<b>Wonderful!</b> The historic architecture inside the Pabst Theater is stunning, and the performance is fantastic." },
+      { text: "Walk around the Deer District plaza outside the basketball arena.", cost: 0, pts: 15, fb: "<b>Bright!</b> There are huge television screens, neon lights, and lots of passionate sports fans. It is free and fun." },
+      { text: "Go to a high rooftop lounge to view the skyline.", cost: 25, pts: 20, fb: "<b>Nice!</b> You sip a cool drink and watch the traffic move across the Hoan Bridge below." },
+      { text: "Sneak into a private VIP lounge without an invitation.", cost: 0, pts: 0, type: "poor", fb: "<b>Bad idea!</b> Security will quickly notice you and ask you to leave. Choose an honest activity!" }
+    ]
+  },
+  // EMERGENCY 1
+  {
+    title: "🚨 EMERGENCY: Forgotten Transit Pass!",
+    desc: "Oh no! Your bus pass fell out of your pocket. It is gone!",
+    choices: [
+      { text: "Buy a new electronic smart card at a station machine.", cost: 5, pts: 5, fb: "<b>Good.</b> You lose a little money, but now you can ride public transit comfortably again." },
+      { text: "Use your smartphone to tap and pay via the transit app.", cost: 2, pts: 12, fb: "<b>Smart!</b> The bus scanner accepts digital payments. It is very cheap, fast, and modern." },
+      { text: "Sneak through the back doors of the bus so you do not have to pay.", cost: 0, pts: 0, type: "poor", fb: "<b>Don't do that!</b> Evading fares is against the rules and disrespectful. Pay for your ride!" }
+    ]
+  },
+  // DAY 2
+  {
+    title: "Day 2 — Step 5: Day 2 Morning",
+    desc: "Good morning! It is a beautiful day. Where do you want to go?",
+    choices: [
+      { text: "Rent a bicycle to ride along Lake Michigan's Oak Leaf Trail.", cost: 15, pts: 22, fb: "<b>Healthy!</b> You ride past green parks, sandy beaches, and beautiful waves. A fast way to see the coast." },
+      { text: "Visit the Harley-Davidson Museum.", cost: 22, pts: 25, fb: "<b>Important history.</b> You see hundreds of classic, shiny motorcycles and learn about an iconic American brand." },
+      { text: "Walk across the scenic lakefront state park peninsula.", cost: 0, pts: 18, fb: "<b>Great view!</b> Lakeshore State Park is free to enter, and you can take gorgeous photos of the downtown skyscrapers." },
+      { text: "Swim across the deep industrial shipping river to save time.", cost: 0, pts: 0, type: "poor", fb: "<b>No!</b> Swimming is strictly prohibited in the industrial river channels. It is unsafe. Pick something normal!" }
+    ]
+  },
+  {
+    title: "Day 2 — Step 6: Afternoon Lunch",
+    desc: "You are walking in the historic Third Ward neighborhood. What do you want to eat?",
+    choices: [
+      { text: "Eat fresh local cheese and a hot soup in a cozy market corner.", cost: 14, pts: 20, fb: "<b>Yummy!</b> The food is local, warm, and comforting. You enjoy the cozy atmosphere." },
+      { text: "Go to an expensive, upscale gastropub.", cost: 50, pts: 22, fb: "<b>Fancy!</b> You eat a gourmet meal and see a famous local athlete sitting near your table." },
+      { text: "Eat a massive deli sandwich at a historic German restaurant.", cost: 28, pts: 25, fb: "<b>Huge!</b> The sandwich uses traditional recipe meats. It is a classic Old World Milwaukee food experience." },
+      { text: "Eat multiple free tooth-pick samples from gourmet shops instead of a real meal.", cost: 0, pts: 5, type: "poor", fb: "<b>Not ideal!</b> You are still hungry and the shopkeepers look annoyed. Buy a real lunch!" }
+    ]
+  },
+  {
+    title: "Day 2 — Step 7: Visiting a Museum or Conservatory",
+    desc: "Let's explore unique indoor plants or local history. Where do you choose to go?",
+    choices: [
+      { text: "Visit the Mitchell Park Horticultural Conservatory (The Domes).", cost: 9, pts: 24, fb: "<b>Incredible!</b> You walk inside giant glass domes containing a desert oasis and a tropical jungle." },
+      { text: "See regional history exhibits at the Milwaukee Public Museum.", cost: 18, pts: 22, fb: "<b>Cool!</b> You walk through a life-sized recreation of old European streets from the 1800s." },
+      { text: "Walk around free art galleries in the creative district.", cost: 0, pts: 15, fb: "<b>Interesting!</b> It is completely free to enter these small shops and check out new local artwork." },
+      { text: "Touch the fragile exotic plants inside the conservatory when guards look away.", cost: 0, pts: 0, type: "poor", fb: "<b>Stop!</b> You must never touch delicate specimens or museum pieces. You can damage them. Choose better behavior!" }
+    ]
+  },
+  {
+    title: "Day 2 — Step 8: Evening Entertainment",
+    desc: "You head to a lively neighborhood for the evening. What do you want to do?",
+    choices: [
+      { text: "Go to a live indie rock concert.", cost: 35, pts: 25, fb: "<b>Loud and fun!</b> You listen to an awesome local band and dance with friendly Midwesterners." },
+      { text: "Watch the sunset from a bench at Bradford Beach.", cost: 0, pts: 18, fb: "<b>Relaxing!</b> You watch the sky change colors over the endless water horizon as the lighthouse lights up." },
+      { text: "Go on a historic brewery tour with dinner included.", cost: 60, pts: 35, fb: "<b>Luxury!</b> You eat a rich dinner while learning how giant industries shaped the city's past." },
+      { text: "Follow a group of local residents to look closely at their historic houses.", cost: 0, pts: 0, type: "poor", fb: "<b>Awkward!</b> Following strangers is impolite and highly suspicious. Stay friendly and stick to tourist areas!" }
+    ]
+  },
+  // EMERGENCY 2 (Day 3 Morning)
+  {
+    title: "🚨 EMERGENCY: Severe Thunderstorm!",
+    desc: "Suddenly, a severe Midwestern thunderstorm begins! Rain is pouring down heavily!",
+    choices: [
+      { text: "Buy an expensive umbrella from a convenience store.", cost: 15, pts: 5, fb: "<b>Dry!</b> The wind damages the umbrella later, but it keeps you dry for now." },
+      { text: "Go inside the Central Public Library to wait for the storm to pass.", cost: 0, pts: 10, fb: "<b>Smart!</b> Since it is daytime, the historic library is open. You stay dry, save money, and admire the beautiful mosaic ceiling panels." },
+      { text: "Stand under a solitary tree in the park until your clothes are totally soaked.", cost: 0, pts: 0, type: "gameover", fb: "<b>GAME OVER!</b> You get completely wet and catch a bad fever. You must spend the rest of your trip in bed!" }
+    ]
+  },
+  // DAY 3
+  {
+    title: "Day 3 — Step 9: Famous Places",
+    desc: "It is your last day! What landmark area do you want to see?",
+    choices: [
+      { text: "Take a historic boat cruise on the Milwaukee River and Lake Michigan.", cost: 30, pts: 30, fb: "<b>Great!</b> You sail past historic brick buildings and out onto the open lake to see the full skyline." },
+      { text: "Explore the historic structures on Brady Street.", cost: 0, pts: 20, fb: "<b>Beautiful!</b> This vibrant street is filled with historic Italian and Polish heritage storefronts and colorful flags." },
+      { text: "Rent a private motorized boat to cruise around the harbor.", cost: 150, pts: 45, fb: "<b>Amazing!</b> You captain your own little boat past huge cargo ships. Very expensive, but unforgettable." },
+      { text: "Try to hitchhike with a stranger on the road to get across town.", cost: 0, pts: 0, type: "poor", fb: "<b>Dangerous!</b> Hitchhiking with strangers in any city is unsafe. Use the city buses or pedestrian paths!" }
+    ]
+  },
+  {
+    title: "Day 3 — Step 10: Souvenir Lunch",
+    desc: "Where do you want to eat lunch and purchase gifts for your family?",
+    choices: [
+      { text: "Eat at a local creamery and buy artisanal cheese boxes.", cost: 35, pts: 20, fb: "<b>Great food!</b> You eat premium grilled cheese and buy fresh cheddar shapes packed to travel safely." },
+      { text: "Buy a classic local hot dog and a Milwaukee logo T-shirt.", cost: 12, pts: 12, fb: "<b>Classic!</b> You eat quickly outdoors and pick up a nice, affordable graphic shirt." },
+      { text: "Go to an old-fashioned chocolate shop for premium candy gifts.", cost: 40, pts: 22, fb: "<b>Sweet!</b> You sample handmade sea-salt caramels and buy gorgeous boxes for your friends." },
+      { text: "Pack a heavy brick from an old building wall as a free souvenir.", cost: 0, pts: 0, type: "poor", fb: "<b>Not good!</b> Damaging property or carrying dirty construction bricks is not a valid gift. Buy a nice souvenir in a shop!" }
+    ]
+  },
+  {
+    title: "Day 3 — Step 11: Afternoon Relaxation",
+    desc: "Your trip is almost finished. How do you spend your final hours?",
+    choices: [
+      { text: "Go shopping for outdoor gear at the large shops downtown.", cost: 70, pts: 15, fb: "<b>Modern!</b> You explore large storefronts and buy high-quality gear for your next outdoor trip." },
+      { text: "Sit in Cathedral Square Park and listen to local musicians.", cost: 0, pts: 18, fb: "<b>Peaceful!</b> You relax on the green lawn under mature trees and enjoy the outdoor performance." },
+      { text: "Ride the modern Hop streetcar circuit around downtown.", cost: 0, pts: 20, fb: "<b>Great view!</b> The electric streetcar is currently free to ride, taking you comfortably past many beautiful neighborhoods." },
+      { text: "Sit quietly inside an office lobby where you don't work to take a nap.", cost: 0, pts: 0, type: "poor", fb: "<b>Uncomfortable!</b> Building management will notice you sleeping and ask you to leave. Find a nice bench in the public park!" }
+    ]
+  },
+  {
+    title: "Day 3 — Step 12: Final Evening Goodbye",
+    desc: "It is your last hour before heading to the airport. How do you say goodbye?",
+    choices: [
+      { text: "Listen to smooth live music at a legendary jazz club.", cost: 30, pts: 30, fb: "<b>Relaxing sounds!</b> You listen to professional brass musicians play. It is a classy end to your trip." },
+      { text: "Watch the lights glow on the Hoan Bridge from a harbor park.", cost: 0, pts: 15, fb: "<b>Quiet.</b> You look across the dark harbor water at the thousands of shifting colored bridge lights and smile." },
+      { text: "Eat an authentic Wisconsin Friday night fish fry meal.", cost: 25, pts: 35, fb: "<b>Excellent food!</b> You enjoy crispy fish, potato pancakes, and applesauce with wonderful local hospitality." },
+      { text: "Sit inside a dark bus shelter and refuse to go to the terminal.", cost: 0, pts: 0, type: "poor", fb: "<b>Impossible!</b> Your vacation is finished and your flight is scheduled. Say goodbye like a mature tourist!" }
+    ]
+  }
+];
+
+const vocabulary = [
+  { word: "Concourse", def: "A wide, open central area inside a large public building like a market or station." },
+  { word: "Skyscraper", def: "A very tall, modern building common in city commercial areas." },
+  { word: "Souvenir", def: "Something small you purchase to remember a city or a special place." },
+  { word: "Ferry / Cruise Boat", def: "A vessel that carries passengers across a river or a body of water." },
+  { word: "Bistro / Pub", def: "A cozy and casual establishment serving food and drinks." },
+  { word: "Crane", def: "A massive machine used in construction projects to lift heavy materials." },
+  { word: "Peninsula", def: "A piece of land that is almost entirely surrounded by water but connected to the mainland." },
+  { word: "Resident", def: "A person who lives permanently in a particular place or neighborhood." }
+];
+
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
+function loadStep() {
+  const step = gameData[currentStepIndex];
+  document.getElementById("stepTitle").innerText = step.title;
+  document.getElementById("stepDesc").innerHTML = step.desc;
+  
+  const list = document.getElementById("choiceList");
+  list.innerHTML = "";
+  
+  const shuffledChoices = [...step.choices];
+  shuffleArray(shuffledChoices);
+  
+  shuffledChoices.forEach((c) => {
+    const btn = document.createElement("button");
+    btn.className = "choice-btn";
+    const canAfford = budget >= c.cost;
+    
+    if (!canAfford && c.type !== "poor" && c.type !== "gameover") {
+        btn.disabled = true;
+    }
+
+    btn.innerHTML = `<span>${c.text} ${(!canAfford && c.type !== "poor" && c.type !== "gameover") ? '<b style="color:red">(Too expensive!)</b>' : ''}</span>
+      <span class="price-tag cost-tag">$${c.cost}</span>`;
+    
+    btn.onclick = () => selectChoice(c);
+    list.appendChild(btn);
+  });
+  
+  document.getElementById("feedbackBox").style.display = "none";
+  document.getElementById("nextBtn").style.display = "none";
+  
+  const progress = (currentStepIndex / gameData.length) * 100;
+  document.getElementById("progressFill").style.width = progress + "%";
+}
+
+function selectChoice(choice) {
+  const fb = document.getElementById("feedbackBox");
+  
+  if (choice.type === "gameover") {
+    fb.innerHTML = choice.fb;
+    fb.className = "feedback error";
+    fb.style.display = "block";
+    document.querySelectorAll(".choice-btn").forEach(b => b.disabled = true);
+    document.getElementById("nextBtn").innerText = "Restart Game ↩";
+    document.getElementById("nextBtn").onclick = () => location.reload();
+    document.getElementById("nextBtn").style.display = "block";
+    return;
+  }
+
+  if (choice.type === "poor") {
+    fb.innerHTML = choice.fb;
+    fb.className = "feedback error";
+    fb.style.display = "block";
+    return;
+  }
+
+  budget -= choice.cost;
+  score += choice.pts;
+  
+  document.getElementById("scoreDisplay").innerText = score;
+  document.getElementById("budgetDisplay").innerText = "$" + budget;
+  
+  fb.innerHTML = choice.fb;
+  fb.className = "feedback";
+  fb.style.display = "block";
+  
+  document.querySelectorAll(".choice-btn").forEach(b => b.disabled = true);
+  document.getElementById("nextBtn").style.display = "block";
+}
+
+function nextStep() {
+  currentStepIndex++;
+  if (currentStepIndex >= gameData.length) {
+    renderFinalScreen();
+  } else {
+    loadStep();
+  }
+}
+
+function renderFinalScreen() {
+  let title, message;
+  
+  if (score >= 260) {
+    title = "🥇 Champion of Cream City!";
+    message = "Amazing! You had a flawless trip. You saw the finest sights, ate excellent local foods, and managed your budget like an expert.";
+  } else if (score >= 160) {
+    title = "🥈 Experienced Explorer";
+    message = "Great job! You enjoyed a fantastic, classic Milwaukee vacation. You experienced iconic landmarks and handled the storm well.";
+  } else {
+    title = "🥉 Midwest Survivor";
+    message = "You made it back home safely! The journey had some difficult moments, but you discovered a lot about this great lakefront city.";
+  }
+
+  let vocabHTML = `<div class="vocab-section"><h3>New Words Learned:</h3><div class="vocab-grid">`;
+  vocabulary.forEach(v => { vocabHTML += `<div class="vocab-item"><b>${v.word}:</b> ${v.def}</div>`; });
+  vocabHTML += `</div></div>`;
+
+  document.getElementById("gameWindow").innerHTML = `
+    <h2 style="color:var(--mke-blue)">${title}</h2>
+    <p>${message}</p>
+    <hr>
+    <div style="font-size: 1.2rem; margin: 20px 0;">
+      <p>Final Fun Points: <b>${score}</b></p>
+      <p>Money Left: <b>$${budget}</b></p>
+    </div>
+    ${vocabHTML}
+    <button class="btn-next" style="display:block" onclick="location.reload()">Play Again ↩</button>
+  `;
+  document.getElementById("progressFill").style.width = "100%";
+}
+
+function startGame() { 
+  document.getElementById("landingPage").style.display = "none"; 
+  loadStep();
+}
+</script>
+</body>
+</html>

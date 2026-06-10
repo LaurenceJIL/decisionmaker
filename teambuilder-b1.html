@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Culture Architect: 12-Day Marathon</title>
+<title>Teambuilding Day: The Culture Boss</title>
 <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700&family=Space+Mono&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -19,25 +19,28 @@ body{font-family:'Lexend',sans-serif;background:var(--bg);color:var(--text);marg
 .stat-val {display: block; font-size: 1.5rem; font-weight: 700; font-family: 'Space Mono', monospace;}
 .stat-label {font-size: 0.75rem; text-transform: uppercase; color: #94A3B8; letter-spacing: 1px;}
 
-.day-badge {background: var(--primary); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-bottom: 15px; display: inline-block;}
-h1 {font-size: 1.8rem; margin: 0 0 15px 0; color: var(--accent);}
-.scenario-text {font-size: 1.1rem; line-height: 1.6; color: #CBD5E1; margin-bottom: 30px; min-height: 80px;}
+.day-badge {background: var(--accent); color: #0F172A; padding: 6px 16px; border-radius: 20px; font-size: 0.9rem; font-weight: 700; margin-bottom: 15px; display: inline-block;}
+h1 {font-size: 2.2rem; margin: 0 0 15px 0; color: var(--primary); text-shadow: 0 2px 4px rgba(0,0,0,0.2);}
+.scenario-text {font-size: 1.15rem; line-height: 1.6; color: #CBD5E1; margin-bottom: 30px; min-height: 80px;}
 
 .choice-list {display: grid; gap: 12px;}
 .choice-btn {
     background: #334155; border: 1px solid #475569; color: white; padding: 18px; text-align: left;
     border-radius: 12px; cursor: pointer; transition: 0.2s; font-size: 1rem; line-height: 1.4;
+    font-weight: 600;
 }
-.choice-btn:hover:not(:disabled) {background: #475569; border-color: var(--primary); transform: translateX(5px);}
-.choice-btn:disabled {opacity: 0.6; cursor: default;}
+.choice-btn:hover:not(:disabled) {background: var(--primary); border-color: white; transform: scale(1.02); box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);}
+.choice-btn:disabled {opacity: 0.5; cursor: default; transform: none;}
 
-.feedback {margin-top: 25px; padding: 20px; border-radius: 12px; display: none; border-left: 5px solid var(--primary); background: rgba(99, 102, 241, 0.1);}
+.feedback {margin-top: 25px; padding: 20px; border-radius: 12px; display: none; border-left: 5px solid var(--accent); background: rgba(245, 158, 11, 0.1); font-size: 1.05rem;}
 .next-btn {
-    background: var(--success); color: white; border: none; padding: 15px 30px; 
-    border-radius: 8px; cursor: pointer; font-weight: 700; margin-top: 20px; width: 100%;
+    background: var(--success); color: white; border: none; padding: 18px 30px; 
+    border-radius: 12px; cursor: pointer; font-weight: 700; margin-top: 20px; width: 100%;
+    font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px; transition: 0.2s;
 }
+.next-btn:hover {opacity: 0.9; transform: translateY(-2px);}
 .hidden {display: none;}
-.glossary {margin-top: 40px; font-size: 0.85rem; color: #94A3B8; border-top: 1px solid #334155; padding-top: 20px;}
+.glossary {margin-top: 40px; font-size: 0.85rem; color: #94A3B8; border-top: 1px solid #334155; padding-top: 20px; line-height: 1.5;}
 .glossary b {color: var(--accent);}
 </style>
 </head>
@@ -45,154 +48,161 @@ h1 {font-size: 1.8rem; margin: 0 0 15px 0; color: var(--accent);}
 
 <div class="container">
     <div id="intro-screen" class="card">
-        <h1>The Culture Architect</h1>
-        <p>You have 12 days to organize the company's annual "Innovation Summit." Your goal is to keep <b>Morale</b> high, stay within <b>Budget</b>, and maximize <b>Innovation</b>. One wrong move could cost you your job.</p>
-        <button class="next-btn" onclick="startSim()">Begin Day 1</button>
+        <h1>Welcome to Teambuilding Day!</h1>
+        <p>You have exactly <b>12 days</b> to plan the company's big <b>Innovation Summit</b>! 🚀</p>
+        <p>Your goals are simple but challenging:</p>
+        <ul>
+            <li>Keep employee <b>Morale</b> high (happy workers work better!).</li>
+            <li>Do not run out of <b>Budget</b> (money is tight!).</li>
+            <li>Get as many <b>Innovation</b> points as possible.</li>
+        </ul>
+        <p>⚠️ <b>Careful:</b> If you make terrible decisions, you will get fired immediately! Good luck, Boss!</p>
+        <button class="next-btn" onclick="startSim()">Let's Start Day 1!</button>
     </div>
 
     <div id="game-screen" class="card hidden">
         <div class="stats-grid">
-            <div class="stat-card"><span class="stat-label">Day</span><span id="stat-d" class="stat-val">1/12</span></div>
-            <div class="stat-card"><span class="stat-label">Morale</span><span id="stat-m" class="stat-val">50</span></div>
-            <div class="stat-card"><span class="stat-label">Budget</span><span id="stat-b" class="stat-val">$5,000</span></div>
-            <div class="stat-card"><span class="stat-label">Innovation</span><span id="stat-i" class="stat-val">0</span></div>
+            <div class="stat-card"><span class="stat-label">Progress</span><span id="stat-d" class="stat-val">1/12</span></div>
+            <div class="stat-card"><span class="stat-label">😃 Morale</span><span id="stat-m" class="stat-val">50</span></div>
+            <div class="stat-card"><span class="stat-label">💰 Budget</span><span id="stat-b" class="stat-val">$5,000</span></div>
+            <div class="stat-card"><span class="stat-label">💡 Innovation</span><span id="stat-i" class="stat-val">0</span></div>
         </div>
 
         <div id="day-container">
-            <span class="day-badge" id="day-badge">Monday</span>
-            <div class="scenario-text" id="scenario-text">Scenario loading...</div>
+            <span class="day-badge" id="day-badge">Day 1</span>
+            <div class="scenario-text" id="scenario-text">Loading your first task...</div>
             <div class="choice-list" id="choice-list"></div>
             
             <div id="feedback-box" class="feedback">
                 <p id="feedback-text"></p>
-                <button class="next-btn" id="next-day-btn" onclick="nextDay()">End Day</button>
+                <button class="next-btn" id="next-day-btn" onclick="nextDay()">Finish Day & Go to Next</button>
             </div>
         </div>
     </div>
 
     <div id="end-screen" class="card hidden">
-        <h1 id="end-title">Simulation Complete</h1>
+        <h1 id="end-title">Game Over</h1>
         <p id="end-body"></p>
-        <button class="next-btn" onclick="location.reload()">Restart Simulation</button>
+        <button class="next-btn" onclick="location.reload()">Play Again 🔄</button>
     </div>
 
     <div class="glossary">
-        <p><b>Glossary:</b> 
-        <b>Burn Rate:</b> How fast you spend your budget. | 
-        <b>Buy-in:</b> Support from the team for an idea. | 
-        <b>Bandwidth:</b> The mental capacity or time to handle a task. | 
-        <b>Scalability:</b> The ability to grow the project larger.</p>
+        <p><b>Useful Words to Know:</b><br> 
+        <b>Burn Rate:</b> How fast you spend your money. | 
+        <b>Buy-in:</b> Getting people to agree with your plan and support you. | 
+        <b>Bandwidth:</b> The time, energy, and mental space people have to do work. | 
+        <b>Scalability:</b> The ability of a plan or system to grow bigger without breaking down.</p>
     </div>
 </div>
 
 <script>
 const DAYS = [
     {
-        name: "Day 1: The Venue",
-        text: "You need a location for the summit. The CEO wants 'Grandeur', but the CFO wants 'Savings'.",
+        name: "Day 1: Finding the Perfect Place",
+        text: "You need to find a location for the summit. The CEO wants a fancy, expensive place. The CFO wants to save every dollar. What do you do?",
         choices: [
-            {text: "Book a high-tech hotel downtown. (High Innovation, Low Budget)", m: 5, b: -2500, i: 15, fb: "The team is excited by the tech, but your burn rate just skyrocketed."},
-            {text: "Host it in the company cafeteria. (High Budget, Low Morale)", m: -15, b: -200, i: 2, fb: "The team feels undervalued. 'Is this all we're worth?' they ask."},
-            {text: "Rent a co-working creative hub. (Balanced)", m: 10, b: -1000, i: 8, fb: "A smart compromise. The vibe is modern and the budget is safe."}
+            {text: "Book a cool, modern hotel downtown.", m: 5, b: -2500, i: 15, fb: "The team loves the beautiful rooms! However, your burn rate is now very high. You spent a lot of money!"},
+            {text: "Use the company cafeteria for free.", m: -15, b: -200, i: 2, fb: "Oh no! The employees feel cheap and sad. They think the bosses do not care about them."},
+            {text: "Rent a creative, shared co-working office.", m: 10, b: -1000, i: 8, fb: "Great choice! It feels fresh and modern, but the price is fair. Everyone is happy."}
         ]
     },
     {
-        name: "Day 2: Speaker Selection",
-        text: "You need a keynote speaker. Who do you hire?",
+        name: "Day 2: Choosing the Guest Speaker",
+        text: "Who will give the big speech at the event? You need someone interesting!",
         choices: [
-            {text: "A famous celebrity influencer. (Massive Cost, High Morale)", m: 20, b: -3000, i: 0, fb: "Everyone loves the selfies, but nobody learned anything about innovation."},
-            {text: "The company's Internal CTO. (Save Money, High Innovation)", m: 0, b: 0, i: 20, fb: "Deeply technical and free! However, some staff find it a bit boring."},
-            {text: "A respected industry expert. (Moderate Cost/Innovation)", m: 5, b: -1200, i: 10, fb: "Professional and polished. A solid choice for the brand."}
+            {text: "Hire a famous social media influencer.", m: 20, b: -3000, i: 0, fb: "The staff loves taking selfies! But the speaker knows nothing about business or technology. Zero innovation."},
+            {text: "Ask our own Chief Technology Officer (CTO) to speak.", m: 0, b: 0, i: 20, fb: "The speech is very smart and costs $0! However, the presentation is a bit boring and people feel sleepy."},
+            {text: "Invite a respected expert from the tech industry.", m: 5, b: -1200, i: 10, fb: "Very professional! The speech is interesting and it makes our company look great."}
         ]
     },
     {
-        name: "Day 3: Catering Crisis",
-        text: "The caterer cancelled. You need food for 200 people by tomorrow.",
+        name: "Day 3: Emergency! No Food!",
+        text: "The catering company canceled at the last minute! You need to feed 200 people by tomorrow morning!",
         choices: [
-            {text: "Order high-end organic meal boxes. (Fast but Expensive)", m: 10, b: -1500, i: 0, fb: "Delicious and on-trend. The team's buy-in increases."},
-            {text: "Standard Pizza delivery for everyone. (Cheap but Greasy)", m: -5, b: -400, i: 0, fb: "People are full, but the afternoon slump kills productivity."},
-            {text: "Ask staff to bring a 'potluck' dish. (Disaster)", m: -25, b: 0, i: -5, fb: "A management failure. Staff feel they are doing your job for you."}
+            {text: "Order healthy, expensive lunch boxes.", m: 10, b: -1500, i: 0, fb: "The food is amazing and looks high-quality. You get a lot of buy-in from the team!"},
+            {text: "Order standard fast-food pizza for everyone.", m: -5, b: -400, i: 0, fb: "People eat, but cheap pizza makes everyone tired in the afternoon. Energy levels drop."},
+            {text: "Ask employees to bring food from home to share.", m: -25, b: 0, i: -5, fb: "Disaster! Employees think this is your job, not theirs. They are angry at your bad planning."}
         ]
     },
     {
-        name: "Day 4: Staffing Bandwidth",
-        text: "Your core team is working 12-hour days. They look exhausted.",
+        name: "Day 4: Tired Workers",
+        text: "Your planning team is working 12 hours a day. They look exhausted and stressed. What is your plan?",
         choices: [
-            {text: "Hire temporary event contractors. (Relieve Stress, Save Morale)", m: 15, b: -1000, i: 0, fb: "The pressure drops. Your team finally has the bandwidth to breathe."},
-            {text: "Offer 'Pizza and Coffee' and ask them to push through. (Risky)", m: -10, b: -50, i: 5, fb: "One lead developer just quit. This isn't scalable."},
-            {text: "Cancel non-essential tasks to focus on the summit. (Neutral)", m: 5, b: 0, i: -2, fb: "A safe move, though other departments are complaining about delays."}
+            {text: "Hire extra freelance helpers to share the work.", m: 15, b: -1000, i: 0, fb: "Smart! The pressure stops immediately. Your team now has the bandwidth to rest and recover."},
+            {text: "Buy them free snacks and tell them to keep working hard.", m: -10, b: -50, i: 5, fb: "Bad news. A top developer quit today. This crazy workload is not sustainable or scalable!"},
+            {text: "Pause regular small jobs so the team can focus only on the summit.", m: 5, b: 0, i: -2, fb: "A safe choice. However, other departments are now complaining because their work is delayed."}
         ]
     },
     {
-        name: "Day 5: The Gift Bags",
-        text: "What 'Swag' will attendees receive?",
+        name: "Day 5: Free Gift Bags",
+        text: "What kind of free corporate gifts will you give to the guests?",
         choices: [
-            {text: "Premium leather notebooks and tech pens. (Quality)", m: 10, b: -800, i: 2, fb: "The team feels the brand is high-quality."},
-            {text: "Cheap plastic fidget spinners with the logo. (Waste)", m: -5, b: -200, i: -2, fb: "These end up in the bin by lunchtime. A waste of budget."},
-            {text: "No gifts. Focus on a digital 'NFT' badge. (Innovative but Weird)", m: 0, b: -50, i: 12, fb: "The tech team loves it; the sales team is confused."}
+            {text: "Give nice leather notebooks with premium pens.", m: 10, b: -800, i: 2, fb: "Excellent! The team feels important and the gifts look high-end and professional."},
+            {text: "Buy cheap plastic toys with the company logo.", m: -5, b: -200, i: -2, fb: "Most people throw them into the trash immediately. You wasted your budget on plastic garbage."},
+            {text: "Give no physical gifts. Send a cool digital token instead.", m: 0, b: -50, i: 12, fb: "The tech engineers think this is cool and futuristic! The sales team is just confused."}
         ]
     },
     {
-        name: "Day 6: Critical Bug",
-        text: "The event app just crashed during the rehearsal.",
+        name: "Day 6: App Crash!",
+        text: "The official summit phone app completely broke during the final test! What do you do?",
         choices: [
-            {text: "Pay a developer double to fix it overnight. (Expensive)", m: 0, b: -600, i: 10, fb: "It works perfectly now, but your budget is bleeding."},
-            {text: "Switch back to paper agendas and posters. (Safe)", m: -5, b: -100, i: -10, fb: "Old-fashioned, but it works. Innovation takes a hit."},
-            {text: "Ignore it and hope it works on the day. (Gamble)", m: -10, b: 0, i: -5, fb: "It crashed again. The CEO's presentation was ruined."}
+            {text: "Pay an engineer extra money to fix it tonight.", m: 0, b: -600, i: 10, fb: "It works perfectly now! But wow, you had to spend a lot of cash very quickly."},
+            {text: "Forget the app. Print schedules on regular paper.", m: -5, b: -100, i: -10, fb: "It works, but paper feels old-fashioned. Your innovation score goes down."},
+            {text: "Ignore the problem and hope it works tomorrow.", m: -10, b: 0, i: -5, fb: "Oh no! The app crashed again during the opening speech. The CEO is very embarrassed and angry."}
         ]
     },
     {
-        name: "Day 7: External PR",
-        text: "A major tech blog wants to interview you about the summit.",
+        name: "Day 7: News and Media Opportunity",
+        text: "A famous tech magazine wants an interview about your upcoming summit. Do you accept?",
         choices: [
-            {text: "Spend time preparing a full press kit. (Time intensive)", m: 5, b: -200, i: 15, fb: "Great visibility! The company looks like a leader in the space."},
-            {text: "Decline the interview to focus on logistics. (Safe)", m: 0, b: 0, i: 0, fb: "You stay on schedule, but nobody outside the office knows what you're doing."},
-            {text: "Ask a junior staffer to do the interview. (Risky)", m: -5, b: 0, i: 5, fb: "They said something confusing. The PR department is unhappy."}
+            {text: "Spend hours creating a beautiful media package for them.", m: 5, b: -200, i: 15, fb: "Great publicity! The news makes our company look like a modern leader in the market."},
+            {text: "Say no to the interview and focus on your daily work list.", m: 0, b: 0, i: 0, fb: "You stay on schedule, but nobody outside the company knows about your cool event."},
+            {text: "Let a young, new intern do the interview alone.", m: -5, b: 0, i: 5, fb: "The intern said wrong things to the reporter. The PR department is now working hard to fix the mess!"}
         ]
     },
     {
-        name: "Day 8: CEO Demand",
-        text: "The CEO wants a live 'Ice Sculpture' of the company logo at the entrance.",
+        name: "Day 8: The Boss's Special Request",
+        text: "The CEO wants a giant ice sculpture of the company logo at the entrance. What do you say?",
         choices: [
-            {text: "Agree to the request. (Political Move)", m: 2, b: -900, i: 0, fb: "The CEO is happy, but the budget is dangerously low."},
-            {text: "Suggest a 'Digital Hologram' logo instead. (Innovation)", m: 5, b: -400, i: 15, fb: "The CEO is impressed by your forward-thinking. Great buy-in!"},
-            {text: "Respectfully decline due to budget constraints. (Strict)", m: -5, b: 0, i: 0, fb: "The budget is safe, but the CEO thinks you lack 'vision'."}
+            {text: "Say yes immediately and order the ice sculpture.", m: 2, b: -900, i: 0, fb: "The CEO smiles, but your budget is now dangerously low. Ice is expensive!"},
+            {text: "Suggest a cool digital hologram of the logo instead.", m: 5, b: -400, i: 15, fb: "Wow! The boss is super impressed by your high-tech idea. You get great buy-in!"},
+            {text: "Say no politely because you do not have the money.", m: -5, b: 0, i: 0, fb: "Your budget is safe, but the CEO thinks you have no imagination or creative vision."}
         ]
     },
     {
-        name: "Day 9: Transport Troubles",
-        text: "The shuttle buses for the attendees have broken down.",
+        name: "Day 9: Bus Problems!",
+        text: "The shuttle buses bringing guests to the event broke down on the road! What now?",
         choices: [
-            {text: "Book private Ubers for everyone. (Luxury/Expensive)", m: 15, b: -1200, i: 0, fb: "Ultra-premium service! But look at your bank balance..."},
-            {text: "Ask people to walk the 15 minutes to the venue. (Cheap)", m: -20, b: 0, i: 0, fb: "It's raining. Everyone arrives wet and angry. Morale plummeted."},
-            {text: "Organize a group 'walk and talk' networking session. (Spin)", m: 5, b: 0, i: 5, fb: "You turned a failure into a networking opportunity. Clever!"}
+            {text: "Pay for luxury private cars to pick everyone up.", m: 15, b: -1200, i: 0, fb: "The guests feel like kings! But your wallet takes a painful hit. So much money spent!"},
+            {text: "Tell everyone to walk 15 minutes to the venue.", m: -20, b: 0, i: 0, fb: "It starts raining! Everyone arrives wet, cold, and angry. Morale drops like a stone."},
+            {text: "Turn the walk into a fun, outdoor 'networking walk'.", m: 5, b: 0, i: 5, fb: "Genius! You turned a bad problem into a fun social activity. Very professional!"}
         ]
     },
     {
-        name: "Day 10: Surprise Holiday",
-        text: "The board announced a surprise half-day holiday. Your setup time is cut in half.",
+        name: "Day 10: Lost Time",
+        text: "The bosses unexpectedly gave everyone a half-day holiday. Now you have 50% less time to prepare!",
         choices: [
-            {text: "Ask for volunteers to work through. (Double Pay)", m: -5, b: -700, i: 0, fb: "The job gets done, but people are starting to burn out."},
-            {text: "Simplify the setup and remove complex tech. (Safe)", m: 0, b: 0, i: -10, fb: "The summit looks a bit basic, but it's ready on time."},
-            {text: "Work 24 hours yourself to finish it. (Personal Sacrifice)", m: 10, b: 0, i: 5, fb: "The team respects your dedication, but you look like a zombie."}
+            {text: "Pay staff extra money to work during their holiday.", m: -5, b: -700, i: 0, fb: "The work gets done, but the team is extremely tired and close to burnout."},
+            {text: "Make the event simpler. Remove the complex tech parts.", m: 0, b: 0, i: -10, fb: "The stage looks a bit empty and simple, but everything works and you are on time."},
+            {text: "Work 24 hours alone without sleep to finish everything.", m: 10, b: 0, i: 5, fb: "The team respects your hard work! But you look like a zombie and have zero energy."}
         ]
     },
     {
-        name: "Day 11: The Pre-Party",
-        text: "It's the night before. Do you host a social mixer?",
+        name: "Day 11: The Night Before the Event",
+        text: "Tomorrow is the big launch! Should you host a small party tonight?",
         choices: [
-            {text: "Open bar and DJ. (High Morale, High Cost)", m: 25, b: -1500, i: 0, fb: "Great vibes! But half the team is hungover on the big day."},
-            {text: "Low-key coffee and networking. (Balanced)", m: 10, b: -300, i: 5, fb: "Productive and calm. Everyone is ready for tomorrow."},
-            {text: "No pre-party. Everyone goes home early. (Focus)", m: -5, b: 0, i: 0, fb: "People are rested, but there's no excitement building."}
+            {text: "Throw a huge party with a DJ and a free open bar.", m: 25, b: -1500, i: 0, fb: "It was a wild party! Unfortunately, your team is completely exhausted and sick on the morning of the summit."},
+            {text: "Host a quiet, nice coffee and talking session.", m: 10, b: -300, i: 5, fb: "A nice, relaxed evening. Everyone goes to bed early and feels ready for tomorrow."},
+            {text: "Cancel all parties and tell everyone to go home early.", m: -5, b: 0, i: 0, fb: "The team sleeps well, but you missed a good chance to excite the group."}
         ]
     },
     {
-        name: "Day 12: THE BIG DAY",
-        text: "The Summit is happening. A rival company just launched a similar product.",
+        name: "Day 12: THE BIG SUMMIT DAY!",
+        text: "The summit is happening right now! Suddenly, your biggest competitor launches the exact same product!",
         choices: [
-            {text: "Change the keynote to address the rival's flaws. (Aggressive)", m: 5, b: 0, i: 20, fb: "Bold! You've pivoted the whole company strategy in one hour."},
-            {text: "Stick to the plan. (Consistent)", m: 5, b: 0, i: 5, fb: "A solid event. You stayed professional and focused on your own path."},
-            {text: "Panic and cancel the afternoon workshops. (Weakness)", m: -20, b: 0, i: -10, fb: "The event ended early. It looked like a defeat."}
+            {text: "Change your speech immediately to show why your competitor's product is worse.", m: 5, b: 0, i: 20, fb: "A brave and powerful move! You changed the strategy fast and won the crowd over."},
+            {text: "Don't panic. Keep your original presentation plan.", m: 5, b: 0, i: 5, fb: "The event is a big success. You stayed calm and finished your goals perfectly."},
+            {text: "Panic and cancel the afternoon workshops.", m: -20, b: 0, i: -10, fb: "Stopping early made the company look weak. People think we lost the battle."}
         ]
     }
 ];
@@ -203,17 +213,15 @@ let state = {
     b: 5000,
     i: 0
 };
+let choiceLocked = false;
 
-/**
- * Fisher-Yates Shuffle Algorithm
- * Ensures answer choices are truly randomized.
- */
 function shuffleArray(array) {
-    for (let i = array.length - 1; i > 0; i--) {
+    let arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
+        [arr[i], arr[j]] = [arr[j], arr[i]];
     }
-    return array;
+    return arr;
 }
 
 function startSim() {
@@ -223,20 +231,21 @@ function startSim() {
 }
 
 function renderDay() {
-    if (state.d > 12) {
+    choiceLocked = false;
+    if (state.d > DAYS.length) {
         endSim();
         return;
     }
 
     const day = DAYS[state.d - 1];
-    document.getElementById('day-badge').innerText = day.name;
+    // Dynamic Chronology Fix: Always shows actual Day X
+    document.getElementById('day-badge').innerText = `Day ${state.d}: ${day.name.split(': ')[1] || day.name}`;
     document.getElementById('scenario-text').innerText = day.text;
     
     const list = document.getElementById('choice-list');
     list.innerHTML = '';
     
-    // Requirements: Randomized order every time, data integrity maintained
-    const shuffledChoices = shuffleArray([...day.choices]);
+    const shuffledChoices = shuffleArray(day.choices);
 
     shuffledChoices.forEach(c => {
         const btn = document.createElement('button');
@@ -251,11 +260,13 @@ function renderDay() {
 }
 
 function handleChoice(c) {
+    if (choiceLocked) return;
+    choiceLocked = true;
+    
     state.m += c.m;
     state.b += c.b;
     state.i += c.i;
 
-    // Constraints
     if (state.m < 0) state.m = 0;
     if (state.i < 0) state.i = 0;
 
@@ -267,17 +278,27 @@ function handleChoice(c) {
 
     updateStats();
 
+    // Game Over Conditions
     if (state.b < -500) {
-        triggerGameOver("The CFO found out you are $500 over budget. You were fired for gross financial negligence.");
+        triggerGameOver("❌ GAME OVER: The finance team saw that you are over $500 in debt! You are fired for spending too much money!");
     } else if (state.m <= 5) {
-        triggerGameOver("The entire team signed a petition for your removal. Morale is so low that work has stopped.");
+        triggerGameOver("❌ GAME OVER: Morale dropped to zero! The entire staff signed a paper saying they hate working with you. They quit!");
     }
 }
 
 function updateStats() {
-    document.getElementById('stat-d').innerText = `${state.d}/12`;
+    document.getElementById('stat-d').innerText = `${state.d}/${DAYS.length}`;
     document.getElementById('stat-m').innerText = state.m;
-    document.getElementById('stat-b').innerText = `$${state.b}`;
+    
+    // Formatting negative money cleanly
+    if(state.b < 0) {
+        document.getElementById('stat-b').innerText = `-$${Math.abs(state.b)}`;
+        document.getElementById('stat-b').style.color = "var(--danger)";
+    } else {
+        document.getElementById('stat-b').innerText = `$${state.b}`;
+        document.getElementById('stat-b').style.color = "var(--text)";
+    }
+    
     document.getElementById('stat-i').innerText = state.i;
 }
 
@@ -289,7 +310,7 @@ function nextDay() {
 function triggerGameOver(msg) {
     document.getElementById('game-screen').classList.add('hidden');
     document.getElementById('end-screen').classList.remove('hidden');
-    document.getElementById('end-title').innerText = "🛑 YOU ARE FIRED";
+    document.getElementById('end-title').innerText = "🛑 YOU ARE FIRED!";
     document.getElementById('end-body').innerText = msg;
 }
 
@@ -301,18 +322,18 @@ function endSim() {
     let rank, msg;
 
     if (score > 60 && state.b >= 0) {
-        rank = "🌟 THE LEGENDARY ARCHITECT";
-        msg = "You are a master of management. You navigated 12 days of chaos and the team is stronger than ever.";
+        rank = "🌟 RATING: THE LEGENDARY BOSS!";
+        msg = "Incredible job! You handled the problems like a true leader. The event was amazing and the company is stronger than ever!";
     } else if (score > 30) {
-        rank = "👍 THE SURVIVOR";
-        msg = "It wasn't perfect, and the budget is tight, but you finished the week. Good job.";
+        rank = "👍 RATING: THE SURVIVOR!";
+        msg = "You made some mistakes and spent almost all your money, but the event happened! You survived the challenge. Nice work!";
     } else {
-        rank = "⚠️ THE BUREAUCRAT";
-        msg = "The event is over, but morale is low. People are updating their LinkedIn profiles to leave.";
+        rank = "⚠️ RATING: THE BORING MANAGER";
+        msg = "The event is over, but nobody is happy. Morale is super low and workers are looking for new jobs elsewhere. Better luck next time.";
     }
 
     document.getElementById('end-title').innerText = rank;
-    document.getElementById('end-body').innerText = `${msg} Final Metrics - Morale: ${state.m}, Innovation: ${state.i}, Budget: $${state.b}`;
+    document.getElementById('end-body').innerText = `${msg}\n\n🏆 Final Scores -> Morale: ${state.m} | Innovation: ${state.i} | Leftover Budget: $${state.b}`;
 }
 </script>
 </body>
