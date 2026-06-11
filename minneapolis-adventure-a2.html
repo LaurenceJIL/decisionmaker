@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Minneapolis Adventure — A2 Level 3-Day Trip</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght=700&family=Lato:wght=400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --msp-purple: #4A2E80;
+    --msp-silver: #D1CDDA;
+    --msp-gold: #F3CA40;
+    --danger: #c0392b;
+    --text: #2c3e50;
+    --bg: #f0f2f5;
+  }
+
+  body { font-family: 'Lato', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; align-items: center; }
+  .header { background: var(--msp-purple); color: white; width: 100%; padding: 15px; text-align: center; position: sticky; top: 0; z-index: 10; border-bottom: 5px solid var(--msp-gold); }
+  
+  .stats-bar { display: flex; justify-content: space-around; background: #fff; width: 100%; padding: 10px 0; border-bottom: 2px solid #ddd; font-weight: bold; }
+  .stat-item { display: flex; align-items: center; gap: 5px; }
+
+  .progress-bar { width: 100%; height: 8px; background: #ddd; }
+  .progress-fill { height: 100%; background: var(--msp-gold); width: 0%; transition: 0.5s; }
+
+  .game-container { max-width: 800px; width: 90%; margin: 20px auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); min-height: 400px; }
+  .choice-list { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+
+  .choice-btn { 
+    padding: 18px; border: 2px solid #eee; border-radius: 8px; background: white; 
+    cursor: pointer; font-size: 1rem; text-align: left; transition: 0.2s;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .choice-btn:hover:not(:disabled) { border-color: var(--msp-purple); background: #fbfaff; transform: translateX(5px); }
+  .choice-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+  
+  .price-tag { padding: 2px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: bold; }
+  .cost-tag { background: #eee; color: #333; }
+
+  .feedback { margin-top: 20px; padding: 20px; border-radius: 8px; display: none; line-height: 1.6; border-left: 5px solid var(--msp-purple); font-size: 1.05rem; }
+  .feedback.error { border-left-color: var(--danger); background-color: #fdf2f2; }
+  .btn-next { display: none; margin-top: 20px; padding: 15px 30px; background: var(--msp-purple); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; font-size: 1.1rem; }
+
+  .vocab-section { margin-top: 30px; background: #f9f9f9; padding: 20px; border-radius: 10px; text-align: left; border-top: 4px solid var(--msp-gold); }
+  .vocab-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px; }
+  .vocab-item { font-size: 0.95rem; line-height: 1.4; }
+  .vocab-item b { color: var(--msp-purple); }
+
+  #landingPage {
+    position: fixed; inset: 0; z-index: 100;
+    background: var(--msp-purple);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 30px;
+  }
+
+  .landing-inner { max-width: 680px; width: 100%; text-align: center; color: white; }
+  .landing-title { font-family: 'Playfair Display', serif; font-size: 3.5rem; margin-bottom: 10px; color: var(--msp-gold); }
+  .landing-btn { padding: 17px 48px; background: var(--msp-gold); color: #222; font-weight: 700; border: none; border-radius: 6px; cursor: pointer; margin-top: 20px; text-transform: uppercase; }
+</style>
+</head>
+<body>
+
+<div id="landingPage">
+  <div class="landing-inner">
+    <h1 class="landing-title">Minneapolis Trip</h1>
+    <p>Welcome to the Twin Cities! You have <strong>$400</strong> for a 3-day trip near the Mississippi River.</p>
+    <p>Try to earn many <b>Fun Points</b>. Don't spend all your money! Discover the legacy of Prince!</p>
+    <button class="landing-btn" onclick="startGame()">Start Trip →</button>
+  </div>
+</div>
+
+<div class="header">
+  <h1>☔ My Minneapolis Journey</h1>
+</div>
+
+<div class="stats-bar">
+  <div class="stat-item">⭐ Fun Points: <span id="scoreDisplay">0</span></div>
+  <div class="stat-item">💰 Money: <span id="budgetDisplay">$400</span></div>
+</div>
+
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+<div class="game-container" id="gameWindow">
+  <h2 id="stepTitle">Loading...</h2>
+  <p id="stepDesc">Loading the game...</p>
+  <div class="choice-list" id="choiceList"></div>
+  <div class="feedback" id="feedbackBox"></div>
+  <button class="btn-next" id="nextBtn" onclick="nextStep()">Continue →</button>
+</div>
+
+<script>
+let currentStepIndex = 0;
+let score = 0;
+let budget = 400;
+
+const gameData = [
+  // DAY 1
+  {
+    title: "Day 1 — Step 1: Arriving in the Twin Cities",
+    desc: "You arrive at Minneapolis-Saint Paul International Airport (MSP). How do you want to travel to your downtown hotel?",
+    choices: [
+      { text: "Take the efficient Metro Blue Line light rail train.", cost: 3, pts: 10, fb: "<b>Good job!</b> This is very cheap, fast, and green. It goes directly from the terminal to downtown." },
+      { text: "Order a rideshare car or taxi downtown.", cost: 38, pts: 20, fb: "<b>Comfortable!</b> You enjoy a private ride and see the city skyscrapers growing larger through the window." },
+      { text: "Rent a purple limousine to ride like a rockstar.", cost: 190, pts: 35, fb: "<b>Wow!</b> You feel like Prince himself, but it takes a massive bite out of your holiday budget." },
+      { text: "Walk along the busy runway tracks with your heavy suitcase.", cost: 0, pts: 0, type: "poor", fb: "<b>Stop!</b> Walking on airport grounds is strictly illegal and extremely dangerous. Choose a proper transit option!" }
+    ]
+  },
+  {
+    title: "Day 1 — Step 2: Morning Exploration",
+    desc: "The morning air is fresh. Where do you want to start your urban exploration?",
+    choices: [
+      { text: "Visit the Minneapolis Sculpture Garden to see the famous 'Spoonbridge and Cherry'.", cost: 0, pts: 25, fb: "<b>Iconic!</b> It is completely free. You take an amazing photograph in front of the giant spoon sculpture." },
+      { text: "Walk across the historic Stone Arch Bridge over the Mississippi River.", cost: 0, pts: 15, fb: "<b>Beautiful!</b> The old stone bridge offers a spectacular view of the rushing St. Anthony Falls and historic flour mills." },
+      { text: "Find the Prince mural downtown and take a picture.", cost: 0, pts: 18, fb: "<b>Fantastic!</b> You find the massive, colorful 100-foot wall art celebrating the musician. Fans have left beautiful flowers at the base." },
+      { text: "Climb the outside of a tall industrial building to get a better view.", cost: 0, pts: 0, type: "poor", fb: "<b>No!</b> Climbing buildings without permission is trespassing and unsafe. Pick a public pedestrian path!" }
+    ]
+  },
+  {
+    title: "Day 1 — Step 3: Lunch Time",
+    desc: "You are getting very hungry. What famous local Minnesota food do you want to eat?",
+    choices: [
+      { text: "Order a classic 'Juicy Lucy' cheese-stuffed burger at a neighborhood pub.", cost: 14, pts: 20, fb: "<b>Delicious!</b> Be careful! The hot cheese is melted inside the meat. It is a legendary Minneapolis creation!" },
+      { text: "Try a warm bowl of wild rice soup at a cozy cafe.", cost: 10, pts: 15, fb: "<b>Wonderful!</b> Wild rice is the official state grain of Minnesota. It tastes nutty, rich, and perfect for lunch." },
+      { text: "Buy a fresh walleye fish sandwich from a local food truck.", cost: 12, pts: 16, fb: "<b>Great choice!</b> Walleye is a delicious local lake fish. It is light, crispy, and gives you great energy." },
+      { text: "Take food samples directly from other people's tables while they look away.", cost: 0, pts: 0, type: "poor", fb: "<b>Oh no!</b> That is very rude and unhygienic. You have enough cash to purchase your own food. Try again!" }
+    ]
+  },
+  {
+    title: "Day 1 — Step 4: First Night Entertainment",
+    desc: "The sun goes down and downtown lights up. Where do you spend your evening?",
+    choices: [
+      { text: "Go to a concert at First Avenue, the legendary music venue.", cost: 40, pts: 30, fb: "<b>Amazing!</b> This is the historic club where Prince filmed *Purple Rain*. You see his famous silver star on the outside wall." },
+      { text: "Watch a famous play at the architectural Guthrie Theater.", cost: 60, pts: 25, fb: "<b>Elegant!</b> The theater is spectacular. You stand on the 'Endless Bridge' glass room for a midnight river view." },
+      { text: "Walk through the neon lights of the downtown Skyway system.", cost: 0, pts: 12, fb: "<b>Interesting!</b> You explore the famous indoor bridges that connect all the buildings above street level." },
+      { text: "Try to jump onto the stage at a private club without a ticket.", cost: 0, pts: 0, type: "poor", fb: "<b>Bad idea!</b> Security guards will instantly stop you and escort you out. Always buy a valid ticket!" }
+    ]
+  },
+  // EMERGENCY 1
+  {
+    title: "🚨 EMERGENCY: Lost Metro Ticket!",
+    desc: "Oh no! Your light rail transit ticket dropped out of your coat pocket. You cannot find it!",
+    choices: [
+      { text: "Buy a new paper ticket at the platform vending machine.", cost: 3, pts: 5, fb: "<b>Safe.</b> You lose a few dollars, but you have a legal ticket to continue riding comfortably." },
+      { text: "Use your smartphone app to instantly buy a digital transit pass.", cost: 2, pts: 12, fb: "<b>Smart!</b> The digital wallet option is secure, faster, and saves paper. You are ready to explore again." },
+      { text: "Hide in the corner of the train car and pretend you do not understand the rules.", cost: 0, pts: 0, type: "poor", fb: "<b>Don't do that!</b> Riding transit without paying is disrespectful and carries heavy fines. Pay for your ride!" }
+    ]
+  },
+  // DAY 2
+  {
+    title: "Day 2 — Step 5: The Ultimate Prince Experience",
+    desc: "Today is a very special day. You are traveling out to Chanhassen to see Prince's private estate!",
+    choices: [
+      { text: "Take the official guided tour inside Paisley Park.", cost: 65, pts: 40, fb: "<b>Unforgettable!</b> You step into his 65,000-square-foot creative sanctuary. You see his recording studios, stage outfits, and personal awards." },
+      { text: "Walk around the outer perimeter fence of Paisley Park to look at the building architecture.", cost: 0, pts: 15, fb: "<b>Peaceful.</b> The white exterior looks simple, but you see beautiful purple memorials and letters left by global fans." },
+      { text: "Book an elite VIP tour of Paisley Park with audio guides and exclusive rooms.", cost: 120, pts: 50, fb: "<b>Pure Luxury!</b> You get to see extra production spaces and hear rare music tracks. Extremely expensive, but a true musical dream." },
+      { text: "Try to climb over the security gates to enter the private recording rooms for free.", cost: 0, pts: 0, type: "poor", fb: "<b>Absolutely not!</b> This is illegal trespassing on private property. Respect the artist's legacy and choose a legal tour!" }
+    ]
+  },
+  {
+    title: "Day 2 — Step 6: Afternoon Shopping",
+    desc: "You head to the Bloomington suburb. It is time to explore the Mall of America, the largest mall in the country!",
+    choices: [
+      { text: "Ride the indoor rollercoasters at the Nickelodeon Universe theme park inside the mall.", cost: 45, pts: 25, fb: "<b>Thrilling!</b> You can't believe there is a full amusement park inside a shopping mall. You loop through the air!" },
+      { text: "Walk the massive multi-level shopping loops and visit the LEGO store.", cost: 0, pts: 15, fb: "<b>Fun!</b> It is completely free to walk around. You marvel at the giant LEGO structures and the pure size of the building." },
+      { text: "Buy an exclusive Minnesota music vinyl record at a specialty store.", cost: 25, pts: 20, fb: "<b>Great find!</b> You purchase a classic album to bring home. It is a fantastic physical memory of your trip." },
+      { text: "Hide in a display clothing rack and fall asleep inside a department store.", cost: 0, pts: 5, type: "poor", fb: "<b>Not ideal!</b> The store staff find you and ask you to leave immediately. Keep moving like an active tourist!" }
+    ]
+  },
+  {
+    title: "Day 2 — Step 7: Nature in the City",
+    desc: "Minneapolis is called the 'City of Lakes'. Let's enjoy the beautiful outdoor water system.",
+    choices: [
+      { text: "Rent a kayak to paddle on Bde Maka Ska lake.", cost: 20, pts: 25, fb: "<b>Refreshing!</b> You glide across the blue water and see the city skyline reflecting perfectly on the lake surface." },
+      { text: "Walk the pedestrian path around Lake Harriet and see the historic rose garden.", cost: 0, pts: 18, fb: "<b>Relaxing!</b> It costs nothing. The flowers smell sweet, and you watch local sailboats cruise across the water." },
+      { text: "Visit Minnehaha Regional Park to see the spectacular 53-foot waterfall.", cost: 0, pts: 22, fb: "<b>Stunning!</b> The waterfall is buried right inside the city park. You walk down the limestone stairs to take photos." },
+      { text: "Jump directly into the wild waterfall currents to see how deep it is.", cost: 0, pts: 0, type: "poor", fb: "<b>Danger!</b> Swimming near heavy waterfalls is completely prohibited and life-threatening. Stand safely on the path!" }
+    ]
+  },
+  {
+    title: "Day 2 — Step 8: Dinner and Art",
+    desc: "Evening is approaching in the vibrant Northeast Arts District. What do you choose?",
+    choices: [
+      { text: "Dine at an upscale, trendy restaurant in the North Loop neighborhood.", cost: 55, pts: 22, fb: "<b>Fancy!</b> You eat a beautiful modern meal inside a converted historic warehouse building." },
+      { text: "Eat a plate of traditional Polish pierogi dumplings at a historic neighborhood diner.", cost: 16, pts: 18, fb: "<b>Cozy!</b> The comfort food is rich, warm, and connects you to the historical immigrant heritage of the city." },
+      { text: "Visit the Minneapolis Institute of Art (MIA) during their free evening hours.", cost: 0, pts: 25, fb: "<b>Incredible!</b> You view famous masterpieces from around the globe without spending a single dollar." },
+      { text: "Touch a delicate old oil painting on the museum wall when the guard turns around.", cost: 0, pts: 0, type: "poor", fb: "<b>Stop!</b> You must never touch art pieces because skin oils cause permanent damage. Keep your hands back!" }
+    ]
+  },
+  // EMERGENCY 2
+  {
+    title: "🚨 EMERGENCY: Severe Blizzard / Cold Snap!",
+    desc: "Suddenly, a classic heavy Minnesota storm arrives! The temperature drops rapidly and snow falls fast!",
+    choices: [
+      { text: "Buy a thick, warm winter hat and gloves from a local shop.", cost: 20, pts: 5, fb: "<b>Toasty!</b> It costs money, but your ears and fingers are safe from the freezing cold wind." },
+      { text: "Move your travel route entirely inside the heated indoor Skyway bridges.", cost: 0, pts: 15, fb: "<b>Genius!</b> You travel through miles of connected indoor pathways above the streets without ever touching the snow." },
+      { text: "Stand in the middle of the open street wearing just a light T-shirt to show your bravery.", cost: 0, pts: 0, type: "gameover", fb: "<b>GAME OVER!</b> You freeze completely and get very sick from hypothermia. You must spend the rest of your vacation recovering in a hospital!" }
+    ]
+  },
+  // DAY 3
+  {
+    title: "Day 3 — Step 9: Cultural Landmarks",
+    desc: "It is your final day in Minneapolis. Which historic area do you want to explore?",
+    choices: [
+      { text: "Visit Mill City Museum built inside the ruins of an old flour mill.", cost: 12, pts: 22, fb: "<b>Fascinating!</b> You ride the multi-story flour tower elevator and learn how Minneapolis was once the flour capital of the world." },
+      { text: "Take a morning stroll down the creative Midtown Global Market.", cost: 0, pts: 15, fb: "<b>Vibrant!</b> You explore cultural craft stalls and listen to international languages spoken by local residents." },
+      { text: "Book an architecture tour of the beautiful basilicas and public libraries.", cost: 25, pts: 20, fb: "<b>Educational!</b> You learn how massive stone structures were built by early settlers along the river." },
+      { text: "Hitchhike with a random cargo truck driver to get a free ride across the city.", cost: 0, pts: 0, type: "poor", fb: "<b>Dangerous!</b> Hitchhiking with strangers is unsafe in any major metropolitan area. Stick to local buses or light rail!" }
+    ]
+  },
+  {
+    title: "Day 3 — Step 10: Souvenir Lunch",
+    desc: "You need to find a good lunch spot and buy gifts for your family at home.",
+    choices: [
+      { text: "Eat a fresh Scandinavian lunch and buy traditional Nordic gifts.", cost: 30, pts: 20, fb: "<b>Lovely!</b> You eat potato lefse and purchase beautiful Nordic ornaments celebrating Minnesota's Scandinavian roots." },
+      { text: "Buy a classic purple t-shirt and Prince memorabilia at an indie music shop.", cost: 22, pts: 25, fb: "<b>Perfect!</b> You get an amazing graphic shirt with a love symbol. Your friends at home will love it." },
+      { text: "Go to a high-end chocolate boutique for premium truffles.", cost: 35, pts: 18, fb: "<b>Sweet!</b> You buy a decorative box of handmade berry chocolates made with local ingredients." },
+      { text: "Steal a loose cobblestone from a historic street to use as a free souvenir paperweight.", cost: 0, pts: 0, type: "poor", fb: "<b>Not good!</b> Damaging public streets or stealing rocks is not acceptable. Buy a real gift in a local store!" }
+    ]
+  },
+  {
+    title: "Day 3 — Step 11: Afternoon Relaxation",
+    desc: "Your flight departs tonight. How do you spend your last sunny afternoon hours?",
+    choices: [
+      { text: "Rent an electric city scooter to ride along the Chain of Lakes trails.", cost: 12, pts: 20, fb: "<b>Fun!</b> You zip along the smooth paths past modern lakeside mansions with the wind in your face." },
+      { text: "Sit on a green lawn bench at Loring Park and watch the local wildlife.", cost: 0, pts: 15, fb: "<b>Peaceful.</b> It costs nothing. You watch gray squirrels play and enjoy the quiet view of the cathedral dome nearby." },
+      { text: "Visit a local indie bookstore to read regional poetry and drink coffee.", cost: 8, pts: 18, fb: "<b>Cozy!</b> You discover wonderful local writers and enjoy a hot drink while watching residents pass by." },
+      { text: "Lie down across the active light rail tracks to get a quick sun tan.", cost: 0, pts: 0, type: "poor", fb: "<b>Unbelievable!</b> Train tracks are active and highly hazardous. Stay safely away on the pedestrian sidewalks!" }
+    ]
+  },
+  {
+    title: "Day 3 — Step 12: Final Evening Goodbye",
+    desc: "It is your final hour before returning to the airport terminal. How do you close your journey?",
+    choices: [
+      { text: "Listen to smooth live jazz musicians at the historic Dakota jazz club.", cost: 35, pts: 30, fb: "<b>Classy!</b> Prince used to sit at the back table here to watch musicians. It is an amazing musical goodbye." },
+      { text: "Watch the purple lights illuminate the Lowry Avenue Bridge over the river.", cost: 0, pts: 15, fb: "<b>Scenic.</b> You stand by the dark river bank and watch the bridge glow purple in memory of the city's musical history." },
+      { text: "Eat a hearty dinner of Minnesota hotdish casserole at a classic diner.", cost: 18, pts: 25, fb: "<b>Comforting!</b> You enjoy a hot baked dish topped with crispy tater tots. True Midwestern comfort food hospitality!" },
+      { text: "Refuse to board the train and hide inside an empty cargo shipping container.", cost: 0, pts: 0, type: "poor", fb: "<b>Impossible!</b> Your vacation is over and your flight is ready. Say goodbye to the Twin Cities like a mature traveler!" }
+    ]
+  }
+];
+
+const vocabulary = [
+  { word: "Skyway", def: "An enclosed, heated pedestrian footbridge connecting buildings above street level." },
+  { word: "Sanctuary", def: "A private, safe place where someone can create art, rest, or feel protected." },
+  { word: "Sculpture", def: "A three-dimensional work of art made from stone, metal, wood, or other materials." },
+  { word: "Blizzard", def: "A severe snowstorm with very high winds and freezing temperatures." },
+  { word: "Waterfall", def: "A cascade of water falling from a height, formed when a river flows over a precipice." },
+  { word: "Memorabilia", def: "Objects kept or collected because of their historical interest, especially historical items linked to a famous person." },
+  { word: "Casserole (Hotdish)", def: "A mixture of ingredients baked and served slowly in a single deep baking dish." },
+  { word: "Flour Mill", def: "A large building equipped with machinery for grinding grain into baking flour." }
+];
+
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
+function loadStep() {
+  const step = gameData[currentStepIndex];
+  document.getElementById("stepTitle").innerText = step.title;
+  document.getElementById("stepDesc").innerHTML = step.desc;
+  
+  const list = document.getElementById("choiceList");
+  list.innerHTML = "";
+  
+  const shuffledChoices = [...step.choices];
+  shuffleArray(shuffledChoices);
+  
+  shuffledChoices.forEach((c) => {
+    const btn = document.createElement("button");
+    btn.className = "choice-btn";
+    const canAfford = budget >= c.cost;
+    
+    if (!canAfford && c.type !== "poor" && c.type !== "gameover") {
+        btn.disabled = true;
+    }
+
+    btn.innerHTML = `<span>${c.text} ${(!canAfford && c.type !== "poor" && c.type !== "gameover") ? '<b style="color:red">(Too expensive!)</b>' : ''}</span>
+      <span class="price-tag cost-tag">$${c.cost}</span>`;
+    
+    btn.onclick = () => selectChoice(c);
+    list.appendChild(btn);
+  });
+  
+  document.getElementById("feedbackBox").style.display = "none";
+  document.getElementById("nextBtn").style.display = "none";
+  
+  const progress = (currentStepIndex / gameData.length) * 100;
+  document.getElementById("progressFill").style.width = progress + "%";
+}
+
+function selectChoice(choice) {
+  const fb = document.getElementById("feedbackBox");
+  
+  if (choice.type === "gameover") {
+    fb.innerHTML = choice.fb;
+    fb.className = "feedback error";
+    fb.style.display = "block";
+    document.querySelectorAll(".choice-btn").forEach(b => b.disabled = true);
+    document.getElementById("nextBtn").innerText = "Restart Game ↩";
+    document.getElementById("nextBtn").onclick = () => location.reload();
+    document.getElementById("nextBtn").style.display = "block";
+    return;
+  }
+
+  if (choice.type === "poor") {
+    fb.innerHTML = choice.fb;
+    fb.className = "feedback error";
+    fb.style.display = "block";
+    return;
+  }
+
+  budget -= choice.cost;
+  score += choice.pts;
+  
+  document.getElementById("scoreDisplay").innerText = score;
+  document.getElementById("budgetDisplay").innerText = "$" + budget;
+  
+  fb.innerHTML = choice.fb;
+  fb.className = "feedback";
+  fb.style.display = "block";
+  
+  document.querySelectorAll(".choice-btn").forEach(b => b.disabled = true);
+  document.getElementById("nextBtn").style.display = "block";
+}
+
+function nextStep() {
+  currentStepIndex++;
+  if (currentStepIndex >= gameData.length) {
+    renderFinalScreen();
+  } else {
+    loadStep();
+  }
+}
+
+function renderFinalScreen() {
+  let title, message;
+  
+  if (score >= 270) {
+    title = "🥇 Royalty of the Twin Cities!";
+    message = "Phenomenal! You had an absolute masterpiece of a trip. You walked down Prince's historic paths, managed your budget perfectly, and explored the finest cultural landmarks.";
+  } else if (score >= 170) {
+    title = "🥈 Professional Pioneer";
+    message = "Great job! You enjoyed a beautiful, comprehensive Minneapolis vacation. You saw iconic lakes, explored historic landmarks, and braved the weather brilliantly.";
+  } else {
+    title = "🥉 Minnesota Explorer";
+    message = "You made it back home safe! The weather and prices were tricky, but you discovered a wealth of beautiful history in this classic Northern river city.";
+  }
+
+  let vocabHTML = `<div class="vocab-section"><h3>New Words Learned:</h3><div class="vocab-grid">`;
+  vocabulary.forEach(v => { vocabHTML += `<div class="vocab-item"><b>${v.word}:</b> ${v.def}</div>`; });
+  vocabHTML += `</div></div>`;
+
+  document.getElementById("gameWindow").innerHTML = `
+    <h2 style="color:var(--msp-purple)">${title}</h2>
+    <p>${message}</p>
+    <hr>
+    <div style="font-size: 1.2rem; margin: 20px 0;">
+      <p>Final Fun Points: <b>${score}</b></p>
+      <p>Money Left: <b>$${budget}</b></p>
+    </div>
+    ${vocabHTML}
+    <button class="btn-next" style="display:block" onclick="location.reload()">Play Again ↩</button>
+  `;
+  document.getElementById("progressFill").style.width = "100%";
+}
+
+function startGame() { 
+  document.getElementById("landingPage").style.display = "none"; 
+  loadStep();
+}
+</script>
+</body>
+</html>
