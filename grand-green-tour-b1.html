@@ -82,7 +82,7 @@
 
 <div class="container" id="mainContainer">
   <div id="startScreen">
-    <div class="route-badge">✈️ London ➔ Paris ➔ Swiss Alps ➔ Venice ➔ Rome</div>
+    <div class="route-badge">✈️ London ➔ Paris ➔ Swiss Alps ➔ Florence ➔ Rome</div>
     <h2 style="margin-bottom: 15px;">Welcome to your European Road Trip!</h2>
     <p style="font-size: 1.1rem; line-height: 1.7; color: #555; margin-bottom: 25px;">
       Improve your English skills as you drive an <strong>electric vehicle (EV)</strong> across Europe! You will face 12 daily dilemmas and 2 dangerous emergencies. Your choices affect your score. Can you make smart, eco-friendly decisions and achieve a perfect road trip score?
@@ -204,13 +204,13 @@ const regularDays = [
   },
   {
     day: 10,
-    location: "Venice (The Edge of the Lagoon)",
-    desc: "You arrive outside Venice! Cars are completely banned inside the floating city. You need a secure plan for your vehicle for two days.",
+    location: "Florence (The Heart of Tuscany)",
+    desc: "You arrive in historic Florence! The famous city center is a strict 'ZTL' (Restricted Traffic Zone) where cameras fine unauthorized vehicles, but you need to access a charging point. What do you do?",
     choices: [
-      { t: "Park in a secure, pre-booked charging garage at Tronchetto island.", pts: 3, fb: "Sensible choice! Your car charges safely while you take a beautiful water taxi into the heart of Venice." },
-      { t: "Park at a train station outside the city and commute across the bridge.", pts: 2, fb: "Good alternative! This option saves a lot of money, though carrying heavy luggage on crowded trains is exhausting." },
-      { t: "Leave your car at an unmonitored street space near the water.", pts: 1, fb: "It is free, but you will spend your entire holiday worrying about parking tickets or thieves breaking your windows." },
-      { t: "Attempt to drive your car across a pedestrian footbridge over a canal.", pts: -1, fb: "Crazy! Venice has zero car roads. You will get stuck on stairs immediately and face arrest by the local police. Try again!" }
+      { t: "Park in an official ZTL-integrated garage that registers your license plate dynamically with the city.", pts: 3, fb: "Sensible choice! The garage automatically whitelist your car for the day, allowing you to charge safely without getting an automated fine." },
+      { t: "Leave your car at a public fast charger just outside the ZTL borders and walk across the Arno River.", pts: 2, fb: "Good alternative! You completely avoid any legal zone issues and get to see some lovely suburban architecture on your walk." },
+      { t: "Drive straight in and look for a plug, assuming electric vehicles are exempt from the traffic cameras.", pts: 1, fb: "Risky! While some Italian cities give perks to EVs, entering without explicit registration often triggers a delayed fine anyway." },
+      { t: "Follow a city bus closely through the gates to hide your license plate from the overhead cameras.", pts: -1, fb: "Incredibly foolish! The cameras will catch you regardless, and tailgating public transit is highly dangerous. Try again!" }
     ]
   },
   {
@@ -248,12 +248,12 @@ const emergencies = [
     ]
   },
   {
-    title: "💥 EMERGENCY: Brake Failure on the Descent!",
-    desc: "While descending a steep road towards Italy, your traditional friction brakes overheat and stop working! The vehicle is gathering speed quickly. What action do you take?",
+    title: "🔋 EMERGENCY: Battery Thermal Runaway Risk!",
+    desc: "As you drive under the scorching midday sun toward Rome, a critical warning flashes on your dashboard: 'BATTERY OVERHEATING - RISK OF THERMAL RUNAWAY!' The cell temperatures are climbing dangerously fast. What is your reaction?",
     choices: [
-      { t: "Switch regenerative braking to maximum intensity and use the steering wheel paddles to control your speed.", pts: 2, fail: false, fb: "Life-saving choice! The electric motor creates immense magnetic resistance, slowing the car down safely while charging your battery!" },
-      { t: "Steer safely into an uphill emergency runaway truck ramp filled with gravel.", pts: 1, fail: false, fb: "Good job! The gravel stops the car instantly. Your vehicle requires a inspection tow, but you escaped completely uninjured." },
-      { t: "Pull the mechanical emergency brake handle completely up while traveling at 100 km/h.", pts: 0, fail: true, fb: "GAME OVER: Pulling the brake instantly locked your rear tires. The car spun out of control and crashed into the guardrail. Safety systems failed!" }
+      { t: "Pull over immediately in a safe open area, shut off the car completely, and evacuate all passengers away from the vehicle.", pts: 2, fail: false, fb: "Life-saving choice! Thermal runaway is an uncontrollable chemical fire hazard. Cutting the power and keeping everyone away safely limits risks while the cooling loop stabilizes." },
+      { t: "Blast the cabin air conditioning to the maximum level and speed up to try and air-cool the underside of the car.", pts: 1, fail: false, fb: "Risky compromise! While cabin A/C shares a cooling loop in some cars, pulling massive current by driving fast strains the battery further, making it hotter." },
+      { t: "Ignore the warning and rush to find an ultra-rapid 350kW charger to force cold energy into the cells.", pts: 0, fail: true, fb: "GAME OVER: Plugging a critically overheating battery into a high-powered fast charger triggers immediate terminal failure and combustion. Safety systems failed!" }
     ]
   }
 ];
@@ -277,12 +277,16 @@ function startGame() {
   currentDayIndex = 0;
   gameTimeline = [...regularDays];
   
-  // Inject the two emergency situations at unpredictable intervals
-  const firstEmergency = emergencies[0];
-  const secondEmergency = emergencies[1];
+  // Inject the two emergency situations exactly where instructed
+  const firstEmergency = emergencies[0];  // The Mountain Blackout
+  const secondEmergency = emergencies[1]; // Battery Emergency
   
-  gameTimeline.splice(Math.floor(Math.random() * 4) + 3, 0, firstEmergency);
-  gameTimeline.splice(Math.floor(Math.random() * 4) + 7, 0, secondEmergency);
+  // Day 6 is at index 5. Placing it after Day 6 means index 6.
+  gameTimeline.splice(6, 0, firstEmergency);
+  
+  // Day 11 is now at index 11 (due to the first addition). 
+  // Between 11 and 12 means inserting right before Day 12.
+  gameTimeline.splice(12, 0, secondEmergency);
 
   document.getElementById("startScreen").style.display = "none";
   document.getElementById("gameWindow").style.display = "block";
@@ -358,7 +362,6 @@ function handleSelection(choice, isEmergency) {
       setupNextButton();
     }
   } else {
-    // Dynamic styling changes assigned here based on score threshold values
     if (choice.pts === -1) {
       fb.innerHTML = `<strong>INCORRECT:</strong> ${choice.fb}`;
       fb.className = "feedback fb-incorrect";
