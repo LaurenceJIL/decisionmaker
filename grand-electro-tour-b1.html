@@ -161,10 +161,10 @@ const regularDays = [
   {
     day: 6,
     location: "Geneva (Entering Switzerland)",
-    desc: "You have arrived at the Swiss border! To legally use the beautiful mountain highways, you must take care of an administrative task.",
+    desc: "You have arrived at the Swiss border! To legally use the beautiful mountain highways, you must have a vignette for your car.",
     choices: [
-      { t: "Buy a digital highway vignette sticker online before crossing the border.", pts: 3, fb: "Superb choice! Buying the digital vignette keeps you completely legal and lets you bypass the crowded physical purchase lanes." },
-      { t: "Stop at the border queue to buy a physical sticker for your windshield.", pts: 2, fb: "Good job! You are fully legal, but you spent forty minutes waiting in a hot line with idling vehicles." },
+      { t: "Buy a digital e-vignette online before crossing the border.", pts: 3, fb: "Superb choice! Buying the e-vignette keeps you completely legal and lets you bypass the crowded physical purchase lanes." },
+      { t: "Stop at the border queue to buy a physical vignette sticker for your windshield.", pts: 2, fb: "Good job! You are fully legal, but you spent forty minutes waiting in a hot line with idling vehicles." },
       { t: "Take slow country roads to avoid the toll highways completely.", pts: 1, fb: "You saved a little money, but navigating these twisty, narrow paths added massive stress and drained extra battery power." },
       { t: "Drive straight past the border officers and pretend you do not understand.", pts: -1, fb: "A terrible mistake! Swiss police are very strict. They will catch you, issue a big fine, and delay your holiday. Try again!" }
     ]
@@ -232,7 +232,7 @@ const regularDays = [
       { t: "Donate your saved fuel money to an urban green tree project in Rome.", pts: 3, fb: "Incredible generosity! You proved that sustainable travel can help the planet and leave a wonderful lasting impact." },
       { t: "Enjoy a huge Italian feast at a traditional family restaurant.", pts: 2, fb: "Delicious! You earned this amazing pasta dinner after traveling thousands of kilometers across international borders." },
       { t: "Take a fast picture outside the city wall and immediately drive home.", pts: 1, fb: "You finished the task, but you missed out on exploring the history and magic of the Eternal City!" },
-      { t: "Honk your horn loudly in traffic and shout insults at local drivers.", pts: -1, fb: "That is very rude! Italian traffic is already chaotic. Let us finish our grand adventure with polite manners. Try again!" }
+      { t: "Honk your horn loudly in traffic and shout at local drivers.", pts: -1, fb: "So rude! Italian traffic is already quite chaotic. Let us finish our grand adventure with polite manners. Try again!" }
     ]
   }
 ];
@@ -240,7 +240,7 @@ const regularDays = [
 const emergencies = [
   {
     title: "⚡ EMERGENCY: The Mountain Blackout!",
-    desc: "A massive summer storm strikes the Swiss valley. The entire local power grid fails. Your battery is down to 8% and the public fast-chargers are completely dead! How do you survive?",
+    desc: "A massive summer storm strikes in a Swiss valley. The entire local power grid fails. Your battery is down to 8% and the public fast-chargers are completely dead! How do you survive?",
     choices: [
       { t: "Locate a small mountain hotel with an independent solar panel system and ask to plug into a standard wall socket.", pts: 2, fail: false, fb: "Amazing initiative! The slow charge takes hours, but the owner gives you hot soup while you wait out the storm safely." },
       { t: "Use a mobile app to find a local homeowner willing to share their private home battery bank energy.", pts: 1, fail: false, fb: "Resourceful! A kind local helps you get a tiny boost. It is just enough power to reach a working grid zone down the mountain." },
