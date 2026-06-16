@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Refinery Security & Training Chief — B2 Interactive</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F3F4F6;--surface:#FFFFFF;--surface2:#F9FAFB;--surface3:#E5E7EB;
+  --ink:#111827;--ink2:#374151;--ink3:#6B7280;
+  --rule:rgba(17,24,39,0.08);
+  --green-bg:#F0FDF4;--green-bd:#22C55E;--green-tx:#166534;
+  --amber-bg:#FFFBEB;--amber-bd:#F59E0B;--amber-tx:#92400E;
+  --red-bg:#FEF2F2;--red-bd:#EF4444;--red-tx:#991B1B;
+  --blue-bg:#EFF6FF;--blue-bd:#3B82F6;--blue-tx:#1E40AF;
+  --rxl:16px;--rs:8px;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+.shell{max-width:750px;margin:2rem auto;padding:0 1rem}
+.card{background:var(--surface);border-radius:var(--rxl);box-shadow:0 10px 25px -5px rgba(0,0,0,0.05);overflow:hidden;border:1px solid var(--rule)}
+.card-bar{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;background:#fff;border-bottom:1px solid var(--rule)}
+.progress-track{display:flex;gap:4px}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--surface3)}
+.dot.done{background:var(--green-bd)}
+.dot.active{background:var(--blue-bd)}
+.dot.emg{background:var(--red-bd);animation:pulse 1.2s infinite}
+@keyframes pulse{0%{opacity:1}50%{opacity:0.4}100%{opacity:1}}
+.score-chip{font-family:'DM Mono',monospace;font-size:13px;background:var(--blue-bg);color:var(--blue-tx);padding:4px 12px;border-radius:20px;border:1px solid var(--blue-bd)}
+.card-body{padding:1.5rem;animation:slideUp 0.35s ease-out}
+@keyframes slideUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.time-label{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.5rem}
+.vocab-row{margin-bottom:1rem;display:flex;flex-wrap:wrap;gap:4px}
+.vpill{font-family:'DM Mono',monospace;font-size:10px;background:var(--surface2);color:var(--ink2);padding:2px 8px;border-radius:12px;border:1px solid var(--rule)}
+.scenario{font-size:16px;margin-bottom:1.5rem;color:var(--ink);font-weight:400}
+.opt{width:100%;text-align:left;padding:14px;background:var(--surface);border:1px solid var(--rule);border-radius:var(--rs);cursor:pointer;margin-bottom:10px;font-size:14px;transition:0.15s;display:flex;justify-content:space-between;align-items:center}
+.opt:hover{background:var(--surface2);border-color:var(--ink3)}
+.opt:disabled{opacity:0.6;cursor:not-allowed;background:var(--surface3)}
+.fbox{margin-top:1rem;padding:1rem;border-radius:var(--rs);font-size:14px;display:none;border-left:4px solid}
+.fbox.show{display:block}
+.nxt{margin-top:1.5rem;padding:12px 24px;background:var(--ink);color:#fff;border:none;border-radius:var(--rs);cursor:pointer;display:none;float:right;font-weight:600}
+.nxt.show{display:block}
+.final-screen{padding:2.5rem}
+.band-box{margin:1.5rem 0;padding:1.5rem;border-radius:var(--rs);text-align:left}
+.band-A{background:var(--green-bg);border:1px solid var(--green-bd);color:var(--green-tx)}
+.band-B{background:var(--amber-bg);border:1px solid var(--amber-bd);color:var(--amber-tx)}
+.band-C{background:var(--red-bg);border:1px solid var(--red-bd);color:var(--red-tx)}
+
+.glossary-section {margin-top:2.5rem; border-top:2px solid var(--surface3); padding-top:1.5rem;}
+.glossary-title {font-family:Lora; font-size:22px; margin-bottom:1.2rem;}
+.glossary-grid {display:grid; grid-template-columns:1fr; gap:15px;}
+.g-item {background:var(--surface2); padding:12px; border-radius:var(--rs); border:1px solid var(--rule);}
+.g-term {font-family:'DM Mono',monospace; font-weight:600; color:var(--blue-tx); display:block; margin-bottom:4px; font-size:14px;}
+.g-def {font-size:13px; color:var(--ink2); display:block;}
+.g-note {font-size:11px; color:var(--ink3); font-style:italic; margin-top:4px; display:block;}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <div class="card" id="main-card">
+    <div class="card-bar" id="card-bar" style="display:none">
+      <div style="font-family:Lora;font-weight:600">Refinery Security Simulation</div>
+      <div style="display:flex;align-items:center;gap:15px">
+        <div class="progress-track" id="dots"></div>
+        <div class="score-chip" id="score">0 pts</div>
+      </div>
+    </div>
+    <div id="content"></div>
+  </div>
+</div>
+
+<script>
+const S = { score: 0, answered: false, currentBadChoices: [] };
+
+const GLOSSARY = [
+  { term: "Muster Point", def: "A designated gathering place where personnel assemble in the event of an emergency evacuation.", note: "Crucial for taking accurate roll calls during an incident." },
+  { term: "Hot Work Permit", def: "An official authorization required to perform work involving open flames or producing heat/sparks in restricted zones.", note: "Failing to issue one can lead to immediate catastrophic fires." },
+  { term: "SOP (Standard Operating Procedure)", def: "Documented instructions intended to minimize risks and maintain strict regulatory compliance.", note: "Deviations are often treated as safety misconduct." },
+  { term: "Contractor Induction", def: "Mandatory security and safety briefing given to external laborers before they access industrial operations.", note: "Often rushed during heavy maintenance windows, increasing site vulnerability." },
+  { term: "Tailgating", def: "An unauthorized person following an authorized person closely through a secure security gate or turnstile.", note: "A primary physical breach vulnerability in high-security compounds." },
+  { term: "Phishing", def: "The fraudulent attempt to obtain sensitive data, such as SCADA access credentials, by disguising as a trustworthy entity.", note: "Industrial control systems are frequent targets of sophisticated spear-phishing." },
+  { term: "SCADA System", def: "Supervisory Control and Data Acquisition; the digital system that monitors and controls refinery plant industrial processes.", note: "A breach here can give threat actors control over physical valves and boilers." },
+  { term: "PPE (Personal Protective Equipment)", def: "Gear designed to protect workers from serious workplace injuries or illnesses.", note: "Includes fire-resistant clothing (FRC), hard hats, and steel-toe boots." }
+];
+
+const DATA = {
+  // --- DAY 1 ---
+  d1: {
+    label: "DAY 1: 06:15 — Main Gate Congestion",
+    scene: "A surge of turnaround contractors is causing severe tailgating at the main turnstiles. Plant managers urge you to turn off biometric checks to prevent a shift production delay.",
+    vocab: ["tailgating", "turnaround", "biometric"],
+    opts: [
+      { t: "Temporarily bypass biometrics and check ID badges visually to speed up entry.", pts: 1, fb: "Suboptimal. Visual ID checks are easily forged or rushed by distracted guards." },
+      { t: "Hold the line. Deploy two extra training officers to manage the queue and verify credentials properly.", pts: 3, fb: "Excellent. Security protocols cannot be sacrificed for scheduling conveniences." },
+      { t: "Open the vehicular cargo gates to let large groups walk through uninspected.", pts: -1, fb: "Poor Choice. You have completely compromised access control. Lose 1 point and choose again." }
+    ],
+    next: "d2"
+  },
+  d2: {
+    label: "DAY 1: 09:30 — Induction Shortcut",
+    scene: "An external maintenance crew arrives to patch a vital pipeline. Their mandatory 2-hour Safety Induction training hasn't been completed. Their foreman asks you to sign them off anyway.",
+    vocab: ["induction", "compliance", "maintenance"],
+    opts: [
+      { t: "Refuse. Insist they complete the full safety induction module before entering the site.", pts: 3, fb: "Correct. Uncontrolled personnel lack awareness of volatile refinery hazards." },
+      { t: "Hand them a printed safety summary leaflet to skim while they drive to the site location.", pts: 1, fb: "Risky. A leaflet does not substitute for structured hazard training." },
+      { t: "Sign the training forms without them doing the class to keep the pipeline project online.", pts: -1, fb: "Poor Choice. You are legally liable if they cause an incident. Lose 1 point and choose again." }
+    ],
+    next: "d3"
+  },
+  d3: {
+    label: "DAY 1: 11:45 — The Perimeter Breach",
+    scene: "A security guard reports a cutout section in the secondary perimeter fence line. Footprints lead toward the crude storage tank farm.",
+    vocab: ["perimeter", "vulnerability", "breach"],
+    opts: [
+      { t: "Discreetly walk over alone with a flashlight to investigate the gap yourself.", pts: 1, fb: "Unsafe. It isolates you without knowing the scale or nature of the threat." },
+      { t: "Initiate a localized zone lockdown, dispatch an armed patrol team, and review CCTV logs.", pts: 3, fb: "Excellent response. This treats the incident as an active physical threat." },
+      { t: "Log it as a delayed maintenance work item to be patched by the fence crew tomorrow.", pts: -1, fb: "Poor Choice. An intruder could be actively sabotaging infrastructure. Lose 1 point and choose again." }
+    ],
+    next: "d4"
+  },
+  d4: {
+    label: "DAY 1: 14:00 — Hot Work Friction",
+    scene: "An experienced operations engineer refuses to wait for your department to issue a Hot Work Permit, arguing that 'minor welding' away from the main columns is completely safe.",
+    vocab: ["hot work permit", "protocol", "friction"],
+    opts: [
+      { t: "Issue a verbal warning but allow them to proceed to maintain team harmony.", pts: 1, fb: "Risky compromise. Vapor clouds can travel far across a facility undetected." },
+      { t: "Halt the work immediately until gas testing is performed and a formal permit is authorized.", pts: 3, fb: "Perfect. Refinery rule adherence prevents devastating vapor ignition incidents." },
+      { t: "Tell them to weld faster so nobody else notices the lack of documentation.", pts: -1, fb: "Poor Choice. Encouraging safety violations can lead to disaster. Lose 1 point and choose again." }
+    ],
+    next: "emergency1"
+  },
+
+  // --- EMERGENCY 1 ---
+  emergency1: {
+    label: "DAY 1: 16:30 — EMERGENCY: Suspicious Drone",
+    scene: "An unidentified commercial drone is hovering directly over the primary catalytic cracking unit, taking close-up structural photography.",
+    vocab: ["catalytic cracker", "surveillance", "emergency"],
+    opts: [
+      { t: "Order a full facility evacuation and trigger the regional emergency air sirens immediately.", isGameOver: true, fb: "<strong>GAME OVER.</strong> Overreaction. Panic causes a stampede at the processing units, leading to structural injuries and complete refinery operational chaos." },
+      { t: "Notify local aviation police, activate anti-surveillance tracking, and move sensitive operations indoors.", isSafe: true, fb: "Correct. You secured the perimeter data and alerted authorities without causing site panic." }
+    ],
+    next: "d5"
+  },
+
+  // --- DAY 2 ---
+  d5: {
+    label: "DAY 2: 08:00 — Cyber Alert",
+    scene: "An IT security monitor flags that a supervisor in the refinery training center clicked a suspicious phishing link. Two workstation computers are acting strangely.",
+    vocab: ["phishing", "malware", "scada"],
+    opts: [
+      { t: "Isolate the training subnet immediately from the main administrative and SCADA network.", pts: 3, fb: "Outstanding network containment. Prevents lateral malware movement to plant controls." },
+      { t: "Wait for the scheduled weekly IT system scan on Friday evening to handle any viruses.", pts: 1, fb: "Dangerous passivity. Ransomware can spread across industrial systems in minutes." },
+      { t: "Ignore it since training computers do not directly open raw oil flow valves.", pts: -1, fb: "Poor Choice. Training systems are frequently used as entry points by cyber attackers. Lose 1 point and choose again." }
+    ],
+    next: "d6"
+  },
+  d6: {
+    label: "DAY 2: 10:30 — Contractor PPE Slack",
+    scene: "During an audit, you notice a sub-contractor crew working near the distillation columns without fire-resistant clothing (FRC). They claim their employer didn't supply them.",
+    vocab: ["PPE", "compliance", "audit"],
+    opts: [
+      { t: "Instruct them to work from a distance and avoid anything that looks hot.", pts: 1, fb: "Inadequate. Hydrocarbon leaks can happen unexpectedly anywhere within processing zones." },
+      { t: "Suspend their site access immediately until the contractor company provides verified FRC for everyone.", pts: 3, fb: "Excellent leadership. Accountability forces contractors to uphold safety baselines." },
+      { t: "Borrow generic jumpsuits from the visitor closet that are not fire-rated just to cover up.", pts: -1, fb: "Poor Choice. This provides a false sense of security and violates standards. Lose 1 point and choose again." }
+    ],
+    next: "d7"
+  },
+  d7: {
+    label: "DAY 2: 13:15 — The Audit Discrepancy",
+    scene: "You uncover that a junior instructor has been falsifying muster station drill attendance scores to make the department's quarterly response metrics look perfect to corporate.",
+    vocab: ["discrepancy", "muster point", "metrics"],
+    opts: [
+      { t: "Confront the instructor privately and ask them to fix the next reports gently.", pts: 1, fb: "Weak compliance control. Masking poor training performance costs lives during actual events." },
+      { t: "Document the infraction, launch an immediate independent retraining cycle, and initiate disciplinary actions.", pts: 3, fb: "Superb integrity. Accurate emergency statistics are vital for real-world readiness." },
+      { t: "Delete the audit report entirely so the refinery doesn't lose its safety bonus.", pts: -1, fb: "Poor Choice. Corporate fraud compromises actual physical safety systems. Lose 1 point and choose again." }
+    ],
+    next: "d8"
+  },
+  d8: {
+    label: "DAY 2: 15:45 — Media Pressure",
+    scene: "A minor, non-toxic steam venting incident causes black smoke over the refinery. A local investigative reporter bypasses the main gate and calls your direct phone line demanding comments on 'the chemical leak'.",
+    vocab: ["media protocol", "reputation"],
+    opts: [
+      { t: "Answer the questions briefly off-the-record to ensure they don't print exaggerated fabrications.", pts: 1, fb: "Risky. Off-the-record comments are routinely misquoted or taken out of context." },
+      { t: "Refuse to comment directly and immediately route the call to the certified Corporate Public Relations Officer.", pts: 3, fb: "Correct protocol. Media operations require unified, factual communications channels." },
+      { t: "Tell them the refinery is going to blow up just to get them off the phone.", pts: -1, fb: "Poor Choice. This can spark public panic and cause severe brand damage. Lose 1 point and choose again." }
+    ],
+    next: "emergency2"
+  },
+
+  // --- EMERGENCY 2 ---
+  emergency2: {
+    label: "DAY 2: 17:00 — EMERGENCY: Vapor Cloud Trigger",
+    scene: "An automated sensor detects a sudden, massive hydrocarbon vapor cloud escape near Tank 4. A spark could cause an explosion.",
+    vocab: ["hydrocarbon", "ignition", "emergency"],
+    opts: [
+      { t: "Order an immediate facility-wide shutdown, isolate electrical grids, and actuate the water deluge curtains.", isSafe: true, fb: "Perfect crisis mitigation. You suppressed potential ignition points instantly." },
+      { t: "Send a security guard out into the vapor area with a standard vehicle to check if the sensor is broken.", isGameOver: true, fb: "<strong>GAME OVER.</strong> Unmitigated disaster. The vehicle’s internal combustion engine sparks the hydrocarbon cloud, causing a devastating industrial explosion." }
+    ],
+    next: "d9"
+  },
+
+  // --- DAY 3 ---
+  d9: {
+    label: "DAY 3: 08:30 — VIP Interruption",
+    scene: "A delegation of international board executives arrives for a facility tour. The Regional Director asks you to skip their mandatory gate safety verification screening to save time.",
+    vocab: ["screening", "delegation", "protocol"],
+    opts: [
+      { t: "Politely insist that all visitors, regardless of executive status, undergo standard safety screening procedures.", pts: 3, fb: "Outstanding. True safety leadership applies identical rules across all ranks." },
+      { t: "Give them a shortened 10-second verbal summary while walking down the main corridor.", pts: 1, fb: "Compromised control. Executives are just as vulnerable to refinery hazards as anyone else." },
+      { t: "Let them pass completely unverified, telling the gate staff to just look away.", pts: -1, fb: "Poor Choice. Undermining your own gate staff ruins security credibility. Lose 1 point and choose again." }
+    ],
+    next: "d10"
+  },
+  d10: {
+    label: "DAY 3: 11:00 — Fatigued Officers",
+    scene: "Due to extended turnaround shifts, your core security roster is exhausted. Several officers have worked 14 days straight, increasing structural observation errors.",
+    vocab: ["fatigue", "roster", "mitigation"],
+    opts: [
+      { t: "Offer them extra energy drinks and financial bonuses to push through the final week.", pts: 1, fb: "Inadequate. Chemical stimulants do not compensate for systemic cognitive exhaustion errors." },
+      { t: "Bring in certified relief security personnel from an authorized partner site and enforce mandatory rest cycles.", pts: 3, fb: "Excellent fatigue management. Human error is a primary risk variable." },
+      { t: "Extend their daily shifts to 16 hours to minimize the total number of individuals on site.", pts: -1, fb: "Poor Choice. Extreme exhaustion guarantees a severe operational safety failure. Lose 1 point and choose again." }
+    ],
+    next: "d11"
+  },
+  d11: {
+    label: "DAY 3: 14:00 — Obsolete Hardware",
+    scene: "The CCTV cameras near the automated rail loading terminal are failing intermittently. The procurement team wants to delay replacement until next fiscal year's budget cycle.",
+    vocab: ["procurement", "intermittent", "monitoring"],
+    opts: [
+      { t: "Accept the budget delay and tell your staff to check that area on foot whenever they can.", pts: 1, fb: "Weak coverage. Blind spots near volatile fuel transfers invite significant security incidents." },
+      { t: "File a formal Risk Escalation Report detailing the security vulnerability to bypass standard budget delays.", pts: 3, fb: "Great bureaucratic navigation. Quantified safety risks loosen corporate capital allocations." },
+      { t: "Turn off the broken cameras completely so your system dashboard looks clean.", pts: -1, fb: "Poor Choice. Hiding physical asset failures invites unmonitored security disasters. Lose 1 point and choose again." }
+    ],
+    next: "d12"
+  },
+  d12: {
+    label: "DAY 3: 16:15 — The Final Choice",
+    scene: "A community activist group gathers outside the north logistics gate. They are peaceful but blocking fuel trucks. The Operations Lead wants you to clear them using force.",
+    vocab: ["escalation", "liaison", "logistics"],
+    opts: [
+      { t: "Coordinate with local police liaisons to safely reroute transport traffic while monitoring the crowd peacefully.", pts: 3, fb: "Superb resolution. De-escalation protects both human life and facility reputation." },
+      { t: "Order security officers to push the protesters away from the roadway using batons.", pts: 1, fb: "Highly volatile. Forceful actions escalate protests into media public-relations crises." },
+      { t: "Lock all gates and let the fuel trucks pile up across the public highway indefinitely.", pts: -1, fb: "Poor Choice. You have completely paralyzed supply chains and created a major traffic hazard. Lose 1 point and choose again." }
+    ],
+    next: "final"
+  }
+};
+
+function fisherYatesShuffle(array) {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function buildDots(id) {
+  const stages = ["d1", "d2", "d3", "d4", "emergency1", "d5", "d6", "d7", "d8", "emergency2", "d9", "d10", "d11", "d12"];
+  const curIdx = stages.indexOf(id);
+  const el = document.getElementById('dots');
+  el.innerHTML = '';
+  stages.forEach((stageId, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i < curIdx ? ' done' : i === curIdx ? ' active' : '');
+    if (stageId.includes('emergency') && i === curIdx) d.className += ' emg';
+    el.appendChild(d);
+  });
+}
+
+function show(id) {
+  const node = DATA[id];
+  S.answered = false;
+  S.currentBadChoices = [];
+  document.getElementById('card-bar').style.display = 'flex';
+  buildDots(id);
+  
+  let h = `<div class="card-body"><div class="time-label">${node.label}</div>`;
+  if(node.vocab) h += `<div class="vocab-row">${node.vocab.map(v=>`<span class="vpill">${v}</span>`).join('')}</div>`;
+  h += `<div class="scenario">${node.scene}</div><div class="options" id="opt-container">`;
+  
+  let displayOpts = fisherYatesShuffle(node.opts);
+  
+  displayOpts.forEach((o, idx) => {
+    h += `<button class="opt" id="opt-${idx}" onclick="pick('${id}', ${idx}, ${JSON.stringify(o).replace(/"/g, '&quot;')})">
+            <span>${o.t}</span>
+          </button>`;
+  });
+  h += `</div><div class="fbox" id="fb"></div><button class="nxt" id="nxt">Continue →</button></div>`;
+  document.getElementById('content').innerHTML = h;
+}
+
+function pick(id, idx, opt) {
+  if(S.answered && opt.pts !== -1) return;
+  
+  const fb = document.getElementById('fb');
+  const nxt = document.getElementById('nxt');
+  
+  fb.innerHTML = opt.fb;
+  fb.className = 'fbox show';
+  
+  if (opt.pts === -1) {
+    S.score += opt.pts;
+    document.getElementById('score').textContent = S.score + ' pts';
+    document.getElementById(`opt-${idx}`).disabled = true;
+    fb.style.backgroundColor = 'var(--red-bg)';
+    fb.style.borderColor = 'var(--red-bd)';
+    fb.style.color = 'var(--red-tx)';
+    return;
+  }
+  
+  S.answered = true;
+  
+  const allButtons = document.getElementById('opt-container').getElementsByTagName('button');
+  for (let b of allButtons) {
+    b.disabled = true;
+  }
+  
+  if(opt.pts !== undefined) S.score += opt.pts;
+  document.getElementById('score').textContent = S.score + ' pts';
+  
+  const isExcellent = opt.pts === 3 || opt.isSafe;
+  fb.style.backgroundColor = isExcellent ? 'var(--green-bg)' : 'var(--amber-bg)';
+  fb.style.borderColor = isExcellent ? 'var(--green-bd)' : 'var(--amber-bd)';
+  fb.style.color = isExcellent ? 'var(--green-tx)' : 'var(--amber-tx)';
+  
+  if(opt.isGameOver) {
+    fb.style.backgroundColor = 'var(--red-bg)';
+    fb.style.borderColor = 'var(--red-bd)';
+    fb.style.color = 'var(--red-tx)';
+    nxt.textContent = "Final Incident Review";
+    nxt.onclick = () => finish(true);
+  } else {
+    nxt.onclick = () => show(DATA[id].next);
+  }
+  nxt.classList.add('show');
+}
+
+function finish(gameOver) {
+  document.getElementById('card-bar').style.display = 'none';
+  let band, title, text, bClass;
+  
+  if(gameOver) {
+    bClass = "band-C"; 
+    title = "HSE Regulatory Shutdown"; 
+    text = "A critical operational safety failure occurred on your watch. In heavy petrochemical industries, breaking core protocols triggers immediate operational suspension, infrastructure damage, and legal prosecution.";
+  } else if(S.score >= 30) {
+    bClass = "band-A"; 
+    title = "Chief HSSE Director"; 
+    text = "Superb executive capability. You kept the facility safe under incredible production pressures, protected life, and maintained regulatory compliance effortlessly. An asset to the enterprise.";
+  } else if(S.score >= 18) {
+    bClass = "band-B"; 
+    title = "Plant Security Superintendent"; 
+    text = "Solid, capable management. You successfully protected the asset and completed the training cycles safely. A few minor compromises were made under production pressure, but security remained functional.";
+  } else {
+    bClass = "band-C"; 
+    title = "Junior Safety Supervisor"; 
+    text = "You survived the week, but your operational choices were reactive and frequently prioritized speed over absolute site integrity. Consider review cycles on hazard mitigation procedures.";
+  }
+
+  let glossHtml = `
+    <div class="glossary-section">
+      <h3 class="glossary-title">Refinery Vocabulary & Core Concepts</h3>
+      <div class="glossary-grid">
+        ${GLOSSARY.map(g => `
+          <div class="g-item">
+            <span class="g-term">${g.term}</span>
+            <span class="g-def">${g.def}</span>
+            <span class="g-note">${g.note}</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>`;
+
+  document.getElementById('content').innerHTML = `
+    <div class="final-screen">
+      <h2 style="font-family:Lora; font-size:26px">Simulation Complete</h2>
+      <div style="font-size:16px; margin:10px 0; font-family:'DM Mono'">Final Metric Evaluation: ${S.score} pts</div>
+      <div class="band-box ${bClass}">
+        <h3 style="margin-bottom:6px; font-weight:600">${title}</h3>
+        <p style="font-size:14px; opacity:0.95">${text}</p>
+      </div>
+      ${glossHtml}
+      <button class="opt" style="justify-content:center; margin-top:24px; font-weight:600; background:var(--ink); color:#fff" onclick="location.reload()">Restart Challenge</button>
+    </div>`;
+}
+
+function start() {
+  document.getElementById('content').innerHTML = `
+    <div class="final-screen" style="text-align:center">
+      <h2 style="font-family:Lora; font-size:30px; margin-bottom:0.5rem">PetroShield Global</h2>
+      <p style="font-size:15px; margin:1rem 0 2rem 0; color:var(--ink2)">
+        Step into the role of Head of Security & Safety Training at a Tier 1 petroleum refinery. 
+        Balance strict corporate protocol compliance against high-pressure production demands across three turbulent days.
+      </p>
+      <button class="opt" style="justify-content:center; background:var(--ink); color:#fff; padding:16px; font-weight:600" onclick="show('d1')">Assume Command →</button>
+    </div>`;
+}
+
+start();
+</script>
+</body>
+</html>
