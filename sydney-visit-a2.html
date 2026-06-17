@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sydney Trip: A2 English Challenge</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght=700&family=Lato:wght=400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --syd-gold: #ffb300;
+    --syd-blue: #00838f;
+    --syd-grey: #263238;
+    --danger: #d32f2f;
+    --success: #388e3c;
+    --text: #2c3e50;
+    --bg: #f4f6f7;
+  }
+
+  body { font-family: 'Lato', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; align-items: center; }
+  .header { background: var(--syd-grey); color: white; width: 100%; padding: 15px; text-align: center; position: sticky; top: 0; z-index: 10; border-bottom: 5px solid var(--syd-gold); }
+  
+  .stats-bar { display: flex; justify-content: space-around; background: #fff; width: 100%; padding: 15px 0; border-bottom: 2px solid #ddd; font-weight: bold; position: sticky; top: 70px; z-index: 9; font-size: 1.2rem; width: 100%; }
+
+  .progress-bar { width: 100%; height: 8px; background: #ddd; position: sticky; top: 125px; z-index: 9; }
+  .progress-fill { height: 100%; background: var(--syd-gold); width: 0%; transition: 0.5s; }
+
+  .game-container { max-width: 850px; width: 95%; margin: 20px auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); min-height: 450px; }
+  .choice-list { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+
+  .choice-btn { 
+    padding: 18px; border: 2px solid #eee; border-radius: 8px; background: white; 
+    cursor: pointer; font-size: 1.05rem; text-align: left; transition: 0.2s;
+    line-height: 1.4;
+  }
+  .choice-btn:hover:not(:disabled) { border-color: var(--syd-gold); background: #fffde7; transform: translateX(5px); }
+  .choice-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .feedback { margin-top: 20px; padding: 20px; border-radius: 8px; display: none; line-height: 1.6; border-left: 5px solid var(--syd-gold); font-size: 1.05rem; animation: fadeIn 0.4s; }
+  .feedback.error { border-left-color: var(--danger); background-color: #fdf2f2; }
+  .feedback.success { border-left-color: var(--success); background-color: #f2fdf5; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  .btn-next { display: none; margin-top: 20px; padding: 15px 30px; background: var(--syd-grey); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; font-size: 1.1rem; }
+
+  #landingPage { position: fixed; inset: 0; z-index: 100; background: var(--syd-blue); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; color: white; text-align: center; }
+  .landing-title { font-family: 'Playfair Display', serif; font-size: 3.5rem; color: var(--syd-gold); margin-bottom: 10px; }
+  .landing-btn { padding: 17px 48px; background: var(--syd-gold); color: #000; font-weight: 700; border: none; border-radius: 6px; cursor: pointer; margin-top: 20px; text-transform: uppercase; font-size: 1.1rem; }
+</style>
+</head>
+<body>
+
+<div id="landingPage">
+    <h1 class="landing-title">Sydney Trip</h1>
+    <p>Welcome to Sydney, Australia! You have a 4-day travel plan with 3 choices every day.</p>
+    <p>Try to make the best decisions to get the highest score!</p>
+    <button class="landing-btn" onclick="startGame()">Start Game →</button>
+</div>
+
+<div class="header"><h1>🦘 Sydney: 4-Day English Practice Game</h1></div>
+
+<div class="stats-bar">
+  <div>🏆 Total Score: <span id="scoreDisplay">0</span> points</div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+<div class="game-container" id="gameWindow">
+  <h2 id="stepTitle"></h2>
+  <p id="stepDesc"></p>
+  <div class="choice-list" id="choiceList"></div>
+  <div class="feedback" id="feedbackBox"></div>
+  <button class="btn-next" id="nextBtn" onclick="nextStep()">Next Step →</button>
+</div>
+
+<script>
+let currentIdx = 0;
+let totalScore = 0;
+
+const gameData = [
+  // --- DAY 1 ---
+  {
+    title: "DAY 1 - Choice 1: Arriving at Sydney Airport",
+    desc: "You just landed at the airport. You need to go to your hostel in the city center. What do you do?",
+    choices: [
+      { text: "Buy an Opal Card and take the airport train.", pts: 3, fb: "<b>Best Choice (+3 pts)!</b> The train is very fast and easy. You arrive at your hostel in 15 minutes." },
+      { text: "Take a regular local bus and then a normal train.", pts: 2, fb: "<b>Good Choice (+2 pts)!</b> This takes more time, but it is a good way to save money." },
+      { text: "Take a very expensive luxury limousine car.", pts: 1, fb: "<b>Average Choice (+1 pt):</b> It is very comfortable, but you spend too much money immediately." },
+      { text: "Try to walk on the big highway with your heavy bags.", pts: -1, type: "poor", fb: "<b>Poor Choice (-1 pt):</b> This is dangerous and impossible. The airport is too far from the city. Try another option!" }
+    ]
+  },
+  {
+    title: "DAY 1 - Choice 2: Breakfast near the Harbor",
+    desc: "It is a sunny morning. You are standing next to the water at Circular Quay. What do you eat for breakfast?",
+    choices: [
+      { text: "Buy a classic Australian meat pie from a local bakery.", pts: 3, fb: "<b>Best Choice (+3 pts)!</b> It is hot, tasty, cheap, and very traditional. You can eat it on a bench outside." },
+      { text: "Get a cup of coffee and avocado toast at a small cafe.", pts: 2, fb: "<b>Good Choice (+2 pts)!</b> It is delicious and you have a beautiful view of the bridge." },
+      { text: "Buy a simple banana and a muffin from a supermarket.", pts: 1, fb: "<b>Average Choice (+1 pt):</b> It is a bit boring, but it is cheap and healthy." },
+      { text: "Do not eat any breakfast today.", pts: -1, type: "poor", fb: "<b>Poor Choice (-1 pt):</b> Now you have no energy and you feel bad. You must eat something! Try again." }
+    ]
+  },
+  {
+    title: "DAY 1 - Choice 3: The Famous Harbour Bridge",
+    desc: "You are looking at the Sydney Harbour Bridge. How do you want to see it?",
+    choices: [
+      { text: "Walk across the bridge on the pedestrian path.", pts: 3, fb: "<b>Best Choice (+3 pts)!</b> Walking on the bridge is 100% free. The view of the blue water is amazing." },
+      { text: "Go inside the bridge tower to visit the lookout museum.", pts: 2, fb: "<b>Good Choice (+2 pts)!</b> It costs a little money, but you learn about the history of the city." },
+      { text: "Look at the bridge from the park below.", pts: 1, fb: "<b>Average Choice (+1 pt):</b> You get some nice pictures, but you do not experience walking on it." },
+      { text: "Pay $50 to a man ina a park for a 'bridge path walking ticket'.", pts: -1, type: "poor", fb: "<b>Poor Choice (-1 pt):</b> This is a scam! Walking on the bridge is free. Never pay people on the street. Try again!" }
+    ]
+  },
+
+  // --- DAY 2 ---
+  {
+    title: "DAY 2 - Choice 1: Going to Manly Beach",
+    desc: "Today you want to visit Manly. It is on the other side of the harbour. How do you go there?",
+    choices: [
+      { text: "Take the famous public Manly Ferry boat from Circular Quay.", pts: 3, fb: "<b>Best Choice (+3 pts)!</b> The ferry is cheap and beautiful. You can sit outside and see the Opera House." },
+      { text: "Take a fast private water taxi boat.", pts: 2, fb: "<b>Good Choice (+2 pts)!</b> It is very fast, but it is much more expensive than the public ferry." },
+      { text: "Take a long multi-bus journey around the roads.", pts: 1, fb: "<b>Average Choice (+1 pt):</b> You get to see the city streets, but it takes a very long time in traffic." },
+      { text: "Try to swim across the deep harbor water to Manly.", pts: -1, type: "poor", fb: "<b>Poor Choice (-1 pt):</b> This is crazy and very dangerous! There are big ships and sharks in the water. Try a real boat!" }
+    ]
+  },
+  {
+    title: "🚨 EMERGENCY 1: The Small Jellyfish",
+    desc: "You are walking near the water at the beach. A small jellyfish touches your foot. It hurts! A man runs to you with a bottle of water.",
+    choices: [
+      { text: "Walk to the official lifeguard station and ask for help.", pts: 3, fb: "<b>Best Choice (+3 pts)!</b> The professional lifeguards give you ice. The pain goes away quickly." },
+      { text: "Ask a local shopkeeper for help.", pts: 2, fb: "<b>Good Choice (+2 pts)!</b> The shopkeeper is very nice and gives you some free ice cubes for your foot." },
+      { text: "Wash your foot with clean sea water and sit down.", pts: 1, fb: "<b>Average Choice (+1 pt):</b> It hurts for an hour, but you stay calm and you are okay." },
+      { text: "Pay a friendly man $30 for his 'secret beach medicine'.", pts: -1, type: "poor", fb: "<b>Poor Choice (-1 pt):</b> His medicine is just colored water! He takes your money and runs away. Choose a safe option." }
+    ]
+  },
+  {
+    title: "DAY 2 - Choice 2: Night at the Opera House",
+    desc: "It is evening. The white sails of the Sydney Opera House are beautiful in the dark. What do you do?",
+    choices: [
+      { text: "Buy a cheap last-minute ticket for a theater show inside.", pts: 3, fb: "<b>Best Choice (+3 pts)!</b> Going inside this famous building to see a live show is a fantastic experience." },
+      { text: "Sit at the outside café and buy one drink.", pts: 2, fb: "<b>Good Choice (+2 pts)!</b> You listen to the music and watch the lights on the dark water." },
+      { text: "Walk around the outside of the building to look at the walls.", pts: 1, fb: "<b>Average Choice (+1 pt):</b> It is a nice walk, but you do not go inside or sit down." },
+      { text: "Try to climb up the outside walls to take a selfie.", pts: -1, type: "poor", fb: "<b>Poor Choice (-1 pt):</b> This is illegal! The loud police alarms start ringing immediately. Do not do that! Try again." }
+    ]
+  },
+  {
+    title: "DAY 2 - Choice 3: Midnight Food Choice",
+    desc: "The show is finished and it is very late. You are hungry. Where do you find dinner?",
+    choices: [
+      { text: "Go to Chinatown for some hot, delicious dumplings.", pts: 3, fb: "<b>Best Choice (+3 pts)!</b> The restaurants are open late, the food is fresh, and lots of locals eat here." },
+      { text: "Buy a quick burger at a 24-hour convenience shop.", pts: 2, fb: "<b>Good Choice (+2 pts)!</b> It is simple and fast, so you can go to sleep early." },
+      { text: "Eat a small pack of biscuits in your bag.", pts: 1, fb: "<b>Average Choice (+1 pt):</b> You are still a bit hungry, but it is free and safe." },
+      { text: "Use an app to order very expensive delivery food to your hotel.", pts: -1, type: "poor", fb: "<b>Poor Choice (-1 pt):</b> The delivery takes one hour and the night fees cost too much money. Choose something simpler!" }
+    ]
+  },
+
+  // --- DAY 3 ---
+  {
+    title: "DAY 3 - Choice 1: The Beach Walk",
+    desc: "Good morning! Day 3 is all about the ocean. You travel to the eastern suburbs. What is your activity?",
+    choices: [
+      { text: "Walk the famous Bondi to Coogee coastal path.", pts: 3, fb: "<b>Best Choice (+3 pts)!</b> This 6-kilometer walk has beautiful beaches, big cliffs, and ocean views. It is completely free!" },
+      { text: "Take a public bus directly to Bondi Beach to sit on the sand.", pts: 2, fb: "<b>Good Choice (+2 pts)!</b> It is easy, comfortable, and you can watch the surfers." },
+      { text: "Visit a small local museum near the beach.", pts: 1, fb: "<b>Average Choice (+1 pt):</b> It is interesting, but you spend a sunny day inside a building." },
+      { text: "Try to catch wild birds on the beach.", pts: -1, type: "poor", fb: "<b>Poor Choice (-1 pt):</b> That is silly! The birds just scream and try to steal your food. Choose a real activity." }
+    ]
+  },
+  {
+    title: "DAY 3 - Choice 2: Whale Watching",
+    desc: "It's whale migration season, and large humpback whales are swimming near the coast. How do you look for them?",
+    choices: [
+      { text: "Go on an official whale-watching boat tour.", pts: 3, fb: "<b>Best Choice (+3 pts)!</b> You go out into the ocean and see a big whale jump out of the water! Incredible." },
+      { text: "Go to a high cliff lookout park with a pair of binoculars.", pts: 2, fb: "<b>Good Choice (+2 pts)!</b> It only costs a cheap bus ticket, and you can see whale water splashes from the land." },
+      { text: "Sit on a beach and use the zoom on your phone camera to get a closer view of passing whales.", pts: 1, fb: "<b>Average Choice (+1 pt):</b> You see the whales, but only on a small screen!" },
+      { text: "Pay a man on the beach to take you out on a small plastic boat.", pts: -1, type: "poor", fb: "<b>Poor Choice (-1 pt):</b> The big ocean waves destroy the toy instantly. You get wet and scared. Choose a safe option!" }
+    ]
+  },
+  {
+    title: "🚨 EMERGENCY 2: The Souvenir Shop",
+    desc: "In a market, a shopkeeper calls you: 'Hey! Buy this special Gold Boomerang and rare Drop Bear protective spray for $40!'",
+    choices: [
+      { text: "Say 'No, thank you' with a smile and walk away.", pts: 3, fb: "<b>Best Choice (+3 pts)!</b> Drop bears are a joke story for tourists, and the boomerang is cheap plastic. Smart shopping!" },
+      { text: "Tell a market manager that the man is selling fake items.", pts: 2, fb: "<b>Good Choice (+2 pts)!</b> The manager thanks you for helping keep the market honest." },
+      { text: "Buy a small postcard from his shop instead.", pts: 1, fb: "<b>Average Choice (+1 pt):</b> A postcard is a cheap souvenir, and the man stops talking to you." },
+      { text: "Start an argument, throw his boomerangs on the floor, stamp on it and yell "Look, it doesn't come back!", pts: -1, type: "poor", fb: "<b>Poor Choice (-1 pt):</b> This is aggressive behavior. The security guards get angry with you. Be polite and try again!" }
+    ]
+  },
+  {
+    title: "DAY 3 - Choice 3: Dinner by the Water",
+    desc: "The sun is setting over Darling Harbour. You need some hot dinner. What do you choose?",
+    choices: [
+      { text: "Buy hot fish and chips from a takeaway shop and sit by the water.", pts: 3, fb: "<b>Best Choice (+3 pts)!</b> The food is fresh, hot, and you can watch the boats in the evening." },
+      { text: "Go to a traditional Australian pub for a big burger.", pts: 2, fb: "<b>Good Choice (+2 pts)!</b> The atmosphere is friendly and the meal is very big." },
+      { text: "Eat a simple sandwich in the hostel kitchen.", pts: 1, fb: "<b>Average Choice (+1 pt):</b> It saves money, but you do not experience the nice city atmosphere." },
+      { text: "Go to a 5-star luxury seafood restaurant.", pts: -1, type: "poor", fb: "<b>Poor Choice (-1 pt):</b> This restaurant is too formal and it costs almost all of your travel money for one meal! Try again." }
+    ]
+  },
+
+  // --- DAY 4 ---
+  {
+    title: "DAY 4 - Choice 1: Going to the Blue Mountains",
+    desc: "It is your last day! You leave the city to see the big green mountains in the west. How do you get there?",
+    choices: [
+      { text: "Take the early morning public train from Central Station.", pts: 3, fb: "<b>Best Choice (+3 pts)!</b> The train is very cheap, comfortable, and has big windows to see the trees." },
+      { text: "Book a seat on a guided tour bus.", pts: 2, fb: "<b>Good Choice (+2 pts)!</b> It costs more money, but a guide tells you interesting stories about the mountains." },
+      { text: "Go with a friend who is driving a small car.", pts: 1, fb: "<b>Average Choice (+1 pt):</b> It is fine, but you get stuck in heavy morning traffic on the highway." },
+      { text: "Try to find a wild kangaroo and ride it to the mountains.", pts: -1, type: "poor", fb: "<b>Poor Choice (-1 pt):</b> Kangaroos are wild animals and they can kick! They are not horses. Choose a real vehicle!" }
+    ]
+  },
+  {
+    title: "DAY 4 - Choice 2: The Three Sisters",
+    desc: "You arrive at the mountain lookout. You see the famous Three Sisters rock formation. What do you do?",
+    choices: [
+      { text: "Walk down the Giant Stairway path into the green valley.", pts: 3, fb: "<b>Best Choice (+3 pts)!</b> Walking inside the ancient forest is beautiful and excellent exercise." },
+      { text: "Buy a ticket for the Scenic World glass cable car.", pts: 2, fb: "<b>Good Choice (+2 pts)!</b> You fly high above the trees and see a wonderful panoramic view." },
+      { text: "Stay at the main lookout point and drink a tea.", pts: 1, fb: "<b>Average Choice (+1 pt):</b> You see the rocks, but you do not explore the forest below." },
+      { text: "Throw small stones at the ancient rocks to hear the sound.", pts: -1, type: "poor", fb: "<b>Poor Choice (-1 pt):</b> This is bad! It is a protected nature park and a special cultural site. Respect nature and choose again!" }
+    ]
+  },
+  {
+    title: "DAY 4 - Choice 3: Seeing Australian Animals",
+    desc: "Before your vacation ends, you want to see some unique Australian animals. Where do you go?",
+    choices: [
+      { text: "Visit an official wildlife park on the way back to the city.", pts: 3, fb: "<b>Best Choice (+3 pts)!</b> You see sleepy koalas up close and hand-feed some small, friendly wallabies." },
+      { text: "Walk in the Royal Botanic Gardens to see wild parrots in the trees.", pts: 2, fb: "<b>Good Choice (+2 pts)!</b> You see beautiful colorful birds and giant bats for free!" },
+      { text: "Visit a small pet shop in the city.", pts: 1, fb: "<b>Average Choice (+1 pt):</b> You see normal dogs and cats, but no wild Australian animals." },
+      { text: "Try to find a wild possum in a dark, dirty city alleyway at night.", pts: -1, type: "poor", fb: "<b>Poor Choice (-1 pt):</b> Wild possums have sharp teeth and claws. They do not want to play with you. Go to a safe park!" }
+    ]
+  }
+];
+
+// Fisher-Yates Shuffle Function
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
+function startGame() {
+  document.getElementById("landingPage").style.display = "none";
+  loadStep();
+}
+
+function loadStep() {
+  const step = gameData[currentIdx];
+  document.getElementById("stepTitle").innerText = step.title;
+  document.getElementById("stepDesc").innerHTML = step.desc;
+  
+  // Shuffle choices using Fisher-Yates before displaying them
+  shuffleArray(step.choices);
+
+  const list = document.getElementById("choiceList");
+  list.innerHTML = "";
+  
+  step.choices.forEach((c) => {
+    const btn = document.createElement("button");
+    btn.className = "choice-btn";
+    btn.innerHTML = c.text;
+    btn.onclick = () => selectChoice(c);
+    list.appendChild(btn);
+  });
+
+  document.getElementById("feedbackBox").style.display = "none";
+  document.getElementById("nextBtn").style.display = "none";
+}
+
+function selectChoice(choice) {
+  const fb = document.getElementById("feedbackBox");
+  
+  if (choice.type === "poor") {
+    totalScore += choice.pts; // deducts 1 point
+    document.getElementById("scoreDisplay").innerText = totalScore;
+    
+    fb.innerHTML = choice.fb;
+    fb.className = "feedback error";
+    fb.style.display = "block";
+    // Do not disable buttons or show next button -> force choose again
+    return;
+  }
+
+  // Good, average, or best choice
+  totalScore += choice.pts;
+  document.getElementById("scoreDisplay").innerText = totalScore;
+  
+  fb.innerHTML = choice.fb;
+  fb.className = "feedback success";
+  fb.style.display = "block";
+  
+  // Disable options and show next button
+  document.querySelectorAll(".choice-btn").forEach(b => b.disabled = true);
+  document.getElementById("nextBtn").style.display = "block";
+  document.getElementById("progressFill").style.width = ((currentIdx + 1) / gameData.length) * 100 + "%";
+}
+
+function nextStep() {
+  currentIdx++;
+  if (currentIdx < gameData.length) loadStep();
+  else renderFinalScreen();
+}
+
+function renderFinalScreen() {
+  let title = "";
+  let message = "";
+  
+  // Three Bands Feedback System (Max perfect score is 14 steps * 3 = 42 points)
+  if (totalScore >= 35) {
+    title = "🥇 Gold Award: Expert Traveller!";
+    message = "Fantastic! You made excellent choices every day. You know how to travel safely, save money, and have fun like an expert.";
+  } else if (totalScore >= 20) {
+    title = "🥈 Silver Award: Good Tourist!";
+    message = "Well done! You made many good choices. Your trip to Sydney was fun, safe, and successful.";
+  } else {
+    title = "🥉 Bronze Award: Learning Traveller!";
+    message = "You finished the trip! Next time, try to avoid the funny or dangerous options to get a higher score.";
+  }
+
+  document.getElementById("gameWindow").innerHTML = `
+    <h2>${title}</h2>
+    <p>${message}</p>
+    <hr>
+    <p style="font-size:1.3rem;">Your Final Score: <b>${totalScore} Points</b></p>
+    <button class="btn-next" style="display:block" onclick="location.reload()">Play Again ↩</button>
+  `;
+}
+</script>
+</body>
+</html>

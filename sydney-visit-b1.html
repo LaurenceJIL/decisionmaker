@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sydney Expedition: The Ultimate 4-Day B1 Challenge</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght=700&family=Lato:wght=400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --syd-gold: #ffb300;
+    --syd-blue: #00838f;
+    --syd-grey: #263238;
+    --danger: #d32f2f;
+    --success: #388e3c;
+    --text: #2c3e50;
+    --bg: #f4f6f7;
+  }
+
+  body { font-family: 'Lato', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; align-items: center; }
+  .header { background: var(--syd-grey); color: white; width: 100%; padding: 15px; text-align: center; position: sticky; top: 0; z-index: 10; border-bottom: 5px solid var(--syd-gold); }
+  
+  .stats-bar { display: flex; justify-content: space-around; background: #fff; width: 100%; padding: 10px 0; border-bottom: 2px solid #ddd; font-weight: bold; position: sticky; top: 70px; z-index: 9; }
+  .stat-item { display: flex; align-items: center; gap: 5px; }
+
+  .progress-bar { width: 100%; height: 8px; background: #ddd; position: sticky; top: 110px; z-index: 9; }
+  .progress-fill { height: 100%; background: var(--syd-gold); width: 0%; transition: 0.5s; }
+
+  .game-container { max-width: 850px; width: 95%; margin: 20px auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); min-height: 450px; }
+  .choice-list { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+
+  .choice-btn { 
+    padding: 18px; border: 2px solid #eee; border-radius: 8px; background: white; 
+    cursor: pointer; font-size: 1rem; text-align: left; transition: 0.2s;
+    display: flex; justify-content: space-between; align-items: center; line-height: 1.4;
+    width: 100%; box-sizing: border-box;
+  }
+  .choice-btn:hover:not(:disabled) { border-color: var(--syd-gold); background: #fffde7; transform: translateX(5px); }
+  .choice-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  
+  .price-tag { padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; font-weight: bold; margin-left: 10px; min-width: 60px; text-align: center; }
+  .cost-tag { background: #eee; color: #333; }
+  .gain-tag { background: var(--success); color: white; }
+
+  .feedback { margin-top: 20px; padding: 20px; border-radius: 8px; display: none; line-height: 1.6; border-left: 5px solid var(--syd-gold); font-size: 1.05rem; animation: fadeIn 0.4s; }
+  .feedback.error { border-left-color: var(--danger); background-color: #fdf2f2; }
+  .feedback.bonus { border-left-color: var(--success); background-color: #f2fdf5; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  .btn-next { display: none; margin-top: 20px; padding: 15px 30px; background: var(--syd-grey); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; font-size: 1.1rem; }
+
+  #landingPage { position: fixed; inset: 0; z-index: 100; background: var(--syd-blue); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; color: white; text-align: center; }
+  .landing-title { font-family: 'Playfair Display', serif; font-size: 3.5rem; color: var(--syd-gold); margin-bottom: 10px; }
+  .landing-btn { padding: 17px 48px; background: var(--syd-gold); color: #000; font-weight: 700; border: none; border-radius: 6px; cursor: pointer; margin-top: 20px; text-transform: uppercase; font-size: 1.1rem; }
+</style>
+</head>
+<body>
+
+<div id="landingPage">
+    <h1 class="landing-title">Sydney Expedition</h1>
+    <p>G'day! Welcome to Australia's Emerald City. You have <strong>$100 AUD</strong> and a strict 4-day plan (3 choices per day).</p>
+    <p>Practice your English, manage your budget, and see if you can become an Ultimate Aussie Explorer!</p>
+    <button class="landing-btn" onclick="startGame()">Start Your Journey →</button>
+</div>
+
+<div class="header"><h1>🦘 Sydney: The 4-Day Discussion Tour</h1></div>
+
+<div class="stats-bar">
+  <div class="stat-item">⭐ Satisfaction: <span id="scoreDisplay">0</span></div>
+  <div class="stat-item">💰 Budget: <span id="budgetDisplay">$100</span></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+<div class="game-container" id="gameWindow">
+  <h2 id="stepTitle"></h2>
+  <p id="stepDesc"></p>
+  <div class="choice-list" id="choiceList"></div>
+  <div class="feedback" id="feedbackBox"></div>
+  <button class="btn-next" id="nextBtn" onclick="nextStep()">Proceed →</button>
+</div>
+
+<script>
+let currentIdx = 0;
+let score = 0;
+let budget = 100;
+
+const gameData = [
+  // --- DAY 1 ---
+  {
+    title: "DAY 1 - Choice 1: Arrival at Kingsford Smith Airport",
+    desc: "You have just landed in Sydney! You need to get to your hostel in the City Centre (CBD). What is your plan?",
+    choices: [
+      { text: "Buy an Opal Card and take the Airport Train Link.", cost: 20, pts: 12, fb: "<b>Fast and convenient!</b> You avoid heavy traffic and arrive in the city center in just 15 minutes." },
+      { text: "Take a private luxury limousine taxi.", cost: 85, pts: 15, fb: "<b>Fancy but foolish!</b> You ride in comfort, but your budget is almost completely gone on step one." },
+      { text: "Try to walk along the highway with your heavy bags.", cost: 0, pts: 0, type: "poor", fb: "<b>Impossible!</b> The airport is miles away from the city center via busy motorways. Your legs hurt thinking about it. Choose a realistic option!" },
+      { text: "Take the local public bus to Mascot Station, then change to a normal train.", cost: 5, pts: 10, fb: "<b>Ultimate budget hack!</b> It takes a little longer, but you save heaps of money like a true student traveler." }
+    ]
+  },
+  {
+    title: "DAY 1 - Choice 2: Breakfast at Circular Quay",
+    desc: "It is a beautiful morning. You are standing right next to the sparkling harbor. What are you going to eat?",
+    choices: [
+      { text: "Get a flat white coffee and avocado toast at a harbor café.", cost: 22, pts: 15, fb: "<b>Delicious and very Australian!</b> The coffee is world-class and the view of the Harbour Bridge is spectacular." },
+      { text: "Buy a meat pie from a local bakery.", cost: 7, pts: 12, fb: "<b>An Aussie classic!</b> It is hot, savory, flaky, and economical. You eat it on a bench outside." },
+      { text: "Skip breakfast to save your money.", cost: 0, pts: -5, fb: "<b>Oh dear!</b> By 10:30 AM, you have no energy and feel very grumpy. Your satisfaction level drops." },
+      { text: "Buy a banana and a muffin from a regular supermarket.", cost: 4, pts: 10, fb: "<b>Smart and cheap.</b> You get your vitamins and keep your wallet safe for later adventures." }
+    ]
+  },
+  {
+    title: "DAY 1 - Choice 3: Crossing the Iconic Bridge",
+    desc: "The Sydney Harbour Bridge is right in front of you. How will you experience this architectural masterpiece?",
+    choices: [
+      { text: "Walk across the bridge's pedestrian pathway for free.", cost: 0, pts: 20, fb: "<b>Sensational value!</b> You get the exact same fresh sea air and stunning harbor views for absolutely zero dollars." },
+      { text: "Pay a street vendor for a 'Bridge Walking License'.", cost: 15, pts: 0, type: "poor", fb: "<b>Scam alert!</b> Walking across the bridge is 100% free for everyone. Do not give money to dishonest tricksters. Choose again!" },
+      { text: "Visit the Pylon Lookout inside the bridge tower.", cost: 25, pts: 18, fb: "<b>Great balance!</b> It is much cheaper than the official arch climb, but you still get amazing history and a high bird's-eye view." }
+    ]
+  },
+
+  // --- DAY 2 ---
+  {
+    title: "DAY 2 - Choice 1: Morning Cruise to Manly",
+    desc: "The sun is high in the sky. It is time to hop on a boat and experience Sydney’s famous waterways. Destination: Manly Beach!",
+    choices: [
+      { text: "Take the iconic public F1 Manly Ferry from Circular Quay.", cost: 10, pts: 25, fb: "<b>The ultimate Sydney experience!</b> It is cheap, scenic, and passes right by the Opera House. The cool breeze is amazing." },
+      { text: "Try to swim across the harbor channel to Manly.", cost: 0, pts: 0, type: "poor", fb: "<b>Suicidal!</b> The harbor is full of giant ferry boats and sharks. The water police drag you out immediately. Try again!" },
+      { text: "Take a fast private water taxi.", cost: 40, pts: 15, fb: "<b>Fast but pricey.</b> You get there quickly, but your budget takes a painful hit." }
+    ]
+  },
+  {
+    title: "🚨 EMERGENCY 1: The Beachside Medical Mistake",
+    desc: "While walking near the rocks at Manly, a small jellyfish brushes against your ankle. It stings! A stranger runs over with a mysterious bottle.",
+    choices: [
+      { text: "Pour sea water on it and politely walk to a lifeguard station.", cost: 0, pts: 15, type: "neutral", fb: "<b>Smart move!</b> The lifeguards apply ice, reassure you it is just a minor sting, and you walk away safe." },
+      { text: "Pay the stranger $30 for his 'Magical Snake and Jellyfish Oil'.", cost: 30, pts: 0, type: "poor", fb: "<b>Don't do it!</b> It is just colored water. He flees with your money while your leg still stings. Try a real solution!" },
+      { text: "Panic, scream, and try to drink ocean water to neutralize it.", cost: 0, pts: 0, type: "expulsion", fb: "<b>Medical Emergency!</b> Drinking salt water makes you severely ill. You spend the rest of your vacation in Sydney Hospital. GAME OVER." },
+      { text: "Ask a local shopkeeper for help; they give you ice for free.", cost: 0, pts: 12, type: "neutral", fb: "<b>Lovely community!</b> The shopkeeper gives you an ice pack. The stinging stops in 10 minutes." }
+    ]
+  },
+  {
+    title: "DAY 2 - Choice 2: Evening Show at the Opera House",
+    desc: "You are back in the city, and the famous sails of the Sydney Opera House are glowing in the dark. How will you spend your evening?",
+    choices: [
+      { text: "Buy a cheap evening rush ticket for an indoor theater performance.", cost: 45, pts: 28, fb: "<b>Cultural victory!</b> Sitting inside this world-famous building listening to live drama is a memory you will keep forever." },
+      { text: "Sit outside at the Opera Bar and buy one cold drink.", cost: 12, pts: 18, fb: "<b>Fantastic vibes!</b> You listen to ambient music and watch the ferry lights mirror on the dark water for a great price." },
+      { text: "Try to climb up the outside of the white sails for a photo.", cost: 0, pts: 0, type: "poor", fb: "<b>Illegal!</b> Security alarms scream immediately. You are heavily fined and embarrassed. Stay on the ground and choose again!" }
+    ]
+  },
+  {
+    title: "DAY 2 - Choice 3: Late Night Snack Logistics",
+    desc: "It's midnight. You are starving after the show. Where are you getting food?",
+    choices: [
+      { text: "Grab a fast burger at a 24-hour convenience shop.", cost: 10, pts: 10, fb: "<b>Functional.</b> It fills you up quickly so you can head back to your hostel bed." },
+      { text: "Order expensive late-night room service via an app.", cost: 35, pts: 12, fb: "<b>Ouch!</b> Delivery fees and midnight surcharges completely drain your cash reserves." },
+      { text: "Go to Chinatown for late-night dumplings.", cost: 14, pts: 20, fb: "<b>Excellent!</b> Bustling atmosphere, steaming hot food, and very popular with locals." }
+    ]
+  },
+
+  // --- DAY 3 ---
+  {
+    title: "DAY 3 - Choice 1: The Eastern Coastal Walk",
+    desc: "Wake up! Day 3 is all about sunshine and sand. You head to the eastern suburbs for a famous walk.",
+    choices: [
+      { text: "Do the stunning Bondi to Coogee Coastal Walk.", cost: 0, pts: 25, fb: "<b>Breathtaking!</b> 6 kilometers of cliffs, pristine beaches, and ocean pools for absolutely zero dollars." },
+      { text: "Hire a premium segway tour along the road.", cost: 55, pts: 12, fb: "<b>Expensive and awkward.</b> Segways aren't allowed on the beach track, so you spend your time dodging cars." },
+      { text: "Take a local public bus straight to Bondi Beach.", cost: 4, pts: 15, fb: "<b>Excellent logistics!</b> Smooth, affordable, and leaves you right next to the famous Bondi Icebergs pool." }
+    ]
+  },
+  {
+    title: "DAY 3 - Choice 2: Mid-Day Whale Watching",
+    desc: "It is migration season! Hundreds of majestic humpback whales are swimming past Sydney's coast. How will you see them?",
+    choices: [
+      { text: "Join an official high-speed catamaran whale-watching cruise.", cost: 65, pts: 25, fb: "<b>Spectacular!</b> You see a mother whale and her calf breach out of the water. Worth every single dollar." },
+      { text: "Stand at Cape Solander lookout with a pair of cheap binoculars.", cost: 5, pts: 15, fb: "<b>Clever alternative!</b> For just the cost of a bus fare, you see puffing water sprouts in the distance from solid land." },
+      { text: "Pay a stranger to take you out on a tiny inflatable pool toy.", cost: 20, pts: 0, type: "poor", fb: "<b>Terrifying!</b> The ocean waves smash your tiny floatie immediately. You wash back ashore wet and missing twenty dollars. Choose again!" }
+    ]
+  },
+  {
+    title: "🚨 EMERGENCY 2: The Souvenir Trap",
+    desc: "In a market alley, a street vendor corners you. 'Hey student! Genuine Australian Drop Bear defensive spray and real gold boomerangs! Only $30!'",
+    choices: [
+      { text: "Politely say 'No thanks' and keep walking.", cost: 0, pts: 10, type: "neutral", fb: "<b>Excellent street smarts!</b> Drop bears are a famous myth to trick tourists, and the plastic boomerangs are cheap fakes." },
+      { text: "Report the illegal counterfeit vendor to a city ranger.", cost: -10, pts: 15, type: "money", fb: "<b>Good citizen!</b> The ranger fines the scammer and rewards you with a $10 voucher for an authentic museum shop." },
+      { text: "Argue with him, punch his table, and start a street fight.", cost: 0, pts: 0, type: "expulsion", fb: "<b>Arrested!</b> Police arrest you for public violence. You spend your weekend at the police station. GAME OVER." },
+      { text: "Buy it because you are too nervous to say no.", cost: 30, pts: 0, type: "poor", fb: "<b>Hustled!</b> You spent $30 on scented tap water. Learn to confidently say no to aggressive sellers! Try again." }
+    ]
+  },
+  {
+    title: "DAY 3 - Choice 3: Dinner in Darling Harbour",
+    desc: "The stars are out over the harbor restaurants. Your stomach is rumbling loudly. What is for dinner?",
+    choices: [
+      { text: "Eat fresh fish and chips from a waterfront takeaway shop.", cost: 16, pts: 15, fb: "<b>Perfect!</b> Crisp batter, hot chips, and you get to sit by the marina watching the luxury boats float by." },
+      { text: "Dine at a premium 5-star seafood restaurant.", cost: 80, pts: 22, fb: "<b>Extravagant!</b> The lobster was incredible, but your remaining bank balance is looking deeply tragic." },
+      { text: "Get a gourmet burger combo at a local pub.", cost: 22, pts: 16, fb: "<b>Hearty meal.</b> Traditional Australian pub feeds are large, filling, and offer a great local atmosphere." }
+    ]
+  },
+
+  // --- DAY 4 ---
+  {
+    title: "DAY 4 - Choice 1: Journey to the Blue Mountains",
+    desc: "It is Day 4. Time to leave the city traffic behind and head west into the ancient eucalyptus wilderness.",
+    choices: [
+      { text: "Take the early morning public train from Central Station to Katoomba.", cost: 9, pts: 25, fb: "<b>Magnificent choice!</b> The train ride is scenic, cheap, comfortable, and drops you right near the hiking tracks." },
+      { text: "Rent an expensive sports car for a single day.", cost: 90, pts: 18, fb: "<b>Financial disaster!</b> Driving was fun, but you can no longer afford to buy lunch or entry tickets into any park attractions." },
+      { text: "Try to ride a wild kangaroo all the way to the mountains.", cost: 0, pts: 0, type: "poor", fb: "<b>Absurd!</b> Kangaroos are wild animals and will kick you. Take a real vehicle! Choose again." }
+    ]
+  },
+  {
+    title: "DAY 4 - Choice 2: The Three Sisters Lookout",
+    desc: "You are standing at Echo Point looking out over the legendary Three Sisters rock formation. The valley looks blue!",
+    choices: [
+      { text: "Do a free self-guided hike down the Giant Stairway trail.", cost: 0, pts: 22, fb: "<b>Invigorating!</b> Your legs hurt from the steep steps, but walking deep inside the ancient temperate rainforest is unforgettable." },
+      { text: "Buy a ticket for the Scenic World glass-bottom cable car.", cost: 49, pts: 24, fb: "<b>Thrilling!</b> You soar high above the canopy floor with panoramic views, assuming you had enough money left over to pay for it." },
+      { text: "Throw rocks at the ancient formations to see if they break.", cost: 0, pts: 0, type: "poor", fb: "<b>Disrespectful!</b> This is a sacred Aboriginal cultural site and national park. Respect nature! Choose a better activity." }
+    ]
+  },
+  {
+    title: "DAY 4 - Choice 3: Final Farewell Wildlife Encounter",
+    desc: "Your trip is concluding. You want to see Australia's unique wildlife one last time before heading home.",
+    choices: [
+      { text: "Visit Featherdale Wildlife Park on your journey back.", cost: 35, pts: 25, fb: "<b>Amazing!</b> You get to hand-feed friendly wallabies and snap a safe photo next to a sleepy koala." },
+      { text: "Try to catch a wild possum in a dark city alleyway.", cost: 0, pts: 0, type: "poor", fb: "<b>Ouch!</b> Wild possums have sharp claws and do not want to be hugged. Go to an official park! Try again." },
+      { text: "Look for wild colorful cockatoos in the Royal Botanic Gardens.", cost: 0, pts: 18, fb: "<b>Wonderful budget trick!</b> Thousands of wild parrots and giant flying foxes live in the trees completely for free." }
+    ]
+  }
+];
+
+function startGame() {
+  document.getElementById("landingPage").style.display = "none";
+  loadStep();
+}
+
+function loadStep() {
+  const step = gameData[currentIdx];
+  document.getElementById("stepTitle").innerText = step.title;
+  document.getElementById("stepDesc").innerHTML = step.desc;
+  
+  const list = document.getElementById("choiceList");
+  list.innerHTML = "";
+  
+  step.choices.forEach((c) => {
+    const btn = document.createElement("button");
+    btn.className = "choice-btn";
+    const canAfford = budget >= c.cost;
+    const isSpecial = (c.type === "expulsion" || c.type === "neutral" || c.type === "money");
+
+    if (!canAfford && !isSpecial && c.type !== "poor") btn.disabled = true;
+
+    let priceDisplay = "";
+    if (c.cost > 0) priceDisplay = `<span class="price-tag cost-tag">$${c.cost} AUD</span>`;
+    else if (c.cost === 0 && !isSpecial) priceDisplay = `<span class="price-tag cost-tag">FREE</span>`;
+
+    btn.innerHTML = `<span>${c.text} ${(!canAfford && !isSpecial) ? '<br><small style="color:red"><b>(Insufficient Funds)</b></small>' : ''}</span>${priceDisplay}`;
+    btn.onclick = () => selectChoice(c);
+    list.appendChild(btn);
+  });
+
+  document.getElementById("feedbackBox").style.display = "none";
+  document.getElementById("nextBtn").style.display = "none";
+}
+
+function selectChoice(choice) {
+  const fb = document.getElementById("feedbackBox");
+  
+  if (choice.type === "expulsion") {
+    fb.innerHTML = choice.fb;
+    fb.className = "feedback error";
+    fb.style.display = "block";
+    endGame("⚖️ EXPELLED FROM AUSTRALIA", "Your journey ended badly due to poor legal choices. The country packed your bags for you.");
+    return;
+  }
+
+  if (choice.type === "poor") {
+    budget -= choice.cost;
+    document.getElementById("budgetDisplay").innerText = "$" + budget;
+    fb.innerHTML = choice.fb;
+    fb.className = "feedback error";
+    fb.style.display = "block";
+    if (budget < 0) endGame("💸 BANKRUPT", "You spent your absolute last dollar on a tourist scam. You are now washing dishes to buy an international plane ticket home.");
+    return;
+  }
+
+  budget -= choice.cost;
+  score += choice.pts;
+  document.getElementById("scoreDisplay").innerText = score;
+  document.getElementById("budgetDisplay").innerText = "$" + budget;
+  
+  fb.innerHTML = choice.fb;
+  fb.className = choice.type === "money" ? "feedback bonus" : "feedback";
+  fb.style.display = "block";
+  
+  document.querySelectorAll(".choice-btn").forEach(b => b.disabled = true);
+  document.getElementById("nextBtn").style.display = "block";
+  document.getElementById("progressFill").style.width = ((currentIdx + 1) / gameData.length) * 100 + "%";
+}
+
+function nextStep() {
+  currentIdx++;
+  if (currentIdx < gameData.length) loadStep();
+  else renderFinalScreen();
+}
+
+function endGame(title, msg) {
+    document.querySelectorAll(".choice-btn").forEach(b => b.disabled = true);
+    document.getElementById("nextBtn").innerText = "Restart Expedition ↩";
+    document.getElementById("nextBtn").onclick = () => location.reload();
+    document.getElementById("nextBtn").style.display = "block";
+    document.getElementById("stepTitle").innerText = title;
+    document.getElementById("stepDesc").innerText = msg;
+}
+
+function renderFinalScreen() {
+  let title = score >= 220 ? "🥇 Ultimate Aussie Explorer" : score >= 140 ? "🥈 Savvy Backpacker" : "🥉 Sunburnt Tourist";
+  let message = score >= 220 ? "Sensational work! You handled Sydney like an absolute expert. You balanced your money, saw real nature, and survived the 4-day challenge!" : "Good job! You balanced your budget well enough to enjoy the local culture and made it home safely.";
+  document.getElementById("gameWindow").innerHTML = `<h2>${title}</h2><p>${message}</p><hr><p>Total Satisfaction Score: <b>${score} Points</b></p><p>Cash Remaining: <b>$${budget} AUD</b></p><button class="btn-next" style="display:block" onclick="location.reload()">Begin a New Journey</button>`;
+}
+</script>
+</body>
+</html>
