@@ -128,7 +128,7 @@ const GAME_DATA = {
       { q: "The Venue", d: "The council offers an old warehouse or a community garden. Which fits the 'Indie' vibe better?", opts: [
         { t: "Community Garden: Intimate, green, and trendy.", pts: 3, fb: "Perfect! The acoustic sets sound amazing among the trees, and the photos look great on social media." },
         { t: "Old Warehouse: Gritty, urban, and spacious.", pts: 2, fb: "A solid choice. It feels underground, though the acoustics are a bit echoey for the softer bands." },
-        { t: "The Local Library: Very quiet and intellectual.", pts: 1, fb: "The librarian keeps shushing the drummer. It's a bit too quiet for a festival." },
+        { t: "The Local Library: Very quiet and intellectual.", pts: 0, fb: "The librarian keeps shushing the drummer. It's a bit too quiet for a festival." },
         { t: "A Construction Site: Raw and industrial.", pts: -1, fb: "It's dangerous and loud. People can't hear the music over the drills. Choose a real venue." }
       ]},
       { q: "Marketing Strategy", d: "How do you reach the 'alternative' crowd without looking too corporate?", opts: [
@@ -153,7 +153,7 @@ const GAME_DATA = {
         { t: "Limited Edition Vinyl: With a signed poster.", pts: 3, fb: "They sold out in 20 minutes! Collectors are already selling them for double online." },
         { t: "Tote Bags: With a minimalist festival logo.", pts: 2, fb: "A practical and popular choice. Everyone is using them to carry their vegan snacks." },
         { t: "Plastic Sunglasses: Cheap and colorful.", pts: 1, fb: "They feel a bit 'pop' for an indie festival, but some kids bought them." },
-        { t: "Used Tissues: From the lead singer's dressing room.", pts: -1, fb: "That's disgusting! Nobody wants that. Sell real merchandise." }
+        { t: "Genuine air: From the lead singer's dressing room.", pts: -1, fb: "That's ridiculous! Nobody wants that. Sell real merchandise." }
       ]},
       { q: "The Weather", d: "A light drizzle has started. How do you keep the 'mood'?", opts: [
         { t: "Provide Branded Ponchos: And call it 'Atmospheric Rain'.", pts: 3, fb: "The crowd stays, and the photos of everyone in colorful ponchos look iconic." },
@@ -226,16 +226,16 @@ const GAME_DATA = {
         { t: "Fill the pit with pillows.", pts: -1, fb: "This is embarrassing. The bands are laughing at you from the stage." }
       ]},
       { q: "Food & Drink", d: "What's on the menu for 5,000 hungry metal fans?", opts: [
-        { t: "The 'Viking Feast': Huge portions of roast meat and ale.", pts: 3, fb: "A massive success! The fans are full and happy. Sales are through the roof." },
+        { t: "The 'Viking Feast': Huge portions of roast meat including a pig on a spit, and ale.", pts: 3, fb: "A massive success! The fans are full and happy. Sales are through the roof." },
         { t: "Standard Burgers & Hot Dogs: Fast and efficient.", pts: 2, fb: "It works, but it's a bit boring. People wanted something more 'epic'." },
-        { t: "Salad Bar: Focus on health and wellness.", pts: 1, fb: "You sold three carrots all day. Metalheads want protein and carbs!" },
+        { t: "Salad and lentil Bar: Focus on health and wellness.", pts: 1, fb: "You sold three carrots all day. Metalheads want protein and carbs!" },
         { t: "Raw Iron: To be 'truly metal'.", pts: -1, fb: "You cannot eat iron. The medical tent is full of people with broken teeth." }
       ]},
       { q: "Merchandise", d: "The black t-shirts are selling out. What else should you sell?", opts: [
         { t: "Custom Leather Jackets: With the festival logo on the back.", pts: 3, fb: "They are expensive, but the fans are buying them as 'lifetime' souvenirs." },
         { t: "Festival Earplugs: High-quality and branded.", pts: 2, fb: "A very smart move. You're protecting their ears and making a profit." },
         { t: "Pink Tutus: As a joke.", pts: 1, fb: "A few people bought them for the 'irony', but most ignored them." },
-        { t: "Bottled Sweat: From the drummer of the headlining band.", pts: -1, fb: "That is horrifying. Stop being weird and sell real clothes." }
+        { t: "Genuine headband: From the drummer of the headlining band.", pts: -1, fb: "That is horrifying. Stop being weird and sell real clothes." }
       ]},
       { q: "The Stage Design", d: "The headliner wants a giant fire-breathing dragon on stage.", opts: [
         { t: "Hire a Pyrotechnics Expert: To make it safe and spectacular.", pts: 3, fb: "The dragon was the highlight of the night! The photos are on the front page of every magazine." },
@@ -307,17 +307,17 @@ const GAME_DATA = {
         { t: "The Local Subway Station: For that 'authentic' busker feel.", pts: 1, fb: "It's too loud and smelly. People are just trying to get to work, not listen to Coltrane." },
         { t: "A Helicopter: Flying over the town.", pts: -1, fb: "Nobody can hear the saxophone over the engine. What a waste of fuel!" }
       ]},
-      { q: "Marketing", d: "How do you promote a 'Jazz' festival to a B1 audience?", opts: [
+      { q: "Marketing", d: "How do you promote a 'Jazz' festival to a high-spending audience?", opts: [
         { t: "The 'Smooth & Sophisticated' Campaign: Focus on wine and culture.", pts: 3, fb: "You've attracted a high-spending crowd. The local restaurants are fully booked!" },
         { t: "The 'Jazz for Everyone' Workshop: Free lessons for kids.", pts: 2, fb: "A great community move. The parents are happy, though the 'serious' fans think it's a bit childish." },
-        { t: "Posters with just a picture of a hat.", pts: 1, fb: "Nobody knew what it meant. Was it a hat festival? Very confusing." },
-        { t: "Shout 'JAZZ' at people in the street.", pts: -1, fb: "You are scaring the tourists. The police have asked you to stop." }
+        { t: "Posters with just a picture of a pork-pie hat.", pts: 1, fb: "Nobody knew what it meant. Was it a hat festival? Very confusing." },
+        { t: "Shout 'YOU LOVE JAZZ' at people in the street.", pts: -1, fb: "You are scaring the tourists. The police have asked you to stop." }
       ]},
       { q: "Food & Drink", d: "What's the best pairing for a night of jazz?", opts: [
         { t: "Wine & Cheese Platters: High-quality and easy to eat.", pts: 3, fb: "Perfect. The audience is spending a lot of money at the bar and staying for the whole set." },
         { t: "Coffee & Cocktails: For that 'Late Night Club' feel.", pts: 2, fb: "The energy is good, though some people are getting a bit too loud during the quiet solos." },
-        { t: "Hot Dogs & Beer: Keep it simple.", pts: 1, fb: "It feels a bit like a baseball game. The 'sophisticated' vibe is lost." },
-        { t: "Raw Coffee Beans: To chew on.", pts: -1, fb: "People are breaking their teeth and they are very caffeinated and angry." }
+        { t: "Hot Dogs & soda: Keep it simple.", pts: 1, fb: "It feels a bit like a baseball game. The 'sophisticated' vibe is lost." },
+        { t: "Parboiled Coffee Beans: To chew on.", pts: -1, fb: "People are breaking their teeth and they are very caffeinated and angry." }
       ]},
       { q: "The Guest Star", d: "A world-famous trumpeter is in town, but he's known for being 'difficult'.", opts: [
         { t: "The 'VIP Treatment': Give him a private dressing room and his favorite tea.", pts: 3, fb: "He played the best set of his life! The review in 'Jazz Times' is 5 stars." },
