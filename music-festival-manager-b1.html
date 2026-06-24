@@ -295,12 +295,6 @@ const GAME_DATA = {
   },
   jazz: {
     scenarios: [
-      { q: "The Opening Act", d: "Should you start with a traditional swing band or a modern fusion group?", opts: [
-        { t: "Traditional Swing: Get the older crowd dancing early.", pts: 3, fb: "The atmosphere is classy and fun! The town square feels like 1940s New York." },
-        { t: "Modern Fusion: Attract the younger 'cool' crowd.", pts: 2, fb: "The music is complex and interesting. The 'jazz snobs' are impressed, but some locals are confused." },
-        { t: "A guy playing a plastic recorder.", pts: 1, fb: "It's... unique. But it's not really the 'high-class' jazz the council wanted." },
-        { t: "Total Silence: To represent the 'notes they aren't playing'.", pts: -1, fb: "The audience is leaving. You can't sell tickets for silence!" }
-      ]},
       { q: "The Venue", d: "The local park or the historic Town Hall?", opts: [
         { t: "Town Hall: Perfect acoustics and a sophisticated vibe.", pts: 3, fb: "The sound is crystal clear. The audience feels like they are at a prestigious gala." },
         { t: "The Park: Relaxed, with picnic blankets and wine.", pts: 2, fb: "A lovely community day, though the wind kept blowing the sheet music away." },
@@ -318,6 +312,24 @@ const GAME_DATA = {
         { t: "Coffee & Cocktails: For that 'Late Night Club' feel.", pts: 2, fb: "The energy is good, though some people are getting a bit too loud during the quiet solos." },
         { t: "Hot Dogs & soda: Keep it simple.", pts: 1, fb: "It feels a bit like a baseball game. The 'sophisticated' vibe is lost." },
         { t: "Parboiled Coffee Beans: To chew on.", pts: -1, fb: "People are breaking their teeth and they are very caffeinated and angry." }
+      ]},
+      { q: "The Opening Act", d: "Should you start with a traditional swing band or a modern fusion group?", opts: [
+        { t: "Traditional Swing: Get the older crowd dancing early.", pts: 3, fb: "The atmosphere is classy and fun! The town square feels like 1940s New York." },
+        { t: "Modern Fusion: Attract the younger 'cool' crowd.", pts: 2, fb: "The music is complex and interesting. The 'jazz snobs' are impressed, but some locals are confused." },
+        { t: "A guy playing a plastic recorder.", pts: 1, fb: "It's... unique. But it's not really the 'high-class' jazz the council wanted." },
+        { t: "Total Silence: To represent the 'notes they aren't playing'.", pts: -1, fb: "The audience is leaving. You can't sell tickets for silence!" }
+      ]},
+      { q: "The Merchandise", d: "What's the best souvenir for a jazz fan?", opts: [
+        { t: "Branded Silk Scarves: Elegant and high-quality.", pts: 3, fb: "They sold out! The audience looks very sophisticated walking around town." },
+        { t: "Live CD of the Festival: Recorded on the first night.", pts: 2, fb: "A classic choice. People love taking the music home with them." },
+        { t: "Jazz-themed Socks.", pts: 1, fb: "A bit silly, but some people bought them as a joke." },
+        { t: "A bag of 'Jazz Air'.", pts: -1, fb: "You are selling an empty bag. People feel scammed and are asking for their money back." }
+      ]},
+      { q: "The Recording", d: "A local radio station wants to record the show for free.", opts: [
+        { t: "Accept: But only if they mention the town's name every 10 minutes.", pts: 3, fb: "Great PR! People all over the country are hearing about your beautiful town." },
+        { t: "Sell them the rights for $1,000.", pts: 2, fb: "You made some extra money, but the radio station decided not to play the whole show." },
+        { t: "Reject: Keep the music 'exclusive' for the people who paid.", pts: 1, fb: "Nobody outside the hall knows the festival happened. Very low impact." },
+        { t: "Record it on your phone and put it on YouTube.", pts: -1, fb: "The sound quality is terrible and the musicians are suing you for copyright." }
       ]},
       { q: "The Guest Star", d: "A world-famous trumpeter is in town, but he's known for being 'difficult'.", opts: [
         { t: "The 'VIP Treatment': Give him a private dressing room and his favorite tea.", pts: 3, fb: "He played the best set of his life! The review in 'Jazz Times' is 5 stars." },
@@ -342,18 +354,6 @@ const GAME_DATA = {
         { t: "Let them play on the main stage until 3 AM.", pts: 2, fb: "The fans loved it, but the neighbors called the police about the noise. A bit risky." },
         { t: "Tell them to go to bed.", pts: 1, fb: "You missed the chance for some real 'jazz magic'. The festival ended on a boring note." },
         { t: "Charge the musicians $50 per minute to keep playing.", pts: -1, fb: "They are the talent! They don't pay you. They all left and won't come back next year." }
-      ]},
-      { q: "The Recording", d: "A local radio station wants to record the show for free.", opts: [
-        { t: "Accept: But only if they mention the town's name every 10 minutes.", pts: 3, fb: "Great PR! People all over the country are hearing about your beautiful town." },
-        { t: "Sell them the rights for $1,000.", pts: 2, fb: "You made some extra money, but the radio station decided not to play the whole show." },
-        { t: "Reject: Keep the music 'exclusive' for the people who paid.", pts: 1, fb: "Nobody outside the hall knows the festival happened. Very low impact." },
-        { t: "Record it on your phone and put it on YouTube.", pts: -1, fb: "The sound quality is terrible and the musicians are suing you for copyright." }
-      ]},
-      { q: "The Merchandise", d: "What's the best souvenir for a jazz fan?", opts: [
-        { t: "Branded Silk Scarves: Elegant and high-quality.", pts: 3, fb: "They sold out! The audience looks very sophisticated walking around town." },
-        { t: "Live CD of the Festival: Recorded on the first night.", pts: 2, fb: "A classic choice. People love taking the music home with them." },
-        { t: "Jazz-themed Socks.", pts: 1, fb: "A bit silly, but some people bought them as a joke." },
-        { t: "A bag of 'Jazz Air'.", pts: -1, fb: "You are selling an empty bag. People feel scammed and are asking for their money back." }
       ]},
       { q: "The Final Review", d: "The festival is over. How do you measure success?", opts: [
         { t: "The 'Economic Impact' Report: Show how much the local shops made.", pts: 3, fb: "The Mayor is delighted! You've proven that jazz is good for business." },
