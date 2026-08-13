@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beat the Heat: Heatwave Survival Game</title>
+    <style>
+        :root {
+            --primary-color: #ff5722;
+            --primary-hover: #e64a19;
+            --secondary-color: #ffe0b2;
+            --dark-color: #1a1a2e;
+            --light-color: #ffffff;
+            --success-color: #2e7d32;
+            --success-bg: #e8f5e9;
+            --danger-color: #c62828;
+            --danger-bg: #ffebee;
+            --warning-bg: #fff8e1;
+            --warning-color: #f57f17;
+            --card-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%);
+            color: var(--dark-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .game-container {
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            width: 100%;
+            max-width: 720px;
+            padding: 35px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 18px;
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .score-badge {
+            background: linear-gradient(45deg, var(--primary-color), #ff8a65);
+            color: white;
+            padding: 8px 18px;
+            border-radius: 25px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 10px rgba(255, 87, 34, 0.3);
+        }
+
+        .screen {
+            display: none;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .intro-screen h2 {
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            font-size: 1.6rem;
+            text-align: center;
+        }
+
+        .intro-screen p {
+            margin-bottom: 14px;
+            line-height: 1.6;
+            font-size: 1.05rem;
+            color: #444;
+            text-align: center;
+        }
+
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 15px;
+            display: inline-block;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(255, 87, 34, 0.25);
+        }
+
+        .btn:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(255, 87, 34, 0.35);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .question-text {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 22px;
+            line-height: 1.5;
+            color: #222;
+        }
+
+        .options-grid {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .option-btn {
+            background-color: #fff;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 16px 20px;
+            font-size: 1rem;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--dark-color);
+            font-weight: 500;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            border-color: var(--primary-color);
+            background-color: #fff8f5;
+            transform: translateX(4px);
+        }
+
+        .option-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .feedback-box {
+            padding: 18px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-size: 1rem;
+            line-height: 1.5;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .feedback-box.correct {
+            background-color: var(--success-bg);
+            color: var(--success-color);
+            border: 1px solid #a5d6a7;
+        }
+
+        .feedback-box.incorrect {
+            background-color: var(--danger-bg);
+            color: var(--danger-color);
+            border: 1px solid #ef9a9a;
+        }
+
+        .feedback-box.warning {
+            background-color: var(--warning-bg);
+            color: var(--warning-color);
+            border: 1px solid #ffe082;
+        }
+
+        .life-or-death {
+            border: 2px solid var(--danger-color) !important;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(198, 40, 40, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(198, 40, 40, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(198, 40, 40, 0); }
+        }
+
+        .danger-badge {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+            display: inline-block;
+            font-weight: 700;
+        }
+
+        .progress-bar {
+            height: 10px;
+            background-color: #eee;
+            border-radius: 5px;
+            margin-bottom: 22px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff7e5f, var(--primary-color));
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        .result-band {
+            padding: 22px;
+            border-radius: 12px;
+            margin-bottom: 22px;
+            text-align: center;
+        }
+
+        .result-band h3 {
+            font-size: 1.6rem;
+            margin-bottom: 10px;
+        }
+
+        .game-over-screen {
+            text-align: center;
+        }
+
+        .game-over-screen h2 {
+            color: var(--danger-color);
+            font-size: 2.2rem;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <div class="header">
+        <h1>☀️ Heatwave Survival</h1>
+        <div class="score-badge">Score: <span id="score-display">0</span>/50</div>
+    </div>
+
+    <!-- BRIEF INTRO SCREEN -->
+    <div id="intro-screen" class="screen active">
+        <h2>Beat the Heatwave!</h2>
+        <p>A dangerous heatwave has struck your city. Test your survival facts and navigate through real-world scenarios to keep yourself and others safe.</p>
+        <p style="font-size: 1.2rem; font-weight: bold; color: var(--primary-color); margin: 20px 0;">
+            🏆 Maximum Total Score: 50 Points
+        </p>
+        <button class="btn" onclick="startGame()">Start Game</button>
+    </div>
+
+    <!-- QUIZ SCREEN -->
+    <div id="quiz-screen" class="screen">
+        <div class="progress-bar">
+            <div id="quiz-progress" class="progress-fill"></div>
+        </div>
+        <div id="quiz-type-tag" class="danger-badge">Part 1: Knowledge Quiz</div>
+        <div class="question-text" id="quiz-question">Question text goes here...</div>
+        
+        <div id="quiz-options" class="options-grid"></div>
+
+        <div id="quiz-feedback" class="feedback-box"></div>
+        <button id="quiz-next-btn" class="btn" style="display: none;" onclick="nextQuizQuestion()">Next Question</button>
+    </div>
+
+    <!-- MAZE SCREEN -->
+    <div id="maze-screen" class="screen">
+        <div class="progress-bar">
+            <div id="maze-progress" class="progress-fill"></div>
+        </div>
+        <div id="maze-badge-container"></div>
+        <div class="question-text" id="scenario-title" style="color: var(--primary-color); font-size: 1.1rem; margin-bottom: 6px;"></div>
+        <div class="question-text" id="scenario-text">Scenario text goes here...</div>
+        
+        <div id="scenario-options" class="options-grid"></div>
+
+        <div id="maze-feedback" class="feedback-box"></div>
+        <button id="maze-next-btn" class="btn" style="display: none;" onclick="nextMazeScenario()">Continue Story</button>
+    </div>
+
+    <!-- GAME OVER SCREEN -->
+    <div id="game-over-screen" class="screen game-over-screen">
+        <h2>⚠️ GAME OVER</h2>
+        <p id="game-over-reason" style="margin-bottom: 20px; font-size: 1.15rem; line-height: 1.6; color: #333;"></p>
+        <p style="color: #666; font-size: 0.95rem;">In a heatwave, making a dangerous mistake can end terribly. Always put health and safety first!</p>
+        <button class="btn" onclick="restartGame()">Try Again</button>
+    </div>
+
+    <!-- FINAL RESULT SCREEN -->
+    <div id="result-screen" class="screen">
+        <h2 style="text-align: center; margin-bottom: 15px; color: var(--primary-color);">Heatwave Challenge Complete!</h2>
+        <div style="text-align: center; font-size: 2.2rem; font-weight: bold; margin-bottom: 20px;">
+            Final Score: <span id="final-score">0</span> / 50
+        </div>
+        
+        <div id="result-band" class="result-band"></div>
+
+        <button class="btn" onclick="restartGame()">Play Again</button>
+    </div>
+</div>
+
+<script>
+    // GAME STATE
+    let score = 0;
+    let currentQuizIndex = 0;
+    let currentMazeIndex = 0;
+
+    // PART 1: 12 Questions total (6 T/F @ 1pt + 6 MC @ 2pts = 18 pts max)
+    const quizData = [
+        // 6 True / False Questions (1 Point Each)
+        {
+            type: "tf",
+            question: "True or False: Eating spicy food can actually help cool your body down.",
+            correct: "True",
+            explanation: "True! Spicy food makes you sweat. When sweaty skin evaporates, it cools your body."
+        },
+        {
+            type: "tf",
+            question: "True or False: Electric fans are very helpful when the room temperature is higher than 35°C (95°F).",
+            correct: "False",
+            explanation: "False! Above 35°C, fans just blow hot air over your skin like a hair dryer, which can heat you up faster."
+        },
+        {
+            type: "tf",
+            question: "True or False: Sunburn reduces your body's ability to cool itself down.",
+            correct: "True",
+            explanation: "True! Sunburn damages the skin and reduces its ability to sweat and release heat."
+        },
+        {
+            type: "tf",
+            question: "True or False: Dark clothing keeps you cooler because it blocks the sunlight from your skin.",
+            correct: "False",
+            explanation: "False! Dark colors absorb heat from sunlight. Light-colored clothing reflects sunlight and keeps you cooler."
+        },
+        {
+            type: "tf",
+            question: "True or False: You can burn your skin on hot pavement or street asphalt during a severe heatwave.",
+            correct: "True",
+            explanation: "True! Asphalt can reach temperatures over 60°C (140°F), which is hot enough to cause burns in seconds."
+        },
+        {
+            type: "tf",
+            question: "True or False: You should open all your windows during the day to let fresh air circulate.",
+            correct: "False",
+            explanation: "False! Keep windows closed during the day when outside air is hotter than indoor air. Open them at night when it cools down."
+        },
+        // 6 Multiple Choice Questions (2 Points Each)
+        {
+            type: "mc",
+            question: "What is the best type of drink during a heatwave?",
+            options: [
+                "Water and electrolyte drinks",
+                "Ice-cold sugary sodas",
+                "Hot coffee and tea",
+                "Energy drinks with caffeine"
+            ],
+            correct: 0,
+            explanation: "Water and electrolytes replenish fluids and mineral salts lost through sweat. Caffeine and sugar can dehydrate you."
+        },
+        {
+            type: "mc",
+            question: "What should you do with your curtains or blinds during a bright, hot day?",
+            options: [
+                "Keep them closed on sunny sides of the house",
+                "Keep them completely open to let in sunlight",
+                "Open them halfway on all windows",
+                "Close them only during the night"
+            ],
+            correct: 0,
+            explanation: "Closing blinds/curtains blocks direct sun rays, keeping your home several degrees cooler."
+        },
+        {
+            type: "mc",
+            question: "What are early symptoms of heat exhaustion?",
+            options: [
+                "Dizziness, heavy sweating, and headaches",
+                "Sore throat, coughing, and sneezing",
+                "High energy, shivering, and cold skin",
+                "Deep hunger and sleepiness"
+            ],
+            correct: 0,
+            explanation: "Dizziness, weakness, headache, and heavy sweating are warning signs that your body is getting too hot."
+        },
+        {
+            type: "mc",
+            question: "When is the safest time to do outdoor sports or exercise in summer?",
+            options: [
+                "Early morning (before 8 AM)",
+                "At noon (12 PM - 2 PM)",
+                "In the late afternoon (3 PM - 5 PM)",
+                "Any time as long as you wear a hat"
+            ],
+            correct: 0,
+            explanation: "Early morning is the coolest time of day. Late afternoon is often the hottest!"
+        },
+        {
+            type: "mc",
+            question: "Why are pets (like dogs) at high risk during a heatwave?",
+            options: [
+                "They cannot sweat through their skin like humans",
+                "They drink too much water",
+                "They sleep too much during the day",
+                "Their fur burns very easily in sunlight"
+            ],
+            correct: 0,
+            explanation: "Dogs cool down mainly by panting and through paw pads; they cannot sweat all over their body like humans."
+        },
+        {
+            type: "mc",
+            question: "What is 'heat stroke'?",
+            options: [
+                "A dangerous medical emergency where the body loses temperature control",
+                "A mild sunburn that turns skin red",
+                "A sudden feeling of cold weather in summer",
+                "A type of headache caused by bright light"
+            ],
+            correct: 0,
+            explanation: "Heat stroke is severe and dangerous! Body temperature rises above 40°C (104°F) and requires immediate emergency help."
+        }
+    ];
+
+    // PART 2: MAZE DATA
+    // 10 Standard Scenarios (3, 2, 1, or -1 pt) -> Max 30 pts
+    // 2 Life or Death Scenarios (1 pt or Game Over) -> Max 2 pts
+    // Total Part 2 Max = 32 pts (Grand Total = 50 pts)
+    const mazeData = [
+        {
+            time: "8:00 AM",
+            title: "Morning Routine",
+            text: "You wake up and the weather forecast predicts 41°C (106°F) today. How do you prepare your apartment before leaving for school/work?",
+            isLifeDeath: false,
+            choices: [
+                { text: "Close all windows and pull down the blinds to keep heat out.", pts: 3, feedback: "Great! Blocking sunlight keeps your home cool all day." },
+                { text: "Close the windows, but leave the curtains open for sunlight.", pts: 2, feedback: "Okay, but direct sunlight will still heat up your rooms." },
+                { text: "Open all windows wide to let morning air in and leave them open.", pts: 1, feedback: "Poor choice. Outside air will quickly get very hot during the day." },
+                { text: "Leave the air conditioner running on high all day with windows slightly open.", pts: -1, feedback: "Terrible idea! Wasteful, expensive, and unsafe for electronics." }
+            ]
+        },
+        {
+            time: "9:00 AM",
+            title: "Dressing for the Heat",
+            text: "You need to choose your outfit for today. What do you wear?",
+            isLifeDeath: false,
+            choices: [
+                { text: "Loose, lightweight, light-colored cotton clothes and a sun hat.", pts: 3, feedback: "Perfect! Light colors reflect heat, and loose fabric allows air to flow." },
+                { text: "Light-colored clothes, but heavy leather shoes and thick socks.", pts: 2, feedback: "Decent clothes choice, but heavy footwear will make your feet overheat." },
+                { text: "Shorts and a sleeveless shirt without applying suncream.", pts: 1, feedback: "Risky! You might burn your skin easily in severe heat." },
+                { text: "A tight black T-shirt and tight dark jeans.", pts: -1, feedback: "Bad outfit! Dark clothing absorbs solar heat and tight clothes trap sweat." }
+            ]
+        },
+        {
+            time: "10:30 AM",
+            title: "Commute Choice",
+            text: "You have to go across town to meet a friend. It is already 34°C outside. How do you travel?",
+            isLifeDeath: false,
+            choices: [
+                { text: "Take an air-conditioned bus or metro train.", pts: 3, feedback: "Smart choice! Stay cool while traveling." },
+                { text: "Walk slowly along shaded paths, carrying a water bottle.", pts: 2, feedback: "Good effort, but public transport with AC is cooler." },
+                { text: "Walk along the main road in direct sunlight.", pts: 1, feedback: "Not ideal. Walking without shade makes you overheat quickly." },
+                { text: "Ride a bicycle fast to finish the trip quickly.", pts: -1, feedback: "Dangerous! Heavy physical exercise in high heat can trigger heat exhaustion." }
+            ]
+        },
+        {
+            time: "11:30 AM",
+            title: "LIFE OR DEATH: The Parked Car",
+            text: "You see a baby and a dog sitting inside a locked parked car in the sun. The windows are closed. What do you do immediately?",
+            isLifeDeath: true,
+            choices: [
+                { text: "Call emergency services immediately and try to find help or open the car safely.", pts: 1, fatal: false, feedback: "LIFE SAVER! Cars heat up like ovens in minutes. Rapid action saves lives!" },
+                { text: "Wait 20 minutes to see if the driver comes back from the store.", pts: 0, fatal: true, feedback: "FATAL ERROR! Inside a car, temperatures reach lethal levels in minutes. Waiting is deadly." }
+            ]
+        },
+        {
+            time: "1:00 PM",
+            title: "Lunchtime Drinks",
+            text: "It is now 39°C. You are ordering lunch at a café. What drink do you choose?",
+            isLifeDeath: false,
+            choices: [
+                { text: "A tall glass of water and a fresh fruit juice.", pts: 3, feedback: "Excellent! Hydrates you well and provides essential nutrients." },
+                { text: "A frozen slushie drink swallowed slowly.", pts: 2, feedback: "Decent hydration, though room-temp water hydrates faster." },
+                { text: "An ice-cold beer.", pts: 1, feedback: "Alcohol accelerates dehydration in hot weather." },
+                { text: "A large iced sweet coffee with double espresso shots.", pts: -1, feedback: "Poor drink choice! High caffeine and sugar dehydrate your body rapidly." }
+            ]
+        },
+        {
+            time: "2:30 PM",
+            title: "Peak Heat Activity",
+            text: "It is the hottest hour of the day (41°C). Your friends ask you to play beach volleyball outdoors. What do you do?",
+            isLifeDeath: false,
+            choices: [
+                { text: "Politely decline and suggest sitting in a shady indoor place until 5 PM.", pts: 3, feedback: "Wise move. Avoid intense outdoor exertion during peak heat hours." },
+                { text: "Go watch them from under a tree shade while drinking water.", pts: 2, feedback: "Good compromise, though indoor air conditioning is even safer." },
+                { text: "Play volleyball, but stop every 10 minutes to pour cold water on your head.", pts: 1, feedback: "Still too risky for heavy exercise in 41°C heat." },
+                { text: "Go play volleyball without a hat to get a nice suntan.", pts: -1, feedback: "Terrible idea! Extreme risk of severe sunburn and heat exhaustion." }
+            ]
+        },
+        {
+            time: "4:00 PM",
+            title: "Recognizing Symptoms",
+            text: "Your friend suddenly says they feel dizzy, nauseous, and tired. Their skin looks pale and damp. What should you do?",
+            isLifeDeath: false,
+            choices: [
+                { text: "Move them to a cool, shady place, give them water, and apply cool damp cloths.", pts: 3, feedback: "Perfect response! These are signs of heat exhaustion. Immediate cooling is key." },
+                { text: "Move them to shade and let them rest quietly without water.", pts: 2, feedback: "Helpful, but giving them cool fluids would be much better." },
+                { text: "Give them a hot cup of coffee to wake them up.", pts: 1, feedback: "Incorrect. Hot caffeine will worsen heat exhaustion." },
+                { text: "Tell them to run around to sweat out the heat.", pts: -1, feedback: "Dangerous! Forcing exertion during heat exhaustion can cause sudden collapse." }
+            ]
+        },
+        {
+            time: "5:30 PM",
+            title: "Cooling Down at Home",
+            text: "You return home. The apartment feels warm and stuffy. How do you cool your body safely?",
+            isLifeDeath: false,
+            choices: [
+                { text: "Take a cool shower and put cool wet towels on your neck and wrists.", pts: 3, feedback: "Best method! Water on pulse points lowers core body temperature effectively." },
+                { text: "Take a moderately cool bath for 15 minutes.", pts: 2, feedback: "Good choice to relax and reduce body heat." },
+                { text: "Turn on a fan and sit right in front of it in a 38°C sealed room.", pts: 1, feedback: "A fan alone in a room above 35°C just blows hot air like an oven." },
+                { text: "Drink three energy drinks from the fridge.", pts: -1, feedback: "Bad idea! Energy drinks spike heart rate and increase heat stress." }
+            ]
+        },
+        {
+            time: "7:00 PM",
+            title: "Evening Meal",
+            text: "It is dinnertime. What kind of meal should you prepare?",
+            isLifeDeath: false,
+            choices: [
+                { text: "A light meal with cucumber, watermelon, salad, and grilled chicken.", pts: 3, feedback: "Ideal! Water-rich foods keep you hydrated without heating the kitchen." },
+                { text: "A mildly spicy dish served with plenty of cool water.", pts: 2, feedback: "Spicy food promotes cooling sweat, though cooking adds slight room heat." },
+                { text: "Salty fast food chips and burgers.", pts: 1, feedback: "Too much salt and heavy fat makes digestion harder in high heat." },
+                { text: "A heavy roast dinner using the oven for two hours.", pts: -1, feedback: "Bad move! Running an oven for hours turns your entire kitchen into a furnace." }
+            ]
+        },
+        {
+            time: "8:30 PM",
+            title: "LIFE OR DEATH: The Collapse",
+            text: "An elderly neighbor collapses outdoors. Their skin is hot and dry (no sweating), and they are confused and unconscious. What do you do?",
+            isLifeDeath: true,
+            choices: [
+                { text: "Call 911 / Emergency immediately for Heat Stroke, move them to shade, and cool them with water.", pts: 1, fatal: false, feedback: "LIFE SAVER! Hot, dry skin and confusion mean HEAT STROKE. Emergency care saves lives!" },
+                { text: "Carry them to their bed, cover them with a warm blanket, and wait until tomorrow morning.", pts: 0, fatal: true, feedback: "FATAL ERROR! Heat stroke is a medical emergency. Covering them with a blanket causes fatal heat damage." }
+            ]
+        },
+        {
+            time: "9:30 PM",
+            title: "Nighttime Ventilation",
+            text: "The sun has set and the outside temperature drops to 22°C (71°F), but inside your home it is still 30°C. What should you do?",
+            isLifeDeath: false,
+            choices: [
+                { text: "Open windows on opposite sides of the house to create a cool cross-breeze.", pts: 3, feedback: "Smart! Cross-ventilation flushes out trapped heat efficiently." },
+                { text: "Open only one tiny window in the bathroom.", pts: 2, feedback: "Provides a little fresh air, but not enough airflow to cool the home." },
+                { text: "Keep all windows completely sealed all night.", pts: 1, feedback: "Poor choice. You trap heat inside when outside air is cooler." },
+                { text: "Turn on the heating radiator.", pts: -1, feedback: "Nonsense! That makes your house dangerously hot." }
+            ]
+        },
+        {
+            time: "10:30 PM",
+            title: "Sleeping Comfortably",
+            text: "You are preparing to sleep, but your bedroom still feels warm. How do you set up for a restful night?",
+            isLifeDeath: false,
+            choices: [
+                { text: "Use light cotton bedsheets, sleep with a fan nearby, and keep water on your nightstand.", pts: 3, feedback: "Excellent! Light breathable fabrics help sweat evaporate while you sleep." },
+                { text: "Sleep on a mattress near an open window with light clothes.", pts: 2, feedback: "Good way to catch a nighttime breeze." },
+                { text: "Drink a bottle of wine before bed to help you fall asleep.", pts: 1, feedback: "Alcohol disrupts sleep quality and causes severe dehydration overnight." },
+                { text: "Sleep under a heavy winter duvet blanket to sweat as much as possible.", pts: -1, feedback: "Dangerous! Heavy blankets trap body heat and can trigger heat exhaustion in your sleep." }
+            ]
+        }
+    ];
+
+    function updateScoreDisplay() {
+        document.getElementById("score-display").innerText = score;
+    }
+
+    function showScreen(screenId) {
+        document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+        document.getElementById(screenId).classList.add("active");
+    }
+
+    function startGame() {
+        score = 0;
+        currentQuizIndex = 0;
+        currentMazeIndex = 0;
+        updateScoreDisplay();
+        showQuizQuestion();
+        showScreen("quiz-screen");
+    }
+
+    function restartGame() {
+        startGame();
+    }
+
+    // QUIZ LOGIC
+    function showQuizQuestion() {
+        const q = quizData[currentQuizIndex];
+        const progressPct = ((currentQuizIndex) / quizData.length) * 100;
+        document.getElementById("quiz-progress").style.width = progressPct + "%";
+        
+        document.getElementById("quiz-feedback").style.display = "none";
+        document.getElementById("quiz-next-btn").style.display = "none";
+
+        const qTextEl = document.getElementById("quiz-question");
+        const optionsEl = document.getElementById("quiz-options");
+        optionsEl.innerHTML = "";
+
+        if (q.type === "tf") {
+            document.getElementById("quiz-type-tag").innerText = `Part 1: True or False (${currentQuizIndex + 1}/12) - 1 Pt`;
+            qTextEl.innerText = q.question;
+
+            ["True", "False"].forEach(opt => {
+                const btn = document.createElement("button");
+                btn.className = "option-btn";
+                btn.innerText = opt;
+                btn.onclick = () => handleQuizAnswer(opt);
+                optionsEl.appendChild(btn);
+            });
+        } else {
+            document.getElementById("quiz-type-tag").innerText = `Part 1: Multiple Choice (${currentQuizIndex + 1}/12) - 2 Pts`;
+            qTextEl.innerText = q.question;
+
+            let opts = q.options.map((text, idx) => ({ text, isCorrect: idx === q.correct }));
+            opts.sort(() => Math.random() - 0.5);
+
+            opts.forEach(opt => {
+                const btn = document.createElement("button");
+                btn.className = "option-btn";
+                btn.innerText = opt.text;
+                btn.onclick = () => handleQuizAnswer(opt.isCorrect);
+                optionsEl.appendChild(btn);
+            });
+        }
+    }
+
+    function handleQuizAnswer(userSelection) {
+        const q = quizData[currentQuizIndex];
+        let isCorrect = (q.type === "tf") ? (userSelection === q.correct) : userSelection;
+
+        const feedbackEl = document.getElementById("quiz-feedback");
+        feedbackEl.style.display = "block";
+
+        const btns = document.querySelectorAll("#quiz-options .option-btn");
+        btns.forEach(b => b.disabled = true);
+
+        if (isCorrect) {
+            const earnedPts = (q.type === "tf") ? 1 : 2;
+            score += earnedPts;
+            updateScoreDisplay();
+            feedbackEl.className = "feedback-box correct";
+            feedbackEl.innerHTML = `<strong>Correct! (+${earnedPts} pt${earnedPts > 1 ? 's' : ''})</strong><br>${q.explanation}`;
+        } else {
+            feedbackEl.className = "feedback-box incorrect";
+            feedbackEl.innerHTML = `<strong>Not quite (+0 pts).</strong><br>${q.explanation}`;
+        }
+
+        document.getElementById("quiz-next-btn").style.display = "block";
+    }
+
+    function nextQuizQuestion() {
+        currentQuizIndex++;
+        if (currentQuizIndex < quizData.length) {
+            showQuizQuestion();
+        } else {
+            showScreen("maze-screen");
+            showMazeScenario();
+        }
+    }
+
+    // MAZE LOGIC
+    function showMazeScenario() {
+        const m = mazeData[currentMazeIndex];
+        const progressPct = ((currentMazeIndex) / mazeData.length) * 100;
+        document.getElementById("maze-progress").style.width = progressPct + "%";
+
+        document.getElementById("maze-feedback").style.display = "none";
+        document.getElementById("maze-next-btn").style.display = "none";
+
+        const badgeContainer = document.getElementById("maze-badge-container");
+        badgeContainer.innerHTML = "";
+        
+        if (m.isLifeDeath) {
+            badgeContainer.innerHTML = `<span class="danger-badge" style="background-color: var(--danger-color);">⚠️ LIFE OR DEATH CHOICE</span>`;
+        } else {
+            badgeContainer.innerHTML = `<span class="danger-badge">Part 2: Scenario (${currentMazeIndex + 1}/12)</span>`;
+        }
+
+        document.getElementById("scenario-title").innerText = `🕒 ${m.time} - ${m.title}`;
+        document.getElementById("scenario-text").innerText = m.text;
+
+        const optionsEl = document.getElementById("scenario-options");
+        optionsEl.innerHTML = "";
+
+        let shuffledChoices = [...m.choices];
+        shuffledChoices.sort(() => Math.random() - 0.5);
+
+        shuffledChoices.forEach(choice => {
+            const btn = document.createElement("button");
+            btn.className = "option-btn";
+            if (m.isLifeDeath) btn.classList.add("life-or-death");
+            btn.innerText = choice.text;
+            btn.onclick = () => handleMazeChoice(choice, m.isLifeDeath, btn);
+            optionsEl.appendChild(btn);
+        });
+    }
+
+    function handleMazeChoice(choice, isLifeDeath, clickedBtn) {
+        const feedbackEl = document.getElementById("maze-feedback");
+        feedbackEl.style.display = "block";
+
+        if (isLifeDeath) {
+            const btns = document.querySelectorAll("#scenario-options .option-btn");
+            btns.forEach(b => b.disabled = true);
+
+            if (choice.fatal) {
+                document.getElementById("game-over-reason").innerText = choice.feedback;
+                showScreen("game-over-screen");
+                return;
+            }
+
+            score += 1;
+            updateScoreDisplay();
+            feedbackEl.className = "feedback-box correct";
+            feedbackEl.innerHTML = `<strong>LIFE SAVER! (+1 pt)</strong><br>${choice.feedback}`;
+            document.getElementById("maze-next-btn").style.display = "block";
+            return;
+        }
+
+        // Standard Scenarios Handling (-1 forces choose again)
+        if (choice.pts === -1) {
+            score -= 1;
+            updateScoreDisplay();
+
+            clickedBtn.disabled = true;
+            clickedBtn.style.opacity = "0.5";
+            clickedBtn.style.textDecoration = "line-through";
+
+            feedbackEl.className = "feedback-box incorrect";
+            feedbackEl.innerHTML = `<strong>❌ Poor Choice (-1 pt)!</strong><br>${choice.feedback}<br><em>Select another option to continue.</em>`;
+            
+            document.getElementById("maze-next-btn").style.display = "none";
+        } else {
+            score += choice.pts;
+            updateScoreDisplay();
+
+            const btns = document.querySelectorAll("#scenario-options .option-btn");
+            btns.forEach(b => b.disabled = true);
+
+            if (choice.pts === 3) {
+                feedbackEl.className = "feedback-box correct";
+                feedbackEl.innerHTML = `<strong>Great Choice! (+3 pts)</strong><br>${choice.feedback}`;
+            } else if (choice.pts === 2) {
+                feedbackEl.className = "feedback-box warning";
+                feedbackEl.innerHTML = `<strong>Good Choice! (+2 pts)</strong><br>${choice.feedback}`;
+            } else {
+                feedbackEl.className = "feedback-box warning";
+                feedbackEl.style.backgroundColor = "#fff3cd";
+                feedbackEl.style.color = "#856404";
+                feedbackEl.style.borderColor = "#ffeeba";
+                feedbackEl.innerHTML = `<strong>Fair Choice (+1 pt)</strong><br>${choice.feedback}`;
+            }
+
+            document.getElementById("maze-next-btn").style.display = "block";
+        }
+    }
+
+    function nextMazeScenario() {
+        currentMazeIndex++;
+        if (currentMazeIndex < mazeData.length) {
+            showMazeScenario();
+        } else {
+            showFinalResults();
+        }
+    }
+
+    // FINAL RESULTS (Scored out of 50 Max Points)
+    function showFinalResults() {
+        document.getElementById("final-score").innerText = score;
+        const resultBandEl = document.getElementById("result-band");
+
+        let title = "";
+        let desc = "";
+        let bgColor = "";
+        let textColor = "";
+
+        if (score >= 43) {
+            title = "🏆 Heatwave Master!";
+            desc = "Amazing job! You have outstanding heatwave safety skills. You know exactly how to stay safe, keep your home cool, and protect others in dangerous heat!";
+            bgColor = "var(--success-bg)";
+            textColor = "var(--success-color)";
+        } else if (score >= 32) {
+            title = "☀️ Heatwave Survivor";
+            desc = "Great work! You made mostly smart decisions and demonstrated solid understanding of heat safety. Review a few tips to become an expert!";
+            bgColor = "#e0f7fa";
+            textColor = "#006064";
+        } else if (score >= 20) {
+            title = "🌤️ Warm Weather Novice";
+            desc = "Good effort! You survived the heatwave, but you made a few risky choices that caused discomfort or penalty points. Play again to improve your score!";
+            bgColor = "var(--warning-bg)";
+            textColor = "var(--warning-color)";
+        } else {
+            title = "⚠️ Sunburn Risk!";
+            desc = "High temperatures caused you lots of trouble today. You fell for common heatwave myths and lost points on risky decisions. Review heat safety and try again!";
+            bgColor = "var(--danger-bg)";
+            textColor = "var(--danger-color)";
+        }
+
+        resultBandEl.style.backgroundColor = bgColor;
+        resultBandEl.style.color = textColor;
+        resultBandEl.innerHTML = `<h3>${title}</h3><p>${desc}</p>`;
+
+        showScreen("result-screen");
+    }
+</script>
+
+</body>
+</html>
