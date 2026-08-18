@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Warehouse Logistics Technician: A2 English Game</title>
+    <style>
+        :root {
+            --bg-warehouse: #0b1220;
+            --card-bg: #ffffff;
+            --accent: #0369a1;
+            --accent-hover: #035388;
+            --warning-amber: #d97706;
+            --success-green: #16a34a;
+            --info-blue: #0ea5a4;
+            --text-dark: #0f172a;
+            --border-color: #cbd5e1;
+            --error-red: #dc2626;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-warehouse);
+            background-image: radial-gradient(#122030 1.5px, transparent 0);
+            background-size: 24px 24px;
+            color: var(--text-dark);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .game-container {
+            background-color: var(--card-bg);
+            width: 100%;
+            max-width: 780px;
+            border-radius: 12px;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
+            padding: 30px;
+            border: 3px solid var(--accent);
+        }
+
+        header {
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        h1 {
+            color: var(--accent);
+            font-size: 1.6rem;
+        }
+
+        .status-bar {
+            display: flex;
+            gap: 15px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            background: #f1f5f9;
+            padding: 8px 14px;
+            border-radius: 20px;
+            color: var(--text-dark);
+        }
+
+        .scenario-box { margin-bottom: 20px; }
+        .scenario-text { font-size: 1.1rem; line-height: 1.6; margin-bottom: 15px; }
+
+        .feedback-banner { padding: 14px 18px; border-radius: 8px; margin-bottom: 20px; font-size: 0.98rem; line-height: 1.5; display: none; border-left: 5px solid; }
+        .feedback-banner.success { background-color: #f0fdf4; color: var(--success-green); border-color: var(--success-green); }
+        .feedback-banner.info-blue { background-color: #f0f9ff; color: var(--info-blue); border-color: var(--info-blue); }
+        .feedback-banner.warning { background-color: #fffbeb; color: var(--warning-amber); border-color: var(--warning-amber); }
+        .feedback-banner.error { background-color: #fef2f2; color: var(--error-red); border-color: var(--error-red); }
+
+        .options-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+        .btn-option { background-color: #ffffff; border: 2px solid var(--border-color); border-radius: 8px; padding: 14px 18px; text-align: left; font-size: 1rem; color: var(--text-dark); cursor: pointer; transition: all 0.2s ease; line-height: 1.4; }
+        .btn-option:hover { border-color: var(--accent); background-color: #f8fafc; transform: translateY(-2px); }
+
+        .btn-action { background-color: var(--accent); color: white; border: none; border-radius: 8px; padding: 14px 28px; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-top: 20px; display: inline-block; transition: background-color 0.2s, transform 0.1s; }
+        .btn-action:hover { background-color: var(--accent-hover); transform: scale(1.02); }
+
+        .hidden { display: none !important; }
+        .final-score { font-size: 2.2rem; color: var(--accent); font-weight: bold; margin: 15px 0; }
+        .badge { display: inline-block; padding: 4px 10px; background: var(--accent); color: white; border-radius: 4px; font-size: 0.85rem; font-weight: 600; margin-bottom: 10px; }
+
+        .landing-card { text-align: center; padding: 10px 0; }
+        .landing-card h2 { color: var(--accent); font-size: 1.8rem; margin-bottom: 15px; }
+        .landing-card p { font-size: 1.05rem; line-height: 1.6; margin-bottom: 15px; text-align: left; }
+        .feature-list { text-align: left; background: #f1f5f9; padding: 15px 20px 15px 35px; border-radius: 8px; margin: 20px 0; line-height: 1.6; }
+
+        @media (max-width: 500px) { .game-container { padding: 18px; } h1 { font-size: 1.3rem; } }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <header id="game-header" class="hidden">
+        <h1>Warehouse Logistics Technician</h1>
+        <div class="status-bar">
+            <span>Decisions: <span id="decision-count">0</span></span>
+            <span>Score: <span id="score-display">0</span></span>
+        </div>
+    </header>
+
+    <main id="game-body">
+        <!-- LANDING PAGE -->
+        <div id="landing-screen" class="landing-card">
+            <h2>Welcome to Oak & Pine Furniture Warehouse!</h2>
+            <p>You work in logistics. Today the warehouse is busy: new sofas arrive, a delivery truck is late, and the packing line has small problems.</p>
+            <p>This game tests your English reading and practical problem-solving at work.</p>
+            <p style="text-align: center; font-weight: bold; color: var(--accent);">Put on your safety vest, check your clipboard, and start your shift!</p>
+            <button class="btn-action" onclick="startGame()">Start Shift</button>
+        </div>
+
+        <!-- GAMEPLAY & FINAL SCREEN -->
+        <div id="gameplay-screen" class="hidden">
+            <div id="feedback" class="feedback-banner"></div>
+
+            <div class="scenario-box">
+                <span class="badge" id="location-badge">Location: Office</span>
+                <div class="scenario-text" id="scenario-text">Loading shift...</div>
+            </div>
+
+            <div class="options-grid" id="options-container">
+                <!-- Option buttons injected dynamically -->
+            </div>
+
+            <button id="restart-btn" class="btn-action hidden" onclick="resetToLanding()">Play Again</button>
+        </div>
+    </main>
+</div>
+
+<script>
+const gameData = {
+    start: {
+        location: "Receiving Office (08:00 AM)",
+        text: "You arrive and see a pallet of chair legs damaged at the corner. What is your first action?",
+        options: [
+            {
+                text: "Stop the pallet, move it to quarantine, and check the delivery note.",
+                score: 3,
+                next: "inspection",
+                feedback: "Good start! Quarantine and check papers so you know the damage and can report it."
+            },
+            {
+                text: "Move the pallet to the storage area quickly to save time.",
+                score: 1,
+                next: "storage_catchup",
+                feedback: "You moved damaged goods into storage. This can cause problems later when orders are picked."
+            },
+            {
+                text: "Put the damaged pieces to one side and continue with other pallets.",
+                score: 2,
+                next: "inspection",
+                feedback: "Acceptable, but always mark damaged items clearly and inform your supervisor."
+            },
+            {
+                text: "Ignore the damage and load the pallet onto the truck for delivery.",
+                score: -1,
+                retry: true,
+                feedback: "Wrong! Sending damaged products to customers causes returns and complaints. Try again."
+            }
+        ]
+    },
+
+    storage_catchup: {
+        location: "Storage Area (Catch-up)",
+        text: "A picker finds damaged chair legs in storage when filling an order. What do you do now?",
+        options: [
+            {
+                text: "Apologise, stop the order, bring the pallet back, and quarantine the damaged items.",
+                score: 3,
+                next: "inspection",
+                feedback: "Good recovery! Stopping the order prevents sending damaged furniture to customers."
+            },
+            {
+                text: "Replace chair legs with similar parts from another pallet without checking.",
+                score: 1,
+                next: "inspection",
+                feedback: "Quick fix, but you must be sure the parts fit and are not from another order."
+            },
+            {
+                text: "Tell the picker to continue and note it on the back of the packing list.",
+                score: 2,
+                next: "inspection",
+                feedback: "Not ideal. A formal report is better than writing on the packing list."
+            },
+            {
+                text: "Tell the picker to hide the damaged parts and finish the order.",
+                score: -1,
+                retry: true,
+                feedback: "Bad practice! Hiding damaged goods risks customer complaints and returns. Try again."
+            }
+        ]
+    },
+
+    inspection: {
+        location: "Receiving Office",
+        text: "You check the delivery note. The supplier marked the goods as " + '"Delivered in good order"' + ". The customer is waiting. What do you do?",
+        options: [
+            {
+                text: "Take photos, record damage on report, and call the supplier to ask for a credit or replacement.",
+                score: 3,
+                next: "forklift_check",
+                feedback: "Excellent. Evidence and supplier contact protect the company and the customer."
+            },
+            {
+                text: "Sign the note as received and file the paper without calling anyone.",
+                score: 1,
+                next: "forklift_check",
+                feedback: "Not good: signing stops claims. You should record damage before accepting delivery."
+            },
+            {
+                text: "Call your manager and ask what to do.",
+                score: 2,
+                next: "forklift_check",
+                feedback: "Okay to ask for help, but basic checks like photos are still your job."
+            },
+            {
+                text: "Throw away the damaged pieces and keep the rest without telling anyone.",
+                score: -1,
+                retry: true,
+                feedback: "Wrong! Disposing of parts without recording causes stock errors. Try again."
+            }
+        ]
+    },
+
+    forklift_check: {
+        location: "Loading Dock",
+        text: "A forklift driver reports a strange noise from the brakes. What do you do?",
+        options: [
+            {
+                text: "Stop using the forklift, tag it as faulty, and book maintenance.",
+                score: 3,
+                next: "loading_dock",
+                feedback: "Safe and correct. Faulty vehicles must be taken out of service."
+            },
+            {
+                text: "Tell the driver to drive slowly and continue working.",
+                score: 1,
+                next: "loading_dock",
+                feedback: "Risky. Slow driving can help short-term but you must fix the brakes."
+            },
+            {
+                text: "Ask the driver to check brake fluid and top it up now.",
+                score: 2,
+                next: "loading_dock",
+                feedback: "Good initiative, but only trained maintenance should handle vehicle repair."
+            },
+            {
+                text: "Ignore the noise because the schedule is tight.",
+                score: -1,
+                retry: true,
+                feedback: "Dangerous! Ignoring vehicle faults can cause accidents. Try again."
+            }
+        ]
+    },
+
+    loading_dock: {
+        location: "Loading Dock",
+        text: "A delivery truck arrives late and the driver is tired. The customer waits. How do you manage the situation?",
+        options: [
+            {
+                text: "Offer the driver a short rest, check paperwork, and re-schedule deliveries to keep customers informed.",n                score: 3,
+                next: "pallet_jam",
+                feedback: "Good care and communication. Rest for drivers and clear information keep customers happy."
+            },
+            {
+                text: "Ask the driver to hurry to finish the job quickly.",
+                score: 1,
+                next: "pallet_jam",
+                feedback: "Pushing tired drivers is risky. Safety first."
+            },
+            {
+                text: "Unload the goods quickly without checking the items for damage.",
+                score: -1,
+                retry: true,
+                feedback: "Bad: unchecked unloading may send damaged furniture to customers. Try again."
+            },
+            {
+                text: "Call the customer and explain the delay, offering a new time slot.",
+                score: 2,
+                next: "pallet_jam",
+                feedback: "Good communication, though handling paperwork and checks is also important."
+            }
+        ]
+    },
+
+    pallet_jam: {
+        location: "Warehouse Aisle",
+        text: "A pallet jack jams under a wrapped sofa and the shrink-wrap tears. What do you do?",
+        options: [
+            {
+                text: "Stop, remove power from the jack, and unwrap carefully to free the sofa.",
+                score: 3,
+                next: "packing_line",
+                feedback: "Correct. Stopping and unwrapping safely prevents more damage."
+            },
+            {
+                text: "Pull the sofa hard to free it now.",
+                score: -1,
+                retry: true,
+                feedback: "Pulling can damage the product and injure workers. Try again."
+            },
+            {
+                text: "Cut the shrink-wrap quickly with a knife without asking for help.",
+                score: 1,
+                next: "packing_line",
+                feedback: "Be careful with knives; ask for a trained colleague if the load is heavy."
+            },
+            {
+                text: "Move other nearby pallets away and then try to lift the sofa with two people.",
+                score: 2,
+                next: "packing_line",
+                feedback: "Good teamwork. Two people lifting reduces damage risk."
+            }
+        ]
+    },
+
+    packing_line: {
+        location: "Packing Area",
+        text: "The packing machine jams and some boxes are torn. What is your action?",
+        options: [
+            {
+                text: "Stop the machine, check jams, replace torn boxes, and record the stoppage.",
+                score: 3,
+                next: "fire_hazard",
+                feedback: "Excellent. Recording stoppages helps prevent future problems."
+            },
+            {
+                text: "Use tape to fix the torn boxes and keep the machine running.",
+                score: 1,
+                next: "fire_hazard",
+                feedback: "Temporary fix, but torn boxes may break in transit. Better to replace boxes."
+            },
+            {
+                text: "Ask a colleague to fix the machine while you continue other work.",
+                score: 2,
+                next: "fire_hazard",
+                feedback: "Okay teamwork, but ensure the machine is stopped for safety."
+            },
+            {
+                text: "Throw half-finished boxes on a pallet and ignore the issue.",
+                score: -1,
+                retry: true,
+                feedback: "Bad handling. Ignoring packing faults causes customer complaints. Try again."
+            }
+        ]
+    },
+
+    fire_hazard: {
+        isEmergency: true,
+        location: "Electrical Panel Room - Critical Hazard",
+        text: "CRITICAL: You smell burning near the electrical panel and see small sparks. What do you do?",
+        options: [
+            {
+                text: "Press the fire alarm, evacuate workers, and call emergency services.",
+                score: 3,
+                next: "final_shift_end",
+                survive: true,
+                feedback: "Correct. Evacuation and calling the fire brigade save lives and stop fires."
+            },
+            {
+                text: "Try to open the electrical panel to fix it yourself.",
+                score: 0,
+                survive: false,
+                failReason: "GAME OVER: Live electrical fires are dangerous. Only trained electricians with protective gear must open panels."
+            }
+        ]
+    },
+
+    final_shift_end: {
+        location: "Office (04:00 PM)",
+        text: "The fire team checked the site and all is safe. Your shift ends. How do you handover to the next team?",
+        options: [
+            {
+                text: "Write a clear report, list actions taken, and speak to the next shift in English.",
+                score: 3,
+                next: "finish",
+                feedback: "Great handover. Clear reports help the next team."
+            },
+            {
+                text: "Give a short verbal note and leave the written form for the manager.",
+                score: 1,
+                next: "finish",
+                feedback: "Some information is transferred, but written details are best."
+            },
+            {
+                text: "Leave without speaking; the next team can read the log later.",
+                score: -1,
+                retry: true,
+                feedback: "Poor handover. Verbal briefing avoids confusion. Try again."
+            },
+            {
+                text: "Send a quick message in the team chat and walk out.",
+                score: 2,
+                next: "finish",
+                feedback: "Better than nothing, but face-to-face handovers are clearer."
+            }
+        ]
+    }
+};
+
+let currentScore = 0;
+let decisionCount = 0;
+let currentNodeKey = "start";
+
+const landingScreenEl = document.getElementById('landing-screen');
+const gameplayScreenEl = document.getElementById('gameplay-screen');
+const gameHeaderEl = document.getElementById('game-header');
+
+const scenarioTextEl = document.getElementById('scenario-text');
+const optionsContainerEl = document.getElementById('options-container');
+const scoreDisplayEl = document.getElementById('score-display');
+const decisionCountEl = document.getElementById('decision-count');
+const locationBadgeEl = document.getElementById('location-badge');
+const feedbackEl = document.getElementById('feedback');
+const restartBtnEl = document.getElementById('restart-btn');
+
+function shuffleArray(array) {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+function startGame() {
+    landingScreenEl.classList.add('hidden');
+    gameHeaderEl.classList.remove('hidden');
+    gameplayScreenEl.classList.remove('hidden');
+    
+    currentScore = 0;
+    decisionCount = 0;
+    currentNodeKey = "start";
+    
+    scoreDisplayEl.textContent = currentScore;
+    decisionCountEl.textContent = decisionCount;
+    
+    feedbackEl.style.display = 'none';
+    restartBtnEl.classList.add('hidden');
+    
+    renderNode(currentNodeKey);
+}
+
+function resetToLanding() {
+    gameplayScreenEl.classList.add('hidden');
+    gameHeaderEl.classList.add('hidden');
+    landingScreenEl.classList.remove('hidden');
+}
+
+function renderNode(nodeKey) {
+    if (nodeKey === "finish") {
+        renderFinalResults();
+        return;
+    }
+
+    const node = gameData[nodeKey];
+
+    if (!node) {
+        console.error("Node missing:", nodeKey);
+        return;
+    }
+
+    locationBadgeEl.textContent = `Location: ${node.location}`;
+    scenarioTextEl.textContent = node.text;
+    optionsContainerEl.innerHTML = '';
+
+    const shuffledOptions = shuffleArray(node.options);
+
+    shuffledOptions.forEach(option => {
+        const btn = document.createElement('button');
+        btn.className = 'btn-option';
+        btn.textContent = option.text;
+        btn.onclick = () => handleChoice(option, node);
+        optionsContainerEl.appendChild(btn);
+    });
+}
+
+function handleChoice(option, currentNode) {
+    feedbackEl.style.display = 'block';
+    feedbackEl.textContent = option.feedback || option.failReason;
+
+    if (option.score === -1) {
+        currentScore -= 1;
+        scoreDisplayEl.textContent = currentScore;
+        feedbackEl.className = 'feedback-banner error';
+        return;
+    }
+
+    if (currentNode.isEmergency) {
+        decisionCount++;
+        decisionCountEl.textContent = decisionCount;
+
+        if (!option.survive) {
+            locationBadgeEl.textContent = "CRITICAL FAILURE";
+            scenarioTextEl.textContent = option.failReason;
+            optionsContainerEl.innerHTML = '';
+            
+            feedbackEl.className = 'feedback-banner error';
+            restartBtnEl.classList.remove('hidden');
+            return;
+        } else {
+            currentScore += option.score;
+            scoreDisplayEl.textContent = currentScore;
+            feedbackEl.className = 'feedback-banner success';
+            currentNodeKey = option.next;
+            renderNode(currentNodeKey);
+            return;
+        }
+    }
+
+    currentScore += option.score;
+    decisionCount++;
+
+    scoreDisplayEl.textContent = currentScore;
+    decisionCountEl.textContent = decisionCount;
+
+    if (option.score === 3) {
+        feedbackEl.className = 'feedback-banner success';
+    } else if (option.score === 2) {
+        feedbackEl.className = 'feedback-banner info-blue';
+    } else {
+        feedbackEl.className = 'feedback-banner warning';
+    }
+
+    currentNodeKey = option.next;
+    renderNode(currentNodeKey);
+}
+
+function renderFinalResults() {
+    optionsContainerEl.innerHTML = '';
+    locationBadgeEl.textContent = "Shift Completed: Warehouse Office";
+    
+    let bandTitle = "";
+    let bandDescription = "";
+
+    if (currentScore >= 18) {
+        bandTitle = "Band 1: Skilled Logistics Technician (18+ Points)";
+        bandDescription = "Excellent work! You managed checks, safety, and customer communication well. Your English and reports helped the team.";
+    } else if (currentScore >= 12) {
+        bandTitle = "Band 2: Competent Warehouse Operator (12–17 Points)";
+        bandDescription = "Good job. You fixed most problems and kept customers informed. A few choices could improve with practice.";
+    } else if (currentScore >= 6) {
+        bandTitle = "Band 3: Trainee Warehouse Assistant (6–11 Points)";
+        bandDescription = "You completed the shift but made several risky or slow choices. Practice safe checks and clearer reports.";
+    } else {
+        bandTitle = "Band 4: Unprepared Worker (Under 6 Points)";
+        bandDescription = "You struggled with safe handling and paperwork. Review basic warehouse safety and communication.";
+    }
+
+    scenarioTextEl.innerHTML = `
+        <h2>Shift Completed!</h2>
+        <div class="final-score">Final Score: ${currentScore} pts</div>
+        <p style="margin-bottom: 12px;"><strong>${bandTitle}</strong></p>
+        <p style="line-height: 1.6; font-size: 1.05rem;">${bandDescription}</p>
+    `;
+
+    restartBtnEl.classList.remove('hidden');
+}
+</script>
+</body>
+</html>
