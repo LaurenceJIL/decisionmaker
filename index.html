@@ -7,6 +7,66 @@
   <meta name="description" content="Directory of Decisionmaker exercise pages. Use the search box to quickly find an exercise." />
   <link rel="icon" href="/favicon.svg" />
   <link rel="stylesheet" href="/styles.css">
+  <style>
+    :root{
+      --bg:#0f1724; /* dark navy */
+      --card:#0b1220; /* slightly lighter */
+      --muted:#9aa4b2;
+      --accent-1:#7dd3fc; /* cyan */
+      --accent-2:#a78bfa; /* purple */
+      --accent-3:#fda4af; /* rose */
+      --glass: rgba(255,255,255,0.03);
+      --radius:12px;
+    }
+
+    /* Base reset tweaks to ensure consistent look */
+    html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;color:#e6eef6;background:linear-gradient(180deg,var(--bg),#071027 140%);}
+    .site{max-width:1100px;margin:36px auto;padding:28px;background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);border-radius:18px;box-shadow:0 10px 30px rgba(2,6,23,0.6);}
+
+    header{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:18px}
+    .title h1{margin:0;font-size:1.4rem}
+    .title .muted{color:var(--muted);font-size:0.9rem}
+
+    .controls{min-width:260px}
+    .controls .search{width:100%;padding:10px 14px;border-radius:999px;border:1px solid rgba(255,255,255,0.06);background:var(--glass);color:inherit;outline:none;font-size:0.95rem;box-shadow:inset 0 -1px 0 rgba(255,255,255,0.02)}
+    .controls .search::placeholder{color:rgba(230,238,246,0.45)}
+
+    main{padding:8px 0}
+    nav{width:100%}
+
+    /* Grid of tiles: responsive, up to 4 columns on wide screens */
+    .link-grid{display:grid;grid-template-columns:repeat(1,1fr);gap:14px;list-style:none;padding:0;margin:0}
+    @media(min-width:640px){.link-grid{grid-template-columns:repeat(2,1fr)}}
+    @media(min-width:900px){.link-grid{grid-template-columns:repeat(3,1fr)}}
+    @media(min-width:1150px){.link-grid{grid-template-columns:repeat(4,1fr)}}
+
+    .link-grid li{margin:0}
+    .link-grid a{display:block;text-decoration:none;padding:16px;border-radius:12px;background:linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.03);box-shadow:0 6px 18px rgba(2,6,23,0.6);transition:transform .18s ease,box-shadow .18s ease,background .18s ease;color:inherit}
+
+    /* Accent stripes using pseudo-element */
+    .link-grid a::before{content:"";height:64px;width:6px;position:absolute;border-top-left-radius:12px;border-bottom-left-radius:12px;left:0;top:0;transform:translateY(0);background:linear-gradient(180deg,var(--accent-1),var(--accent-2));opacity:0.18}
+    .link-grid li{position:relative}
+
+    .link-grid a:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(7,12,33,0.7)}
+    .link-grid a:focus{outline:3px solid rgba(167,139,250,0.14);outline-offset:3px}
+
+    /* Title and meta inside tile */
+    .link-grid a span.title{display:block;font-weight:600}
+    .link-grid a span.meta{display:block;color:var(--muted);font-size:0.88rem;margin-top:6px}
+
+    /* Small tag for level like B1/A2 */
+    .tag{display:inline-block;padding:4px 8px;border-radius:999px;font-size:0.75rem;background:linear-gradient(90deg,var(--accent-2),var(--accent-1));color:#051023;font-weight:600;margin-left:8px}
+
+    footer{display:flex;justify-content:space-between;align-items:center;margin-top:18px;color:var(--muted);font-size:0.95rem}
+
+    .skip{position:absolute;left:-9999px}
+
+    /* Decorative header background */
+    header::after{content:"";position:absolute;left:0;right:0;top:0;height:130px;background:radial-gradient(800px 160px at 10% 0%, rgba(167,139,250,0.06), transparent 12%),radial-gradient(600px 120px at 90% 20%, rgba(125,211,252,0.04), transparent 12%);pointer-events:none}
+
+    /* keep count style */
+    #count{font-weight:700;color:var(--accent-1)}
+  </style>
 </head>
 <body>
   <a class="skip" href="#main">Skip to main content</a>
@@ -27,80 +87,80 @@
     <main id="main">
       <nav aria-label="exercise directory">
         <ul id="pages" class="link-grid" aria-live="polite">
-          <li><a href="accountant-busy-day-b1.html">Accountant Busy Day — B1</a></li>
-          <li><a href="african-safari-a2.html">African Safari — A2</a></li>
-          <li><a href="agri-plant-planner-b1.html">Agri Plant Planner — B1</a></li>
-          <li><a href="agri-sales-b1.html">Agri Sales — B1</a></li>
-          <li><a href="badminton-tournament-a2.html">Badminton Tournament — A2</a></li>
-          <li><a href="bnb-french-getaway-b1.html">BnB French Getaway — B1</a></li>
-          <li><a href="bnb-hell-b2.html">BnB Hell — B2</a></li>
-          <li><a href="bnb-manhattan-b1.html">BnB Manhattan — B1</a></li>
-          <li><a href="bnb-paris-b1.html">BnB Paris — B1</a></li>
-          <li><a href="bnb-riverside-manor-b1.html">BnB Riverside Manor — B1</a></li>
-          <li><a href="bushwalking-weekend-b1.html">Bushwalking Weekend — B1</a></li>
-          <li><a href="cashier-a2.html">Cashier — A2</a></li>
-          <li><a href="chess-tournament-b1.html">Chess Tournament — B1</a></li>
-          <li><a href="cold-snap-b1.html">Cold Snap — B1</a></li>
-          <li><a href="dance-school-b1.html">Dance School — B1</a></li>
-          <li><a href="dance-school-b2.html">Dance School — B2</a></li>
-          <li><a href="diy-the-deck-a2.html">DIY The deck — A2</a></li>
-          <li><a href="diy-the-deck-b1.html">DIY The deck — B1</a></li>
+          <li><a href="accountant-busy-day-b1.html"><span class="title">Accountant Busy Day</span><span class="meta">B1</span></a></li>
+          <li><a href="african-safari-a2.html"><span class="title">African Safari</span><span class="meta">A2</span></a></li>
+          <li><a href="agri-plant-planner-b1.html"><span class="title">Agri Plant Planner</span><span class="meta">B1</span></a></li>
+          <li><a href="agri-sales-b1.html"><span class="title">Agri Sales</span><span class="meta">B1</span></a></li>
+          <li><a href="badminton-tournament-a2.html"><span class="title">Badminton Tournament</span><span class="meta">A2</span></a></li>
+          <li><a href="bnb-french-getaway-b1.html"><span class="title">BnB French Getaway</span><span class="meta">B1</span></a></li>
+          <li><a href="bnb-hell-b2.html"><span class="title">BnB Hell</span><span class="meta">B2</span></a></li>
+          <li><a href="bnb-manhattan-b1.html"><span class="title">BnB Manhattan</span><span class="meta">B1</span></a></li>
+          <li><a href="bnb-paris-b1.html"><span class="title">BnB Paris</span><span class="meta">B1</span></a></li>
+          <li><a href="bnb-riverside-manor-b1.html"><span class="title">BnB Riverside Manor</span><span class="meta">B1</span></a></li>
+          <li><a href="bushwalking-weekend-b1.html"><span class="title">Bushwalking Weekend</span><span class="meta">B1</span></a></li>
+          <li><a href="cashier-a2.html"><span class="title">Cashier</span><span class="meta">A2</span></a></li>
+          <li><a href="chess-tournament-b1.html"><span class="title">Chess Tournament</span><span class="meta">B1</span></a></li>
+          <li><a href="cold-snap-b1.html"><span class="title">Cold Snap</span><span class="meta">B1</span></a></li>
+          <li><a href="dance-school-b1.html"><span class="title">Dance School</span><span class="meta">B1</span></a></li>
+          <li><a href="dance-school-b2.html"><span class="title">Dance School</span><span class="meta">B2</span></a></li>
+          <li><a href="diy-the-deck-a2.html"><span class="title">DIY The deck</span><span class="meta">A2</span></a></li>
+          <li><a href="diy-the-deck-b1.html"><span class="title">DIY The deck</span><span class="meta">B1</span></a></li>
 
-          <li><a href="dog-show-b1.html">Dog Show — B1</a></li>
-          <li><a href="electrical-engineer-a2.html">Electrical Engineer — A2</a></li>
-          <li><a href="eurotech-chief-people-officer-b2.html">Eurotech Chief People Officer — B2</a></li>
-          <li><a href="football-tournament-b1.html">Football Tournament — B1</a></li>
-          <li><a href="football-tournament-b2.html">Football Tournament — B2</a></li>
-          <li><a href="forest-retreat-b1.html">Forest Retreat — B1</a></li>
-          <li><a href="garden-challenge-b1.html">Garden Challenge — B1</a></li>
-          <li><a href="garden-game-a2.html">Garden Game — A2</a></li>
-          <li><a href="garden-maze-b2.html">Garden Maze — B2</a></li>
-          <li><a href="grand-electro-tour-b1.html">Grand Electro Tour — B1</a></li>
-          <li><a href="horticultural-mastery-c1.html">Horticultural Mastery — C1</a></li>
-          <li><a href="heatwave-b1.html">Heatwave — B1</a></li>
-          <li><a href="hr-busy-day-b1.html">HR Busy Day — B1</a></li>
-          <li><a href="hr-hero-precision-maze-b2.html">HR Hero Precision Maze — B2</a></li>
-          <li><a href="hr-information-technology-precision-engineering-b1.html">HR IT Precision Engineering — B1</a></li>
-          <li><a href="it-consultant-a2.html">IT Consultant — A2</a></li>
-          <li><a href="it-developer-b1.html">IT Developer — B1</a></li>
-          <li><a href="it-developer-b2.html">IT Developer — B2</a></li>
-          <li><a href="it-insurance-risks-b2.html">IT Insurance Risks — B2</a></li>
+          <li><a href="dog-show-b1.html"><span class="title">Dog Show</span><span class="meta">B1</span></a></li>
+          <li><a href="electrical-engineer-a2.html"><span class="title">Electrical Engineer</span><span class="meta">A2</span></a></li>
+          <li><a href="eurotech-chief-people-officer-b2.html"><span class="title">Eurotech Chief People Officer</span><span class="meta">B2</span></a></li>
+          <li><a href="football-tournament-b1.html"><span class="title">Football Tournament</span><span class="meta">B1</span></a></li>
+          <li><a href="football-tournament-b2.html"><span class="title">Football Tournament</span><span class="meta">B2</span></a></li>
+          <li><a href="forest-retreat-b1.html"><span class="title">Forest Retreat</span><span class="meta">B1</span></a></li>
+          <li><a href="garden-challenge-b1.html"><span class="title">Garden Challenge</span><span class="meta">B1</span></a></li>
+          <li><a href="garden-game-a2.html"><span class="title">Garden Game</span><span class="meta">A2</span></a></li>
+          <li><a href="garden-maze-b2.html"><span class="title">Garden Maze</span><span class="meta">B2</span></a></li>
+          <li><a href="grand-electro-tour-b1.html"><span class="title">Grand Electro Tour</span><span class="meta">B1</span></a></li>
+          <li><a href="horticultural-mastery-c1.html"><span class="title">Horticultural Mastery</span><span class="meta">C1</span></a></li>
+          <li><a href="heatwave-b1.html"><span class="title">Heatwave</span><span class="meta">B1</span></a></li>
+          <li><a href="hr-busy-day-b1.html"><span class="title">HR Busy Day</span><span class="meta">B1</span></a></li>
+          <li><a href="hr-hero-precision-maze-b2.html"><span class="title">HR Hero Precision Maze</span><span class="meta">B2</span></a></li>
+          <li><a href="hr-information-technology-precision-engineering-b1.html"><span class="title">HR IT Precision Engineering</span><span class="meta">B1</span></a></li>
+          <li><a href="it-consultant-a2.html"><span class="title">IT Consultant</span><span class="meta">A2</span></a></li>
+          <li><a href="it-developer-b1.html"><span class="title">IT Developer</span><span class="meta">B1</span></a></li>
+          <li><a href="it-developer-b2.html"><span class="title">IT Developer</span><span class="meta">B2</span></a></li>
+          <li><a href="it-insurance-risks-b2.html"><span class="title">IT Insurance Risks</span><span class="meta">B2</span></a></li>
 
-          <li><a href="it-nebula-realms-b1.html">IT Nebula Realms — B1</a></li>
-          <li><a href="it-techbro-of-tomorrow-b1.html">IT Techbro of Tomorrow — B1</a></li>
-          <li><a href="kens-karate-club-b1.html">Kens Karate Club — B1</a></li>
-          <li><a href="knitters-international-b1.html">Knitters International — B1</a></li>
-          <li><a href="life-with-frenchie.html">Life with Frenchie — B2</a></li>
-          <li><a href="london-weekend-a2.html">London Weekend — A2</a></li>
-          <li><a href="london-weekend-b1.html">London Weekend — B1</a></li>
-          <li><a href="minneapolis-adventure-b1.html">Minneapolis Adventure — B1</a></li>
-          <li><a href="music-festival-manager-b1.html">Music Festival Manager — B1</a></li>
-          <li><a href="new-york-visit-a2.html">New York Visit — A2</a></li>
-          <li><a href="new-york-visit-b1.html">New York Visit — B1</a></li>
-          <li><a href="new-york-visit-b1-plus.html">New York Visit — B1+</a></li>
-          <li><a href="outback-a2.html">Outback — A2</a></li>
-          <li><a href="outback-b1.html">Outback — B1</a></li>
-          <li><a href="pet-food-technician-a2.html">Pet food technician — A2</a></li>
-          <li><a href="pharma-difficult-day-b1.html">Pharma Difficult Day — B1</a></li>
-          <li><a href="plant-manager-b1.html">Plant Manager — B1</a></li>
-          <li><a href="poker-tournament-b1.html">Poker Tournament — B1</a></li>
+          <li><a href="it-nebula-realms-b1.html"><span class="title">IT Nebula Realms</span><span class="meta">B1</span></a></li>
+          <li><a href="it-techbro-of-tomorrow-b1.html"><span class="title">IT Techbro of Tomorrow</span><span class="meta">B1</span></a></li>
+          <li><a href="kens-karate-club-b1.html"><span class="title">Kens Karate Club</span><span class="meta">B1</span></a></li>
+          <li><a href="knitters-international-b1.html"><span class="title">Knitters International</span><span class="meta">B1</span></a></li>
+          <li><a href="life-with-frenchie.html"><span class="title">Life with Frenchie</span><span class="meta">B2</span></a></li>
+          <li><a href="london-weekend-a2.html"><span class="title">London Weekend</span><span class="meta">A2</span></a></li>
+          <li><a href="london-weekend-b1.html"><span class="title">London Weekend</span><span class="meta">B1</span></a></li>
+          <li><a href="minneapolis-adventure-b1.html"><span class="title">Minneapolis Adventure</span><span class="meta">B1</span></a></li>
+          <li><a href="music-festival-manager-b1.html"><span class="title">Music Festival Manager</span><span class="meta">B1</span></a></li>
+          <li><a href="new-york-visit-a2.html"><span class="title">New York Visit</span><span class="meta">A2</span></a></li>
+          <li><a href="new-york-visit-b1.html"><span class="title">New York Visit</span><span class="meta">B1</span></a></li>
+          <li><a href="new-york-visit-b1-plus.html"><span class="title">New York Visit</span><span class="meta">B1+</span></a></li>
+          <li><a href="outback-a2.html"><span class="title">Outback</span><span class="meta">A2</span></a></li>
+          <li><a href="outback-b1.html"><span class="title">Outback</span><span class="meta">B1</span></a></li>
+          <li><a href="pet-food-technician-a2.html"><span class="title">Pet food technician</span><span class="meta">A2</span></a></li>
+          <li><a href="pharma-difficult-day-b1.html"><span class="title">Pharma Difficult Day</span><span class="meta">B1</span></a></li>
+          <li><a href="plant-manager-b1.html"><span class="title">Plant Manager</span><span class="meta">B1</span></a></li>
+          <li><a href="poker-tournament-b1.html"><span class="title">Poker Tournament</span><span class="meta">B1</span></a></li>
 
-          <li><a href="pub-trivia-quiz-b1.html">Pub Trivia Quiz — B1</a></li>
-          <li><a href="put-your-town-on-the-map-b1.html">Put Your Town On The Map — B1</a></li>
-          <li><a href="put-your-town-on-the-map-b2.html">Put Your Town On The Map — B2</a></li>
-          <li><a href="recruitment-agency-a2.html">Recruitment Agency — A2</a></li>
-          <li><a href="refinery-security-b1.html">Refinery Security — B1</a></li>
-          <li><a href="route-66-a2.html">Route 66 — A2</a></li>
-          <li><a href="route-66-b2.html">Route 66 — B2</a></li>
-          <li><a href="sydney-visit-a2.html">Sydney Visit — A2</a></li>
-          <li><a href="sydney-visit-b1.html">Sydney Visit — B1</a></li>
-          <li><a href="teaching-english.html">Teaching English</a></li>
-          <li><a href="teambuilder-b1.html">Teambuilder — B1</a></li>
-          <li><a href="teambuilder-b2.html">Teambuilder — B2</a></li>
-          <li><a href="travel-fair-b2.html">Travel Fair — B2</a></li>
-          <li><a href="waylons-institute-of-personal-development-b2.html">Waylons Institute — B2</a></li>
-          <li><a href="yoga-heaven-b1.html">Yoga Heaven — B1</a></li>
-          <li><a href="yoga-hell-b1.html">Yoga Hell — B1</a></li>
+          <li><a href="pub-trivia-quiz-b1.html"><span class="title">Pub Trivia Quiz</span><span class="meta">B1</span></a></li>
+          <li><a href="put-your-town-on-the-map-b1.html"><span class="title">Put Your Town On The Map</span><span class="meta">B1</span></a></li>
+          <li><a href="put-your-town-on-the-map-b2.html"><span class="title">Put Your Town On The Map</span><span class="meta">B2</span></a></li>
+          <li><a href="recruitment-agency-a2.html"><span class="title">Recruitment Agency</span><span class="meta">A2</span></a></li>
+          <li><a href="refinery-security-b1.html"><span class="title">Refinery Security</span><span class="meta">B1</span></a></li>
+          <li><a href="route-66-a2.html"><span class="title">Route 66</span><span class="meta">A2</span></a></li>
+          <li><a href="route-66-b2.html"><span class="title">Route 66</span><span class="meta">B2</span></a></li>
+          <li><a href="sydney-visit-a2.html"><span class="title">Sydney Visit</span><span class="meta">A2</span></a></li>
+          <li><a href="sydney-visit-b1.html"><span class="title">Sydney Visit</span><span class="meta">B1</span></a></li>
+          <li><a href="teaching-english.html"><span class="title">Teaching English</span><span class="meta">—</span></a></li>
+          <li><a href="teambuilder-b1.html"><span class="title">Teambuilder</span><span class="meta">B1</span></a></li>
+          <li><a href="teambuilder-b2.html"><span class="title">Teambuilder</span><span class="meta">B2</span></a></li>
+          <li><a href="travel-fair-b2.html"><span class="title">Travel Fair</span><span class="meta">B2</span></a></li>
+          <li><a href="waylons-institute-of-personal-development-b2.html"><span class="title">Waylons Institute</span><span class="meta">B2</span></a></li>
+          <li><a href="yoga-heaven-b1.html"><span class="title">Yoga Heaven</span><span class="meta">B1</span></a></li>
+          <li><a href="yoga-hell-b1.html"><span class="title">Yoga Hell</span><span class="meta">B1</span></a></li>
         </ul>
       </nav>
     </main>
