@@ -5,124 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Decisionmaker Exercises — File Directory</title>
   <meta name="description" content="Directory of Decisionmaker exercise pages. Use the search box to quickly find an exercise." />
-  <link rel="icon" href="/favicon.ico" />
-  <style>
-    :root{
-      --bg:#f4f4f4;
-      --card:#fff;
-      --brand:#007acc;
-      --brand-strong:#005f99;
-      --text:#222;
-      --gap:12px;
-      --maxw:1100px;
-    }
-    html,body{height:100%;margin:0}
-    body{
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      background:var(--bg);
-      color:var(--text);
-      display:flex;
-      align-items:flex-start;
-      justify-content:center;
-      padding:20px;
-    }
-    .site{
-      width:100%;
-      max-width:var(--maxw);
-      background:var(--card);
-      border-radius:10px;
-      padding:20px;
-      box-shadow:0 4px 18px rgba(0,0,0,.06);
-    }
-    a{color:inherit}
-    header{
-      margin-bottom:16px;
-      display:flex;
-      gap:12px;
-      align-items:center;
-      justify-content:space-between;
-      flex-wrap:wrap;
-    }
-    .title h1{margin:0;font-size:1.25rem}
-    .controls{display:flex;gap:8px;align-items:center}
-    .search{
-      padding:8px 10px;
-      border-radius:8px;
-      border:1px solid #ddd;
-      font-size:0.95rem;
-      min-width:220px;
-    }
-    nav[aria-label="exercise directory"]{
-      margin-top:8px;
-    }
-
-    /* Responsive grid for links */
-    .link-grid{
-      display:grid;
-      gap:var(--gap);
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      list-style:none;
-      padding:0;
-      margin:0;
-    }
-    .link-grid li{
-      margin:0;
-    }
-    .link-grid a{
-      display:block;
-      padding:12px 10px;
-      text-decoration:none;
-      background:var(--brand);
-      color:white;
-      border-radius:8px;
-      font-size:0.95rem;
-      transition:transform .08s ease, background .12s ease;
-      word-wrap:break-word;
-    }
-    .link-grid a:hover{background:var(--brand-strong); transform:translateY(-2px)}
-    .link-grid a:focus{outline:3px solid #fff; box-shadow:0 0 0 3px rgba(0,122,204,.25)}
-    .muted{font-size:.9rem;color:#666;margin-top:6px}
-
-    footer{
-      margin-top:18px;
-      font-size:0.9rem;
-      color:#555;
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      align-items:center;
-    }
-
-    /* Skip link */
-    .skip {
-      position: absolute;
-      left: -9999px;
-      top: auto;
-      width: 1px;
-      height: 1px;
-      overflow: hidden;
-    }
-    .skip:focus {
-      left: 10px;
-      top: 10px;
-      width: auto;
-      height: auto;
-      padding: 8px 12px;
-      background: #000;
-      color: #fff;
-      border-radius: 4px;
-      z-index: 100;
-    }
-
-    @media (max-width:600px){
-      .title h1{font-size:1rem}
-      .search{min-width:140px}
-    }
-
-    @media (prefers-reduced-motion:reduce){
-      .link-grid a, .link-grid a:hover{transition:none; transform:none}
-    }
-  </style>
+  <link rel="icon" href="/favicon.svg" />
+  <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
   <a class="skip" href="#main">Skip to main content</a>
@@ -228,7 +112,7 @@
   </div>
 
   <script>
-    // Simple client-side filter and count
+    // Simple client-side filter and count with debounce
     (function(){
       const input = document.getElementById('filter');
       const list = document.getElementById('pages');
@@ -239,14 +123,26 @@
         const visible = items.filter(li => li.style.display !== 'none').length;
         count.textContent = visible;
       }
-      input.addEventListener('input', e=>{
-        const q = e.target.value.trim().toLowerCase();
+
+      function filter(q){
+        q = q.trim().toLowerCase();
         items.forEach(li=>{
           const text = li.textContent.toLowerCase();
           li.style.display = q === '' || text.includes(q) ? '' : 'none';
         });
         updateCount();
-      });
+      }
+
+      function debounce(fn, wait){
+        let t = null;
+        return function(...args){
+          clearTimeout(t);
+          t = setTimeout(()=>fn.apply(this,args), wait);
+        }
+      }
+
+      const debounced = debounce(e=>filter(e.target.value), 200);
+      input.addEventListener('input', debounced);
 
       // initialize count
       updateCount();
