@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Outback 4WD Adventure: B1 English Game</title>
+    <style>
+        :root {
+            --bg-ochre: #1f1107;
+            --card-bg: #fffcf8;
+            --outback-red: #bb4422;
+            --outback-red-hover: #963318;
+            --sand-accent: #e2a85c;
+            --spinifex-green: #2e5a36;
+            --info-blue: #1d5288;
+            --text-dark: #2c1d11;
+            --border-color: #e0d0c1;
+            --error-red: #ab2828;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-ochre);
+            background-image: radial-gradient(#3a2108 1.5px, transparent 0);
+            background-size: 24px 24px;
+            color: var(--text-dark);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .game-container {
+            background-color: var(--card-bg);
+            width: 100%;
+            max-width: 780px;
+            border-radius: 12px;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6);
+            padding: 30px;
+            border: 3px solid var(--outback-red);
+        }
+
+        header {
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        h1 {
+            color: var(--outback-red);
+            font-size: 1.6rem;
+        }
+
+        .status-bar {
+            display: flex;
+            gap: 15px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            background: #f4eadf;
+            padding: 8px 14px;
+            border-radius: 20px;
+            color: var(--text-dark);
+        }
+
+        .scenario-box {
+            margin-bottom: 20px;
+        }
+
+        .scenario-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        /* 20-30 word Feedback Banner */
+        .feedback-banner {
+            padding: 14px 18px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.98rem;
+            line-height: 1.5;
+            display: none;
+            border-left: 5px solid;
+        }
+
+        .feedback-banner.success {
+            background-color: #eaf4ec;
+            color: var(--spinifex-green);
+            border-color: var(--spinifex-green);
+        }
+
+        .feedback-banner.info-blue {
+            background-color: #e8f1f9;
+            color: var(--info-blue);
+            border-color: var(--info-blue);
+        }
+
+        .feedback-banner.warning {
+            background-color: #fcf3e8;
+            color: #8a5314;
+            border-color: var(--sand-accent);
+        }
+
+        .feedback-banner.error {
+            background-color: #fce8e8;
+            color: var(--error-red);
+            border-color: var(--error-red);
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .btn-option {
+            background-color: #ffffff;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 14px 18px;
+            text-align: left;
+            font-size: 1rem;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            line-height: 1.4;
+        }
+
+        .btn-option:hover {
+            border-color: var(--outback-red);
+            background-color: #fff8f5;
+            transform: translateY(-2px);
+        }
+
+        .btn-action {
+            background-color: var(--outback-red);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 14px 28px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            display: inline-block;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        .btn-action:hover {
+            background-color: var(--outback-red-hover);
+            transform: scale(1.02);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .final-score {
+            font-size: 2.2rem;
+            color: var(--outback-red);
+            font-weight: bold;
+            margin: 15px 0;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            background: var(--outback-red);
+            color: white;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .landing-card {
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        .landing-card h2 {
+            color: var(--outback-red);
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+
+        .landing-card p {
+            font-size: 1.05rem;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .feature-list {
+            text-align: left;
+            background: #f8f1e9;
+            padding: 15px 20px 15px 35px;
+            border-radius: 8px;
+            margin: 20px 0;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 500px) {
+            .game-container {
+                padding: 18px;
+            }
+            h1 {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <header id="game-header" class="hidden">
+        <h1>Outback 4WD Adventure</h1>
+        <div class="status-bar">
+            <span>Decisions: <span id="decision-count">0</span></span>
+            <span>Score: <span id="score-display">0</span></span>
+        </div>
+    </header>
+
+    <main id="game-body">
+        <!-- LANDING PAGE -->
+        <div id="landing-screen" class="landing-card">
+            <h2>G'day, Adventurer! Welcome to the Outback.</h2>
+            <p>Are you ready for the ultimate four-wheel drive expedition across Australia's red centre? You are about to drive over 2,000 kilometres through remote desert tracks, massive sand dunes, and flooded creek beds from Alice Springs to Birdsville.</p>
+            
+            <p>This challenge tests your <strong>English reading comprehension </strong> alongside your practical survival skills in the bush!</p>
+
+            
+            <p style="text-align: center; font-weight: bold; color: var(--spinifex-green);">Pack your swag, check your water supplies, and let's head off into the Never-Never!</p>
+
+            <button class="btn-action" onclick="startGame()">Start Your Adventure</button>
+        </div>
+
+        <!-- GAMEPLAY & FINAL SCREEN -->
+        <div id="gameplay-screen" class="hidden">
+            <div id="feedback" class="feedback-banner"></div>
+            
+            <div class="scenario-box">
+                <span class="badge" id="location-badge">Location: Alice Springs</span>
+                <div class="scenario-text" id="scenario-text">Loading scenario...</div>
+            </div>
+
+            <div class="options-grid" id="options-container">
+                <!-- Option buttons injected dynamically -->
+            </div>
+
+            <button id="restart-btn" class="btn-action hidden" onclick="resetToLanding()">Play Again</button>
+        </div>
+    </main>
+</div>
+
+<script>
+const gameData = {
+    start: {
+        location: "Alice Springs (Preparation)",
+        text: "You are preparing a 2,000 km 4WD expedition through the remote Simpson Desert. Before setting off into the wild outback, how do you equip your vehicle and plan your supplies?",
+        options: [
+            { 
+                text: "Pack extra water (5L per person daily), two spare tyres, a satellite phone, and a printed paper map.", 
+                score: 3, 
+                next: "route_choice",
+                feedback: "Top choice! Extra water, two spare tyres, and satellite comms are vital in remote desert terrain where mobile coverage is non-existent. You are well prepared for trouble."
+            },
+            { 
+                text: "Take standard water, one spare tyre, rely on your smartphone for GPS, and buy extra food supplies.", 
+                score: 2, 
+                next: "route_choice",
+                feedback: "Decent setup, but relying solely on smartphone GPS is risky in the bush. Mobile signals drop completely, and one spare tyre might not prove enough on sharp rocks."
+            },
+            { 
+                text: "Pack extra food and extra fuel, carry standard water, but skip buying emergency communication gear.", 
+                score: 1, 
+                next: "route_catchup",
+                feedback: "Fair attempt, but missing satellite communications leaves you vulnerable if you breakdown far from help. You will need to catch up on emergency safety at the next township."
+            },
+            { 
+                text: "Pack light to save fuel: basic water, no extra tyres, assuming remote roadhouses sell everything.", 
+                score: -1, 
+                retry: true, 
+                feedback: "Dangerous mistake! Outback settlements are hundreds of kilometres apart with very limited stocks. Travelling without spare tyres and ample water is extremely reckless. Try again!"
+            }
+        ]
+    },
+
+    route_choice: {
+        location: "Outside Alice Springs",
+        text: "You are selecting your primary route towards the desert. Forecasts predict hot weather and potential storm rain later this week. Which route do you choose?",
+        options: [
+            { 
+                text: "Take the main highway, check official weather bulletins daily, and log your travel route with local police.", 
+                score: 3, 
+                next: "track_condition",
+                feedback: "Brilliant decision! Registering your travel route ensures search teams know where to look if you disappear, while daily weather checks help avoid flash floods."
+            },
+            { 
+                text: "Take an unpaved scenic dirt road and plan to ask about weather updates at local roadhouses.", 
+                score: 2, 
+                next: "track_condition",
+                feedback: "Good effort. Roadhouse staff offer reliable local knowledge, though dirt roads can deteriorate rapidly into thick mud if unpredicted rain arrives unexpectedly overnight."
+            },
+            { 
+                text: "Choose an old, unmaintained track to save 50 km, despite having no access to weather updates.", 
+                score: 1, 
+                next: "route_catchup",
+                feedback: "Risky shortcut! Unmaintained tracks often feature severe washouts and hidden hazards. Without weather reports, you could drive straight into dangerous torrential downpours."
+            },
+            { 
+                text: "Drive onto an unregistered private cattle station track without requesting permission from owners.", 
+                score: -1, 
+                retry: true, 
+                feedback: "Poor etiquette and unsafe! Trespassing on private station land without permission is illegal and leaves you completely isolated if you breakdown without anyone knowing. Reconsider!"
+            }
+        ]
+    },
+
+    route_catchup: {
+        location: "Outside Alice Springs (Catch-up)",
+        text: "Because you selected an unmaintained track earlier, a local park ranger halts you before entering remote tracks. What do you do?",
+        options: [
+            { 
+                text: "Rent a satellite emergency beacon (EPIRB) from the ranger station before proceeding.", 
+                score: 3, 
+                next: "track_condition",
+                feedback: "Excellent recovery! Hiring an EPIRB gives you a direct lifeline to emergency services anywhere in the bush. You have successfully corrected your earlier oversight."
+            },
+            { 
+                text: "Buy a UHF CB radio for your vehicle to communicate with nearby truck drivers.", 
+                score: 2, 
+                next: "track_condition",
+                feedback: "Good choice. UHF radios are brilliant for speaking with passing road trains, though range is limited if you break down miles away from main tracks."
+            },
+            { 
+                text: "Politely thank the ranger for advice, but decide to rely purely on visible track signs.", 
+                score: 1, 
+                next: "track_condition",
+                feedback: "Acceptable, but basic. Track signs are frequently damaged, spun around, or faded by Outback sun. You are taking unnecessary navigation risks in remote areas."
+            },
+            { 
+                text: "Ignore the ranger's warnings entirely and speed away into the desert track.", 
+                score: -1, 
+                retry: true, 
+                feedback: "Foolish decision! Rangers are local experts who know current track hazards and weather risks. Ignoring official warnings jeopardises your safety. Choose a wiser action!"
+            }
+        ]
+    },
+
+    track_condition: {
+        location: "Oodnadatta Track",
+        text: "You join the famous dirt track. The road surface is heavily corrugated with deep ridges and loose gravel. How do you adjust your driving?",
+        options: [
+            { 
+                text: "Lower your tyre pressure slightly, engage 4WD mode, and maintain a steady 60 km/h.", 
+                score: 3, 
+                next: "river_crossing",
+                feedback: "Spot on! Lowering tyre pressure improves traction and reduces vehicle vibration over rough corrugations, while 4WD mode provides vital stability on loose gravel."
+            },
+            { 
+                text: "Maintain full highway tyre pressure, stay in 2WD mode, and drive slowly at 40 km/h.", 
+                score: 2, 
+                next: "river_crossing",
+                feedback: "Safe speed, but keeping highway tyre pressure causes severe cabin shaking and increases wear on your vehicle suspension. Lowering pressure makes driving smoother."
+            },
+            { 
+                text: "Drive fast at 90 km/h over the bumps so your vehicle skips over the corrugated ridges smoothly.", 
+                score: 1, 
+                next: "track_catchup",
+                feedback: "Risky technique! Driving fast over corrugations feels smoother, but steering control is drastically reduced, making skidding off the dirt track highly probable."
+            },
+            { 
+                text: "Deflate your tyres completely until they are almost flat to maximise driving comfort.", 
+                score: -1, 
+                retry: true, 
+                feedback: "Terrible idea! Driving on near-flat tyres destroys wheel rims, shreds rubber sidewalls, and leaves you stranded with ruined tyres within kilometres. Adjust properly!"
+            }
+        ]
+    },
+
+    track_catchup: {
+        location: "Oodnadatta Track (Catch-up)",
+        text: "Driving too fast over corrugations caused your vehicle to slide towards a gravel ditch. How do you safely regain control?",
+        options: [
+            { 
+                text: "Ease off the accelerator gently, keep the steering wheel straight, and slow down gradually.", 
+                score: 3, 
+                next: "river_crossing",
+                feedback: "Perfect driving recovery! Smoothly releasing the accelerator restores tyre grip without unsettling the chassis, preventing a dangerous skid into the ditch."
+            },
+            { 
+                text: "Brake lightly and steer carefully back towards the centre of the dirt track.", 
+                score: 2, 
+                next: "river_crossing",
+                feedback: "Reasonable control. Gentle braking works fine provided gravel traction holds, though keeping steering movements minimal is always safer during a skid."
+            },
+            { 
+                text: "Bring the vehicle to a complete halt on the track to check tyres for damage.", 
+                score: 1, 
+                next: "river_crossing",
+                feedback: "Okay, but stopping abruptly on a dusty track creates hazards for trailing vehicles blinded by dust clouds. Pulling off safely is preferable."
+            },
+            { 
+                text: "Slam on the brakes hard and turn the steering wheel sharply away from the ditch.", 
+                score: -1, 
+                retry: true, 
+                feedback: "Dangerous panic response! Hard braking and aggressive steering on loose dirt causes 4WD vehicles to flip over instantly. Correct your manoeuvre safely!"
+            }
+        ]
+    },
+
+    river_crossing: {
+        location: "Finke River Crossing",
+        text: "You reach a creek crossing covered in flowing brown water. You cannot see the riverbed below. What is your strategy?",
+        options: [
+            { 
+                text: "Stop, walk through the water carefully with a stick to check depth, obstacles, and mud thickness.", 
+                score: 3, 
+                next: "emergency_1",
+                feedback: "Top bushcraft! Walking the riverbed allows you to check for hidden logs, deep holes, and strong currents before risking your four-wheel drive in water."
+            },
+            { 
+                text: "Wait safely on the bank until a local vehicle arrives, then observe their path across.", 
+                score: 2, 
+                next: "emergency_1",
+                feedback: "Smart strategy. Watching an experienced local driver shows you water depth and safe driving lines without risking your own vehicle first."
+            },
+            { 
+                text: "Drive through slowly in low-range 4WD without inspecting the water on foot first.", 
+                score: 1, 
+                next: "river_catchup",
+                feedback: "A gamble! Driving blindly through creek crossings risks dropping into hidden underwater holes or getting stuck in soft mud midway across."
+            },
+            { 
+                text: "Accelerate hard and splash through fast so vehicle momentum pushes you across.", 
+                score: -1, 
+                retry: true, 
+                feedback: "Disastrous technique! Hitting water fast creates a bow wave that sucks water straight into the engine intake, causing catastrophic mechanical destruction! Try again."
+            }
+        ]
+    },
+
+    river_catchup: {
+        location: "Finke River Crossing (Catch-up)",
+        text: "Because you did not check water depth beforehand, your tyres sink deep into soft riverbed mud. How do you extract the 4WD?",
+        options: [
+            { 
+                text: "Select reverse gear, place recovery tracks under tyres, and back out smoothly.", 
+                score: 3, 
+                next: "emergency_1",
+                feedback: "Excellent recovery! Recovery tracks provide instant grip, allowing your vehicle to climb out of deep mud without damaging transmission components."
+            },
+            { 
+                text: "Unroll your electric vehicle winch and attach it securely to a stout tree on the bank.", 
+                score: 2, 
+                next: "emergency_1",
+                feedback: "Solid technical solution. Winching provides controlled pulling power, provided you select an anchor tree strong enough to support vehicle weight."
+            },
+            { 
+                text: "Ask passengers to push from behind while gently applying throttle in low gear.", 
+                score: 1, 
+                next: "emergency_1",
+                feedback: "Acceptable effort, though pushing heavy 4WDs in slick mud is tiring and risky for passengers if tyres suddenly throw up rocks."
+            },
+            { 
+                text: "Spin your tyres rapidly at maximum engine power to dig through mud.", 
+                score: -1, 
+                retry: true, 
+                feedback: "Wrong move! Spinning tyres quickly digs deeper holes, burying axles into mud and risking severe gearbox overheating. Try a proper recovery method!"
+            }
+        ]
+    },
+
+    emergency_1: {
+        isEmergency: true,
+        location: "Deep Desert - Critical Hazard",
+        text: "CRITICAL EMERGENCY: A sudden flash flood cuts off tracks ahead and behind! Torrential water isolates your 4WD on a small mound of dry land as night falls and temperatures plummet. What is your survival decision?",
+        options: [
+            { 
+                text: "Stay with your vehicle, set up camp on high ground, activate your EPIRB beacon, and wait for emergency teams.", 
+                score: 3, 
+                next: "fuel_management", 
+                survive: true,
+                feedback: "Life-saving choice! Your vehicle offers essential shelter, water, and visibility for rescue helicopters. Remaining stationary in Outback emergencies saves lives!"
+            },
+            { 
+                text: "Abandon your vehicle and attempt swimming and walking 15 km through floodwaters to reach the highway.", 
+                score: 0, 
+                survive: false, 
+                failReason: "GAME OVER: Walking through Outback floodwaters leads to hypothermia, drowning, or getting lost in darkness. Always stay beside your vehicle!"
+            }
+        ]
+    },
+
+    fuel_management: {
+        location: "Simpson Desert Dune Track",
+        text: "Having survived the flood, you reach desert sand dunes. Driving through soft sand consumes double the normal fuel. How do you manage fuel and tyres?",
+        options: [
+            { 
+                text: "Reduce tyre pressure further, maintain steady low speeds, and calculate remaining fuel range daily.", 
+                score: 3, 
+                next: "dune_driving",
+                feedback: "Outstanding desert driving! Reduced tyre pressure lets tyres float over soft sand, drastically lowering engine workload and saving precious diesel."
+            },
+            { 
+                text: "Top up your fuel tank at every remote outpost, even when three-quarters full.", 
+                score: 2, 
+                next: "dune_driving",
+                feedback: "Sensible habit. Keeping fuel tanks full in remote regions provides peace of mind, though adjusting tyre pressure remains critical for sand traction."
+            },
+            { 
+                text: "Switch off air conditioning to conserve fuel while keeping highway tyre pressures.", 
+                score: 1, 
+                next: "fuel_catchup",
+                feedback: "Incomplete solution. Turning off air conditioning saves minimal fuel compared to the massive drag caused by driving high-pressure tyres through soft sand."
+            },
+            { 
+                text: "Drive at maximum speed over sand tracks to traverse the desert region quickly.", 
+                score: -1, 
+                retry: true, 
+                feedback: "Reckless driving! Speeding over hidden sand bumps causes vehicle rollovers, destroys suspension shocks, and consumes excessive fuel. Re-evaluate your driving!"
+            }
+        ]
+    },
+
+    fuel_catchup: {
+        location: "Simpson Desert Dune Track (Catch-up)",
+        text: "High tyre pressures caused your engine to work too hard in deep sand, pushing engine temperatures into the red zone. How do you respond?",
+        options: [
+            { 
+                text: "Park safely in shade, let engine idle briefly before turning off, and allow it to cool naturally.", 
+                score: 3, 
+                next: "dune_driving",
+                feedback: "Mechanically sound! Idling briefly prevents heat-soak damage before engine shutdown, allowing temperatures to drop safely without cracking metal engine parts."
+            },
+            { 
+                text: "Stop the vehicle, carefully raise the bonnet, and wait 45 minutes before inspecting coolant levels.", 
+                score: 2, 
+                next: "dune_driving",
+                feedback: "Safe procedure. Waiting allows pressurized hot steam to cool down before opening bonnet hatches, preventing painful burns."
+            },
+            { 
+                text: "Turn interior cabin heaters onto maximum strength while idling to draw heat away from the engine.", 
+                score: 1, 
+                next: "dune_driving",
+                feedback: "Old mechanic trick! Turning heaters on helps radiate engine heat into the cabin, though it makes occupants uncomfortably hot in summer!"
+            },
+            { 
+                text: "Unscrew the pressurized radiator cap immediately and pour cold water into the engine.", 
+                score: -1, 
+                retry: true, 
+                feedback: "Severe danger! Removing hot radiator caps causes scalding steam explosions, while cold water cracks white-hot engine blocks instantly. Think again!"
+            }
+        ]
+    },
+
+    dune_driving: {
+        location: "Big Red Sand Dune",
+        text: "You arrive at Big Red, a famous 30-metre sand dune. You must climb the crest safely, but blind oncoming traffic may be ascending from the opposite side. What do you do?",
+        options: [
+            { 
+                text: "Attach a tall sand flag to your bonnet, select low-range 4WD, call out on CB radio, and climb steadily.", 
+                score: 3, 
+                next: "heat_management",
+                feedback: "Flawless desert safety! Sand flags and radio calls give oncoming vehicles early warning before meeting at narrow dune crests."
+            },
+            { 
+                text: "Wait at the dune base, listening intently for approaching engine noises before ascending slowly.", 
+                score: 2, 
+                next: "heat_management",
+                feedback: "Cautious approach. Listening helps, though wind noise over sand dunes can easily muffle engine sounds from opposing vehicles."
+            },
+            { 
+                text: "Drive fast up the dune while sounding your horn continuously to alert others.", 
+                score: 1, 
+                next: "dune_catchup",
+                feedback: "Noisy and risky! Horns are hard to hear over revving V8 engines, and speeding increases vehicle bounce near dune tops."
+            },
+            { 
+                text: "Park your vehicle right at the dune crest to check the opposite side for traffic.", 
+                score: -1, 
+                retry: true, 
+                feedback: "Extreme hazard! Parking on a blind dune crest guarantees getting hit by approaching vehicles climbing from either side. Move to safety!"
+            }
+        ]
+    },
+
+    dune_catchup: {
+        location: "Big Red Sand Dune (Catch-up)",
+        text: "Lacking a safety flag, an oncoming 4WD suddenly crests the dune directly ahead! How do you avoid a collision?",
+        options: [
+            { 
+                text: "Steer smoothly into soft sand escape areas on the left and bring the vehicle to a controlled stop.", 
+                score: 3, 
+                next: "heat_management",
+                feedback: "Brilliant split-second driving! Steering into soft sand absorbs momentum safely without risking a high-speed vehicle roll."
+            },
+            { 
+                text: "Halt completely and reverse straight down your entry tracks smoothly.", 
+                score: 2, 
+                next: "heat_management",
+                feedback: "Acceptable evasion. Reversing straight prevents jackknifing, provided you maintain clear rear vision down steep sand slopes."
+            },
+            { 
+                text: "Flash headlights repeatedly while applying brakes firmly.", 
+                score: 1, 
+                next: "heat_management",
+                feedback: "Basic reaction. Flashers provide visual alerts, but physically moving out of the collision path is far more effective on dunes."
+            },
+            { 
+                text: "Swerve aggressively at high speed down the steep side slope of the dune.", 
+                score: -1, 
+                retry: true, 
+                feedback: "Catastrophic error! Sharp turns at speed on steep sand slopes cause immediate sideways rollovers. Select a safer response!"
+            }
+        ]
+    },
+
+    heat_management: {
+        location: "Sturt Stony Desert",
+        text: "It is mid-afternoon with outside temperatures hitting 44°C. You feel intense fatigue, dry mouth, and a throbbing headache. What is your immediate action?",
+        options: [
+            { 
+                text: "Stop in shade, drink water mixed with rehydration salts, rest for an hour, and monitor symptoms.", 
+                score: 3, 
+                next: "camp_selection",
+                feedback: "Life-saving medical choice! Headaches and fatigue indicate heat exhaustion. Resting and replacing electrolytes prevents life-threatening heatstroke."
+            },
+            { 
+                text: "Swap drivers immediately, consume cold water, and reduce driving speed.", 
+                score: 2, 
+                next: "camp_selection",
+                feedback: "Sensible response. Handing over driving duties keeps the vehicle moving safely while allowing the affected person time to recover."
+            },
+            { 
+                text: "Drink energy drinks, set cabin air conditioning to maximum, and push on to reach town.", 
+                score: 1, 
+                next: "heat_catchup",
+                feedback: "Poor medical choice! Caffeine in energy drinks worsens dehydration, masking critical warning signs of heat stress."
+            },
+            { 
+                text: "Ignore the symptoms, drink sweet fizzy drinks, and drive faster to finish early.", 
+                score: -1, 
+                retry: true, 
+                feedback: "Dangerous neglect! Ignoring heat exhaustion leads rapidly to confusion, collapse, and fatal heatstroke. Take medical precautions immediately!"
+            }
+        ]
+    },
+
+    heat_catchup: {
+        location: "Sturt Stony Desert (Catch-up)",
+        text: "Because you pushed through heat signs earlier, your passenger notes you are slurring words—a key sign of heatstroke. What do you do?",
+        options: [
+            { 
+                text: "Stop instantly in shade, apply wet cloths to neck and underarms, sip water, and rest.", 
+                score: 3, 
+                next: "camp_selection",
+                feedback: "Crucial first-aid! Active cooling with wet cloths drops core body temperature quickly, reversing dangerous heatstroke effects."
+            },
+            { 
+                text: "Stop driving immediately and rest in the passenger seat with air vents blowing directly on you.", 
+                score: 2, 
+                next: "camp_selection",
+                feedback: "Good decision. Halting physical exertion and cooling down stops symptoms progressing into medical emergencies."
+            },
+            { 
+                text: "Take a brief 15-minute break in the vehicle before continuing your drive.", 
+                score: 1, 
+                next: "camp_selection",
+                feedback: "Insufficient rest. Severe heat stress requires hours of rest and rehydration to recover safely."
+            },
+            { 
+                text: "Take painkiller tablets and continue driving for another half hour.", 
+                score: -1, 
+                retry: true, 
+                feedback: "Lethal mistake! Painkillers do not treat heatstroke and can strain dehydrated kidneys. Medical cooling is required now!"
+            }
+        ]
+    },
+
+    camp_selection: {
+        location: "Birdsville Track Approach",
+        text: "It is 5:00 PM; dusk approaches in one hour. Kangaroos and emus are moving onto track shoulders. Where do you pitch camp?",
+        options: [
+            { 
+                text: "Stop early at a designated bush campsite well clear of dry riverbeds and large eucalyptus trees.", 
+                score: 3, 
+                next: "wildlife_encounter",
+                feedback: "Top bush wisdom! Camping clear of riverbeds avoids flash floods, while avoiding large eucalyptus trees prevents injury from falling branches."
+            },
+            { 
+                text: "Camp near a pastoral station homestead after requesting permission from the station manager.", 
+                score: 2, 
+                next: "wildlife_encounter",
+                feedback: "Polite and safe. Station managers appreciate courtesy and often share excellent advice about local track conditions."
+            },
+            { 
+                text: "Drive two additional hours after dark to reach a hotel in the next township.", 
+                score: 1, 
+                next: "camp_catchup",
+                feedback: "High-risk choice! Driving at night in the Outback dramatically increases chances of crashing into nocturnal wildlife like roos and cattle."
+            },
+            { 
+                text: "Set up camp inside a dry sandy creek bed underneath a massive old Eucalyptus gum tree.", 
+                score: -1, 
+                retry: true, 
+                feedback: "Double hazard! Dry creek beds flood without warning from distant rain, and eucalyptus trees drop heavy limbs unexpectedly at night. Pick a safer spot!"
+            }
+        ]
+    },
+
+    camp_catchup: {
+        location: "Birdsville Track (Night Driving Catch-up)",
+        text: "Driving after dark proved risky; a huge kangaroo leaps directly into your headlights! How do you handle this sudden hazard?",
+        options: [
+            { 
+                text: "Brake firmly in a straight line without swerving violently off the gravel track.", 
+                score: 3, 
+                next: "wildlife_encounter",
+                feedback: "Outstanding discipline! Straight-line braking prevents vehicle rollovers on loose dirt shoulders, even if hitting the animal is unavoidable."
+            },
+            { 
+                text: "Reduce speed significantly, dip headlight beams to low, and sound your horn.", 
+                score: 2, 
+                next: "wildlife_encounter",
+                feedback: "Good response. Dipping high beams unfreezes blinded animals, allowing them to hop off tracks."
+            },
+            { 
+                text: "Gently apply brakes and coast onto the dirt shoulder carefully.", 
+                score: 1, 
+                next: "wildlife_encounter",
+                feedback: "Controlled move, though dirt shoulders often contain soft sand or sharp rocks that destabilise vehicles."
+            },
+            { 
+                text: "Swerve aggressively at high speed to steer around the kangaroo.", 
+                score: -1, 
+                retry: true, 
+                feedback: "Major crash risk! Swerving at speed on Outback gravel tracks is the leading cause of fatal vehicle rollovers. Brake straight instead!"
+            }
+        ]
+    },
+
+    wildlife_encounter: {
+        location: "Campsite Bushland",
+        text: "Unpacking camping gear, you spot a venomous Eastern Brown Snake resting near your storage boxes. How do you react?",
+        options: [
+            { 
+                text: "Back away slowly and calmly, giving the snake plenty of room to slither away naturally.", 
+                score: 3, 
+                next: "mechanical_check",
+                feedback: "Perfect snake safety! Australian snakes only strike when threatened. Retreating calmly eliminates bite risks entirely."
+            },
+            { 
+                text: "Alert camp mates, then stamp feet firmly on ground 5 metres away to encourage it to move.", 
+                score: 2, 
+                next: "mechanical_check",
+                feedback: "Effective technique. Ground vibrations alert snakes to human presence, prompting them to seek quiet cover."
+            },
+            { 
+                text: "Use a long stick to tap ground near the snake to drive it off.", 
+                score: 1, 
+                next: "wildlife_catchup",
+                feedback: "Risky proximity! Getting within stick range brings you close to strike zones if the snake feels cornered."
+            },
+            { 
+                text: "Grab a shovel or heavy rock and attempt to kill the snake quickly.", 
+                score: -1, 
+                retry: true, 
+                feedback: "Extreme danger! Most snake bites occur when people attempt to attack or kill snakes. Leave wildlife alone!"
+            }
+        ]
+    },
+
+    wildlife_catchup: {
+        location: "Campsite Bushland (Catch-up)",
+        text: "Tapping the stick agitated the snake into an s-shaped defensive strike posture! What is your immediate action?",
+        options: [
+            { 
+                text: "Freeze completely motionless, then retreat backwards very slowly.", 
+                score: 3, 
+                next: "mechanical_check",
+                feedback: "Flawless calmness! Snakes track fast movements. Standing still causes them to lose interest before you back away safely."
+            },
+            { 
+                text: "Walk backwards slowly while keeping your eyes fixed on the snake.", 
+                score: 2, 
+                next: "mechanical_check",
+                feedback: "Safe withdrawal. Keeping eyes on wildlife ensures you know its position while retreating."
+            },
+            { 
+                text: "Stand still and wait quietly until the snake settles and slithers off.", 
+                score: 1, 
+                next: "mechanical_check",
+                feedback: "Patient move, though slowly increasing distance is safer than remaining close."
+            },
+            { 
+                text: "Turn around and sprint fast away from the campsite.", 
+                score: -1, 
+                retry: true, 
+                feedback: "Panic response! Sudden sprinting triggers defensive strike reactions in agitated snakes. Retreat slowly!"
+            }
+        ]
+    },
+
+    mechanical_check: {
+        location: "Outback Track - Day 4",
+        text: "During morning vehicle checks, you spot a minor oil leak under the engine and hear a faint squeal from fan belts. What do you do?",
+        options: [
+            { 
+                text: "Check oil levels, top up fluid, inspect belt tension, and monitor dashboard gauges every 50 km.", 
+                score: 3, 
+                next: "emergency_2",
+                feedback: "Proactive mechanical care! Regular checks catch minor leaks before they turn into major engine meltdowns far from help."
+            },
+            { 
+                text: "Drive carefully to the next roadhouse (80 km away) to consult a mechanic.", 
+                score: 2, 
+                next: "emergency_2",
+                feedback: "Practical choice, provided oil levels remain adequate to reach the roadhouse safely."
+            },
+            { 
+                text: "Wipe away oil drops with a rag and keep driving without checking fluid dipsticks.", 
+                score: 1, 
+                next: "mechanical_catchup",
+                feedback: "Careless habit! Ignoring oil leaks risks running engines dry, leading to total mechanical breakdown."
+            },
+            { 
+                text: "Pour thick chemical stop-leak additives straight into the engine oil filler.", 
+                score: -1, 
+                retry: true, 
+                feedback: "Bad practice! Chemical additives can clog oil lines and destroy engines. Always check dipstick levels first!"
+            }
+        ]
+    },
+
+    mechanical_catchup: {
+        location: "Outback Track (Catch-up)",
+        text: "Because dipsticks were unchecked earlier, your dashboard oil warning light illuminates 40 km later. How do you handle it?",
+        options: [
+            { 
+                text: "Pull over immediately in a safe spot, switch off engine, and refill oil using spare supplies.", 
+                score: 3, 
+                next: "emergency_2",
+                feedback: "Engine-saving action! Stopping instantly prevents metal engine parts grinding together without lubrication."
+            },
+            { 
+                text: "Park in shade, let engine cool down, and inspect underneath for major cracks.", 
+                score: 2, 
+                next: "emergency_2",
+                feedback: "Thorough check. Finding leak origins helps decide if temporary repairs can get you to town."
+            },
+            { 
+                text: "Drive very slowly at 30 km/h toward the nearest town.", 
+                score: 1, 
+                next: "emergency_2",
+                feedback: "Risky gamble! Even low speeds without engine oil cause catastrophic engine seizure within minutes."
+            },
+            { 
+                text: "Ignore the warning light and speed up to reach town before the engine stops.", 
+                score: -1, 
+                retry: true, 
+                feedback: "Fatal error! Driving with oil warning lights on destroys engines completely within kilometres. Stop immediately!"
+            }
+        ]
+    },
+
+    emergency_2: {
+        isEmergency: true,
+        location: "Strzelecki Track - Critical Breakdown",
+        text: "CRITICAL EMERGENCY: Total electrical failure kills your engine in 42°C heat! Mobile phone coverage is zero, and no vehicles have passed all day. How do you survive?",
+        options: [
+            { 
+                text: "Stay with your vehicle, raise the bonnet as a signal, erect shade awnings, drink water, and trigger your EPIRB.", 
+                score: 3, 
+                next: "navigation_final", 
+                survive: true,
+                feedback: "Heroic decision! Vehicles provide shade, water storage, and giant targets for search aircraft. Staying put ensures survival!"
+            },
+            { 
+                text: "Attempt walking 35 km back to the roadhouse you passed five hours ago.", 
+                score: 0, 
+                survive: false, 
+                failReason: "GAME OVER: Trekking in 42°C Outback heat causes fatal dehydration within hours. Always stay beside your broken-down vehicle!"
+            }
+        ]
+    },
+
+    navigation_final: {
+        location: "Approach to Birdsville (Final Destination)",
+        text: "A road maintenance crew jump-starts your vehicle. You are 50 km from Birdsville when a massive Outback dust storm (haboob) blackens the sky, dropping visibility to zero. Your final decision?",
+        options: [
+            { 
+                text: "Pull completely off the road surface, switch on hazard lights, turn off headlights, and wait out the storm.", 
+                score: 3, 
+                next: "finish",
+                feedback: "Flawless safety decision! Pulling off tracks and turning off headlights prevents rear-end collisions from disoriented drivers."
+            },
+            { 
+                text: "Drive slowly at 10 km/h with hazard lights flashing, following road shoulder markings.", 
+                score: 2, 
+                next: "finish",
+                feedback: "Creeping along works if shoulders are clear, though stopping off-road remains far safer in zero-visibility dust."
+            },
+            { 
+                text: "Stop immediately in the middle of your driving lane with all lights on.", 
+                score: 1, 
+                next: "finish",
+                feedback: "Hazardous position! Parking in active lanes invites rear-end crashes from trailing vehicles blinded by dust."
+            },
+            { 
+                text: "Accelerate quickly to outrun the approaching dust wall before it covers the track.", 
+                score: -1, 
+                retry: true, 
+                feedback: "Disastrous choice! Trying to outrun dust storms on dirt tracks results in violent high-speed blind crashes. Pull off safely!"
+            }
+        ]
+    }
+};
+
+let currentScore = 0;
+let decisionCount = 0;
+let currentNodeKey = "start";
+
+const landingScreenEl = document.getElementById('landing-screen');
+const gameplayScreenEl = document.getElementById('gameplay-screen');
+const gameHeaderEl = document.getElementById('game-header');
+
+const scenarioTextEl = document.getElementById('scenario-text');
+const optionsContainerEl = document.getElementById('options-container');
+const scoreDisplayEl = document.getElementById('score-display');
+const decisionCountEl = document.getElementById('decision-count');
+const locationBadgeEl = document.getElementById('location-badge');
+const feedbackEl = document.getElementById('feedback');
+const restartBtnEl = document.getElementById('restart-btn');
+
+function shuffleArray(array) {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+function startGame() {
+    landingScreenEl.classList.add('hidden');
+    gameHeaderEl.classList.remove('hidden');
+    gameplayScreenEl.classList.remove('hidden');
+    
+    currentScore = 0;
+    decisionCount = 0;
+    currentNodeKey = "start";
+    
+    scoreDisplayEl.textContent = currentScore;
+    decisionCountEl.textContent = decisionCount;
+    
+    feedbackEl.style.display = 'none';
+    restartBtnEl.classList.add('hidden');
+    
+    renderNode(currentNodeKey);
+}
+
+function resetToLanding() {
+    gameplayScreenEl.classList.add('hidden');
+    gameHeaderEl.classList.add('hidden');
+    landingScreenEl.classList.remove('hidden');
+}
+
+function renderNode(nodeKey) {
+    // Check if game has reached the end
+    if (nodeKey === "finish") {
+        renderFinalResults();
+        return;
+    }
+
+    const node = gameData[nodeKey];
+
+    if (!node) {
+        console.error("Node missing:", nodeKey);
+        return;
+    }
+
+    locationBadgeEl.textContent = `Location: ${node.location}`;
+    scenarioTextEl.textContent = node.text;
+    optionsContainerEl.innerHTML = '';
+
+    const shuffledOptions = shuffleArray(node.options);
+
+    shuffledOptions.forEach(option => {
+        const btn = document.createElement('button');
+        btn.className = 'btn-option';
+        btn.textContent = option.text;
+        btn.onclick = () => handleChoice(option, node);
+        optionsContainerEl.appendChild(btn);
+    });
+}
+
+function handleChoice(option, currentNode) {
+    feedbackEl.style.display = 'block';
+    feedbackEl.textContent = option.feedback || option.failReason;
+
+    // Handle Poor Choice (-1 Point, Retry on same node)
+    if (option.score === -1) {
+        currentScore -= 1;
+        scoreDisplayEl.textContent = currentScore;
+        feedbackEl.className = 'feedback-banner error';
+        return;
+    }
+
+    // Handle Emergency Lethal Checkpoints
+    if (currentNode.isEmergency) {
+        decisionCount++;
+        decisionCountEl.textContent = decisionCount;
+
+        if (!option.survive) {
+            locationBadgeEl.textContent = "CRITICAL FAILURE";
+            scenarioTextEl.textContent = option.failReason;
+            optionsContainerEl.innerHTML = '';
+            
+            feedbackEl.className = 'feedback-banner error';
+            restartBtnEl.classList.remove('hidden');
+            return;
+        } else {
+            currentScore += option.score;
+            scoreDisplayEl.textContent = currentScore;
+            feedbackEl.className = 'feedback-banner success';
+            currentNodeKey = option.next;
+            renderNode(currentNodeKey);
+            return;
+        }
+    }
+
+    // Standard Decisions (3, 2, 1 Points)
+    currentScore += option.score;
+    decisionCount++;
+
+    scoreDisplayEl.textContent = currentScore;
+    decisionCountEl.textContent = decisionCount;
+
+    // Feedback Color Coding (2 points set to Blue)
+    if (option.score === 3) {
+        feedbackEl.className = 'feedback-banner success';
+    } else if (option.score === 2) {
+        feedbackEl.className = 'feedback-banner info-blue';
+    } else {
+        feedbackEl.className = 'feedback-banner warning';
+    }
+
+    // Progress to next stage
+    currentNodeKey = option.next;
+    renderNode(currentNodeKey);
+}
+
+function renderFinalResults() {
+    optionsContainerEl.innerHTML = '';
+    locationBadgeEl.textContent = "Destination Reached: Birdsville Pub";
+    
+    let bandTitle = "";
+    let bandDescription = "";
+
+    // 40-50 Word Feedback Bands
+    if (currentScore >= 33) {
+        bandTitle = "Band 1: Outback Legend (33+ Points)";
+        bandDescription = "Sensational effort! You demonstrated outstanding judgment across desert navigation, mechanical care, and emergency survival tactics. Your English reading comprehension and practical bushcraft skills are exceptional. You managed every hazard perfectly and reached Birdsville like a true Outback expert. Fantastic work!";
+    } else if (currentScore >= 24) {
+        bandTitle = "Band 2: Experienced Bush Driver (24–32 Points)";
+        bandDescription = "Great effort! You navigated dusty tracks and desert sand dunes safely. Although you made a few minor miscalculations along the trail, your sensible catch-up decisions kept the vehicle running smoothly. With a little extra care regarding preparation, you will easily master the Outback!";
+    } else if (currentScore >= 15) {
+        bandTitle = "Band 3: Novice Adventurer (15–23 Points)";
+        bandDescription = "You made it to Birdsville Pub, but your expedition was filled with mechanical stress and dangerous situations! You relied heavily on catch-up options to recover from poor choices. Review bush safety rules, practice your vocabulary, and try the drive again to improve!";
+    } else {
+        bandTitle = "Band 4: Unprepared Tourist (Under 15 Points)";
+        bandDescription = "You barely survived the desert journey! You made several hazardous choices regarding water, tyre pressure, and navigation, relying on pure luck to reach town. Re-read the Outback survival advice carefully and replay the game to build your English reading and bush survival skills!";
+    }
+
+    scenarioTextEl.innerHTML = `
+        <h2>Expedition Complete!</h2>
+        <div class="final-score">Final Score: ${currentScore} pts</div>
+        <p style="margin-bottom: 12px;"><strong>${bandTitle}</strong></p>
+        <p style="line-height: 1.6; font-size: 1.05rem;">${bandDescription}</p>
+    `;
+
+    restartBtnEl.classList.remove('hidden');
+}
+</script>
+
+</body>
+</html>

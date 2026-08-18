@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERP Project Manager: A2 English Work Week Challenge</title>
+    <style>
+        :root {
+            --bg-tech: #0f172a;
+            --card-bg: #ffffff;
+            --tech-blue: #0284c7;
+            --tech-blue-hover: #0369a1;
+            --warning-amber: #d97706;
+            --success-green: #16a34a;
+            --info-blue: #2563eb;
+            --text-dark: #0f172a;
+            --border-color: #cbd5e1;
+            --error-red: #dc2626;
+            --speak-purple: #7c3aed;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-tech);
+            background-image: radial-gradient(#334155 1.5px, transparent 0);
+            background-size: 24px 24px;
+            color: var(--text-dark);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .game-container {
+            background-color: var(--card-bg);
+            width: 100%;
+            max-width: 780px;
+            border-radius: 12px;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
+            padding: 30px;
+            border: 3px solid var(--tech-blue);
+        }
+
+        header {
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        h1 {
+            color: var(--tech-blue);
+            font-size: 1.6rem;
+        }
+
+        .status-bar {
+            display: flex;
+            gap: 15px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            background: #f1f5f9;
+            padding: 8px 14px;
+            border-radius: 20px;
+            color: var(--text-dark);
+        }
+
+        .scenario-box {
+            margin-bottom: 20px;
+        }
+
+        .scenario-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .speaking-prompt {
+            background-color: #f3e8ff;
+            border: 2px dashed var(--speak-purple);
+            color: #581c87;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 0.98rem;
+            line-height: 1.4;
+        }
+
+        .feedback-banner {
+            padding: 14px 18px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.98rem;
+            line-height: 1.5;
+            display: none;
+            border-left: 5px solid;
+        }
+
+        .feedback-banner.success {
+            background-color: #f0fdf4;
+            color: var(--success-green);
+            border-color: var(--success-green);
+        }
+
+        .feedback-banner.info-blue {
+            background-color: #f0f9ff;
+            color: var(--info-blue);
+            border-color: var(--info-blue);
+        }
+
+        .feedback-banner.warning {
+            background-color: #fffbeb;
+            color: var(--warning-amber);
+            border-color: var(--warning-amber);
+        }
+
+        .feedback-banner.error {
+            background-color: #fef2f2;
+            color: var(--error-red);
+            border-color: var(--error-red);
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .btn-option {
+            background-color: #ffffff;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 14px 18px;
+            text-align: left;
+            font-size: 1rem;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            line-height: 1.4;
+        }
+
+        .btn-option:hover:not(:disabled) {
+            border-color: var(--tech-blue);
+            background-color: #f8fafc;
+            transform: translateY(-2px);
+        }
+
+        .btn-action {
+            background-color: var(--tech-blue);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 14px 28px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            display: inline-block;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        .btn-action:hover {
+            background-color: var(--tech-blue-hover);
+            transform: scale(1.02);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .final-score {
+            font-size: 2.2rem;
+            color: var(--tech-blue);
+            font-weight: bold;
+            margin: 15px 0;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            background: var(--tech-blue);
+            color: white;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .landing-card {
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        .landing-card h2 {
+            color: var(--tech-blue);
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+
+        .landing-card p {
+            font-size: 1.05rem;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        @media (max-width: 500px) {
+            .game-container {
+                padding: 18px;
+            }
+            h1 {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <header id="game-header" class="hidden">
+        <h1>ERP Project Manager Challenge</h1>
+        <div class="status-bar">
+            <span>Decisions: <span id="decision-count">0</span></span>
+            <span>Score: <span id="score-display">0</span></span>
+        </div>
+    </header>
+
+    <main id="game-body">
+        <!-- LANDING PAGE -->
+        <div id="landing-screen" class="landing-card">
+            <h2>Welcome to Your International ERP Project Week!</h2>
+            <p>You are an <strong>IT Consultant and Project Manager</strong> at a software company that develops ERP solutions (enterprise software package / <em>progiciel</em>). This week, you must lead remote online meetings with international, English-speaking clients and colleagues!</p>
+            
+            <p>This game will test your <strong>English comprehension, decision-making, and speaking fluency</strong>. In every step, read the choices carefully and <strong>speak your response out loud</strong> to practice your English!</p>
+
+            <p style="text-align: center; font-weight: bold; color: var(--tech-blue);">Open your laptop, check your calendar, and let's start Monday morning!</p>
+
+            <button class="btn-action" onclick="startGame()">Start Week</button>
+        </div>
+
+        <!-- GAMEPLAY & FINAL SCREEN -->
+        <div id="gameplay-screen" class="hidden">
+            <div id="feedback" class="feedback-banner"></div>
+            
+            <div class="scenario-box">
+                <span class="badge" id="location-badge">Day: Monday Morning</span>
+                <div class="scenario-text" id="scenario-text">Loading scenario...</div>
+                <div class="speaking-prompt" id="speaking-prompt">🗣️ <strong>Speaking Task:</strong> Read your chosen answer out loud before clicking!</div>
+            </div>
+
+            <div class="options-grid" id="options-container">
+                <!-- Option buttons injected dynamically -->
+            </div>
+
+            <button id="restart-btn" class="btn-action hidden" onclick="resetToLanding()">Play Again</button>
+        </div>
+    </main>
+</div>
+
+<script>
+const gameData = {
+    // MONDAY: Kick-off Meeting & Internet Lag
+    start: {
+        location: "Monday - 09:00 AM (Remote Kick-off Meeting)",
+        text: "You are hosting an online kick-off meeting with an English client for a new ERP implementation. At the start of the call, you notice some participants have their microphones muted. How do you welcome them and start?",
+        prompt: "🗣️ Practice out loud: Greet the team politely and set a clear agenda for the meeting.",
+        options: [
+            { 
+                text: "'Good morning everyone! Can you hear me well? Today we will present the ERP project plan and discuss modules.'", 
+                score: 3, 
+                next: "mon_connection",
+                feedback: "Excellent! Professional, polite, and clear. You checked audio quality and stated the agenda confidently."
+            },
+            { 
+                text: "'Hello. I share my screen now and read the presentation slides.'", 
+                score: 2, 
+                next: "mon_connection",
+                feedback: "Understandable, but a bit direct. Adding a warm greeting and checking sound makes international clients feel welcome."
+            },
+            { 
+                text: "'Hi. Sorry my English is bad, but we must look at software now.'", 
+                score: 1, 
+                next: "mon_catchup",
+                feedback: "Try to avoid apologizing for your English right away! Be confident with simple sentences. You can do it!"
+            },
+            { 
+                text: "'Okay guys, quiet please. I press record and start talking without waiting.'", 
+                score: -1, 
+                retry: true, 
+                feedback: "Too abrupt! In remote business meetings, it is polite to check if everyone is ready before starting. Try again."
+            }
+        ]
+    },
+
+    mon_catchup: {
+        location: "Monday - 09:15 AM (Meeting Catch-up)",
+        text: "The client product owner asks a complex question about data migration, but you did not catch a key word. What do you say?",
+        prompt: "🗣️ Practice out loud: Ask for clarification politely without losing your confidence.",
+        options: [
+            { 
+                text: "'I'm sorry, could you repeat that last point about data migration please? The connection was a bit quiet.'", 
+                score: 3, 
+                next: "mon_connection",
+                feedback: "Perfect strategy! Blaming the connection or asking politely to repeat is standard professional English."
+            },
+            { 
+                text: "'Can you speak slower please? I didn't understand the word.'", 
+                score: 2, 
+                next: "mon_connection",
+                feedback: "Clear and direct. Clients are happy to adapt their pace when asked politely."
+            },
+            { 
+                text: "'Yes, yes, correct, no problem!' (even though you did not understand).", 
+                score: 1, 
+                next: "mon_connection",
+                feedback: "Dangerous habit! Guessing or pretending to understand leads to big software configuration errors later."
+            },
+            { 
+                text: "Disconnect from the call intentionally and send an email saying your computer crashed.", 
+                score: -1, 
+                retry: true, 
+                feedback: "Avoid running away! Miscommunication happens to everyone. Just ask for clarification. Try again!"
+            }
+        ]
+    },
+
+    mon_connection: {
+        location: "Monday - 11:30 AM (Technical Audio Issue)",
+        text: "During your software demonstration, the client says: 'Your screen is frozen and your voice is cutting out!' What is your immediate response?",
+        prompt: "🗣️ Practice out loud: Explain the technical issue simply and offer a quick solution.",
+        options: [
+            { 
+                text: "'Apologies! I will turn off my webcam to save bandwidth and re-share my screen now.'", 
+                score: 3, 
+                next: "tue_requirements",
+                feedback: "Top troubleshooting! Disabling video frees up bandwidth and resolves screen lag in online meetings."
+            },
+            { 
+                text: "'Please wait two minutes, I will restart my internet router.'", 
+                score: 2, 
+                next: "tue_requirements",
+                feedback: "Acceptable, but restarting a router takes time and pauses the meeting completely."
+            },
+            { 
+                text: "'My connection is fine here, it must be a problem on your side.'", 
+                score: 1, 
+                next: "mon_lag_catchup",
+                feedback: "A bit diplomatic-risk! Even if true, it sounds slightly defensive to international clients."
+            },
+            { 
+                text: "Keep speaking loudly for 10 minutes without fixing the screen lag.", 
+                score: -1, 
+                retry: true, 
+                feedback: "Ineffective! If participants cannot see your screen, the presentation is lost. Address tech issues fast!"
+            }
+        ]
+    },
+
+    mon_lag_catchup: {
+        location: "Monday - 11:45 AM (Screen Lag Recovery)",
+        text: "The client still cannot see your ERP software menu. What do you suggest to keep the meeting productive?",
+        prompt: "🗣️ Practice out loud: Propose an alternative solution clearly.",
+        options: [
+            { 
+                text: "'I will send the PDF slide deck in the chat now, and we can follow page 5 together.'", 
+                score: 3, 
+                next: "tue_requirements",
+                feedback: "Great plan B! Sharing documents in chat keeps remote meetings moving forward smoothly."
+            },
+            { 
+                text: "'Let's reschedule this demonstration for tomorrow morning after I test my line.'", 
+                score: 2, 
+                next: "tue_requirements",
+                feedback: "Sensible choice if tech fails completely, though providing a backup document is faster."
+            },
+            { 
+                text: "'I will describe the buttons verbally without any visual slides.'", 
+                score: 1, 
+                next: "tue_requirements",
+                feedback: "Describing complex ERP software interfaces purely verbally can confuse language learners and clients."
+            },
+            { 
+                text: "Cancel the entire ERP contract via chat.", 
+                score: -1, 
+                retry: true, 
+                feedback: "Extreme overreaction! Technical glitches happen every day in IT. Fix them calmly!"
+            }
+        ]
+    },
+
+    // TUESDAY: Requirements Gathering & Scope Creep
+    tue_requirements: {
+        location: "Tuesday - 10:00 AM (Requirement Gathering)",
+        text: "On Tuesday, you analyze client needs. The client asks for a custom feature not included in the standard ERP package: 'We want custom real-time automated reports by tomorrow.' What do you reply?",
+        prompt: "🗣️ Practice out loud: Say no professionally or explain project scope limitations.",
+        options: [
+            { 
+                text: "'That is an interesting requirement. However, custom reports are out of initial scope. I can write a change request and estimate the extra time.'", 
+                score: 3, 
+                next: "emergency_1",
+                feedback: "Flawless IT Project Management! You set clear boundaries (scope management) while staying polite and helpful."
+            },
+            { 
+                text: "'We can try, but standard ERP reports already cover sales analysis. Can I show you the standard option first?'", 
+                score: 2, 
+                next: "emergency_1",
+                feedback: "Good response! Promoting standard software features saves budget and prevents custom coding delays."
+            },
+            { 
+                text: "'Yes, sure! We will code everything you want by tomorrow for free!'", 
+                score: 1, 
+                next: "tue_scope_catchup",
+                feedback: "Careful! Promising uncosted custom features creates unrealistic deadlines and project budget overruns."
+            },
+            { 
+                text: "'No way! That is a stupid idea and our software doesn't do that.'", 
+                score: -1, 
+                retry: true, 
+                feedback: "Unprofessional language! Always use courteous business terms like 'out of scope' or 'additional requirement'."
+            }
+        ]
+    },
+
+    tue_scope_catchup: {
+        location: "Tuesday - 02:00 PM (Scope Recovery)",
+        text: "Your lead developer warns you: 'We cannot build this custom feature by tomorrow without breaking the database!' How do you correct this with the client?",
+        prompt: "🗣️ Practice out loud: Explain a technical delay politely and suggest a manageable timeline.",
+        options: [
+            { 
+                text: "'After consulting our technical team, custom development requires 5 days. Let's stick to standard features for Phase 1.'", 
+                score: 3, 
+                next: "emergency_1",
+                feedback: "Excellent recovery! Informing the client based on technical team feedback restores realistic project timelines."
+            },
+            { 
+                text: "'We have a small technical delay. Can we deliver this feature next month instead?'", 
+                score: 2, 
+                next: "emergency_1",
+                feedback: "Clear communication, though specifying Phase 1 vs Phase 2 helps organize deliverables better."
+            },
+            { 
+                text: "'My developer refused to work on it, so we won't do it.'", 
+                score: 1, 
+                next: "emergency_1",
+                feedback: "Blaming internal colleagues directly to clients looks unprofessional. Speak as 'our team'."
+            },
+            { 
+                text: "Force your developer to work 24 hours without sleep to finish it.", 
+                score: -1, 
+                retry: true, 
+                feedback: "Bad leadership! Unreasonable pressure causes burnout and buggy software. Manage client scope instead."
+            }
+        ]
+    },
+
+    // EMERGENCY 1: Critical Hazard Checkpoint (Server Crash)
+    emergency_1: {
+        isEmergency: true,
+        location: "Wednesday - 08:30 AM - CRITICAL SYSTEM ALERT",
+        text: "CRITICAL INCIDENT: During live testing, the cloud staging server crashes! All ERP user access is blocked, and the Steering Committee meeting starts in 15 minutes! What do you do?",
+        prompt: "🗣️ Practice out loud: React fast under pressure using clear, calm English instructions.",
+        options: [
+            { 
+                text: "Send an urgent alert to DevOps to restore backup, post a calm update to the client status group, and prepare a backup local demo.", 
+                score: 3, 
+                next: "wed_training", 
+                survive: true,
+                feedback: "Heroic crisis management! You alerted engineers, communicated proactively with stakeholders, and secured a backup plan."
+            },
+            { 
+                text: "Panic, turn off your mobile phone, and pretend you have no internet access today.", 
+                score: 0, 
+                survive: false, 
+                failReason: "CRITICAL FAILURE: Hiding during a server crash destroys client trust! You must communicate transparently in IT crises."
+            }
+        ]
+    },
+
+    // WEDNESDAY: Key User Training & Difficult Questions
+    wed_training: {
+        location: "Wednesday - 02:00 PM (Key User Training Session)",
+        text: "You are conducting an online training workshop for key ERP users. A user says: 'The new system is too complicated! The old software was much easier!' How do you respond?",
+        prompt: "🗣️ Practice out loud: Validate their feelings and highlight the business benefits clearly.",
+        options: [
+            { 
+                text: "'I understand change can be difficult. The new ERP automates manual steps to save you 2 hours every day. Let's do a step-by-step example together.'", 
+                score: 3, 
+                next: "thu_data_bug",
+                feedback: "Outstanding empathy and clarity! Acknowledging user frustration and showing benefits builds user adoption."
+            },
+            { 
+                text: "'Don't worry, after two weeks of practice, it will feel very simple.'", 
+                score: 2, 
+                next: "thu_data_bug",
+                feedback: "Positive and encouraging, though showing a practical example immediately helps reduce anxiety faster."
+            },
+            { 
+                text: "'Management decided to change software, so everyone must learn it.'", 
+                score: 1, 
+                next: "wed_training_catchup",
+                feedback: "True, but stating executive orders makes users feel ignored and resistant to learning."
+            },
+            { 
+                text: "'If you cannot use this software, you should talk to HR.'", 
+                score: -1, 
+                retry: true, 
+                feedback: "Unacceptable tone! An IT Consultant must support and coach users through change management."
+            }
+        ]
+    },
+
+    wed_training_catchup: {
+        location: "Wednesday - 03:30 PM (Training Support Catch-up)",
+        text: "The users are still hesitant to practice in the test environment. What exercise do you give them?",
+        prompt: "🗣️ Practice out loud: Give simple, encouraging instructions.",
+        options: [
+            { 
+                text: "'Let's do a short 5-minute task: everyone creates one test purchase order. I am here to help if you get stuck.'", 
+                score: 3, 
+                next: "thu_data_bug",
+                feedback: "Great active learning! Breaking tasks into small, guided steps builds confidence quickly."
+            },
+            { 
+                text: "'Please read the 100-page user manual tonight and we practice tomorrow.'", 
+                score: 2, 
+                next: "thu_data_bug",
+                feedback: "Manuals are useful, but hands-on practice during workshops is much more effective."
+            },
+            { 
+                text: "'I will do all the clicks on my screen while you watch silently.'", 
+                score: 1, 
+                next: "thu_data_bug",
+                feedback: "Passive watching does not teach software skills effectively. Users need to click themselves!"
+            },
+            { 
+                text: "'End training early and go drink coffee.'", 
+                score: -1, 
+                retry: true, 
+                feedback: "Incomplete training causes major operational errors at Go-Live! Stick with your users."
+            }
+        ]
+    },
+
+    // THURSDAY: Data Bug & Developer Sync
+    thu_data_bug: {
+        location: "Thursday - 11:00 AM (Bug Triaging with Developers)",
+        text: "A bug is found: VAT calculation in customer invoices is off by 1%. You meet with international developers on Teams. How do you explain the bug clearly?",
+        prompt: "🗣️ Practice out loud: Describe a technical bug clearly with reproducible steps.",
+        options: [
+            { 
+                text: "'We found a bug in the billing module. When creating an invoice for UK clients, VAT calculates at 19% instead of 20%. Here are the exact steps to reproduce it.'", 
+                score: 3, 
+                next: "emergency_2",
+                feedback: "Brilliant technical reporting! Providing specific module names, expected vs actual behavior, and steps saves developer time."
+            },
+            { 
+                text: "'The accounting module has a calculation error. Can you check invoice rounding rules?'", 
+                score: 2, 
+                next: "emergency_2",
+                feedback: "Good concise summary, though attaching exact steps to reproduce makes debugging faster."
+            },
+            { 
+                text: "'Invoices are totally wrong and dangerous. Everything is broken!'", 
+                score: 1, 
+                next: "thu_bug_catchup",
+                feedback: "Vague and alarming! Technical teams need precise details, not general drama."
+            },
+            { 
+                text: "'Ignore the 1% difference, nobody will notice on financial statements.'", 
+                score: -1, 
+                retry: true, 
+                feedback: "Major compliance risk! Accounting software must be 100% accurate. Tax errors lead to legal fines!"
+            }
+        ]
+    },
+
+    thu_bug_catchup: {
+        location: "Thursday - 01:30 PM (Bug Log Clarification)",
+        text: "The lead developer messages: 'I need logs or screenshot examples to fix this issue.' What do you send?",
+        prompt: "🗣️ Practice out loud: Confirm what technical details you are providing.",
+        options: [
+            { 
+                text: "'I am attaching the error screenshot, invoice ID #1042, and system error log file to the ticket now.'", 
+                score: 3, 
+                next: "emergency_2",
+                feedback: "Top IT support habit! Ticket references and screenshots allow developers to patch code immediately."
+            },
+            { 
+                text: "'Look at customer invoice #1042 on the test server.'", 
+                score: 2, 
+                next: "emergency_2",
+                feedback: "Helps locate the issue, but attaching error logs speed up the debugging process."
+            },
+            { 
+                text: "'I don't have screenshots, just test it yourself until you see it.'", 
+                score: 1, 
+                next: "emergency_2",
+                feedback: "Unhelpful! Without reproduction details, developers spend hours hunting phantom bugs."
+            },
+            { 
+                text: "Delete the bug ticket from the tracking board.", 
+                score: -1, 
+                retry: true, 
+                feedback: "Hiding software bugs causes disasters when real money is processed! Always log and track issues."
+            }
+        ]
+    },
+
+    // EMERGENCY 2: Critical Hazard Checkpoint (Data Leak / Security Breach)
+    emergency_2: {
+        isEmergency: true,
+        location: "Friday - 09:00 AM - SECURITY EMERGENCY",
+        text: "CRITICAL SECURITY RISK: A user accidentally posts live production database passwords into an open public Teams channel! What is your immediate action?",
+        prompt: "🗣️ Practice out loud: Issue an immediate security order clearly.",
+        options: [
+            { 
+                text: "Delete message immediately, trigger mandatory password reset with IT Security, and notify Data Protection Officer.", 
+                score: 3, 
+                next: "fri_steering_comm", 
+                survive: true,
+                feedback: "Critical threat neutralized! Quick removal, credential rotation, and formal notification protect GDPR compliance."
+            },
+            { 
+                text: "Reply in the public chat asking the user not to post credentials there.", 
+                score: 0, 
+                survive: false, 
+                failReason: "CRITICAL FAILURE: Leaving exposed passwords active while chatting allows hackers to compromise data! Revoke access immediately!"
+            }
+        ]
+    },
+
+    // FRIDAY: Steering Committee & Week Wrap-up
+    fri_steering_comm: {
+        location: "Friday - 03:00 PM (Steering Committee Meeting)",
+        text: "It is Friday afternoon. You present the weekly progress report to executives and international sponsors. How do you conclude your weekly summary?",
+        prompt: "🗣️ Practice out loud: Summarize key achievements and upcoming milestones professionally.",
+        options: [
+            { 
+                text: "'To summarize, user training is completed, core modules are validated, and the tax bug is resolved. Next week, we start final user acceptance testing.'", 
+                score: 3, 
+                next: "finish",
+                feedback: "Outstanding presentation finish! Concise executive summaries demonstrate executive maturity and control."
+            },
+            { 
+                text: "'We had a very hard week with server crashes and bugs, but everything is okay now.'", 
+                score: 2, 
+                next: "finish",
+                feedback: "Honest feedback, though framing challenges around solutions and next steps leaves a stronger impression."
+            },
+            { 
+                text: "'We worked late every night. I am very tired, see you next week.'", 
+                score: 1, 
+                next: "finish",
+                feedback: "Too casual for a formal Steering Committee! Focus on business project status during executive updates."
+            },
+            { 
+                text: "Leave the meeting call abruptly without providing any weekly status update.", 
+                score: -1, 
+                retry: true, 
+                feedback: "Unprofessional departure! Always present your weekly status to project sponsors. Finish strong!"
+            }
+        ]
+    }
+};
+
+let currentScore = 0;
+let decisionCount = 0;
+let currentNodeKey = "start";
+
+const landingScreenEl = document.getElementById('landing-screen');
+const gameplayScreenEl = document.getElementById('gameplay-screen');
+const gameHeaderEl = document.getElementById('game-header');
+
+const scenarioTextEl = document.getElementById('scenario-text');
+const speakingPromptEl = document.getElementById('speaking-prompt');
+const optionsContainerEl = document.getElementById('options-container');
+const scoreDisplayEl = document.getElementById('score-display');
+const decisionCountEl = document.getElementById('decision-count');
+const locationBadgeEl = document.getElementById('location-badge');
+const feedbackEl = document.getElementById('feedback');
+const restartBtnEl = document.getElementById('restart-btn');
+
+function shuffleArray(array) {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+function startGame() {
+    landingScreenEl.classList.add('hidden');
+    gameHeaderEl.classList.remove('hidden');
+    gameplayScreenEl.classList.remove('hidden');
+    
+    // Reset game state
+    currentScore = 0;
+    decisionCount = 0;
+    currentNodeKey = "start";
+    
+    scoreDisplayEl.textContent = currentScore;
+    decisionCountEl.textContent = decisionCount;
+    
+    feedbackEl.style.display = 'none';
+    speakingPromptEl.classList.remove('hidden');
+    restartBtnEl.classList.add('hidden');
+    
+    renderNode(currentNodeKey);
+}
+
+function resetToLanding() {
+    gameplayScreenEl.classList.add('hidden');
+    gameHeaderEl.classList.add('hidden');
+    landingScreenEl.classList.remove('hidden');
+}
+
+function renderNode(nodeKey) {
+    if (nodeKey === "finish") {
+        renderFinalResults();
+        return;
+    }
+
+    const node = gameData[nodeKey];
+
+    if (!node) {
+        console.error("Node missing:", nodeKey);
+        return;
+    }
+
+    locationBadgeEl.textContent = `Context: ${node.location}`;
+    scenarioTextEl.textContent = node.text;
+    speakingPromptEl.innerHTML = node.prompt || "🗣️ <strong>Speaking Task:</strong> Read your chosen option out loud before clicking!";
+    speakingPromptEl.classList.remove('hidden');
+    optionsContainerEl.innerHTML = '';
+
+    const shuffledOptions = shuffleArray(node.options);
+
+    shuffledOptions.forEach(option => {
+        const btn = document.createElement('button');
+        btn.className = 'btn-option';
+        btn.textContent = option.text;
+        btn.onclick = (e) => handleChoice(option, node, e.target);
+        optionsContainerEl.appendChild(btn);
+    });
+}
+
+function handleChoice(option, currentNode, targetBtn) {
+    feedbackEl.style.display = 'block';
+    feedbackEl.textContent = option.feedback || option.failReason;
+
+    // Penalty / Retry handling
+    if (option.score === -1) {
+        currentScore -= 1;
+        scoreDisplayEl.textContent = currentScore;
+        feedbackEl.className = 'feedback-banner error';
+        if (targetBtn) {
+            targetBtn.disabled = true;
+            targetBtn.style.opacity = '0.5';
+            targetBtn.style.cursor = 'not-allowed';
+        }
+        return;
+    }
+
+    if (currentNode.isEmergency) {
+        decisionCount++;
+        decisionCountEl.textContent = decisionCount;
+
+        if (!option.survive) {
+            locationBadgeEl.textContent = "CRITICAL PROJECT FAILURE";
+            scenarioTextEl.textContent = option.failReason;
+            speakingPromptEl.classList.add('hidden');
+            optionsContainerEl.innerHTML = '';
+            
+            feedbackEl.className = 'feedback-banner error';
+            restartBtnEl.classList.remove('hidden');
+            return;
+        } else {
+            currentScore += option.score;
+            scoreDisplayEl.textContent = currentScore;
+            feedbackEl.className = 'feedback-banner success';
+            currentNodeKey = option.next;
+            renderNode(currentNodeKey);
+            return;
+        }
+    }
+
+    currentScore += option.score;
+    decisionCount++;
+
+    scoreDisplayEl.textContent = currentScore;
+    decisionCountEl.textContent = decisionCount;
+
+    if (option.score === 3) {
+        feedbackEl.className = 'feedback-banner success';
+    } else if (option.score === 2) {
+        feedbackEl.className = 'feedback-banner info-blue';
+    } else {
+        feedbackEl.className = 'feedback-banner warning';
+    }
+
+    currentNodeKey = option.next;
+    renderNode(currentNodeKey);
+}
+
+function renderFinalResults() {
+    optionsContainerEl.innerHTML = '';
+    speakingPromptEl.classList.add('hidden');
+    feedbackEl.style.display = 'none';
+    locationBadgeEl.textContent = "Week Completed: Friday Evening";
+    
+    let bandTitle = "";
+    let bandDescription = "";
+
+    if (currentScore >= 24) {
+        bandTitle = "Band 1: Senior ERP Project Manager (24+ Points)";
+        bandDescription = "Outstanding performance! You managed remote client expectations, handled unexpected server crashes calmly, resolved software bugs with developers, and spoke clear, professional English. Your international remote meetings were concise, polite, and effective!";
+    } else if (currentScore >= 18) {
+        bandTitle = "Band 2: Competent IT Consultant (18–23 Points)";
+        bandDescription = "Good job! You navigated a challenging project week, kept key stakeholders informed, and handled technical issues well. With a little more fluency practice during requirement gathering and executive summaries, you will master international project leadership!";
+    } else if (currentScore >= 12) {
+        bandTitle = "Band 3: Junior ERP Consultant (12–17 Points)";
+        bandDescription = "You completed the work week, but you faced significant project delays, scope creep, and communication hurdles! Practice professional meeting phrases, review ERP technical vocabulary, and try playing again to improve your score!";
+    } else {
+        bandTitle = "Band 4: Unprepared IT Trainee (Under 12 Points)";
+        bandDescription = "Your project week suffered from severe communication issues, scope overruns, and unhandled technical emergencies. Re-read the scenario feedback, practice speaking your choices out loud, and restart to build your IT business English confidence!";
+    }
+
+    scenarioTextEl.innerHTML = `
+        <h2>Project Week Completed!</h2>
+        <div class="final-score">Final Score: ${currentScore} pts</div>
+        <p style="margin-bottom: 12px;"><strong>${bandTitle}</strong></p>
+        <p style="line-height: 1.6; font-size: 1.05rem;">${bandDescription}</p>
+    `;
+
+    restartBtnEl.classList.remove('hidden');
+}
+</script>
+
+</body>
+</html>
