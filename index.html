@@ -1,156 +1,264 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Decisionmaker Exercises</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 20px;
-            text-align: center;
-        }
-        h1 {
-            color: #333;
-        }
-        .container {
-            max-width: 1000px; /* Increased width to accommodate 4 columns */
-            margin: auto;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            display: grid;
-            grid-template-columns: repeat(4, 1fr); /* Updated to four columns */
-            gap: 10px;
-        }
-        .header-section {
-            grid-column: span 4; /* Updated to span across all 4 columns */
-            margin-bottom: 10px;
-        }
-        a {
-            display: block;
-            padding: 12px 5px;
-            text-decoration: none;
-            background: #007acc;
-            color: white;
-            border-radius: 5px;
-            font-size: 13px; /* Slightly smaller font for tighter fit */
-            transition: background 0.2s;
-            word-wrap: break-word; /* Prevents long titles from breaking layout */
-        }
-        a:hover {
-            background: #005f99;
-        }
-        /* Responsive adjustments */
-        @media (max-width: 900px) {
-            .container {
-                grid-template-columns: 1fr 1fr; /* Drop to 2 columns on tablets */
-            }
-            .header-section {
-                grid-column: span 2;
-            }
-        }
-        @media (max-width: 600px) {
-            .container {
-                grid-template-columns: 1fr; /* 1 column on mobile */
-            }
-            .header-section {
-                grid-column: span 1;
-            }
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Decisionmaker Exercises — File Directory</title>
+  <meta name="description" content="Directory of Decisionmaker exercise pages. Use the search box to quickly find an exercise." />
+  <link rel="icon" href="/favicon.ico" />
+  <style>
+    :root{
+      --bg:#f4f4f4;
+      --card:#fff;
+      --brand:#007acc;
+      --brand-strong:#005f99;
+      --text:#222;
+      --gap:12px;
+      --maxw:1100px;
+    }
+    html,body{height:100%;margin:0}
+    body{
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background:var(--bg);
+      color:var(--text);
+      display:flex;
+      align-items:flex-start;
+      justify-content:center;
+      padding:20px;
+    }
+    .site{
+      width:100%;
+      max-width:var(--maxw);
+      background:var(--card);
+      border-radius:10px;
+      padding:20px;
+      box-shadow:0 4px 18px rgba(0,0,0,.06);
+    }
+    a{color:inherit}
+    header{
+      margin-bottom:16px;
+      display:flex;
+      gap:12px;
+      align-items:center;
+      justify-content:space-between;
+      flex-wrap:wrap;
+    }
+    .title h1{margin:0;font-size:1.25rem}
+    .controls{display:flex;gap:8px;align-items:center}
+    .search{
+      padding:8px 10px;
+      border-radius:8px;
+      border:1px solid #ddd;
+      font-size:0.95rem;
+      min-width:220px;
+    }
+    nav[aria-label="exercise directory"]{
+      margin-top:8px;
+    }
+
+    /* Responsive grid for links */
+    .link-grid{
+      display:grid;
+      gap:var(--gap);
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      list-style:none;
+      padding:0;
+      margin:0;
+    }
+    .link-grid li{
+      margin:0;
+    }
+    .link-grid a{
+      display:block;
+      padding:12px 10px;
+      text-decoration:none;
+      background:var(--brand);
+      color:white;
+      border-radius:8px;
+      font-size:0.95rem;
+      transition:transform .08s ease, background .12s ease;
+      word-wrap:break-word;
+    }
+    .link-grid a:hover{background:var(--brand-strong); transform:translateY(-2px)}
+    .link-grid a:focus{outline:3px solid #fff; box-shadow:0 0 0 3px rgba(0,122,204,.25)}
+    .muted{font-size:.9rem;color:#666;margin-top:6px}
+
+    footer{
+      margin-top:18px;
+      font-size:0.9rem;
+      color:#555;
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:center;
+    }
+
+    /* Skip link */
+    .skip {
+      position: absolute;
+      left: -9999px;
+      top: auto;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+    }
+    .skip:focus {
+      left: 10px;
+      top: 10px;
+      width: auto;
+      height: auto;
+      padding: 8px 12px;
+      background: #000;
+      color: #fff;
+      border-radius: 4px;
+      z-index: 100;
+    }
+
+    @media (max-width:600px){
+      .title h1{font-size:1rem}
+      .search{min-width:140px}
+    }
+
+    @media (prefers-reduced-motion:reduce){
+      .link-grid a, .link-grid a:hover{transition:none; transform:none}
+    }
+  </style>
 </head>
 <body>
+  <a class="skip" href="#main">Skip to main content</a>
 
-<div class="container">
-    <div class="header-section">
-        <h1>File Directory</h1>
-        <p>Select a page to view:</p>
-    </div>
+  <div class="site" role="application" aria-labelledby="site-title">
+    <header>
+      <div class="title">
+        <h1 id="site-title">Decisionmaker Exercises — Directory</h1>
+        <div class="muted">Select a page to view</div>
+      </div>
 
-    <!-- Column 1 Content -->
-    <a href="accountant-busy-day-b1.html">Accountant Busy Day B1</a>
-    <a href="african-safari-a2.html">African Safari A2</a>
-    <a href="agri-plant-planner-b1.html">Agri Plant Planner B1</a>
-    <a href="agri-sales-b1.html">Agri Sales B1</a>
-    <a href="badminton-tournament-a2.html">Badminton Tournament A2</a>
-    <a href="bnb-french-getaway-b1.html">BnB French Getaway B1</a>
-    <a href="bnb-hell-b2.html">BnB Hell B2</a>
-    <a href="bnb-manhattan-b1.html">BnB Manhattan B1</a>
-    <a href="bnb-paris-b1.html">BnB Paris B1</a>
-    <a href="bnb-riverside-manor-b1.html">BnB Riverside Manor B1</a>
-    <a href="bushwalking-weekend-b1.html">Bushwalking Weekend B1</a>
-    <a href="cashier-a2.html">Cashier A2</a>
-    <a href="chess-tournament-b1.html">Chess Tournament B1</a>
-    <a href="cold-snap-b1.html">Cold Snap B1</a>
-    <a href="dance-school-b1.html">Dance School B1</a>
-    <a href="dance-school-b2.html">Dance School B2</a>
-    <a href="diy-the-deck-a2.html">DIY The deck A2</a>
-    <a href="diy-the-deck-b1.html">DIY The deck B1</a>
+      <div class="controls" role="search" aria-label="Search exercises">
+        <label for="filter" class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden">Search pages</label>
+        <input id="filter" class="search" type="search" placeholder="Search pages (type to filter)" aria-label="Search pages" />
+      </div>
+    </header>
 
-    <!-- Column 2 Content -->
-    <a href="dog-show-b1.html">Dog Show B1</a>
-    <a href="electrical-engineer-a2.html">Electrical Engineer A2</a>
-    <a href="eurotech-chief-people-officer-b2.html">Eurotech Chief People Officer B2</a>
-    <a href="football-tournament-b1.html">Football Tournament B1</a>
-    <a href="football-tournament-b2.html">Football Tournament B2</a>
-    <a href="forest-retreat-b1.html">Forest Retreat B1</a>
-    <a href="garden-challenge-b1.html">Garden Challenge B1</a>
-    <a href="garden-game-a2.html">Garden Game A2</a>
-    <a href="garden-maze-b2.html">Garden Maze B2</a>
-    <a href="grand-electro-tour-b1.html">Grand Electro Tour B1</a> 
-    <a href="horticultural-mastery-c1.html">Horticultural Mastery C1</a>
-    <a href="heatwave-b1.html">Heatwave B1</a>
-    <a href="hr-busy-day-b1.html">HR Busy Day B1</a>
-    <a href="hr-hero-precision-maze-b2.html">HR Hero Precision Maze B2</a>
-    <a href="hr-information-technology-precision-engineering-b1.html">HR IT Precision Engineering B1</a>
-    <a href="it-consultant-a2.html">IT Consultant A2</a>
-    <a href="it-developer-b1.html">IT Developer B1</a>
-    <a href="it-developer-b2.html">IT Developer B2</a>
-    <a href="it-insurance-risks-b2.html">IT Insurance Risks B2</a>
-   
-    <!-- Column 3 Content -->
-    <a href="it-nebula-realms-b1.html">IT Nebula Realms B1</a>
-    <a href="it-techbro-of-tomorrow-b1.html">IT Techbro of Tomorrow B1</a>
-    <a href="kens-karate-club-b1.html">Kens Karate Club B1</a>
-    <a href="knitters-international-b1.html">Knitters International B1</a>
-    <a href="life-with-frenchie.html">Life with Frenchie B2</a>
-    <a href="london-weekend-a2.html">London Weekend A2</a>
-    <a href="london-weekend-b1.html">London Weekend B1</a>
-    <a href="minneapolis-adventure-b1.html">Minneapolis Adventure B1</a>
-    <a href="music-festival-manager-b1.html">Music festival manager B1</a>
-    <a href="new-york-visit-a2.html">New York Visit A2</a>
-    <a href="new-york-visit-b1.html">New York Visit B1</a>
-    <a href="new-york-visit-b1+.html">New York Visit B1+</a>
-    <a href="outback-a2.html">Outback A2 B1</a>
-    <a href="outback-b1.html">Outback B1</a>
-    <a href="pet-foo-technician-a2.html">Pet food technician A2</a>
-    <a href="pharma-difficult-day-b1.html">Pharma Difficult Day B1</a>
-    <a href="plant-manager-b1.html">Plant Manager B1</a>
-    <a href="poker-tournament-b1.html">Poker Tournament B1</a>
+    <main id="main">
+      <nav aria-label="exercise directory">
+        <ul id="pages" class="link-grid" aria-live="polite">
+          <li><a href="accountant-busy-day-b1.html">Accountant Busy Day — B1</a></li>
+          <li><a href="african-safari-a2.html">African Safari — A2</a></li>
+          <li><a href="agri-plant-planner-b1.html">Agri Plant Planner — B1</a></li>
+          <li><a href="agri-sales-b1.html">Agri Sales — B1</a></li>
+          <li><a href="badminton-tournament-a2.html">Badminton Tournament — A2</a></li>
+          <li><a href="bnb-french-getaway-b1.html">BnB French Getaway — B1</a></li>
+          <li><a href="bnb-hell-b2.html">BnB Hell — B2</a></li>
+          <li><a href="bnb-manhattan-b1.html">BnB Manhattan — B1</a></li>
+          <li><a href="bnb-paris-b1.html">BnB Paris — B1</a></li>
+          <li><a href="bnb-riverside-manor-b1.html">BnB Riverside Manor — B1</a></li>
+          <li><a href="bushwalking-weekend-b1.html">Bushwalking Weekend — B1</a></li>
+          <li><a href="cashier-a2.html">Cashier — A2</a></li>
+          <li><a href="chess-tournament-b1.html">Chess Tournament — B1</a></li>
+          <li><a href="cold-snap-b1.html">Cold Snap — B1</a></li>
+          <li><a href="dance-school-b1.html">Dance School — B1</a></li>
+          <li><a href="dance-school-b2.html">Dance School — B2</a></li>
+          <li><a href="diy-the-deck-a2.html">DIY The deck — A2</a></li>
+          <li><a href="diy-the-deck-b1.html">DIY The deck — B1</a></li>
 
-    <!-- Column 4 Content -->
-    <a href="pub-trivia-quiz-b1.html">Pub Trivia Quiz B1</a>
-    <a href="put-your-town-on-the-map-b1.html">Put Your Town On The Map B1</a>
-    <a href="put-your-town-on-the-map-b2.html">Put Your Town On The Map B2</a>
-    <a href="recruitment-agency-a2.html">Recruitment Agency A2</a>
-    <a href="refinery-security-b1.html">Refinery Security B1</a>
-    <a href="route-66-a2.html">Route 66 A2</a>
-    <a href="route-66-b2.html">Route 66 B2</a>
-    <a href="sydney-visit-a2.html">Sydney visit A2</a>
-    <a href="sydney-visit-b1.html">Sydney visit B1</a>
-    <a href="teaching-english.html">Teaching English</a>
-    <a href="teambuilder-b1.html">Teambuilder B1</a>
-    <a href="teambuilder-b2.html">Teambuilder B2</a>
-    <a href="travel-fair-b2.html">Travel Fair B2</a>
-    <a href="waylons-institute-of-personal-development-b2.html">Waylons Institute B2</a>
-    <a href="yoga-heaven-b1.html">Yoga Heaven B1</a>
-    <a href="yoga-hell-b1.html">Yoga Hell B1</a>
+          <li><a href="dog-show-b1.html">Dog Show — B1</a></li>
+          <li><a href="electrical-engineer-a2.html">Electrical Engineer — A2</a></li>
+          <li><a href="eurotech-chief-people-officer-b2.html">Eurotech Chief People Officer — B2</a></li>
+          <li><a href="football-tournament-b1.html">Football Tournament — B1</a></li>
+          <li><a href="football-tournament-b2.html">Football Tournament — B2</a></li>
+          <li><a href="forest-retreat-b1.html">Forest Retreat — B1</a></li>
+          <li><a href="garden-challenge-b1.html">Garden Challenge — B1</a></li>
+          <li><a href="garden-game-a2.html">Garden Game — A2</a></li>
+          <li><a href="garden-maze-b2.html">Garden Maze — B2</a></li>
+          <li><a href="grand-electro-tour-b1.html">Grand Electro Tour — B1</a></li>
+          <li><a href="horticultural-mastery-c1.html">Horticultural Mastery — C1</a></li>
+          <li><a href="heatwave-b1.html">Heatwave — B1</a></li>
+          <li><a href="hr-busy-day-b1.html">HR Busy Day — B1</a></li>
+          <li><a href="hr-hero-precision-maze-b2.html">HR Hero Precision Maze — B2</a></li>
+          <li><a href="hr-information-technology-precision-engineering-b1.html">HR IT Precision Engineering — B1</a></li>
+          <li><a href="it-consultant-a2.html">IT Consultant — A2</a></li>
+          <li><a href="it-developer-b1.html">IT Developer — B1</a></li>
+          <li><a href="it-developer-b2.html">IT Developer — B2</a></li>
+          <li><a href="it-insurance-risks-b2.html">IT Insurance Risks — B2</a></li>
 
-</div>
+          <li><a href="it-nebula-realms-b1.html">IT Nebula Realms — B1</a></li>
+          <li><a href="it-techbro-of-tomorrow-b1.html">IT Techbro of Tomorrow — B1</a></li>
+          <li><a href="kens-karate-club-b1.html">Kens Karate Club — B1</a></li>
+          <li><a href="knitters-international-b1.html">Knitters International — B1</a></li>
+          <li><a href="life-with-frenchie.html">Life with Frenchie — B2</a></li>
+          <li><a href="london-weekend-a2.html">London Weekend — A2</a></li>
+          <li><a href="london-weekend-b1.html">London Weekend — B1</a></li>
+          <li><a href="minneapolis-adventure-b1.html">Minneapolis Adventure — B1</a></li>
+          <li><a href="music-festival-manager-b1.html">Music Festival Manager — B1</a></li>
+          <li><a href="new-york-visit-a2.html">New York Visit — A2</a></li>
+          <li><a href="new-york-visit-b1.html">New York Visit — B1</a></li>
+          <li><a href="new-york-visit-b1+.html">New York Visit — B1+</a></li>
+          <li><a href="outback-a2.html">Outback — A2</a></li>
+          <li><a href="outback-b1.html">Outback — B1</a></li>
+          <li><a href="pet-foo-technician-a2.html">Pet food technician — A2</a></li>
+          <li><a href="pharma-difficult-day-b1.html">Pharma Difficult Day — B1</a></li>
+          <li><a href="plant-manager-b1.html">Plant Manager — B1</a></li>
+          <li><a href="poker-tournament-b1.html">Poker Tournament — B1</a></li>
 
+          <li><a href="pub-trivia-quiz-b1.html">Pub Trivia Quiz — B1</a></li>
+          <li><a href="put-your-town-on-the-map-b1.html">Put Your Town On The Map — B1</a></li>
+          <li><a href="put-your-town-on-the-map-b2.html">Put Your Town On The Map — B2</a></li>
+          <li><a href="recruitment-agency-a2.html">Recruitment Agency — A2</a></li>
+          <li><a href="refinery-security-b1.html">Refinery Security — B1</a></li>
+          <li><a href="route-66-a2.html">Route 66 — A2</a></li>
+          <li><a href="route-66-b2.html">Route 66 — B2</a></li>
+          <li><a href="sydney-visit-a2.html">Sydney Visit — A2</a></li>
+          <li><a href="sydney-visit-b1.html">Sydney Visit — B1</a></li>
+          <li><a href="teaching-english.html">Teaching English</a></li>
+          <li><a href="teambuilder-b1.html">Teambuilder — B1</a></li>
+          <li><a href="teambuilder-b2.html">Teambuilder — B2</a></li>
+          <li><a href="travel-fair-b2.html">Travel Fair — B2</a></li>
+          <li><a href="waylons-institute-of-personal-development-b2.html">Waylons Institute — B2</a></li>
+          <li><a href="yoga-heaven-b1.html">Yoga Heaven — B1</a></li>
+          <li><a href="yoga-hell-b1.html">Yoga Hell — B1</a></li>
+        </ul>
+      </nav>
+    </main>
+
+    <footer>
+      <div>Decisionmaker — index</div>
+      <div class="muted">Total pages: <span id="count">0</span></div>
+    </footer>
+  </div>
+
+  <script>
+    // Simple client-side filter and count
+    (function(){
+      const input = document.getElementById('filter');
+      const list = document.getElementById('pages');
+      const items = Array.from(list.querySelectorAll('li'));
+      const count = document.getElementById('count');
+
+      function updateCount(){
+        const visible = items.filter(li => li.style.display !== 'none').length;
+        count.textContent = visible;
+      }
+      input.addEventListener('input', e=>{
+        const q = e.target.value.trim().toLowerCase();
+        items.forEach(li=>{
+          const text = li.textContent.toLowerCase();
+          li.style.display = q === '' || text.includes(q) ? '' : 'none';
+        });
+        updateCount();
+      });
+
+      // initialize count
+      updateCount();
+
+      // keyboard shortcut: press "/" to focus search (like many docs)
+      window.addEventListener('keydown', e=>{
+        if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+          e.preventDefault();
+          input.focus();
+        }
+      });
+    })();
+  </script>
 </body>
 </html>
