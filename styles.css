@@ -1,0 +1,44 @@
+:root{
+  --bg:#f4f4f4;
+  --card:#fff;
+  --brand:#007acc;
+  --brand-strong:#005f99;
+  --text:#222;
+  --gap:12px;
+  --maxw:1100px;
+}
+html,body{height:100%;margin:0}
+body{
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background:var(--bg);
+  color:var(--text);
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+  padding:20px;
+}
+.site{
+  width:100%;
+  max-width:var(--maxw);
+  background:var(--card);
+  border-radius:10px;
+  padding:20px;
+  box-shadow:0 4px 18px rgba(0,0,0,.06);
+}
+a{color:inherit}
+header{margin-bottom:16px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.title h1{margin:0;font-size:1.25rem}
+.controls{display:flex;gap:8px;align-items:center}
+.search{padding:8px 10px;border-radius:8px;border:1px solid #ddd;font-size:0.95rem;min-width:220px}
+nav[aria-label="exercise directory"]{margin-top:8px}
+.link-grid{display:grid;gap:var(--gap);grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));list-style:none;padding:0;margin:0}
+.link-grid li{margin:0}
+.link-grid a{display:block;padding:12px 10px;text-decoration:none;background:var(--brand);color:white;border-radius:8px;font-size:0.95rem;transition:transform .08s ease, background .12s ease;word-wrap:break-word}
+.link-grid a:hover{background:var(--brand-strong);transform:translateY(-2px)}
+.link-grid a:focus{outline:3px solid #fff;box-shadow:0 0 0 3px rgba(0,122,204,.25)}
+.muted{font-size:.9rem;color:#666;margin-top:6px}
+footer{margin-top:18px;font-size:0.9rem;color:#555;display:flex;justify-content:space-between;gap:12px;align-items:center}
+.skip{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden}
+.skip:focus{left:10px;top:10px;width:auto;height:auto;padding:8px 12px;background:#000;color:#fff;border-radius:4px;z-index:100}
+@media (max-width:600px){.title h1{font-size:1rem}.search{min-width:140px}}
+@media (prefers-reduced-motion:reduce){.link-grid a, .link-grid a:hover{transition:none;transform:none}}
