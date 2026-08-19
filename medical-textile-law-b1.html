@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Medical Textile Compliance Crisis — Legal & Regulatory Challenge</title>
+<style>
+  :root {
+    --bg-main: #E8ECEF;
+    --card-bg: linear-gradient(135deg, #FFFFFF 0%, #F1F4F8 100%);
+    --card-border: #D1D8E0;
+    --accent-steel: #718093;
+    --accent-cyan: #00A8FF;
+    --text-dark: #2F3640;
+    --text-muted: #7F8FA6;
+    --vocab-color: #273C75;
+    --disc-color: #8C7AE6;
+    --green: #44BD32;
+    --blue: #00A8FF;
+    --ochre: #E1B12C;
+    --red: #E84118;
+  }
+
+  body { 
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+    background: var(--bg-main); 
+    background-image: radial-gradient(circle at 50% 0%, #F5F7FA 0%, #E8ECEF 100%);
+    color: var(--text-dark); 
+    display: flex; 
+    justify-content: center; 
+    padding: 20px;
+    margin: 0;
+  }
+  
+  .shell { 
+    max-width: 760px; 
+    width: 100%; 
+    display: none; 
+  }
+
+  .shell.active {
+    display: block;
+  }
+  
+  .card { 
+    background: var(--card-bg); 
+    padding: 32px; 
+    border-radius: 16px; 
+    line-height: 1.6; 
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05), 0 1px 0 rgba(255,255,255,0.8) inset;
+    border: 1px solid var(--card-border);
+  }
+
+  h1, h2, h3 { margin-top: 0; color: var(--text-dark); letter-spacing: -0.5px; }
+  h1 { 
+    border-bottom: 2px solid var(--accent-cyan); 
+    padding-bottom: 12px; 
+    font-size: 1.8rem; 
+    text-transform: uppercase;
+    background: linear-gradient(45deg, #2F3640, #718093);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  button.action-btn { 
+    padding: 14px 24px; 
+    cursor: pointer; 
+    background: linear-gradient(180deg, #FFFFFF 0%, #F1F4F8 100%); 
+    color: var(--text-dark); 
+    border: 1px solid var(--card-border); 
+    border-radius: 8px; 
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  }
+  button.action-btn:hover { 
+    background: linear-gradient(180deg, #F5F7FA 0%, #E4E9F0 100%); 
+    border-color: var(--accent-cyan); 
+    color: var(--accent-cyan);
+    transform: translateY(-1px);
+  }
+  
+  .option { 
+    display: block; 
+    width: 100%; 
+    margin: 12px 0; 
+    padding: 16px; 
+    text-align: left; 
+    background: #FFFFFF; 
+    border: 1px solid #DCDDE1; 
+    color: var(--text-dark); 
+    border-radius: 10px; 
+    cursor: pointer;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+  }
+  .option:hover { 
+    background: #F5F6FA; 
+    border-color: var(--accent-cyan);
+    transform: translateX(4px);
+  }
+  .option:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  
+  .emergency-header {
+    color: var(--red);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    animation: pulse 1.2s infinite alternate;
+  }
+
+  @keyframes pulse {
+    0% { opacity: 1; text-shadow: 0 0 4px rgba(232, 65, 24, 0.4); }
+    100% { opacity: 0.5; text-shadow: none; }
+  }
+
+  #feedback { 
+    margin-top: 20px; 
+    padding: 16px; 
+    background: #F1F2F6; 
+    border-left: 4px solid var(--accent-cyan); 
+    border-radius: 8px; 
+    font-size: 0.95rem;
+    box-shadow: inset 0 0 6px rgba(0,0,0,0.03);
+  }
+  
+  .vocab-box { 
+    background: #F8F9FA; 
+    padding: 14px; 
+    border-radius: 8px; 
+    margin: 16px 0; 
+    font-size: 0.9em; 
+    color: var(--vocab-color); 
+    border: 1px solid #E2E8F0;
+  }
+  
+  .discussion-box { 
+    background: #FAF8F5; 
+    padding: 16px; 
+    border-radius: 8px; 
+    margin-top: 16px; 
+    font-style: italic; 
+    color: #8C7AE6; 
+    border-left: 4px solid #8C7AE6;
+    font-size: 0.95rem;
+  }
+  
+  .context-tag { 
+    font-size: 0.85em; 
+    color: var(--text-muted); 
+    text-transform: uppercase; 
+    letter-spacing: 1.5px; 
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    font-weight: 600;
+  }
+
+  .score-tracker {
+    font-weight: 700;
+    color: var(--accent-cyan);
+  }
+
+  .score-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.8em;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+  }
+  .badge-3 { background-color: var(--green); color: #fff; }
+  .badge-2 { background-color: var(--blue); }
+  .badge-1 { background-color: var(--ochre); color: #fff; }
+  .badge--1 { background-color: var(--red); }
+
+  .game-over {
+    color: var(--red);
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin-bottom: 12px;
+    letter-spacing: 1px;
+  }
+</style>
+</head>
+<body>
+
+<div class="shell active" id="intro">
+  <div class="card">
+    <h1>Medical Textile Compliance Crisis</h1>
+    <p><strong>Your Role:</strong> Legal & Regulatory Affairs Officer at a European medical textile manufacturer in Lyon, France.</p>
+    <p><strong>Situation:</strong> It is peak delivery season. Your company produces surgical gowns, compression bandages, and antimicrobial wound dressings. Your American Legal Director, Sarah, expects full compliance with European Medical Device Regulations (MDR), accurate contract terms, and clear risk management under high commercial pressure.</p>
+    <p><strong>Game Rules:</strong></p>
+    <ul>
+      <li>12 Core Scenarios with randomized options (+3 Excellent, +2 Good, +1 Average, -1 Poor with forced retry).</li>
+      <li>2 High-Stakes Emergency Scenarios (after Scenarios 4 and 10). Selecting the wrong option triggers an immediate <strong>Game Over</strong>.</li>
+      <li>Maximum Score: <strong>40 Points</strong>.</li>
+    </ul>
+    <button class="action-btn" onclick="startGame()">Start the Compliance Challenge</button>
+  </div>
+</div>
+
+<div class="shell" id="game">
+  <div class="card">
+    <div class="context-tag">
+      <span id="step"></span>
+      <span class="score-tracker" id="score-display">Score: 0</span>
+    </div>
+    <h3 id="scenario"></h3>
+    <div class="vocab-box" id="vocab"></div>
+    <div id="options"></div>
+    <div id="feedback" style="display:none"></div>
+    <div class="discussion-box" id="discussion" style="display:none"></div>
+    <br>
+    <button class="action-btn" id="next" onclick="nextStep()" style="display:none">Continue</button>
+    <button class="action-btn" id="retry" onclick="retryScenario()" style="display:none">Try Again</button>
+  </div>
+</div>
+
+<div class="shell" id="final">
+  <div class="card">
+    <h1 id="end-title">Challenge Complete</h1>
+    <div id="game-over-msg" class="game-over" style="display:none;">CRITICAL LEGAL FAILURE</div>
+    <div id="result" style="font-size: 1.3em; margin-bottom: 16px; font-weight: bold;"></div>
+    <div id="debrief"></div>
+    <br>
+    <button class="action-btn" onclick="location.reload()">Play Again</button>
+  </div>
+</div>
+
+<script>
+const GAME_DATA = [
+  // --- SCENARIO 1 ---
+  {
+    type: "standard",
+    day: "Monday Morning — Missing CE Marking Documentation",
+    text: "A shipment of 10,000 sterile surgical gowns is ready for dispatch to a hospital group in Germany. However, Quality Control notes that the technical file lacks an updated EU Declaration of Conformity. Sarah emails: <em>'The client is threatening late penalties! Can we release the shipment now and update the file tomorrow?'</em>",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Declaration of Conformity</em> = an official document stating that a product meets EU safety laws.<br>• <em>Non-compliance</em> = failure to meet legal or regulatory requirements.<br>• <em>Dispatch</em> = send goods to a customer.",
+    options: [
+      { pts: 3, t: "Halt dispatch, place the lot in quarantine, and fast-track the technical file update with Regulatory Affairs.", fb: "Sarah agrees: 'Right call. Releasing medical devices without valid documentation breaches EU MDR regulations and risks major fines.'", disc: "How do you explain regulatory delays to an urgent commercial sales manager?" },
+      { pts: 2, t: "Request a temporary 48-hour formal delay from the German client while finalizing the paperwork.", fb: "Sarah notes: 'Good negotiation. The commercial team was unhappy, but we protected the company legally.'", disc: "What key contract clauses help protect suppliers during temporary shipping delays?" },
+      { pts: 1, t: "Ship the gowns immediately and email the updated Declaration of Conformity later in the week.", fb: "Sarah frowns: 'The shipment passed, but custom inspectors flagged the missing certificate at the border.'", disc: "What risks occur when physical shipments arrive before legal documentation?" },
+      { pts: -1, t: "Sign a provisional internal statement and instruct warehouse staff to override the system lock.", fb: "Sarah fumes: 'Unacceptable! Overriding regulatory locks violates legal compliance protocols!'", disc: "Why must internal safety locks never be bypassed for commercial speed?" }
+    ]
+  },
+
+  // --- SCENARIO 2 ---
+  {
+    type: "standard",
+    day: "Monday Afternoon — Raw Material Supplier Breach",
+    text: "Your supplier of antimicrobial silver coating changes the chemical formula slightly without advance notice. Your technical team confirms the fabric is safe, but the new formula is not listed in your registered device file.",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Supply agreement</em> = a legal contract for purchasing materials.<br>• <em>Specification</em> = precise technical requirements for a product.<br>• <em>Breach of contract</em> = breaking a legal agreement.",
+    options: [
+      { pts: 3, t: "Issue a formal notice of non-compliance to the supplier, pause production, and submit a regulatory change notification.", fb: "Sarah praises: 'Excellent contract enforcement! We held the supplier accountable while protecting our registration.'", disc: "What language should you use in a formal supplier non-compliance letter?" },
+      { pts: 2, t: "Accept the material conditionally for non-sterile products only while completing a rapid technical evaluation.", fb: "Sarah comments: 'Practical compromise. It reduced production downtime without putting Class II devices at risk.'", disc: "How do you classify different risk levels for medical devices?" },
+      { pts: 1, t: "Continue production normally while asking the supplier to send updated technical sheets next month.", fb: "Sarah sighs: 'Risky move. Unnotified material changes can invalidate our product certification.'", disc: "Why are material changes critical in medical textile manufacturing?" },
+      { pts: -1, t: "Ignore the change because the final textile passes basic in-house safety checks.", fb: "Sarah groans: 'Illegal! Unapproved formula changes violate EU MDR device registration laws.'", disc: "What liability risks arise from unapproved changes in medical products?" }
+    ]
+  },
+
+  // --- SCENARIO 3 ---
+  {
+    type: "standard",
+    day: "Tuesday Morning — Intellectual Property Claim",
+    text: "A rival manufacturer sends a cease-and-desist letter claiming your new elastic compression bandage infringes their European patent. Sarah asks: <em>'Should we pull the product from the market immediately?'</em>",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Cease-and-desist letter</em> = an official legal letter demanding that a company stop an activity.<br>• <em>Patent infringement</em> = unauthorized use of a patented invention.<br>• <em>Injunction</em> = a court order stopping a business activity.",
+    options: [
+      { pts: 3, t: "Conduct an immediate Freedom-to-Operate assessment with external patent counsel before deciding on sales actions.", fb: "Sarah approves: 'Measured and professional. Early review showed their patent claims were overly broad.'", disc: "What steps should a legal department take upon receiving a patent threat?" },
+      { pts: 2, t: "Pause new marketing campaigns while instructing the legal team to prepare a formal response letter.", fb: "Sarah notes: 'Prudent approach. We controlled public exposure while evaluating our legal defense.'", disc: "How do you draft a defensive response to an aggressive competitor?" },
+      { pts: 1, t: "Withdraw all compression bandages from distributors immediately to avoid potential court damages.", fb: "Sarah grunts: 'Overly defensive. We panicked and lost market share on a product that didn't infringe.'", disc: "When is immediate product withdrawal legally necessary versus premature?" },
+      { pts: -1, t: "Ignore the letter completely and increase sales volume before they take court action.", fb: "Sarah explodes: 'Ignored legal notices lead to immediate court injunctions and punitive damages!'", disc: "Why should legal correspondence never be ignored in corporate law?" }
+    ]
+  },
+
+  // --- SCENARIO 4 ---
+  {
+    type: "standard",
+    day: "Tuesday Afternoon — Hospital Liability Claim",
+    text: "A private clinic in Spain reports skin irritation in three patients using your adhesive wound dressings and threatens legal action. Quality Assurance states the batch passed all release tests.",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Vigilance report</em> = an official report sent to health authorities regarding adverse events.<br>• <em>Adverse event</em> = an unexpected medical problem caused by a device.<br>• <em>Liability</em> = legal responsibility for damage or injury.",
+    options: [
+      { pts: 3, t: "Log the complaint in the vigilance database, request retained batch samples for testing, and draft a formal reply.", fb: "Sarah approves: 'Proper medical device vigilance! Rigorous sample testing showed patient allergies, not product defects.'", disc: "What information must be gathered when investigating medical product complaints?" },
+      { pts: 2, t: "Offer the clinic a goodwill commercial credit for the batch while conducting an internal investigation.", fb: "Sarah comments: 'Handled diplomatically, though we must ensure credit offers do not imply legal fault.'", disc: "How can a company express sympathy without admitting legal liability?" },
+      { pts: 1, t: "Reject the clinic's claim immediately using the successful factory quality control release certificates.", fb: "Sarah frowns: 'Aggressive posture. Rejecting claims prematurely damages customer trust and invites lawsuits.'", disc: "Why is an open investigation better than immediate denial in product liability?" },
+      { pts: -1, t: "Instruct the sales team to destroy all internal emails discussing patient skin irritation.", fb: "Sarah panics: 'Destroying evidence is illegal! Spoliation of records leads to criminal prosecution!'", disc: "What are the legal consequences of destroying evidence in product liability cases?" }
+    ]
+  },
+
+  // --- EMERGENCY 1 ---
+  {
+    type: "emergency",
+    day: "EMERGENCY DANGER 1 — TUESDAY NIGHT",
+    text: "<span class='emergency-header'>CRITICAL CONTAMINATION:</span> Lab analysis confirms bacterial contamination in a batch of implantable mesh fabrics already shipped to regional distribution hubs. Surgery schedules start tomorrow morning.",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Recall</em> = an official order to return defective or dangerous products.<br>• <em>Competent Authority</em> = national health agency regulating medical devices.",
+    options: [
+      { pts: 2, isGood: true, t: "IMMEDIATE CLASS I RECALL: Issue urgent recall notices, halt all dispatches, and notify Health Competent Authorities.", fb: "Sarah confirms: 'Vital decision! Immediate intervention prevented patient injury. Health authorities commended our response time.'", disc: "How do you coordinate rapid communication during a Class I medical recall?" },
+      { pts: 0, isGood: false, t: "DELAY NOTIFICATION: Wait 48 hours to re-test secondary samples before informing hospitals or regulators.", fb: "CRITICAL FAILURE: Contaminated devices are implanted. Severe patient injuries occur. GAME OVER.", disc: "" }
+    ]
+  },
+
+  // --- SCENARIO 5 ---
+  {
+    type: "standard",
+    day: "Wednesday Morning — Distribution Contract Dispute",
+    text: "Your main distributor in Italy demands exclusive rights for your new vascular wrap line. However, your existing Italian contract contains vague territorial language.",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Exclusivity clause</em> = a contract term granting sole rights to one partner.<br>• <em>Ambiguity</em> = language that can be understood in more than one way.<br>• <em>Amendment</em> = an official change to a legal document.",
+    options: [
+      { pts: 3, t: "Draft a formal contract amendment defining specific product scope, minimum sales targets, and territory limits.", fb: "Sarah praises: 'Clear contract drafting! Precise language eliminated ambiguity and secured strong sales commitments.'", disc: "What key terms must be included in an exclusive distribution agreement?" },
+      { pts: 2, t: "Grant exclusivity verbally for six months as a trial period before signing legal documents.", fb: "Sarah notes: 'Verbal agreements create uncertainty, but it bought time to evaluate distributor performance.'", disc: "What are the risks of verbal agreements in commercial distribution?" },
+      { pts: 1, t: "Refuse exclusivity completely and sign two additional competing distributors in Milan.", fb: "Sarah grunts: 'Legally permitted, but the main distributor terminated their relationship in frustration.'", disc: "How do you balance legal rights with commercial relationship management?" },
+      { pts: -1, t: "Sign an exclusive agreement without sales performance targets or termination clauses.", fb: "Sarah yells: 'Disastrous contract! Unconditional exclusivity locks our market without guaranteed sales!'", disc: "Why are performance milestones essential in exclusive commercial contracts?" }
+    ]
+  },
+
+  // --- SCENARIO 6 ---
+  {
+    type: "standard",
+    day: "Wednesday Afternoon — Misleading Marketing Claims",
+    text: "The marketing department prints brochures claiming your silver-infused bandages 'eliminate 100% of hospital superbugs instantly.' Regulatory Affairs warns this claim exceeds clinical trial evidence.",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Clinical trial</em> = scientific research testing medical products on humans.<br>• <em>Misleading advertising</em> = false or exaggerated promotional claims.<br>• <em>Substantiation</em> = proof or evidence supporting a claim.",
+    options: [
+      { pts: 3, t: "Block distribution of the brochure and rewrite promotional claims to reflect exact clinical trial data.", fb: "Sarah approves: 'Excellent regulatory control! Unsubstantiated claims expose the firm to unfair competition lawsuits.'", disc: "How do you guide creative marketing teams to stay within legal boundaries?" },
+      { pts: 2, t: "Allow the brochure for B2B trade shows only, adding a technical disclaimer in fine print.", fb: "Sarah comments: 'Disclaimers reduce risk slightly, but regulatory agencies still dislike exaggerated claims.'", disc: "Do disclaimers protect companies from misleading advertising charges?" },
+      { pts: 1, t: "Distribute existing printed brochures but instruct sales reps to clarify claims verbally during client visits.", fb: "Sarah sighs: 'Verbal disclaimers are impossible to prove when regulators inspect marketing material.'", disc: "Why is written promotional content scrutinized strictly by medical regulators?" },
+      { pts: -1, t: "Approve the brochure as printed to match a aggressive marketing launch campaign.", fb: "Sarah explodes: 'Regulators issued a heavy fine and ordered a public retraction for false advertising!'", disc: "What penalties exist for misleading claims in healthcare marketing?" }
+    ]
+  },
+
+  // --- SCENARIO 7 ---
+  {
+    type: "standard",
+    day: "Thursday Morning — Clinical Trial Protocol Deviation",
+    text: "During an ongoing clinical study for a new bio-absorbable textile, a partner hospital fails to follow patient follow-up timing specified in the protocol.",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Protocol deviation</em> = a departure from agreed study procedures.<br>• <em>Ethical committee</em> = board that approves medical research safety.<br>• <em>Data integrity</em> = accuracy and consistency of research data.",
+    options: [
+      { pts: 3, t: "Document the deviation, notify the trial ethics committee, and audit the hospital's research team.", fb: "Sarah commends: 'Rigorous clinical governance! Transparent reporting protected data integrity for regulatory submission.'", disc: "Why is data integrity vital when submitting clinical trials to health authorities?" },
+      { pts: 2, t: "Exclude the affected patient group from the final statistical analysis and issue corrective guidance.", fb: "Sarah notes: 'Valid methodology. Excluding compromised data preserved the scientific value of the study.'", disc: "When should compromised trial data be removed from regulatory submissions?" },
+      { pts: 1, t: "Request the hospital doctor to adjust follow-up dates on records to match the protocol window.", fb: "Sarah frowns: 'Altering trial record dates borders on data falsification and endangers the entire study.'", disc: "What is the boundary between minor record correction and fraudulent data entry?" },
+      { pts: -1, t: "Conceal the timing errors in the final clinical report submitted to regulatory authorities.", fb: "Sarah panics: 'Submitting falsified clinical data is a criminal offense that invalidates the product!'", disc: "What are the consequences of submitting inaccurate clinical data to authorities?" }
+    ]
+  },
+
+  // --- SCENARIO 8 ---
+  {
+    type: "standard",
+    day: "Thursday Eve — Employee Trade Secret Leak",
+    text: "A departing senior textile engineer downloads proprietary manufacturing specs for your barrier fabric before joining a competitor.",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Trade secret</em> = confidential business information giving a competitive edge.<br>• <em>Non-disclosure agreement (NDA)</em> = legal contract restricting information sharing.<br>• <em>Injunction</em> = court order stopping illegal activity.",
+    options: [
+      { pts: 3, t: "Send a formal legal notice enforcing NDA obligations and prepare an emergency court injunction.", fb: "Sarah praises: 'Decisive legal defense! Rapid legal action blocked the competitor from using our specifications.'", disc: "What legal mechanisms protect proprietary manufacturing secrets when staff depart?" },
+      { pts: 2, t: "Contact the new employer's legal department directly to inform them of the engineer's binding obligations.", fb: "Sarah notes: 'Effective corporate communication. Most corporate legal teams back down to avoid lawsuits.'", disc: "How do you write a corporate notice to a competitor hiring former employees?" },
+      { pts: 1, t: "Offer the departing engineer a financial retention bonus to remain with your company.", fb: "Sarah grunts: 'Weak position. Paying staff who violate security rules sets a terrible precedent.'", disc: "Why is rewarding policy violations bad management strategy?" },
+      { pts: -1, t: "Do nothing because manufacturing processes are difficult to copy quickly.", fb: "Sarah fumes: 'Negligence! The competitor launched an identical product six months later!'", disc: "How does failure to enforce IP rights weaken future legal protections?" }
+    ]
+  },
+
+  // --- SCENARIO 9 ---
+  {
+    type: "standard",
+    day: "Friday Peak — ISO 13485 Audit Non-Conformity",
+    text: "An external auditor finds two major non-conformities in your cleanroom sterilization monitoring records during an ISO 13485 quality audit.",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Non-conformity</em> = failure to fulfill a specified quality standard requirement.<br>• <em>Corrective Action Plan (CAPA)</em> = systematic plan to fix quality failures.<br>• <em>Certification body</em> = independent organization issuing ISO certificates.",
+    options: [
+      { pts: 3, t: "Formulate a comprehensive Corrective and Preventive Action (CAPA) plan within 14 days and retrain staff.", fb: "Sarah approves: 'Professional quality management! A solid CAPA plan satisfied auditors and maintained certification.'", disc: "What components make a Corrective and Preventive Action (CAPA) plan effective?" },
+      { pts: 2, t: "Request a re-audit of the cleanroom section while implementing immediate procedural corrections.", fb: "Sarah notes: 'Proactive effort. Immediate fixes showed commitment, though CAPA root-cause analysis is still required.'", disc: "How do you prepare staff for external quality management audits?" },
+      { pts: 1, t: "Challenge the auditor's findings formally, arguing that the records meet minimum standards.", fb: "Sarah sighs: 'Contesting minor findings created friction with the certification body and delayed approval.'", disc: "When is challenging an auditor's finding appropriate versus counterproductive?" },
+      { pts: -1, t: "Falsify past cleanroom environmental logs before the auditor submits the final report.", fb: "Sarah screams: 'Falsifying quality records leads to immediate certification withdrawal and shutdown!'", disc: "Why is record integrity the foundation of medical quality standards?" }
+    ]
+  },
+
+  // --- SCENARIO 10 ---
+  {
+    type: "standard",
+    day: "Saturday Morning — Import/Export Customs Hold",
+    text: "Customs authorities in the UK hold a shipment of specialized vascular grafts, demanding additional origin certificates under post-Brexit rules.",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Rules of Origin</em> = criteria determining national source of a product.<br>• <em>Customs clearance</em> = official permission to import/export goods.<br>• <em>Tariff</em> = tax on imported or exported goods.",
+    options: [
+      { pts: 3, t: "Provide detailed bills of materials proving EU origin and work with a specialist customs broker.", fb: "Sarah praises: 'Expert trade compliance! Clear documentation secured customs release without extra tariffs.'", disc: "How do international trade rules impact medical device distribution?" },
+      { pts: 2, t: "Pay a provisional customs bond to release goods while preparing origin documentation.", fb: "Sarah agrees: 'Practical commercial decision. Paying the bond kept hospital deliveries on schedule.'", disc: "When should commercial speed override temporary administrative disputes?" },
+      { pts: 1, t: "Instruct the transport company to reroute the shipment through an alternative port.", fb: "Sarah frowns: 'Rerouting created additional delays and raised suspicion among customs inspectors.'", disc: "Why does port-hopping raise compliance red flags with customs authorities?" },
+      { pts: -1, t: "Declare the medical textiles under a false lower-value commodity code to bypass checks.", fb: "Sarah groans: 'Customs fraud! False declarations lead to heavy fines and blacklisting!'", disc: "What legal consequences result from misclassifying imported goods?" }
+    ]
+  },
+
+  // --- EMERGENCY 2 ---
+  {
+    type: "emergency",
+    day: "EMERGENCY DANGER 2 — SATURDAY AFTERNOON",
+    text: "<span class='emergency-header'>CYBER EXTORTION ATTACK:</span> Hackers lock your automated cleanroom environmental control systems and demand payment in Bitcoin to restore temperature and humidity controls.",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Cybersecurity</em> = measures taken to protect computer systems from attacks.<br>• <em>Containment</em> = stopping the spread of a cyber attack.",
+    options: [
+      { pts: 2, isGood: true, t: "ISOLATE & REVERT: Disconnect production networks, notify Cyber Security authorities, and switch to offline manual controls.", fb: "Sarah confirms: 'Correct response! Systems were isolated, cleanroom parameters kept safe manually, and data protected.'", disc: "What protocols exist in your company to maintain operations during cyber attacks?" },
+      { pts: 0, isGood: false, t: "PAY RANSOM: Transfer cryptocurrency immediately to avoid stopping automated cleanroom production.", fb: "CRITICAL FAILURE: Payment failed, system controls corrupted, and cleanroom sterile batches ruined. GAME OVER.", disc: "" }
+    ]
+  },
+
+  // --- SCENARIO 11 ---
+  {
+    type: "standard",
+    day: "Sunday — EUDAMED Database Registration",
+    text: "The EU medical device database (EUDAMED) mandates new Unique Device Identifier (UDI) uploads for all compression textile lines before midnight.",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>EUDAMED</em> = European database on medical devices.<br>• <em>UDI (Unique Device Identifier)</em> = series of numeric or alphanumeric characters marking a device.<br>• <em>Traceability</em> = ability to track a product through all stages.",
+    options: [
+      { pts: 3, t: "Mobilize a dedicated regulatory task force to upload and double-check all UDI data entries before deadline.", fb: "Sarah smiles: 'Flawless compliance execution! Full product traceability was maintained without sales disruption.'", disc: "Why is UDI traceability essential for medical device safety in Europe?" },
+      { pts: 2, t: "Upload primary product family UDIs today and request a technical extension for secondary packaging variants.", fb: "Sarah notes: 'Acceptable prioritization. Key products remained compliant while extension was processed.'", disc: "How do you manage regulatory workload when deadlines overlap?" },
+      { pts: 1, t: "Use an automated bulk script to generate default UDIs without verifying individual product specs.", fb: "Sarah grunts: 'Data errors in EUDAMED forced us to spend weeks correcting official records.'", disc: "What risks occur when using automated bulk entries for regulatory filings?" },
+      { pts: -1, t: "Ignore the EUDAMED deadline and continue shipping products without registered UDIs.", fb: "Sarah fumes: 'Non-registered sales are illegal! Unregistered devices were seized at distribution hubs.'", disc: "Why is selling unregistered medical devices a severe legal breach?" }
+    ]
+  },
+
+  // --- SCENARIO 12 ---
+  {
+    type: "standard",
+    day: "Final Push — OEM Manufacturing Contract Negotiation",
+    text: "A major US healthcare brand wants your company to produce white-label surgical drapes. They demand US indemnification terms and US court jurisdiction.",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Indemnification</em> = obligation to compensate for harm or loss.<br>• <em>Jurisdiction</em> = official power of a legal court to make decisions.<br>• <em>OEM (Original Equipment Manufacturer)</em> = manufacturing products sold under another brand.",
+    options: [
+      { pts: 3, t: "Negotiate balanced terms: cap overall liability to contract value, specify neutral jurisdiction, and divide IP rights.", fb: "Sarah praises: 'Masterful commercial contract negotiation! Secured a lucrative contract while protecting company liability.'", disc: "What contract clauses are crucial when negotiating international OEM agreements?" },
+      { pts: 2, t: "Accept US jurisdiction but insist on a strict financial liability cap backed by international product insurance.", fb: "Sarah notes: 'Calculated commercial risk. Insurance coverage mitigated potential exposure under US courts.'", disc: "How does product liability insurance protect manufacturers in foreign markets?" },
+      { pts: 1, t: "Accept all US legal terms without modification to secure the high-volume contract quickly.", fb: "Sarah grunts: 'High-risk contract! Full US indemnification exposes our company to extreme legal liability.'", disc: "Why should European manufacturers be cautious regarding US legal jurisdiction?" },
+      { pts: -1, t: "Reject the contract abruptly without offering counter-terms or alternative compromise clauses.", fb: "Sarah explodes: 'Lost opportunity! Unwillingness to negotiate cost us a major strategic commercial partnership.'", disc: "How can legal teams facilitate commercial growth while managing legal risk?" }
+    ]
+  }
+];
+
+let currentIndex = 0;
+let totalScore = 0;
+
+function shuffle(array) {
+  let arr = JSON.parse(JSON.stringify(array));
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function showScreen(screenId) {
+  document.querySelectorAll('.shell').forEach(el => el.classList.remove('active'));
+  document.getElementById(screenId).classList.add('active');
+}
+
+function startGame() {
+  currentIndex = 0;
+  totalScore = 0;
+  showScreen("game");
+  renderStep();
+}
+
+function renderStep() {
+  const data = GAME_DATA[currentIndex];
+  
+  document.getElementById("step").textContent = `${data.day} (Step ${currentIndex + 1} of ${GAME_DATA.length})`;
+  document.getElementById("score-display").textContent = `Score: ${totalScore}`;
+  document.getElementById("scenario").innerHTML = data.text;
+  document.getElementById("vocab").innerHTML = data.vocab;
+  
+  const optionsContainer = document.getElementById("options");
+  optionsContainer.innerHTML = "";
+  document.getElementById("feedback").style.display = "none";
+  document.getElementById("discussion").style.display = "none";
+  document.getElementById("next").style.display = "none";
+  document.getElementById("retry").style.display = "none";
+
+  const randomizedOptions = shuffle(data.options);
+  
+  randomizedOptions.forEach(opt => {
+    const btn = document.createElement("button");
+    btn.className = "option";
+    if (data.type === "emergency") {
+      btn.style.borderColor = "var(--red)";
+    }
+    btn.innerHTML = opt.t;
+    btn.onclick = () => {
+      if (data.type === "standard") {
+        chooseStandard(opt);
+      } else {
+        chooseEmergency(opt);
+      }
+    };
+    optionsContainer.appendChild(btn);
+  });
+}
+
+function chooseStandard(opt) {
+  document.querySelectorAll(".option").forEach(btn => btn.disabled = true);
+  
+  totalScore += opt.pts;
+  document.getElementById("score-display").textContent = `Score: ${totalScore}`;
+
+  const fb = document.getElementById("feedback");
+  let badgeClass = opt.pts > 0 ? `badge-${opt.pts}` : `badge--1`;
+  let scoreText = opt.pts > 0 ? `+${opt.pts} Points` : `${opt.pts} Point`;
+  
+  fb.innerHTML = `<span class="score-badge ${badgeClass}">${scoreText}</span><br>${opt.fb}`;
+  fb.style.display = "block";
+
+  const disc = document.getElementById("discussion");
+  disc.innerHTML = `<strong>Discussion Question:</strong> ${opt.disc}`;
+  disc.style.display = "block";
+
+  if (opt.pts === -1) {
+    document.getElementById("retry").style.display = "inline-block";
+  } else {
+    document.getElementById("next").style.display = "inline-block";
+  }
+}
+
+function chooseEmergency(opt) {
+  document.querySelectorAll(".option").forEach(btn => btn.disabled = true);
+
+  if (opt.isGood) {
+    totalScore += opt.pts;
+    document.getElementById("score-display").textContent = `Score: ${totalScore}`;
+
+    const fb = document.getElementById("feedback");
+    fb.innerHTML = `<span class="score-badge badge-3">CRITICAL SUCCESS (+2 Points)</span><br>${opt.fb}`;
+    fb.style.display = "block";
+
+    const disc = document.getElementById("discussion");
+    disc.innerHTML = `<strong>Discussion Question:</strong> ${opt.disc}`;
+    disc.style.display = "block";
+
+    document.getElementById("next").style.display = "inline-block";
+  } else {
+    showGameOver(opt.fb);
+  }
+}
+
+function retryScenario() {
+  renderStep();
+}
+
+function nextStep() {
+  currentIndex++;
+  if (currentIndex >= GAME_DATA.length) {
+    showFinalResults();
+  } else {
+    renderStep();
+  }
+}
+
+function showGameOver(reason) {
+  showScreen("final");
+  document.getElementById("end-title").style.display = "none";
+  document.getElementById("game-over-msg").style.display = "block";
+  document.getElementById("result").innerHTML = `FINAL SCORE: ${totalScore} Points`;
+  document.getElementById("debrief").innerHTML = `<p>${reason}</p><p>Critical regulatory or legal errors ended your medical compliance challenge early. Review MDR procedures and try again!</p>`;
+}
+
+function showFinalResults() {
+  showScreen("final");
+  document.getElementById("end-title").style.display = "block";
+  document.getElementById("game-over-msg").style.display = "none";
+  
+  document.getElementById("result").innerHTML = `Final Score: ${totalScore} / 40 Points`;
+
+  let feedbackText = "";
+
+  if (totalScore >= 35) {
+    feedbackText = "<strong>Band 1: Legal & Regulatory Director (35–40 pts)</strong><br>Outstanding performance! You managed European MDR compliance, product liability risks, international contract negotiations, and quality audits flawlessly. Sarah is recommending you for an executive promotion across European legal affairs!";
+  } else if (totalScore >= 25) {
+    feedbackText = "<strong>Band 2: Senior Compliance Counsel (25–34 pts)</strong><br>Very good work! You navigated complex medical textile regulations and commercial pressure effectively. Minor contract risks or small delivery delays occurred, but overall regulatory safety and corporate legal standing remained solid throughout.";
+  } else if (totalScore >= 15) {
+    feedbackText = "<strong>Band 3: Junior Legal Officer (15–24 pts)</strong><br>You survived the compliance challenge, but experienced noticeable legal and commercial friction. Contractual ambiguities, regulatory warnings, and communication gaps created business exposure. Review key legal concepts and replay to improve your score!";
+  } else {
+    feedbackText = "<strong>Band 4: Regulatory Risk (Under 15 pts)</strong><br>Challenging week! Regulatory fines, product recall threats, poor contract drafting, and compliance breaches caused major business issues. Re-read the scenario vocabulary, focus on MDR requirements first, and try again!";
+  }
+
+  document.getElementById("debrief").innerHTML = feedbackText;
+}
+</script>
+</body>
+</html>

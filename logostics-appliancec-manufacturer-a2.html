@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Winter Sale Crisis — Logistics Game</title>
+<style>
+  :root {
+    --bg-main: #E8ECEF;
+    --card-bg: linear-gradient(135deg, #FFFFFF 0%, #F1F4F8 100%);
+    --card-border: #D1D8E0;
+    --accent-steel: #718093;
+    --accent-cyan: #00A8FF;
+    --text-dark: #2F3640;
+    --text-muted: #7F8FA6;
+    --vocab-color: #273C75;
+    --disc-color: #8C7AE6;
+    --green: #44BD32;
+    --blue: #00A8FF;
+    --ochre: #E1B12C;
+    --red: #E84118;
+  }
+
+  body { 
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+    background: var(--bg-main); 
+    background-image: radial-gradient(circle at 50% 0%, #F5F7FA 0%, #E8ECEF 100%);
+    color: var(--text-dark); 
+    display: flex; 
+    justify-content: center; 
+    padding: 20px;
+    margin: 0;
+  }
+  
+  .shell { 
+    max-width: 760px; 
+    width: 100%; 
+    display: none; 
+  }
+  
+  .shell.active { 
+    display: block; 
+  }
+  
+  .card { 
+    background: var(--card-bg); 
+    padding: 32px; 
+    border-radius: 16px; 
+    line-height: 1.6; 
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05), 0 1px 0 rgba(255,255,255,0.8) inset;
+    border: 1px solid var(--card-border);
+  }
+
+  h1, h2, h3 { margin-top: 0; color: var(--text-dark); letter-spacing: -0.5px; }
+  h1 { 
+    border-bottom: 2px solid var(--accent-cyan); 
+    padding-bottom: 12px; 
+    font-size: 1.8rem; 
+    text-transform: uppercase;
+    background: linear-gradient(45deg, #2F3640, #718093);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  button.action-btn { 
+    padding: 14px 24px; 
+    cursor: pointer; 
+    background: linear-gradient(180deg, #FFFFFF 0%, #F1F4F8 100%); 
+    color: var(--text-dark); 
+    border: 1px solid var(--card-border); 
+    border-radius: 8px; 
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  }
+  button.action-btn:hover { 
+    background: linear-gradient(180deg, #F5F7FA 0%, #E4E9F0 100%); 
+    border-color: var(--accent-cyan); 
+    color: var(--accent-cyan);
+    transform: translateY(-1px);
+  }
+  
+  .option { 
+    display: block; 
+    width: 100%; 
+    margin: 12px 0; 
+    padding: 16px; 
+    text-align: left; 
+    background: #FFFFFF; 
+    border: 1px solid #DCDDE1; 
+    color: var(--text-dark); 
+    border-radius: 10px; 
+    cursor: pointer;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+  }
+  .option:hover { 
+    background: #F5F6FA; 
+    border-color: var(--accent-cyan);
+    transform: translateX(4px);
+  }
+  .option:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  
+  .emergency-header {
+    color: var(--red);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    animation: pulse 1.2s infinite alternate;
+  }
+
+  @keyframes pulse {
+    0% { opacity: 1; text-shadow: 0 0 4px rgba(232, 65, 24, 0.4); }
+    100% { opacity: 0.5; text-shadow: none; }
+  }
+
+  #feedback { 
+    margin-top: 20px; 
+    padding: 16px; 
+    background: #F1F2F6; 
+    border-left: 4px solid var(--accent-cyan); 
+    border-radius: 8px; 
+    font-size: 0.95rem;
+    box-shadow: inset 0 0 6px rgba(0,0,0,0.03);
+  }
+  
+  .vocab-box { 
+    background: #F8F9FA; 
+    padding: 14px; 
+    border-radius: 8px; 
+    margin: 16px 0; 
+    font-size: 0.9em; 
+    color: var(--vocab-color); 
+    border: 1px solid #E2E8F0;
+  }
+  
+  .discussion-box { 
+    background: #FAF8F5; 
+    padding: 16px; 
+    border-radius: 8px; 
+    margin-top: 16px; 
+    font-style: italic; 
+    color: #8C7AE6; 
+    border-left: 4px solid #8C7AE6;
+    font-size: 0.95rem;
+  }
+  
+  .context-tag { 
+    font-size: 0.85em; 
+    color: var(--text-muted); 
+    text-transform: uppercase; 
+    letter-spacing: 1.5px; 
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    font-weight: 600;
+  }
+
+  .score-tracker {
+    font-weight: 700;
+    color: var(--accent-cyan);
+  }
+
+  .score-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.8em;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+  }
+  .badge-3 { background-color: var(--green); color: #fff; }
+  .badge-2 { background-color: var(--blue); }
+  .badge-1 { background-color: var(--ochre); color: #fff; }
+  .badge--1 { background-color: var(--red); }
+
+  .game-over {
+    color: var(--red);
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin-bottom: 12px;
+    letter-spacing: 1px;
+  }
+</style>
+</head>
+<body>
+
+<div class="shell active" id="intro">
+  <div class="card">
+    <h1>Winter Sale Crisis</h1>
+    <p><strong>Your Role:</strong> Logistics Manager at a home appliance factory in Liège, Belgium.</p>
+    <p><strong>Your Goal:</strong> It is January! The Great Winter Sale starts this week. Many customers want new fridges, ovens, and washing machines. Work with your American boss, Mark, to send orders fast and keep costs low.</p>
+    <p><strong>Game Rules:</strong></p>
+    <ul>
+      <li>12 Daily Situations: Pick the best answer (+3 Excellent, +2 Good, +1 Average, -1 Poor with forced try again).</li>
+      <li>2 Danger Emergencies (after Situations 4 and 10). Choosing the bad option results in an immediate <strong>Game Over</strong>.</li>
+      <li>Maximum Score: <strong>40 Points</strong>.</li>
+    </ul>
+    <button class="action-btn" onclick="startGame()">Start the 7-Day Challenge</button>
+  </div>
+</div>
+
+<div class="shell" id="game">
+  <div class="card">
+    <div class="context-tag">
+      <span id="step"></span>
+      <span class="score-tracker" id="score-display">Score: 0</span>
+    </div>
+    <h3 id="scenario"></h3>
+    <div class="vocab-box" id="vocab"></div>
+    <div id="options"></div>
+    <div id="feedback" style="display:none"></div>
+    <div class="discussion-box" id="discussion" style="display:none"></div>
+    <br>
+    <button class="action-btn" id="next" onclick="nextStep()" style="display:none">Continue</button>
+    <button class="action-btn" id="retry" onclick="retryScenario()" style="display:none">Try Again</button>
+  </div>
+</div>
+
+<div class="shell" id="final">
+  <div class="card">
+    <h1 id="end-title">Challenge Complete</h1>
+    <div id="game-over-msg" class="game-over" style="display:none;">CRITICAL OPERATIONS FAILURE</div>
+    <div id="result" style="font-size: 1.3em; margin-bottom: 16px; font-weight: bold;"></div>
+    <div id="debrief"></div>
+    <br>
+    <button class="action-btn" onclick="location.reload()">Play Again</button>
+  </div>
+</div>
+
+<script>
+const GAME_DATA = [
+  // --- SCENARIO 1 ---
+  {
+    type: "standard",
+    day: "Monday Morning — Winter Sale Starts",
+    text: "A truck brings 500 smart fridges early to your warehouse in Liège. The loading area is full! Mark sends a message: <em>'We cannot block the doors! Find a cheap solution now.'</em>",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Loading bay</em> = the area where trucks unload boxes.<br>• <em>Overflow</em> = extra items that do not fit in a space.<br>• <em>Rent</em> = pay money to use a space for a short time.",
+    options: [
+      { pts: 3, t: "Rent extra storage space in a local warehouse for two weeks.", fb: "Mark says: 'Good idea. It costs a little money, but our workers can keep moving.'", disc: "How do you ask your boss for extra money during a busy week?" },
+      { pts: 2, t: "Send half of the fridges to another company building nearby.", fb: "Mark says: 'Fast decision. Transport costs a bit more, but the doors are open.'", disc: "When is it better to move items to another building?" },
+      { pts: 1, t: "Tell the truck driver to leave and come back next week.", fb: "Mark frowns: 'The warehouse is clear, but now shops have no fridges to sell!'", disc: "What happens when you send a delivery truck away?" },
+      { pts: -1, t: "Put the fridges in the walking hallways to save money.", fb: "Mark shouts: 'No! Blocking hallways is dangerous for workers and forklifts!'", disc: "Why is safety more important than saving money?" }
+    ]
+  },
+
+  // --- SCENARIO 2 ---
+  {
+    type: "standard",
+    day: "Monday Afternoon — Computer Problem",
+    text: "Your order software stops working for three hours. Workers cannot see what items to pack. Mark calls: <em>'Orders are waiting! How do we keep packing without making mistakes?'</em>",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Software</em> = computer programs used for work.<br>• <em>Paper list</em> = printed paper used when computers fail.<br>• <em>Pause</em> = stop for a short time.",
+    options: [
+      { pts: 3, t: "Use printed paper lists for popular items while IT fixes the computers.", fb: "Mark says: 'Great solution! We kept selling our best items during the problem.'", disc: "Do you prefer using paper or computers when you work?" },
+      { pts: 2, t: "Stop packing and ask workers to clean and organize the boxes.", fb: "Mark says: 'Okay. We lost time, but we made zero mistakes with customer orders.'", disc: "Is it better to work slow without errors or fast with small errors?" },
+      { pts: 1, t: "Ask team leaders to pack items from memory.", fb: "Mark sighs: 'We sent boxes, but workers sent many wrong items to clients.'", disc: "What problems happen when workers do not write down order details?" },
+      { pts: -1, t: "Tell all workers to sit down and wait until computers work again.", fb: "Mark yells: 'Paying workers to do nothing during the Winter Sale is too expensive!'", disc: "How can staff stay busy when tools break?" }
+    ]
+  },
+
+  // --- SCENARIO 3 ---
+  {
+    type: "standard",
+    day: "Tuesday Morning — Fast Delivery Request",
+    text: "A big store in Brussels wants 200 washing machines tomorrow morning. Slow trucks take 3 days. Express trucks arrive tomorrow but cost three times more.",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Express delivery</em> = very fast shipping.<br>• <em>Negotiate</em> = talk to find an agreement.<br>• <em>Profit</em> = money left after paying costs.",
+    options: [
+      { pts: 3, t: "Talk to the client: send 50 machines fast today, and 150 machines on regular trucks.", fb: "Mark smiles: 'Great agreement! The client has stock tomorrow, and shipping was cheap.'", disc: "What English sentences can you use to negotiate with a customer?" },
+      { pts: 2, t: "Pay for full express shipping so the customer is very happy.", fb: "Mark says: 'The customer is happy, but we made zero profit on this order.'", disc: "When should a company pay extra money to keep a client happy?" },
+      { pts: 1, t: "Send all items on slow trucks and write an email apologizing for the wait.", fb: "Mark frowns: 'The client accepted it, but they are unhappy with our service.'", disc: "How do you talk to an angry client when a delivery is late?" },
+      { pts: -1, t: "Promise fast delivery with slow trucks and hope traffic is good.", fb: "Mark explodes: 'We missed the sale! The customer wants to stop working with us.'", disc: "Why is it bad to make promises you cannot keep?" }
+    ]
+  },
+
+  // --- SCENARIO 4 ---
+  {
+    type: "standard",
+    day: "Tuesday Afternoon — Quality Check",
+    text: "An inspector finds broken wires in 150 microwave ovens ready to leave the factory. Mark asks: <em>'Do we stop the boxes or ship them now and check later?'</em>",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Defect</em> = a problem or broken part in a product.<br>• <em>Quarantine</em> = put broken items in a separate safe space.<br>• <em>Inspect</em> = look at an item carefully to check for errors.",
+    options: [
+      { pts: 3, t: "Put the boxes in a separate safe zone and quickly test 10% of the ovens.", fb: "Mark says: 'Smart work! We found the bad ovens and sent the good ones.'", disc: "How do you check for product quality when you have very little time?" },
+      { pts: 2, t: "Hold all 150 ovens for a full check, delaying shipping by 1 day.", fb: "Mark says: 'Safety first! It was slow, but no dangerous ovens went to stores.'", disc: "Why is product safety important for a brand?" },
+      { pts: 1, t: "Ship the ovens and tell shop technicians to check the wires later.", fb: "Mark frowns: 'Shops were angry because we gave them extra work.'", disc: "Is it okay to ask clients to fix small product problems?" },
+      { pts: -1, t: "Ignore the broken wires and ship everything immediately.", fb: "Mark shouts: 'Dangerous decision! Broken electric ovens can start fires!'", disc: "What happens if a company sells unsafe electrical items?" }
+    ]
+  },
+
+  // --- EMERGENCY 1 ---
+  {
+    type: "emergency",
+    day: "EMERGENCY DANGER 1 — TUESDAY NIGHT",
+    text: "<span class='emergency-header'>DANGER:</span> A toxic cleaning chemical spills on the warehouse floor. Bad smoke is in the air and workers are coughing. Stopping work means missing Wednesday morning trucks.",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Hazardous</em> = dangerous to health or life.<br>• <em>Evacuate</em> = leave a dangerous building immediately.",
+    options: [
+      { pts: 2, isGood: true, t: "EVACUATE NOW: Stop work, tell everyone to leave the building, and call emergency services.", fb: "Mark says: 'Correct choice! Worker health is always more important than delivery times.'", disc: "How do you stay calm during a fire or chemical emergency?" },
+      { pts: 0, isGood: false, t: "KEEP WORKING: Give workers simple paper masks and tell them to finish packing.", fb: "CRITICAL FAILURE: Workers go to the hospital. Government closes the factory. GAME OVER.", disc: "" }
+    ]
+  },
+
+  // --- SCENARIO 5 ---
+  {
+    type: "standard",
+    day: "Wednesday Morning — Missing Items",
+    text: "The computer says you have 100 espresso machines in Zone C, but the shelves are empty! Customers are buying them online right now.",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Discrepancy</em> = numbers on paper do not match real items.<br>• <em>Stock count</em> = counting real physical items on shelves.<br>• <em>Out of stock</em> = no items left to sell.",
+    options: [
+      { pts: 3, t: "Stop online sales for this model immediately and count the real items.", fb: "Mark says: 'Good reaction! We stopped selling items we do not have.'", disc: "How do you tell a customer their order is out of stock?" },
+      { pts: 2, t: "Give customers a better, more expensive espresso machine for the same price.", fb: "Mark says: 'This cost us money, but customers were very happy with the free upgrade.'", disc: "When is giving a free upgrade a good business decision?" },
+      { pts: 1, t: "Keep selling online while workers look for the missing boxes in the warehouse.", fb: "Mark sighs: 'We sold 30 machines we don't have! Now we must refund customers.'", disc: "Why is accurate stock information important in online shopping?" },
+      { pts: -1, t: "Close the entire warehouse for half a day to count every item.", fb: "Mark yells: 'Closing the factory during the Winter Sale lost us thousands of Euros!'", disc: "Why should you avoid stopping all work during busy sales periods?" }
+    ]
+  },
+
+  // --- SCENARIO 6 ---
+  {
+    type: "standard",
+    day: "Wednesday Afternoon — Worker Problem",
+    text: "Warehouse workers want to stop working because they are tired of extra evening hours. Mark asks: <em>'We need our team! How do we make them happy?'</em>",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Overtime</em> = extra hours worked after normal schedule.<br>• <em>Representative</em> = person speaking for a group of workers.<br>• <em>Bonus</em> = extra money paid for good work.",
+    options: [
+      { pts: 3, t: "Talk to worker representatives, offer free hot meals, and pay a higher overtime bonus.", fb: "Mark says: 'Great leadership! Workers are happy and shifts are full again.'", disc: "What makes you feel happy and motivated at work?" },
+      { pts: 2, t: "Hire new temporary workers immediately to replace tired staff.", fb: "Mark says: 'Work continued, but new workers made some packing mistakes.'", disc: "What are the problems with hiring new staff during busy weeks?" },
+      { pts: 1, t: "Cancel extra evening hours and send fewer boxes every day.", fb: "Mark grunts: 'Workers are rested, but we are falling behind on deliveries.'", disc: "How do you balance resting staff with finishing job tasks?" },
+      { pts: -1, t: "Tell workers they will lose their jobs if they do not work extra hours.", fb: "Mark groans: 'The whole team walked out! No work is happening now.'", disc: "Why is threatening workers always a bad management style?" }
+    ]
+  },
+
+  // --- SCENARIO 7 ---
+  {
+    type: "standard",
+    day: "Thursday Morning — Factory Delay",
+    text: "A supplier in Italy is late sending electric parts for kitchen cooktops. Your factory line will stop in 4 hours without these parts.",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Supplier</em> = company that sells parts to factories.<br>• <em>Assembly line</em> = factory line where products are put together.<br>• <em>Local</em> = near your city or area.",
+    options: [
+      { pts: 3, t: "Buy matching certified parts from a local supplier at a higher price.", fb: "Mark says: 'Agile choice! Parts cost more, but the factory line never stopped.'", disc: "Why is it helpful to have local suppliers near your company?" },
+      { pts: 2, t: "Change the factory line to build different products that have full parts.", fb: "Mark says: 'Good flexibility. Schedules changed, but workers stayed busy.'", disc: "How easily can you change your plans when tools are missing?" },
+      { pts: 1, t: "Stop the line and pay factory workers to wait for the Italian truck.", fb: "Mark frowns: 'Paying idle staff is expensive, but the products are 100% original.'", disc: "What is the cost of waiting for late deliveries?" },
+      { pts: -1, t: "Buy cheap uncertified parts from an unknown local seller.", fb: "Mark panics: 'Uncertified parts break safety laws! We cannot build illegal cooktops.'", disc: "Why must safety certificates always be checked?" }
+    ]
+  },
+
+  // --- SCENARIO 8 ---
+  {
+    type: "standard",
+    day: "Thursday Evening — Busy Night Shift",
+    text: "It is 8:00 PM. Order numbers are 40% higher than expected. The warehouse is crowded with boxes and staff are exhausted.",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Shift</em> = work period (e.g., day shift, night shift).<br>• <em>Reallocate</em> = move people to different jobs.<br>• <em>Exhausted</em> = extremely tired.",
+    options: [
+      { pts: 3, t: "Move office staff to help pack boxes and give floor workers extra short breaks.", fb: "Mark praises: 'Great teamwork! Office staff helped clear the floor safely.'", disc: "Would you be willing to help in the warehouse if office work was quiet?" },
+      { pts: 2, t: "Offer double pay to night shift workers to pack boxes faster.", fb: "Mark says: 'It was expensive, but all morning trucks were loaded on time.'", disc: "Does extra money motivate people to work faster when tired?" },
+      { pts: 1, t: "Stop packing at 10:00 PM and leave the rest of the boxes for Friday morning.", fb: "Mark sighs: 'We controlled stress, but Friday morning starts with too much work.'", disc: "Is it better to finish work today or leave it for tomorrow morning?" },
+      { pts: -1, t: "Make staff work 16 hours continuously without any rest breaks.", fb: "Mark fumes: 'Tired workers had forklift accidents! This is dangerous and illegal.'", disc: "How many hours can a person work safely in one day?" }
+    ]
+  },
+
+  // --- SCENARIO 9 ---
+  {
+    type: "standard",
+    day: "Friday Surge — Truck Shortage",
+    text: "It is Friday morning! Our main transport company has no drivers and cancelled 5 large trucks. Boxes are filling all the floor space.",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Carrier</em> = company that transports goods.<br>• <em>Spot market</em> = hiring emergency trucks at current prices.<br>• <em>Stack</em> = put items on top of each other.",
+    options: [
+      { pts: 3, t: "Hire emergency trucks from local transport companies at a higher price.", fb: "Mark approves: 'Quick decision! It was expensive, but boxes kept moving out.'", disc: "What do you do when your primary partner fails to deliver?" },
+      { pts: 2, t: "Stack boxes safely using high shelves to keep walking paths clear.", fb: "Mark says: 'Good organization. The floor stayed clear while we waited for trucks.'", disc: "How do you keep your workspace organized during busy times?" },
+      { pts: 1, t: "Use company vans to deliver local orders first and hold big distant orders.", fb: "Mark notes: 'Local clients are happy, but distant stores are complaining.'", disc: "Which customers should you help first when resources are limited?" },
+      { pts: -1, t: "Put electrical boxes outside in the rain to make space inside.", fb: "Mark screams: 'The rain destroyed thousands of Euros of appliance packaging!'", disc: "Why must products always be protected from bad weather?" }
+    ]
+  },
+
+  // --- SCENARIO 10 ---
+  {
+    type: "standard",
+    day: "Saturday Morning — Returned Packages",
+    text: "Customers are returning items with wrong addresses or damaged boxes. The returns area is full and blocking incoming trucks.",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Returns</em> = products sent back by customers.<br>• <em>Sort</em> = arrange items into categories.<br>• <em>Refund</em> = return money to a buyer.",
+    options: [
+      { pts: 3, t: "Create three areas to sort returns quickly: resell, repair, or throw away.", fb: "Mark praises: 'Organized work! Good returned items were resold quickly.'", disc: "Why is it important to deal with customer returns quickly?" },
+      { pts: 2, t: "Move returned boxes to a safe corner and deal with them on Monday.", fb: "Mark says: 'Okay plan. It kept space clear for sending new orders today.'", disc: "When is it okay to delay non-urgent tasks?" },
+      { pts: 1, t: "Refund all customer money automatically without opening the returned boxes.", fb: "Mark frowns: 'We gave refunds for empty boxes! We lost company money.'", disc: "What are the risks of giving automatic refunds?" },
+      { pts: -1, t: "Refuse to take returned items from delivery drivers until next week.", fb: "Mark groans: 'Delivery companies charged us heavy penalty fees for refusing intake!'", disc: "Why must companies accept authorized returns?" }
+    ]
+  },
+
+  // --- EMERGENCY 2 ---
+  {
+    type: "emergency",
+    day: "EMERGENCY DANGER 2 — SATURDAY AFTERNOON",
+    text: "<span class='emergency-header'>CYBER ATTACK:</span> Hackers lock your computer screens and demand money to let you print shipping labels. All systems are frozen.",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Hacker</em> = person using computers to break into systems illegally.<br>• <em>Disconnect</em> = unplug computers from the network.",
+    options: [
+      { pts: 2, isGood: true, t: "PROTECT DATA: Unplug computer cables immediately, call IT Security, and write labels by hand.", fb: "Mark confirms: 'Correct response! IT isolated the attack and protected customer data.'", disc: "What should you do if your work computer gets a virus?" },
+      { pts: 0, isGood: false, t: "PAY HACKERS: Pay the hackers money immediately to get computer access back.", fb: "CRITICAL FAILURE: Hackers took the money and kept systems locked. GAME OVER.", disc: "" }
+    ]
+  },
+
+  // --- SCENARIO 11 ---
+  {
+    type: "standard",
+    day: "Sunday — Packaging Material Shortage",
+    text: "The factory has no cardboard corner protectors left for glass dishwashers. Simple boxes might let dishwashers break during transport.",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Packaging</em> = materials used to wrap and protect items.<br>• <em>Fragile</em> = easily broken.<br>• <em>Adapt</em> = change behavior to fit a new situation.",
+    options: [
+      { pts: 3, t: "Cut soft foam pieces from unused materials to protect fragile corners safely.", fb: "Mark smiles: 'Creative thinking! Zero dishwashers broke during transport.'", disc: "How can you use simple materials to solve unexpected shortages?" },
+      { pts: 2, t: "Use extra layers of bubble wrap and put big 'FRAGILE' stickers on boxes.", fb: "Mark notes: 'A few panels cracked, but most dishwashers arrived safely.'", disc: "Are 'Fragile' stickers enough to protect delicate items?" },
+      { pts: 1, t: "Stop shipping glass dishwashers until proper corner protectors arrive Monday.", fb: "Mark grunts: 'Products stayed safe, but Sunday sales targets were missed.'", disc: "Is it better to delay orders or risk sending damaged items?" },
+      { pts: -1, t: "Ship dishwashers in weak cardboard boxes without extra protection.", fb: "Mark fumes: 'Dozens of glass doors shattered! Clients are leaving angry reviews online.'", disc: "How do broken deliveries hurt a company's image?" }
+    ]
+  },
+
+  // --- SCENARIO 12 ---
+  {
+    type: "standard",
+    day: "Winter Sale Final Day — Client Choices",
+    text: "It is the final sale day! Transport capacity is limited. You must choose: ship 300 ovens to a major retail store chain or 300 ovens to individual online buyers.",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Retail store</em> = large commercial shop.<br>• <em>Individual buyer</em> = single online customer.<br>• <em>Capacity</em> = maximum space available.",
+    options: [
+      { pts: 3, t: "Send 150 ovens to the store chain and 150 ovens to online buyers.", fb: "Mark smiles: 'Balanced choice! You kept store partners happy and satisfied online clients.'", disc: "How do you choose fairly between two important clients?" },
+      { pts: 2, t: "Send all 300 ovens to the major store chain to protect the long-term contract.", fb: "Mark notes: 'Big contract secured, but online buyers left bad reviews about slow delivery.'", disc: "Why are long-term business contracts so important?" },
+      { pts: 1, t: "Send all 300 ovens to individual online buyers for fast cash profits.", fb: "Mark grunts: 'High profit today, but the major store manager is very angry with us.'", disc: "Is fast cash better than long-term commercial relationships?" },
+      { pts: -1, t: "Cancel half of both orders to make packing easier for your team.", fb: "Mark explodes: 'Terrible decision! You disappointed both client groups at the same time.'", disc: "Why should you avoid cancelling orders unless necessary?" }
+    ]
+  }
+];
+
+let currentIndex = 0;
+let totalScore = 0;
+
+function shuffle(array) {
+  let arr = JSON.parse(JSON.stringify(array));
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function showScreen(screenId) {
+  document.querySelectorAll('.shell').forEach(el => el.classList.remove('active'));
+  document.getElementById(screenId).classList.add('active');
+}
+
+function startGame() {
+  currentIndex = 0;
+  totalScore = 0;
+  showScreen("game");
+  renderStep();
+}
+
+function renderStep() {
+  const data = GAME_DATA[currentIndex];
+  
+  document.getElementById("step").textContent = `${data.day} (Step ${currentIndex + 1} of ${GAME_DATA.length})`;
+  document.getElementById("score-display").textContent = `Score: ${totalScore}`;
+  document.getElementById("scenario").innerHTML = data.text;
+  document.getElementById("vocab").innerHTML = data.vocab;
+  
+  const optionsContainer = document.getElementById("options");
+  optionsContainer.innerHTML = "";
+  document.getElementById("feedback").style.display = "none";
+  document.getElementById("discussion").style.display = "none";
+  document.getElementById("next").style.display = "none";
+  document.getElementById("retry").style.display = "none";
+
+  const randomizedOptions = shuffle(data.options);
+  
+  randomizedOptions.forEach(opt => {
+    const btn = document.createElement("button");
+    btn.className = "option";
+    if (data.type === "emergency") {
+      btn.style.borderColor = "var(--red)";
+    }
+    btn.innerHTML = opt.t;
+    btn.onclick = () => {
+      if (data.type === "standard") {
+        chooseStandard(opt);
+      } else {
+        chooseEmergency(opt);
+      }
+    };
+    optionsContainer.appendChild(btn);
+  });
+}
+
+function chooseStandard(opt) {
+  document.querySelectorAll(".option").forEach(btn => btn.disabled = true);
+  
+  totalScore += opt.pts;
+  document.getElementById("score-display").textContent = `Score: ${totalScore}`;
+
+  const fb = document.getElementById("feedback");
+  let badgeClass = opt.pts > 0 ? `badge-${opt.pts}` : `badge--1`;
+  let scoreText = opt.pts > 0 ? `+${opt.pts} Points` : `${opt.pts} Point`;
+  
+  fb.innerHTML = `<span class="score-badge ${badgeClass}">${scoreText}</span><br>${opt.fb}`;
+  fb.style.display = "block";
+
+  const disc = document.getElementById("discussion");
+  disc.innerHTML = `<strong>Discussion Question:</strong> ${opt.disc}`;
+  disc.style.display = "block";
+
+  if (opt.pts === -1) {
+    document.getElementById("retry").style.display = "inline-block";
+  } else {
+    document.getElementById("next").style.display = "inline-block";
+  }
+}
+
+function chooseEmergency(opt) {
+  document.querySelectorAll(".option").forEach(btn => btn.disabled = true);
+
+  if (opt.isGood) {
+    totalScore += opt.pts;
+    document.getElementById("score-display").textContent = `Score: ${totalScore}`;
+
+    const fb = document.getElementById("feedback");
+    fb.innerHTML = `<span class="score-badge badge-3">CRITICAL SUCCESS (+2 Points)</span><br>${opt.fb}`;
+    fb.style.display = "block";
+
+    const disc = document.getElementById("discussion");
+    disc.innerHTML = `<strong>Discussion Question:</strong> ${opt.disc}`;
+    disc.style.display = "block";
+
+    document.getElementById("next").style.display = "inline-block";
+  } else {
+    showGameOver(opt.fb);
+  }
+}
+
+function retryScenario() {
+  renderStep();
+}
+
+function nextStep() {
+  currentIndex++;
+  if (currentIndex >= GAME_DATA.length) {
+    showFinalResults();
+  } else {
+    renderStep();
+  }
+}
+
+function showGameOver(reason) {
+  showScreen("final");
+  document.getElementById("end-title").style.display = "none";
+  document.getElementById("game-over-msg").style.display = "block";
+  document.getElementById("result").innerHTML = `FINAL SCORE: ${totalScore} Points`;
+  document.getElementById("debrief").innerHTML = `<p>${reason}</p><p>Operational failures ended your logistics management challenge early. Review safety rules and try again!</p>`;
+}
+
+function showFinalResults() {
+  showScreen("final");
+  document.getElementById("end-title").style.display = "block";
+  document.getElementById("game-over-msg").style.display = "none";
+  
+  document.getElementById("result").innerHTML = `Final Score: ${totalScore} / 40 Points`;
+
+  let feedbackText = "";
+
+  if (totalScore >= 35) {
+    feedbackText = "<strong>Band 1: Expert Logistics Manager (35–40 pts)</strong><br>Fantastic job! You managed safety, costs, and customer orders perfectly. Mark wants to give you a promotion to manage European operations! You demonstrated clear decision-making under high pressure during peak sales.";
+  } else if (totalScore >= 25) {
+    feedbackText = "<strong>Band 2: Good Supervisor (25–34 pts)</strong><br>Very good work! You solved tough warehouse problems during the busy Winter Sale. There were minor delays or extra transport costs, but customers are happy overall and warehouse operations stayed safe and stable.";
+  } else if (totalScore >= 15) {
+    feedbackText = "<strong>Band 3: Junior Assistant (15–24 pts)</strong><br>You survived the Winter Sale, but it was difficult. Extra transport costs, inventory counting errors, and staff stress hurt business profits. Review key vocabulary and try playing again to improve your score!";
+  } else {
+    feedbackText = "<strong>Band 4: Operations Bottleneck (Under 15 pts)</strong><br>Tough week! Warehouse congestion, damaged goods, unhappy clients, and unexpected costs caused major operational issues for the company. Re-read the scenario guides, focus on safety first, and try again!";
+  }
+
+  document.getElementById("debrief").innerHTML = feedbackText;
+}
+</script>
+</body>
+</html>

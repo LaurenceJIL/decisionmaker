@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Pipeline Panic — BI Governance Challenge</title>
+<style>
+  :root {
+    --bg-main: #E8ECEF;
+    --card-bg: linear-gradient(135deg, #FFFFFF 0%, #F1F4F8 100%);
+    --card-border: #D1D8E0;
+    --accent-steel: #718093;
+    --accent-cyan: #00A8FF;
+    --text-dark: #2F3640;
+    --text-muted: #7F8FA6;
+    --vocab-color: #273C75;
+    --disc-color: #8C7AE6;
+    --green: #44BD32;
+    --blue: #00A8FF;
+    --ochre: #E1B12C;
+    --red: #E84118;
+  }
+
+  body { 
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+    background: var(--bg-main); 
+    background-image: radial-gradient(circle at 50% 0%, #F5F7FA 0%, #E8ECEF 100%);
+    color: var(--text-dark); 
+    display: flex; 
+    justify-content: center; 
+    padding: 20px;
+    margin: 0;
+  }
+  
+  .shell { 
+    max-width: 760px; 
+    width: 100%; 
+    display: none; 
+  }
+
+  .shell.active {
+    display: block;
+  }
+  
+  .card { 
+    background: var(--card-bg); 
+    padding: 32px; 
+    border-radius: 16px; 
+    line-height: 1.6; 
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05), 0 1px 0 rgba(255,255,255,0.8) inset;
+    border: 1px solid var(--card-border);
+  }
+
+  h1, h2, h3 { margin-top: 0; color: var(--text-dark); letter-spacing: -0.5px; }
+  h1 { 
+    border-bottom: 2px solid var(--accent-cyan); 
+    padding-bottom: 12px; 
+    font-size: 1.8rem; 
+    text-transform: uppercase;
+    background: linear-gradient(45deg, #2F3640, #718093);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  button.action-btn { 
+    padding: 14px 24px; 
+    cursor: pointer; 
+    background: linear-gradient(180deg, #FFFFFF 0%, #F1F4F8 100%); 
+    color: var(--text-dark); 
+    border: 1px solid var(--card-border); 
+    border-radius: 8px; 
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  }
+  button.action-btn:hover { 
+    background: linear-gradient(180deg, #F5F7FA 0%, #E4E9F0 100%); 
+    border-color: var(--accent-cyan); 
+    color: var(--accent-cyan);
+    transform: translateY(-1px);
+  }
+  
+  .option { 
+    display: block; 
+    width: 100%; 
+    margin: 12px 0; 
+    padding: 16px; 
+    text-align: left; 
+    background: #FFFFFF; 
+    border: 1px solid #DCDDE1; 
+    color: var(--text-dark); 
+    border-radius: 10px; 
+    cursor: pointer;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+  }
+  .option:hover { 
+    background: #F5F6FA; 
+    border-color: var(--accent-cyan);
+    transform: translateX(4px);
+  }
+  .option:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  
+  .emergency-header {
+    color: var(--red);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    animation: pulse 1.2s infinite alternate;
+  }
+
+  @keyframes pulse {
+    0% { opacity: 1; text-shadow: 0 0 4px rgba(232, 65, 24, 0.4); }
+    100% { opacity: 0.5; text-shadow: none; }
+  }
+
+  #feedback { 
+    margin-top: 20px; 
+    padding: 16px; 
+    background: #F1F2F6; 
+    border-left: 4px solid var(--accent-cyan); 
+    border-radius: 8px; 
+    font-size: 0.95rem;
+    box-shadow: inset 0 0 6px rgba(0,0,0,0.03);
+  }
+  
+  .vocab-box { 
+    background: #F8F9FA; 
+    padding: 14px; 
+    border-radius: 8px; 
+    margin: 16px 0; 
+    font-size: 0.9em; 
+    color: var(--vocab-color); 
+    border: 1px solid #E2E8F0;
+  }
+  
+  .discussion-box { 
+    background: #FAF8F5; 
+    padding: 16px; 
+    border-radius: 8px; 
+    margin-top: 16px; 
+    font-style: italic; 
+    color: #8C7AE6; 
+    border-left: 4px solid #8C7AE6;
+    font-size: 0.95rem;
+  }
+  
+  .context-tag { 
+    font-size: 0.85em; 
+    color: var(--text-muted); 
+    text-transform: uppercase; 
+    letter-spacing: 1.5px; 
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    font-weight: 600;
+  }
+
+  .score-tracker {
+    font-weight: 700;
+    color: var(--accent-cyan);
+  }
+
+  .score-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.8em;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+  }
+  .badge-3 { background-color: var(--green); color: #fff; }
+  .badge-2 { background-color: var(--blue); }
+  .badge-1 { background-color: var(--ochre); color: #fff; }
+  .badge--1 { background-color: var(--red); }
+
+  .game-over {
+    color: var(--red);
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin-bottom: 12px;
+    letter-spacing: 1px;
+  }
+</style>
+</head>
+<body>
+
+<div class="shell active" id="intro">
+  <div class="card">
+    <h1>Data Pipeline Panic</h1>
+    <p><strong>Role:</strong> Lead Data Engineer at a major game studio in Paris, France.</p>
+    <p><strong>Situation:</strong> Your studio launched its flagship title, <em>"Realm of Legends,"</em> worldwide yesterday. Millions of players are online, putting your BI infrastructure under immense pressure. Your American VP of Data, Chad, demands fast solutions, low cloud infrastructure costs, and full regulatory compliance.</p>
+    <p><strong>Rules:</strong></p>
+    <ul>
+      <li>12 Core Scenarios with randomized options (+3 Excellent, +2 Good, +1 Average, -1 Poor with forced retry).</li>
+      <li>2 High-Stakes Emergency Scenarios (after Scenarios 4 and 10). Selecting the wrong option triggers an immediate <strong>Game Over</strong>.</li>
+      <li>Maximum Score: <strong>40 Points</strong>.</li>
+    </ul>
+    <button class="action-btn" onclick="startGame()">Start the 7-Day Challenge</button>
+  </div>
+</div>
+
+<div class="shell" id="game">
+  <div class="card">
+    <div class="context-tag">
+      <span id="step"></span>
+      <span class="score-tracker" id="score-display">Score: 0</span>
+    </div>
+    <h3 id="scenario"></h3>
+    <div class="vocab-box" id="vocab"></div>
+    <div id="options"></div>
+    <div id="feedback" style="display:none"></div>
+    <div class="discussion-box" id="discussion" style="display:none"></div>
+    <br>
+    <button class="action-btn" id="next" onclick="nextStep()" style="display:none">Continue</button>
+    <button class="action-btn" id="retry" onclick="retryScenario()" style="display:none">Try Again</button>
+  </div>
+</div>
+
+<div class="shell" id="final">
+  <div class="card">
+    <h1 id="end-title">Challenge Complete</h1>
+    <div id="game-over-msg" class="game-over" style="display:none;">CRITICAL DATA FAILURE</div>
+    <div id="result" style="font-size: 1.3em; margin-bottom: 16px; font-weight: bold;"></div>
+    <div id="debrief"></div>
+    <br>
+    <button class="action-btn" onclick="location.reload()">Play Again</button>
+  </div>
+</div>
+
+<script>
+const GAME_DATA = [
+  // --- SCENARIO 1 ---
+  {
+    type: "standard",
+    day: "Monday Morning — Cloud Cost Explodes",
+    text: "Player telemetry streaming into your data warehouse is 5x higher than budgeted. Chad sends a Slack message at 07:00 AM: <em>'Hey team, our cloud bill is burning cash! We need to cut warehouse costs by 40% ASAP. What’s the plan?'</em>",
+    vocab: "<strong>Key Vocabulary:</strong><br>• <em>Burn cash</em> = spend money rapidly.<br>• <em>Sampling</em> = processing a representative subset of data instead of 100%.<br>• <em>Trade-off</em> = a compromise between two conflicting features.",
+    options: [
+      { pts: 3, t: "Retain 100% data ingestion, but tier older logs to lower-cost cold storage and optimize compute clusters.", fb: "Chad smiles: 'Smart move! Storage costs dropped significantly while full raw telemetry remains accessible for deep analysis.'", disc: "Why is data tiering often preferred over aggressive sampling in enterprise BI?" },
+      { pts: 2, t: "Enable 10% data sampling on non-critical player event logs to reduce warehouse storage instantly.", fb: "Chad notes: 'Great cost reduction, but now the Analytics team is complaining that rare bug logs are missing!'", disc: "How do you explain the trade-offs of data sampling to executive stakeholders?" },
+      { pts: 1, t: "Tell Chad you need 3 days to analyze query patterns before making any infrastructure changes.", fb: "Chad frowns: 'Three days?! In US tech culture, we move fast and break things. That's too slow!'", disc: "How do you reconcile French thorough engineering culture with American 'bias for action'?" },
+      { pts: -1, t: "Disable all incoming event logging for 24 hours to freeze billing entirely.", fb: "Chad explodes: 'Unacceptable! We have zero visibility into active player telemetry or server crashes!'", disc: "Why must data logging never be completely disabled during a major launch?" }
+    ]
+  },
+
+  // --- SCENARIO 2 ---
+  {
+    type: "standard",
+    day: "Monday Afternoon — GDPR vs. Executive Metrics",
+    text: "Chad wants a real-time player location dashboard for an upcoming investor presentation. However, raw player IP addresses are flowing directly into unencrypted BI staging tables without anonymization.",
+    vocab: "<strong>Key Vocabulary:</strong><br>• <em>Governance</em> = rules and processes for managing data legally and securely.<br>• <em>Anonymization</em> = removing personally identifiable information.<br>• <em>Non-compliant</em> = failing to obey a rule or law.",
+    options: [
+      { pts: 3, t: "Deploy an automated hashing step in the staging pipeline before rendering the visual dashboard.", fb: "Chad approves: 'Perfect solution—fully compliant with European laws and fully functional for investors.'", disc: "How do you propose solution-oriented compromises when regulatory compliance conflicts with speed?" },
+      { pts: 2, t: "Refuse to build the dashboard until a full legal data governance audit is completed next week.", fb: "Chad notes: 'I appreciate the legal protection, but you blocked a key metric right before an investor call.'", disc: "What language strategies can you use to say 'not yet' professionally without sounding uncooperative?" },
+      { pts: 1, t: "Build the dashboard immediately using raw IP data, promising to implement anonymization later.", fb: "Chad praises the speed, but legal flags the breach shortly after. Major regulatory compliance risk!", disc: "What are the long-term corporate risks of bypassing governance rules under executive pressure?" },
+      { pts: -1, t: "Publish the raw IP location data to an unauthenticated public web dashboard.", fb: "Chad panics: 'Catastrophic privacy violation! European regulators are launching a formal GDPR investigation!'", disc: "Why is public exposure of personally identifiable information (PII) fatal for tech companies?" }
+    ]
+  },
+
+  // --- SCENARIO 3 ---
+  {
+    type: "standard",
+    day: "Tuesday Morning — The 'Bad Data' Crisis",
+    text: "A bug in the new game update causes duplicated microtransaction records. Game designers believe revenue doubled overnight, but the data is incorrect.",
+    vocab: "<strong>Key Vocabulary:</strong><br>• <em>Single Source of Truth</em> = a central data structure where all data is accurate and unified.<br>• <em>Pipeline outage</em> = temporary failure in data delivery.<br>• <em>Discrepancy</em> = a lack of agreement between two sets of data.",
+    options: [
+      { pts: 3, t: "Immediately post an alert in the main Slack channel explaining the duplication bug and giving a fix timeline.", fb: "Chad praises: 'Thanks for the proactive callout! Transparency saved us from reporting false numbers to board members.'", disc: "What specific phrases can you use to announce technical issues transparently to non-technical colleagues?" },
+      { pts: 2, t: "Silently pause the pipeline, remove duplicate rows, and re-run ingestion without announcing the issue.", fb: "Chad notes: 'Good data cleanup, but dashboards were offline for 4 hours without notice. Communication is key!'", disc: "Is it better to pause pipelines quietly to fix bugs, or warn stakeholders immediately?" },
+      { pts: 1, t: "Allow game designers to view the inflated metrics while you repair the underlying database.", fb: "Chad frowns: 'We almost reported incorrect revenue figures externally! Unacceptable.'", disc: "What happens to executive trust in the BI team when business decisions rely on flawed data?" },
+      { pts: -1, t: "Purge all transaction records for the day to clear out the duplicate entries.", fb: "Chad yells: 'You deleted legitimate transaction records! We lost financial audit capability!'", disc: "Why must transactional financial data never be hard-deleted during error recovery?" }
+    ]
+  },
+
+  // --- SCENARIO 4 ---
+  {
+    type: "standard",
+    day: "Tuesday Afternoon — Database Query Overload",
+    text: "Game designers are executing unindexed ad-hoc queries against the primary operational database, causing latency for active players.",
+    vocab: "<strong>Key Vocabulary:</strong><br>• <em>Ad-hoc query</em> = an unplanned, custom database query.<br>• <em>Read replica</em> = a secondary copy of a database dedicated to read-only reporting.<br>• <em>Latency</em> = delay in data processing or response times.",
+    options: [
+      { pts: 3, t: "Provision a dedicated read-replica instance specifically for designer analytics queries.", fb: "Chad approves: 'Excellent architecture! Designers get high-speed analytics and active game performance remains fast.'", disc: "How do isolated read-replicas prevent analytical queries from degrading operational databases?" },
+      { pts: 2, t: "Restrict game designers to running queries during scheduled off-peak windows.", fb: "Chad comments: 'Operational latency cleared, but designers are frustrated by restricted data access.'", disc: "How do you balance developer autonomy with system performance constraints?" },
+      { pts: 1, t: "Send an email asking designers to write more efficient SQL queries.", fb: "Chad sighs: 'Designers ignored the email guidelines and operational databases continued lagging.'", disc: "Why are architectural controls more effective than policy emails for system stability?" },
+      { pts: -1, t: "Revoke all database read permissions from the game design team permanently.", fb: "Chad explodes: 'Designers cannot evaluate game balance without data! Production is blocked.'", disc: "Why should technical leads avoid cutting off data access completely?" }
+    ]
+  },
+
+  // --- EMERGENCY 1 ---
+  {
+    type: "emergency",
+    day: "EMERGENCY DANGER 1 — TUESDAY NIGHT",
+    text: "<span class='emergency-header'>CRITICAL HAZARD:</span> An electrical short causes smoke in the primary server rack! Alarms are sounding throughout the data center facility.",
+    vocab: "<strong>Key Vocabulary:</strong><br>• <em>Facility hazard</em> = dangerous physical environment conditions.<br>• <em>Evacuation protocol</em> = mandatory emergency exit procedure.",
+    options: [
+      { pts: 2, isGood: true, t: "EVACUATE IMMEDIATELY: Trigger facility fire alarms, evacuate personnel, and notify emergency services.", fb: "Chad confirms: 'Correct priority! Human life and physical safety always supersede data infrastructure uptime.'", disc: "How do you lead technical teams calmly during physical facility emergencies?" },
+      { pts: 0, isGood: false, t: "MANUAL INTERVENTION: Enter the electrical room to pull physical drive arrays before evacuating.", fb: "CRITICAL FAILURE: Electrical fire smoke causes severe injury. Facility is sealed. GAME OVER.", disc: "" }
+    ]
+  },
+
+  // --- SCENARIO 5 ---
+  {
+    type: "standard",
+    day: "Wednesday Morning — Real-Time Dashboard Latency",
+    text: "The marketing director complains that the campaign performance dashboard lags by 45 minutes during an active acquisition push.",
+    vocab: "<strong>Key Vocabulary:</strong><br>• <em>Stream processing</em> = real-time continuous data ingestion.<br>• <em>Batching</em> = processing data in scheduled chunks.<br>• <em>SLA (Service Level Agreement)</em> = agreed service performance level.",
+    options: [
+      { pts: 3, t: "Migrate key conversion metrics to a real-time stream processing framework while maintaining batching for historical logs.", fb: "Chad praises: 'Outstanding architecture! Marketing gets immediate campaign feedback and infrastructure costs stay controlled.'", disc: "When does business value justify switching from batching to real-time streaming?" },
+      { pts: 2, t: "Scale up batch compute resources fourfold to execute batch runs every 5 minutes.", fb: "Chad notes: 'Latency dropped, but warehouse compute billing quadrupled.'", disc: "Why is scaling infrastructure hardware not always the most efficient software solution?" },
+      { pts: 1, t: "Explain to marketing that a 45-minute latency window is standard for enterprise batch pipelines.", fb: "Chad frowns: 'Marketing cannot optimize active ad spending using delayed analytics.'", disc: "How do you manage expectations when technical SLAs conflict with marketing demands?" },
+      { pts: -1, t: "Shut down the marketing dashboard completely until the next scheduled maintenance release.", fb: "Chad explodes: 'Marketing is executing campaigns blind without performance tracking!'", disc: "Why is disabling business tools during active revenue events damaging?" }
+    ]
+  },
+
+  // --- SCENARIO 6 ---
+  {
+    type: "standard",
+    day: "Wednesday Afternoon — Unannounced Schema Drift",
+    text: "Game developers deploy a patch changing player payload JSON formats without notifying the BI team. Ingestion pipelines are breaking.",
+    vocab: "<strong>Key Vocabulary:</strong><br>• <em>Schema drift</em> = unexpected changes in incoming data structure.<br>• <em>Validation layer</em> = automated code checking data format compliance.<br>• <em>Ingestion</em> = absorbing raw data into a storage system.",
+    options: [
+      { pts: 3, t: "Implement an automated schema validation layer that alerts developers and isolates non-conforming payloads.", fb: "Chad approves: 'Great engineering! Pipeline ingestion continues uninterrupted while schema breaking changes are flagged instantly.'", disc: "How does automated schema validation prevent pipeline failures during software updates?" },
+      { pts: 2, t: "Manually rewrite parsing scripts whenever developers modify payload formats.", fb: "Chad comments: 'Data is flowing, but your engineering team is spending full days writing hotfixes.'", disc: "What are the operational costs of relying on manual code fixes?" },
+      { pts: 1, t: "Post a message asking developers never to alter payload JSON structures.", fb: "Chad sighs: 'Developers must ship features! Our data architecture must adapt dynamically.'", disc: "Why must data engineering teams build flexible pipelines for evolving products?" },
+      { pts: -1, t: "Drop all incoming event payloads that do not match original JSON structures.", fb: "Chad yells: 'Half of our player analytics data was discarded completely!'", disc: "Why is dropping mismatched data without fallback mechanisms dangerous?" }
+    ]
+  },
+
+  // --- SCENARIO 7 ---
+  {
+    type: "standard",
+    day: "Thursday Morning — Unencrypted Cloud Storage",
+    text: "An internal security audit reveals that automated daily data warehouse snapshots are stored in unencrypted S3 buckets.",
+    vocab: "<strong>Key Vocabulary:</strong><br>• <em>At-rest encryption</em> = protecting stored data mathematically.<br>• <em>Audit finding</em> = official security flaw identified in a review.<br>• <em>Bucket policy</em> = access rules for cloud storage containers.",
+    options: [
+      { pts: 3, t: "Enforce automated default KMS encryption on all storage buckets and update IAM access policies.", fb: "Chad commends: 'Flawless execution! All snapshots are fully encrypted and security audit findings are cleared.'", disc: "Why should at-rest encryption be enforced automatically across all storage environments?" },
+      { pts: 2, t: "Delete historical unencrypted snapshots and enable encryption on future daily snapshots.", fb: "Chad notes: 'Current snapshots are secure, but losing historical recovery points created business risk.'", disc: "How do you safely remediate security flaws without destroying historical backups?" },
+      { pts: 1, t: "Schedule encryption implementation for the next quarterly infrastructure sprint.", fb: "Chad frowns: 'Leaving unencrypted snapshots exposed for months violates compliance policies.'", disc: "Why should security vulnerabilities be prioritized over feature requests?" },
+      { pts: -1, t: "Disable daily automated snapshots to clear the security audit flag.", fb: "Chad panics: 'We have no disaster recovery snapshots if the warehouse corrupts!'", disc: "Why are automated snapshots essential for business continuity?" }
+    ]
+  },
+
+  // --- SCENARIO 8 ---
+  {
+    type: "standard",
+    day: "Thursday Eve — External API Rate Limits",
+    text: "An external geolocation API starts throttling ingestion requests due to high request frequency, stalling enrichment pipelines.",
+    vocab: "<strong>Key Vocabulary:</strong><br>• <em>Throttling</em> = limiting request speeds to prevent server overload.<br>• <em>Exponential backoff</em> = waiting progressively longer between request retries.<br>• <em>Enrichment</em> = adding external context to raw data.",
+    options: [
+      { pts: 3, t: "Implement exponential backoff retry algorithms and batch requests into combined payloads.", fb: "Chad praises: 'Smart engineering! API calls are optimized, rate limits avoided, and enrichment runs smoothly.'", disc: "How does exponential backoff protect pipelines from external API throttling?" },
+      { pts: 2, t: "Upgrade to a higher external API pricing tier to increase request volume limits.", fb: "Chad says: 'Throttling stopped, but our monthly API vendor costs doubled unexpectedly.'", disc: "When should you upgrade vendor API plans versus refactoring ingestion code?" },
+      { pts: 1, t: "Add simple fixed sleep timers between API calls, increasing pipeline runtime.", fb: "Chad grunts: 'Enrichment is working, but total pipeline runtime increased by 4 hours.'", disc: "What are the limitations of simple sleep timers in high-throughput pipelines?" },
+      { pts: -1, t: "Disable the geolocation enrichment step completely to keep pipelines moving.", fb: "Chad fumes: 'Regional player analytics are missing! Marketing cannot target ads.'", disc: "Why should enrichment steps not be cut without business alignment?" }
+    ]
+  },
+
+  // --- SCENARIO 9 ---
+  {
+    type: "standard",
+    day: "Friday Surge — Warehouse Storage Limit",
+    text: "Primary analytics storage reaches 98% capacity ahead of a high-traffic weekend player event.",
+    vocab: "<strong>Key Vocabulary:</strong><br>• <em>Capacity threshold</em> = maximum storage safety limit.<br>• <em>Auto-scaling</em> = automatically increasing server resources based on load.<br>• <em>Data retention policy</em> = rules defining how long data is stored.",
+    options: [
+      { pts: 3, t: "Configure auto-scaling storage rules and apply data retention compression to legacy tables.", fb: "Chad approves: 'Proactive management! Storage capacity expanded automatically and legacy data costs dropped.'", disc: "How do automated retention policies prevent warehouse storage exhaustion?" },
+      { pts: 2, t: "Manually provision maximum storage capacity immediately on high-speed drives.", fb: "Chad notes: 'Storage is secure for the weekend, though server expenses went up.'", disc: "How do you plan storage capacity ahead of predicted traffic spikes?" },
+      { pts: 1, t: "Delete temporary staging tables manually to free up 10% storage space.", fb: "Chad sighs: 'It bought us time, but storage will hit capacity again by Sunday night.'", disc: "Why are temporary manual cleanup fixes risky for weekend traffic events?" },
+      { pts: -1, t: "Ignore storage alerts and assume traffic will remain within current limits.", fb: "Chad screams: 'Storage filled up! Database crashed and lost all Saturday telemetry!'", disc: "Why must infrastructure capacity warnings be addressed immediately?" }
+    ]
+  },
+
+  // --- SCENARIO 10 ---
+  {
+    type: "standard",
+    day: "Saturday Morning — Flawed Public KPI",
+    text: "Community managers report that the public website 'Active Players' counter is displaying inaccurate low figures due to a query logic error.",
+    vocab: "<strong>Key Vocabulary:</strong><br>• <em>KPI (Key Performance Indicator)</em> = crucial business metric.<br>• <em>Distinct count logic</em> = calculating unique items without duplicates.<br>• <em>Public dashboard</em> = metrics visible to external users.",
+    options: [
+      { pts: 3, t: "Correct the underlying SQL query logic, invalidate dashboard cache, and issue a brief internal notice.", fb: "Chad praises: 'Quick and accurate response! Public numbers are correct and stakeholder trust was preserved.'", disc: "Why is distinct counting logic critical when calculating active user metrics?" },
+      { pts: 2, t: "Fix the SQL query silently and wait for the next scheduled cache refresh cycle.", fb: "Chad notes: 'Query fixed, but community managers spent 2 hours handling confused player posts.'", disc: "Why should internal teams be notified immediately before public metrics change?" },
+      { pts: 1, t: "Override the public display manually with estimated numbers until Monday.", fb: "Chad frowns: 'Manual estimates created confusion when real numbers differed on Monday.'", disc: "What are the risks of using manual estimated data on public dashboards?" },
+      { pts: -1, t: "Take down the public dashboard completely until next week.", fb: "Chad groans: 'Taking down the page caused gaming media to report a secret player drop!'", disc: "Why can taking down public dashboards trigger unnecessary market panic?" }
+    ]
+  },
+
+  // --- EMERGENCY 2 ---
+  {
+    type: "emergency",
+    day: "EMERGENCY DANGER 2 — SATURDAY AFTERNOON",
+    text: "<span class='emergency-header'>CYBER RANSOMWARE ATTACK:</span> Hackers lock production database terminals and demand cryptocurrency to restore decryption keys.",
+    vocab: "<strong>Key Vocabulary:</strong><br>• <em>Ransomware</em> = malicious software locking files for ransom.<br>• <em>Immutable backup</em> = data backups that cannot be altered or deleted.",
+    options: [
+      { pts: 2, isGood: true, t: "ISOLATE & RESTORE: Disconnect affected systems, notify IT Security, and restore from immutable backups.", fb: "Chad confirms: 'Correct security response! Systems were isolated and restored cleanly from immutable backups.'", disc: "What is your organization's recovery protocol during ransomware events?" },
+      { pts: 0, isGood: false, t: "PAY RANSOM: Pay the cryptocurrency demand immediately using company funds to restore access fast.", fb: "CRITICAL FAILURE: Hackers took the payment and kept database keys locked permanently. GAME OVER.", disc: "" }
+    ]
+  },
+
+  // --- SCENARIO 11 ---
+  {
+    type: "standard",
+    day: "Sunday — Stale BI Cache Layer",
+    text: "Executive dashboards display outdated Saturday metrics because the caching layer is failing to invalidate after pipeline updates.",
+    vocab: "<strong>Key Vocabulary:</strong><br>• <em>Cache invalidation</em> = clearing outdated data from memory.<br>• <em>TTL (Time To Live)</em> = expiration timer for cached files.<br>• <em>Stale data</em> = outdated information retained in memory.",
+    options: [
+      { pts: 3, t: "Configure automated cache invalidation triggers linked to pipeline completion and optimize TTL timers.", fb: "Chad smiles: 'Great technical fix! Executive dashboards now reflect fresh pipeline data reliably.'", disc: "How does automated cache invalidation ensure data freshness on executive dashboards?" },
+      { pts: 2, t: "Purge cache memory manually every morning before executive briefing calls.", fb: "Chad notes: 'Numbers are fresh for meetings, but manual purges are easy to forget.'", disc: "Why should operational processes be automated rather than manually executed?" },
+      { pts: 1, t: "Disable the caching layer entirely to force dashboards to query the warehouse live.", fb: "Chad grunts: 'Dashboards show real-time numbers, but data warehouse compute costs quadrupled.'", disc: "What are the performance impacts of disabling cache layers on analytics databases?" },
+      { pts: -1, t: "Tell executives to perform hard browser refreshes whenever they view reports.", fb: "Chad fumes: 'Executives expect working dashboards, not manual technical workarounds!'", disc: "Why is asking business stakeholders to use manual workarounds unprofessional?" }
+    ]
+  },
+
+  // --- SCENARIO 12 ---
+  {
+    type: "standard",
+    day: "Cyber Monday Push — Warehouse Platform Migration",
+    text: "Management pushes to migrate analytics workloads to a new cloud warehouse platform today during peak traffic volume.",
+    vocab: "<strong>Key Vocabulary:</strong><br>• <em>Cutover</em> = final transition to a new system.<br>• <em>Dual-running</em> = operating old and new systems simultaneously.<br>• <em>Maintenance window</em> = planned time slot for system updates.",
+    options: [
+      { pts: 3, t: "Postpone platform cutover to a scheduled off-peak maintenance window next week.", fb: "Chad smiles: 'Wise operational decision! Running peak traffic on stable existing systems prevented downtime.'", disc: "Why should major system migrations avoid high-traffic business events?" },
+      { pts: 2, t: "Execute dual-running pipelines to both old and new warehouses simultaneously today.", fb: "Chad notes: 'Safe validation approach, though running dual pipelines temporarily doubled cloud costs.'", disc: "What are the risk-reduction benefits of dual-running systems during migrations?" },
+      { pts: 1, t: "Perform live migration cutover today using fast-copy automation scripts.", fb: "Chad grunts: 'Migration completed, but active player dashboards dropped for 2 peak hours.'", disc: "What risks are associated with live data migrations during peak load?" },
+      { pts: -1, t: "Shut down the legacy warehouse immediately without testing load on the new platform.", fb: "Chad explodes: 'New platform failed under peak load! We lost analytics tracking on Cyber Monday!'", disc: "Why is thorough load testing necessary before decommissioning legacy systems?" }
+    ]
+  }
+];
+
+let currentIndex = 0;
+let totalScore = 0;
+
+function shuffle(array) {
+  let arr = JSON.parse(JSON.stringify(array));
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function showScreen(screenId) {
+  document.querySelectorAll('.shell').forEach(el => el.classList.remove('active'));
+  document.getElementById(screenId).classList.add('active');
+}
+
+function startGame() {
+  currentIndex = 0;
+  totalScore = 0;
+  showScreen("game");
+  renderStep();
+}
+
+function renderStep() {
+  const data = GAME_DATA[currentIndex];
+  
+  document.getElementById("step").textContent = `${data.day} (Step ${currentIndex + 1} of ${GAME_DATA.length})`;
+  document.getElementById("score-display").textContent = `Score: ${totalScore}`;
+  document.getElementById("scenario").innerHTML = data.text;
+  document.getElementById("vocab").innerHTML = data.vocab;
+  
+  const optionsContainer = document.getElementById("options");
+  optionsContainer.innerHTML = "";
+  document.getElementById("feedback").style.display = "none";
+  document.getElementById("discussion").style.display = "none";
+  document.getElementById("next").style.display = "none";
+  document.getElementById("retry").style.display = "none";
+
+  const randomizedOptions = shuffle(data.options);
+  
+  randomizedOptions.forEach(opt => {
+    const btn = document.createElement("button");
+    btn.className = "option";
+    if (data.type === "emergency") {
+      btn.style.borderColor = "var(--red)";
+    }
+    btn.innerHTML = opt.t;
+    btn.onclick = () => {
+      if (data.type === "standard") {
+        chooseStandard(opt);
+      } else {
+        chooseEmergency(opt);
+      }
+    };
+    optionsContainer.appendChild(btn);
+  });
+}
+
+function chooseStandard(opt) {
+  document.querySelectorAll(".option").forEach(btn => btn.disabled = true);
+  
+  totalScore += opt.pts;
+  document.getElementById("score-display").textContent = `Score: ${totalScore}`;
+
+  const fb = document.getElementById("feedback");
+  let badgeClass = opt.pts > 0 ? `badge-${opt.pts}` : `badge--1`;
+  let scoreText = opt.pts > 0 ? `+${opt.pts} Points` : `${opt.pts} Point`;
+  
+  fb.innerHTML = `<span class="score-badge ${badgeClass}">${scoreText}</span><br>${opt.fb}`;
+  fb.style.display = "block";
+
+  const disc = document.getElementById("discussion");
+  disc.innerHTML = `<strong>Discussion Question:</strong> ${opt.disc}`;
+  disc.style.display = "block";
+
+  if (opt.pts === -1) {
+    document.getElementById("retry").style.display = "inline-block";
+  } else {
+    document.getElementById("next").style.display = "inline-block";
+  }
+}
+
+function chooseEmergency(opt) {
+  document.querySelectorAll(".option").forEach(btn => btn.disabled = true);
+
+  if (opt.isGood) {
+    totalScore += opt.pts;
+    document.getElementById("score-display").textContent = `Score: ${totalScore}`;
+
+    const fb = document.getElementById("feedback");
+    fb.innerHTML = `<span class="score-badge badge-3">CRITICAL SUCCESS (+2 Points)</span><br>${opt.fb}`;
+    fb.style.display = "block";
+
+    const disc = document.getElementById("discussion");
+    disc.innerHTML = `<strong>Discussion Question:</strong> ${opt.disc}`;
+    disc.style.display = "block";
+
+    document.getElementById("next").style.display = "inline-block";
+  } else {
+    showGameOver(opt.fb);
+  }
+}
+
+function retryScenario() {
+  renderStep();
+}
+
+function nextStep() {
+  currentIndex++;
+  if (currentIndex >= GAME_DATA.length) {
+    showFinalResults();
+  } else {
+    renderStep();
+  }
+}
+
+function showGameOver(reason) {
+  showScreen("final");
+  document.getElementById("end-title").style.display = "none";
+  document.getElementById("game-over-msg").style.display = "block";
+  document.getElementById("result").innerHTML = `FINAL SCORE: ${totalScore} Points`;
+  document.getElementById("debrief").innerHTML = `<p>${reason}</p><p>Critical system errors or safety failures ended your data governance challenge early. Review infrastructure procedures and try again!</p>`;
+}
+
+function showFinalResults() {
+  showScreen("final");
+  document.getElementById("end-title").style.display = "block";
+  document.getElementById("game-over-msg").style.display = "none";
+  
+  document.getElementById("result").innerHTML = `Final Score: ${totalScore} / 40 Points`;
+
+  let feedbackText = "";
+
+  if (totalScore >= 35) {
+    feedbackText = "<strong>Band 1: Principal Data Architect (35–40 pts)</strong><br>Outstanding performance! You managed data pipelines, GDPR compliance, cloud budgets, and system security flawlessly during a massive game launch. Chad is recommending you for an executive promotion across European data engineering!";
+  } else if (totalScore >= 25) {
+    feedbackText = "<strong>Band 2: Senior Data Engineer (25–34 pts)</strong><br>Very good work! You solved complex database hurdles during launch week effectively. Minor server cost overruns or temporary dashboard delays occurred, but overall system stability and team communication remained solid throughout.";
+  } else if (totalScore >= 15) {
+    feedbackText = "<strong>Band 3: Junior Data Analyst (15–24 pts)</strong><br>You survived launch week, but experienced noticeable operational friction. Expensive cloud bills, data quality bugs, and communication gaps reduced team efficiency. Review key technical concepts and replay to improve your score!";
+  } else {
+    feedbackText = "<strong>Band 4: System Bottleneck (Under 15 pts)</strong><br>Challenging launch week! Database crashes, privacy violations, corrupted sales reports, and unexpected cloud costs caused major business issues. Re-read the scenario vocabulary, focus on safety and compliance, and try again!";
+  }
+
+  document.getElementById("debrief").innerHTML = feedbackText;
+}
+</script>
+</body>
+</html>

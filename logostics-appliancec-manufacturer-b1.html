@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Black Friday Crisis — Logistics Management Challenge</title>
+<style>
+  :root {
+    --bg-main: #121519;
+    --card-bg: #1B2028;
+    --card-border: #2E3644;
+    --accent-steel: #8E9AAF;
+    --accent-cyan: #00D2D3;
+    --text-light: #F1F5F9;
+    --text-muted: #94A3B8;
+    --vocab-color: #70A1FF;
+    --disc-color: #ECCC68;
+    --green: #2ED573;
+    --blue: #1E90FF;
+    --ochre: #FFA502;
+    --red: #FF4757;
+  }
+
+  body { 
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+    background: var(--bg-main); 
+    color: var(--text-light); 
+    display: flex; 
+    justify-content: center; 
+    padding: 20px;
+    margin: 0;
+  }
+  
+  .shell { max-width: 760px; width: 100%; }
+  
+  .card { 
+    background: linear-gradient(145deg, #1e242e, #171b22); 
+    padding: 32px; 
+    border-radius: 16px; 
+    line-height: 1.6; 
+    box-shadow: 0 12px 32px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1);
+    border: 1px solid var(--card-border);
+  }
+
+  h1, h2, h3 { margin-top: 0; color: var(--text-light); letter-spacing: -0.5px; }
+  h1 { 
+    border-bottom: 2px solid var(--accent-cyan); 
+    padding-bottom: 12px; 
+    font-size: 1.8rem; 
+    text-transform: uppercase;
+    background: linear-gradient(45deg, #fff, var(--accent-steel));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  button.action-btn { 
+    padding: 14px 24px; 
+    cursor: pointer; 
+    background: linear-gradient(180deg, #2C3545 0%, #1E2532 100%); 
+    color: var(--text-light); 
+    border: 1px solid var(--card-border); 
+    border-radius: 8px; 
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+  button.action-btn:hover { 
+    background: linear-gradient(180deg, #3A465B 0%, #252E3E 100%); 
+    border-color: var(--accent-cyan); 
+    color: var(--accent-cyan);
+    transform: translateY(-1px);
+  }
+
+  .game-ui, .final-card { display: none; }
+  
+  .option { 
+    display: block; 
+    width: 100%; 
+    margin: 12px 0; 
+    padding: 16px; 
+    text-align: left; 
+    background: #222936; 
+    border: 1px solid #2D3748; 
+    color: var(--text-light); 
+    border-radius: 10px; 
+    cursor: pointer;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    transition: all 0.2s ease;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+  .option:hover { 
+    background: #2A3445; 
+    border-color: var(--accent-cyan);
+    transform: translateX(4px);
+  }
+  .option:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  
+  .emergency-header {
+    color: var(--red);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    animation: pulse 1.2s infinite alternate;
+  }
+
+  @keyframes pulse {
+    0% { opacity: 1; text-shadow: 0 0 4px rgba(255, 71, 87, 0.4); }
+    100% { opacity: 0.5; text-shadow: none; }
+  }
+
+  #feedback { 
+    margin-top: 20px; 
+    padding: 16px; 
+    background: #18202C; 
+    border-left: 4px solid var(--accent-cyan); 
+    border-radius: 8px; 
+    font-size: 0.95rem;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
+  }
+  
+  .vocab-box { 
+    background: #141A24; 
+    padding: 14px; 
+    border-radius: 8px; 
+    margin: 16px 0; 
+    font-size: 0.9em; 
+    color: var(--vocab-color); 
+    border: 1px solid #1E293B;
+  }
+  
+  .discussion-box { 
+    background: #24241B; 
+    padding: 16px; 
+    border-radius: 8px; 
+    margin-top: 16px; 
+    font-style: italic; 
+    color: var(--disc-color); 
+    border-left: 4px solid var(--disc-color);
+    font-size: 0.95rem;
+  }
+  
+  .context-tag { 
+    font-size: 0.85em; 
+    color: var(--text-muted); 
+    text-transform: uppercase; 
+    letter-spacing: 1.5px; 
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    font-weight: 600;
+  }
+
+  .score-tracker {
+    font-weight: 700;
+    color: var(--accent-cyan);
+  }
+
+  .score-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.8em;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+  }
+  .badge-3 { background-color: var(--green); color: #000; }
+  .badge-2 { background-color: var(--blue); }
+  .badge-1 { background-color: var(--ochre); color: #000; }
+  .badge--1 { background-color: var(--red); }
+
+  .game-over {
+    color: var(--red);
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin-bottom: 12px;
+    letter-spacing: 1px;
+  }
+</style>
+</head>
+<body>
+
+<div class="shell" id="intro">
+  <div class="card">
+    <h1>Black Friday Crisis</h1>
+    <p><strong>Role:</strong> Logistics Manager at a premier home appliance manufacturer in Valence, France.</p>
+    <p><strong>Mission:</strong> Lead your operations through a 7-day high-volume surge (Black Friday through Cyber Monday). Manage warehouse capacity, shipping carriers, workforce tensions, and inventory alongside your American Supply Chain Director, Mark.</p>
+    <p><strong>Rules:</strong></p>
+    <ul>
+      <li>12 Core Scenarios with randomized options (+3 Excellent, +2 Good, +1 Average, -1 Poor with forced retry).</li>
+      <li>2 High-Stakes Emergency Scenarios after Scenarios 4 and 10. Making the wrong choice triggers an immediate <strong>Game Over</strong>.</li>
+      <li>Maximum Possible Score: <strong>40 Points</strong>.</li>
+    </ul>
+    <button class="action-btn" onclick="startGame()">Start the 7-Day Challenge</button>
+  </div>
+</div>
+
+<div class="shell game-ui" id="game">
+  <div class="card">
+    <div class="context-tag">
+      <span id="step"></span>
+      <span class="score-tracker" id="score-display">Score: 0</span>
+    </div>
+    <h3 id="scenario"></h3>
+    <div class="vocab-box" id="vocab"></div>
+    <div id="options"></div>
+    <div id="feedback" style="display:none"></div>
+    <div class="discussion-box" id="discussion" style="display:none"></div>
+    <br>
+    <button class="action-btn" id="next" onclick="nextStep()" style="display:none">Continue</button>
+    <button class="action-btn" id="retry" onclick="retryScenario()" style="display:none">Try Again</button>
+  </div>
+</div>
+
+<div class="shell final-card" id="final">
+  <div class="card">
+    <h1 id="end-title">Challenge Complete</h1>
+    <div id="game-over-msg" class="game-over" style="display:none;">CRITICAL OPERATIONS FAILURE</div>
+    <div id="result" style="font-size: 1.3em; margin-bottom: 16px; font-weight: bold;"></div>
+    <div id="debrief"></div>
+    <br>
+    <button class="action-btn" onclick="location.reload()">Play Again</button>
+  </div>
+</div>
+
+<script>
+const GAME_DATA = [
+  // --- SCENARIO 1 ---
+  {
+    type: "standard",
+    day: "Monday Morning — Peak Week Launch",
+    text: "A delivery of 500 smart fridges arrives unexpectedly early at your Valence regional warehouse, completely clogging the receiving docks. Mark messages: <em>'We can't block loading bays! We need a cost-effective plan right now.'</em>",
+    vocab: "<strong>Useful Words:</strong><br>• <em>Loading dock</em> = area where trucks load/unload goods.<br>• <em>Backlog</em> = accumulated unprocessed work/goods.<br>• <em>Third-party warehouse</em> = external contract storage facility.",
+    options: [
+      { pts: 3, color: "green", t: "Rent emergency overflow space at a local third-party warehouse for two weeks.", fb: "Mark nods: 'Smart move. It adds a minor storage fee, but our core intake keeps moving smoothly.'", disc: "How do you explain unexpected operational expenses to senior management?" },
+      { pts: 2, color: "blue", t: "Reroute 50% of the shipment immediately to a secondary facility nearby.", fb: "Mark replies: 'Decisive action. Extra transport fees hurt slightly, but dock flow is restored.'", disc: "What key factors determine whether you reroute inventory or hold it?" },
+      { pts: 1, color: "ochre", t: "Refuse the delivery and request the carrier to return late next week.", fb: "Mark grimaces: 'Docks are clear, but now retail partners are reporting out-of-stock items!'", disc: "What impact does refusing shipments have on supplier relationships?" },
+      { pts: -1, color: "red", t: "Store the fridges temporarily in pedestrian building aisles to save money.", fb: "Mark yells: 'Unacceptable! Aisle blockages breach safety regulations and stop forklifts!'", disc: "Why must safety never be sacrificed for temporary operational convenience?" }
+    ]
+  },
+
+  // --- SCENARIO 2 ---
+  {
+    type: "standard",
+    day: "Monday Afternoon — System Integration Failure",
+    text: "Your ERP software crashes during high volume, stopping digital pick-lists for three hours. Mark calls: <em>'Orders are piling up! How do we keep fulfillment moving without creating inventory errors?'</em>",
+    vocab: "<strong>Useful Words:</strong><br>• <em>ERP System</em> = integrated software used to manage business operations.<br>• <em>Manual fallback</em> = non-automated backup process.<br>• <em>Throughput</em> = rate at which a system processes items.",
+    options: [
+      { pts: 3, color: "green", t: "Activate manual paper picking protocols for top-selling items while IT resolves the crash.", fb: "Mark notes: 'Great crisis management! Our key revenue drivers kept moving despite the blackout.'", disc: "How prepared is your operational team to execute manual fallback procedures?" },
+      { pts: 2, color: "blue", t: "Pause picking completely and reassign floor staff to perform maintenance and staging.", fb: "Mark comments: 'Controlled approach. We lost throughput hours, but data integrity was fully preserved.'", disc: "Is maintaining data accuracy worth losing shipping speed during peak periods?" },
+      { pts: 1, color: "ochre", t: "Allow floor managers to pick items based on memory and verbal customer lists.", fb: "Mark groans: 'We shipped orders, but created dozens of wrong items and inventory errors.'", disc: "How do unrecorded inventory movements damage supply chain operations?" },
+      { pts: -1, color: "red", t: "Instruct workers to take extended breaks until IT resolves the software issue.", fb: "Mark fumes: 'Total stagnation! Idle labor during peak volume is an expensive disaster.'", disc: "What steps should be taken to keep staff productive during system downtimes?" }
+    ]
+  },
+
+  // --- SCENARIO 3 ---
+  {
+    type: "standard",
+    day: "Tuesday Morning — Transit Bottlenecks",
+    text: "A major retail client in Paris demands 200 washing machines delivered tomorrow for a Black Friday promo. Standard road transport takes 3 days. Express transport costs three times as much.",
+    vocab: "<strong>Useful Words:</strong><br>• <em>Freight</em> = goods transported by truck, train, ship, or plane.<br>• <em>Lead time</em> = total time from order placement to final delivery.<br>• <em>Margin</em> = profit difference between selling price and total cost.",
+    options: [
+      { pts: 3, color: "green", t: "Negotiate a partial shipment: send 50 units express today, and 150 via standard transport.", fb: "Mark smiles: 'Excellent negotiation! The client gets launch stock, and overall freight costs stayed low.'", disc: "What phrases in English help negotiate compromise delivery terms with clients?" },
+      { pts: 2, color: "blue", t: "Absorbing the cost, book full express freight to guarantee relationship loyalty.", fb: "Mark notes: 'Client is happy, but our profit margin on this major order dropped to zero.'", disc: "When is it acceptable to lose margin on an order to save a client relationship?" },
+      { pts: 1, color: "ochre", t: "Send all units via standard freight with an email apologizing for the delay.", fb: "Mark frowns: 'The client accepted it, but threatened to downgrade our vendor rating next year.'", disc: "How do late deliveries affect vendor scorecards and long-term contracts?" },
+      { pts: -1, color: "red", t: "Promise express delivery on standard freight budget and hope traffic is light.", fb: "Mark explodes: 'We missed the promo entirely! The client is threatening legal action.'", disc: "Why is over-promising transport capabilities a fatal commercial mistake?" }
+    ]
+  },
+
+  // --- SCENARIO 4 ---
+  {
+    type: "standard",
+    day: "Tuesday Afternoon — Quality Assurance Defect",
+    text: "Quality Control flags a potential wiring defect in a batch of 150 microwave ovens ready for dispatch. Mark texts: <em>'Do we hold the entire batch or ship now and inspect later?'</em>",
+    vocab: "<strong>Useful Words:</strong><br>• <em>Recall</em> = official request to return a defective product.<br>• <em>Quarantine zone</em> = isolated storage for non-compliant goods.<br>• <em>Compliance</em> = meeting formal safety standards.",
+    options: [
+      { pts: 3, color: "green", t: "Quarantine the batch immediately and perform rapid sample testing on 10% of units.", fb: "Mark agrees: 'Rigorous work. We identified the exact faulty sub-lot without blocking good inventory.'", disc: "How do you balance thorough quality control with aggressive delivery schedules?" },
+      { pts: 2, color: "blue", t: "Hold the entire batch for full inspection, delaying shipments by 24 hours.", fb: "Mark says: 'Safety first. Delays hurt our schedule, but we completely avoided product recalls.'", disc: "What are the hidden operational costs associated with product recalls?" },
+      { pts: 1, color: "ochre", t: "Ship the units but issue a technical advisory note to distributor technicians.", fb: "Mark grimaces: 'Distributors were annoyed by extra work, damaging our professional reputation.'", disc: "Is passing technical checks to third parties ever an acceptable strategy?" },
+      { pts: -1, color: "red", t: "Ignore the warning and ship the batch to meet Black Friday dispatch deadlines.", fb: "Mark shouts: 'Major risk! Unsafe electrical appliances could trigger dangerous recalls!'", disc: "What liability risks do companies face when shipping unchecked items?" }
+    ]
+  },
+
+  // --- EMERGENCY 1 (AFTER SCENARIO 4) ---
+  {
+    type: "emergency",
+    day: "EMERGENCY DILEMMA 1 — TUESDAY NIGHT",
+    text: "<span class='emergency-header'>CRITICAL HAZARD:</span> A major chemical spill occurs in the main packing lane, releasing hazardous fumes. Workers are coughing. Stopping operations will cause missing all Wednesday morning carrier deadlines.",
+    vocab: "<strong>Useful Words:</strong><br>• <em>Hazmat</em> = hazardous materials.<br>• <em>Evacuation</em> = emergency withdrawal of personnel.",
+    options: [
+      { pts: 2, isGood: true, t: "IMMEDIATE EVACUATION: Halt picking, evacuate the zone, and call the Hazmat response team.", fb: "Mark confirms: 'Correct priority! Human life and safety always supersede delivery deadlines. No penalties assigned.'", disc: "How do you lead a team calmly during a sudden facility emergency?" },
+      { pts: 0, isGood: false, t: "CONTINUE OPERATIONS: Issue basic dust masks to workers and demand they finish the shift.", fb: "CRITICAL FAILURE: Staff members require medical hospitalization. Authorities seal the facility. GAME OVER.", disc: "" }
+    ]
+  },
+
+  // --- SCENARIO 5 ---
+  {
+    type: "standard",
+    day: "Wednesday Morning — Inventory Discrepancy",
+    text: "Your Warehouse Management System shows 100 high-end espresso machines in stock, but physical shelves in Zone C are completely empty. Orders are actively coming in.",
+    vocab: "<strong>Useful Words:</strong><br>• <em>Discrepancy</em> = inconsistency between database and physical count.<br>• <em>Cycle count</em> = targeted inventory auditing practice.<br>• <em>Shrinkage</em> = loss of inventory due to theft or accounting error.",
+    options: [
+      { pts: 3, color: "green", t: "Freeze online stock counts immediately, inform support, and conduct a targeted cycle count.", fb: "Mark reports: 'Proactive work. We contained order cancellations before clients were affected.'", disc: "How do you communicate inventory mistakes internally to minimize panic?" },
+      { pts: 2, color: "blue", t: "Substitute ordered units with a higher-spec model at no extra charge to customers.", fb: "Mark notes: 'Expensive solution, but customer satisfaction ratings remained exceptionally high.'", disc: "When is product upgrading a viable solution for out-of-stock items?" },
+      { pts: 1, color: "ochre", t: "Keep selling online while staff spend hours searching unmapped warehouse zones.", fb: "Mark sighs: 'We took 30 unfulfillable orders. Customer support is overwhelmed with refunds.'", disc: "How do inventory discrepancies hurt customer service teams during sales?" },
+      { pts: -1, color: "red", t: "Shut down the entire warehouse for half a day to conduct a site-wide audit.", fb: "Mark yells: 'Paralyzing the entire facility during Black Friday week cost us millions!'", disc: "Why are full facility shutdowns dangerous during peak operating seasons?" }
+    ]
+  },
+
+  // --- SCENARIO 6 ---
+  {
+    type: "standard",
+    day: "Wednesday Afternoon — Labor Dispute",
+    text: "Warehouse operators threaten a walkout due to mandatory overtime demands. Mark asks: <em>'We can't lose our workforce right before Black Friday! How do we handle this?'</em>",
+    vocab: "<strong>Useful Words:</strong><br>• <em>Overtime</em> = hours worked beyond normal duty time.<br>• <em>Union steward</em> = employee representing labor union interests.<br>• <em>Incentive</em> = financial or personal reward to motivate action.",
+    options: [
+      { pts: 3, color: "green", t: "Meet union stewards, negotiate catering allowances, and offer voluntary high-rate overtime shifts.", fb: "Mark approves: 'Diplomatic victory! Staff morale recovered and shift coverage was fully secured.'", disc: "What leadership skills are essential when resolving workplace labor tension?" },
+      { pts: 2, color: "blue", t: "Hire temporary agency workers immediately to replace protesting regular staff.", fb: "Mark notes: 'Shift targets were met, but operational errors rose due to inexperienced staff.'", disc: "What are the operational risks of relying heavily on temporary staff?" },
+      { pts: 1, color: "ochre", t: "Cancel planned overtime shifts completely and scale back daily dispatch targets.", fb: "Mark grunts: 'Labor peace preserved, but backlog is growing. We are falling behind schedule.'", disc: "How do you balance employee well-being with aggressive operational targets?" },
+      { pts: -1, color: "red", t: "Threaten disciplinary action for any worker refusing mandatory extra hours.", fb: "Mark groans: 'The team walked out on strike! Operations are completely frozen.'", disc: "Why is aggressive authority ineffective in modern labor management?" }
+    ]
+  },
+
+  // --- SCENARIO 7 ---
+  {
+    type: "standard",
+    day: "Thursday Morning — Supplier Shortage",
+    text: "A key component supplier in Northern Italy delays shipping critical induction coils for built-in cooktops. Assembly lines face shutdown in 4 hours.",
+    vocab: "<strong>Useful Words:</strong><br>• <em>Component</em> = part used in manufacturing finished goods.<br>• <em>Bottleneck</em> = stage that reduces workflow speed.<br>• <em>Safety stock</em> = reserve inventory buffer.",
+    options: [
+      { pts: 3, color: "green", t: "Source equivalent certified coils locally at premium cost to keep assembly moving.", fb: "Mark commends: 'Agile decision! High component costs were offset by continuous factory output.'", disc: "How do local fallback suppliers protect companies from global supply disruptions?" },
+      { pts: 2, color: "blue", t: "Reconfigure assembly lines temporarily to build units requiring available parts.", fb: "Mark notes: 'Good flexibility. Production schedule was disrupted, but worker efficiency stayed high.'", disc: "How can agile manufacturing processes mitigate supply chain delays?" },
+      { pts: 1, color: "ochre", t: "Pause assembly lines and place factory technicians on paid standby status.", fb: "Mark frowns: 'Unproductive downtime cost us heavily, but product specs remained unchanged.'", disc: "What is the true cost of idle assembly lines during peak manufacturing periods?" },
+      { pts: -1, color: "red", t: "Use uncertified alternative coils from an unvetted local supplier.", fb: "Mark panics: 'Uncertified parts violate safety laws! Product compliance is completely compromised.'", disc: "Why must component quality certifications never be bypassed under pressure?" }
+    ]
+  },
+
+  // --- SCENARIO 8 ---
+  {
+    type: "standard",
+    day: "Thursday Eve — Black Friday Eve Logistics",
+    text: "It is 8:00 PM on Black Friday Eve. Order volume is 40% higher than projected forecasts. Docks are congested and floor staff are exhausted.",
+    vocab: "<strong>Useful Words:</strong><br>• <em>Congestion</em> = overcrowding slowing down motion.<br>• <em>Shift rotation</em> = scheduled staggering of worker duty hours.<br>• <em>Cross-functional</em> = involving different operational departments.",
+    options: [
+      { pts: 3, color: "green", t: "Reallocate administrative logistics staff to dock staging and implement mandatory rest breaks.", fb: "Mark praises: 'All-hands support boosted team spirit and cleared dock congestion cleanly!'", disc: "How can cross-functional training help businesses survive demand spikes?" },
+      { pts: 2, color: "blue", t: "Authorize double-time pay incentives for night shift teams to push through backlog.", fb: "Mark comments: 'Labor budget was stretched, but we cleared dispatch before Friday morning.'", disc: "Are financial incentives effective for short-term emergency productivity?" },
+      { pts: 1, color: "ochre", t: "Cap outgoing dispatch numbers for tonight and resume processing tomorrow morning.", fb: "Mark sighs: 'Controlled chaos, but Friday morning shifts start with a heavy backlog.'", disc: "How do morning backlogs impact overall carrier collection schedules?" },
+      { pts: -1, color: "red", t: "Force existing floor staff to work 16-hour continuous shifts without breaks.", fb: "Mark fumes: 'Exhaustion caused major forklift accidents and severe worker injuries!'", disc: "What are the legal and ethical limits of pushing operational teams?" }
+    ]
+  },
+
+  // --- SCENARIO 9 ---
+  {
+    type: "standard",
+    day: "Black Friday Peak — Carrier Shortage",
+    text: "It's Black Friday! Our primary freight carrier fails to send 5 promised trailers due to driver shortages. Outgoing packaged appliances are filling up floor space.",
+    vocab: "<strong>Useful Words:</strong><br>• <em>Carrier</em> = company transporting goods commercially.<br>• <em>Spot market</em> = buying transport services on immediate short-term rates.<br>• <em>Capacity</em> = maximum volume transport can hold.",
+    options: [
+      { pts: 3, color: "green", t: "Secure emergency spot-market carrier capacity using secondary pre-approved brokers.", fb: "Mark approves: 'Quick thinking! Rates were high, but freight kept moving without storage stalls.'", disc: "Why are relationships with backup freight brokers critical during peak seasons?" },
+      { pts: 2, color: "blue", t: "Restructure staging zones to stack orders vertically, holding freight for Saturday.", fb: "Mark observes: 'Good warehouse adaptation. Docks remained organized despite delayed pickups.'", disc: "How do floor management techniques preserve space during carrier delays?" },
+      { pts: 1, color: "ochre", t: "Deliver urgent local orders using internal fleet vans, delaying long-distance shipments.", fb: "Mark notes: 'Local clients are happy, but regional distribution centers faced stockouts.'", disc: "How do you prioritize local delivery vs regional hub replenishment?" },
+      { pts: -1, color: "red", t: "Stack outgoing pallets outside on uncovered loading bays in rainy weather.", fb: "Mark screams: 'Rain ruined thousands of Euros worth of appliance packaging boxes!'", disc: "Why must goods protection be prioritized even when space is fully exhausted?" }
+    ]
+  },
+
+  // --- SCENARIO 10 ---
+  {
+    type: "standard",
+    day: "Saturday Morning — Reverse Logistics Surge",
+    text: "Customer returns begin arriving early. Wrong delivery addresses and damaged boxes are filling the returns bay, blocking incoming return processing.",
+    vocab: "<strong>Useful Words:</strong><br>• <em>Reverse logistics</em> = managing returned or defective goods.<br>• <em>RMA</em> = Return Merchandise Authorization.<br>• <em>Triage</em> = sorting items based on condition/priority.",
+    options: [
+      { pts: 3, color: "green", t: "Set up a dedicated triage zone to categorize returns immediately: restock, repair, or scrap.", fb: "Mark praises: 'Efficient reverse flow! Valued returned stock was quickly resold.'", disc: "Why is efficient reverse logistics key to protecting profit margins?" },
+      { pts: 2, color: "blue", t: "Postpone processing returns until Monday, stacking them securely in storage.", fb: "Mark agrees: 'Acceptable prioritization. Main forward dispatches remained unhindered.'", disc: "When is it beneficial to pause reverse logistics to focus on outbound shipping?" },
+      { pts: 1, color: "ochre", t: "Issue automatic refunds to all returns immediately without verifying box contents.", fb: "Mark frowns: 'We refunded several empty boxes! Fraud costs hit our department budget.'", disc: "What risks are associated with automated, unverified customer refunds?" },
+      { pts: -1, color: "red", t: "Refuse carrier drop-offs of returned goods until next week.", fb: "Mark groans: 'Carriers levied heavy storage fines against us for refusing authorized returns!'", disc: "What obligations do logistics teams have regarding contractual return intake?" }
+    ]
+  },
+
+  // --- EMERGENCY 2 (AFTER SCENARIO 10) ---
+  {
+    type: "emergency",
+    day: "EMERGENCY DILEMMA 2 — SATURDAY AFTERNOON",
+    text: "<span class='emergency-header'>CYBER RANSOMWARE ATTACK:</span> Hackers lock your dispatch terminal network, demanding Bitcoin to restore shipping labels. Computer screens are locked.",
+    vocab: "<strong>Useful Words:</strong><br>• <em>Ransomware</em> = malicious software blocking access until payment.<br>• <em>Cybersecurity</em> = protection of systems against digital attacks.",
+    options: [
+      { pts: 2, isGood: true, t: "ISOLATE & REPORT: Disconnect terminals from network immediately, notify IT Security, switch to offline procedures.", fb: "Mark confirms: 'Correct response! IT isolated the breach within 20 minutes and prevented operational data theft.'", disc: "What are your company protocols when facing severe cybersecurity threats?" },
+      { pts: 0, isGood: false, t: "PAY RANSOM: Pay the cryptocurrency fee immediately using company funds to restore systems.", fb: "CRITICAL FAILURE: Payment failed, funds lost, and IT systems permanently corrupted. GAME OVER.", disc: "" }
+    ]
+  },
+
+  // --- SCENARIO 11 ---
+  {
+    type: "standard",
+    day: "Sunday Peak — Packaging Supply Shortage",
+    text: "Your facility runs out of custom heavy-duty protective corners for shipping glass-top dishwashers. Standard cardboard offers minimal protection.",
+    vocab: "<strong>Useful Words:</strong><br>• <em>Consumables</em> = goods used regularly that are replaced continuously.<br>• <em>Transit damage</em> = harm caused to products during transportation.<br>• <em>Standard operating procedure (SOP)</em> = established step-by-step instructions.",
+    options: [
+      { pts: 3, color: "green", t: "Repurpose high-density foam padding from idle production lines to custom-fit delicate corners.", fb: "Mark smiles: 'Resourceful engineering! Transit damage was zero and orders shipped on time.'", disc: "How can operational teams creatively adapt materials during packaging shortages?" },
+      { pts: 2, color: "blue", t: "Double-wrap fragile zones with standard bubble wrap and add prominent 'Fragile' labels.", fb: "Mark notes: 'Damage rate rose slightly by 2%, but fulfillment kept moving forward.'", disc: "Is extra labeling an effective countermeasure for reduced structural packaging?" },
+      { pts: 1, color: "ochre", t: "Halt shipments of glass-top models until official custom corner supplies arrive Monday.", fb: "Mark grunts: 'Safeguarded products, but built up a heavy backlog for Cyber Monday morning.'", disc: "When should shipping be paused to protect product integrity?" },
+      { pts: -1, color: "red", t: "Ship dishwashers in standard unreinforced boxes to meet daily shipping targets.", fb: "Mark fumes: 'Dozens of dishwashers arrived with shattered glass panels! Customer backlash is huge.'", disc: "How does transit damage ruin brand reputation during peak shopping periods?" }
+    ]
+  },
+
+  // --- SCENARIO 12 ---
+  {
+    type: "standard",
+    day: "Cyber Monday Final Push — B2B vs B2C Conflict",
+    text: "It is Cyber Monday. Freight capacity is maxed out. You must choose between fulfilling a corporate retail chain order of 300 built-in ovens or 300 individual e-commerce consumer orders.",
+    vocab: "<strong>Useful Words:</strong><br>• <em>B2B / B2C</em> = Business-to-Business / Business-to-Consumer.<br>• <em>Fulfillment</em> = process of receiving, packaging, and shipping orders.<br>• <em>SLA</em> = Service Level Agreement.",
+    options: [
+      { pts: 3, color: "green", t: "Split capacity 50/50: fulfill urgent e-commerce SLAs and negotiate partial B2B delivery.", fb: "Mark smiles: 'Balanced strategy! Saved individual consumer trust while keeping corporate happy.'", disc: "How do you balance obligations between large B2B partners and direct consumers?" },
+      { pts: 2, color: "blue", t: "Prioritize the B2B corporate order completely to protect high-value long-term contracts.", fb: "Mark notes: 'Corporate contract secured, though individual e-commerce reviews took a temporary hit.'", disc: "Should high-value B2B relationships always override individual retail sales?" },
+      { pts: 1, color: "ochre", t: "Prioritize B2C direct e-commerce orders completely to capture immediate high retail margins.", fb: "Mark grunts: 'High retail profits captured, but corporate account manager is furious with us.'", disc: "How do operational choices directly impact sales department relationships?" },
+      { pts: -1, color: "red", t: "Cancel half of both order types to make logistics management simpler.", fb: "Mark explodes: 'Unbelievable! You damaged reputation across both commercial sectors simultaneously!'", disc: "Why is arbitrary order cancellation damaging to brand equity?" }
+    ]
+  }
+];
+
+let currentIndex = 0;
+let totalScore = 0;
+let currentOptions = [];
+
+function shuffle(array) {
+  let arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function startGame() {
+  document.getElementById("intro").style.display = "none";
+  document.getElementById("game").style.display = "block";
+  document.getElementById("final").style.display = "none";
+  currentIndex = 0;
+  totalScore = 0;
+  renderStep();
+}
+
+function renderStep() {
+  const data = GAME_DATA[currentIndex];
+  
+  document.getElementById("step").textContent = `${data.day} (Step ${currentIndex + 1} of ${GAME_DATA.length})`;
+  document.getElementById("score-display").textContent = `Score: ${totalScore}`;
+  document.getElementById("scenario").innerHTML = data.text;
+  document.getElementById("vocab").innerHTML = data.vocab;
+  
+  const optionsContainer = document.getElementById("options");
+  optionsContainer.innerHTML = "";
+  document.getElementById("feedback").style.display = "none";
+  document.getElementById("discussion").style.display = "none";
+  document.getElementById("next").style.display = "none";
+  document.getElementById("retry").style.display = "none";
+
+  currentOptions = shuffle(data.options);
+  
+  if (data.type === "standard") {
+    currentOptions.forEach(opt => {
+      const btn = document.createElement("button");
+      btn.className = "option";
+      btn.innerHTML = opt.t;
+      btn.onclick = () => chooseStandard(opt);
+      optionsContainer.appendChild(btn);
+    });
+  } else if (data.type === "emergency") {
+    currentOptions.forEach(opt => {
+      const btn = document.createElement("button");
+      btn.className = "option";
+      btn.style.borderColor = "var(--red)";
+      btn.innerHTML = opt.t;
+      btn.onclick = () => chooseEmergency(opt);
+      optionsContainer.appendChild(btn);
+    });
+  }
+}
+
+function chooseStandard(opt) {
+  document.querySelectorAll(".option").forEach(btn => btn.disabled = true);
+  
+  totalScore += opt.pts;
+  document.getElementById("score-display").textContent = `Score: ${totalScore}`;
+
+  const fb = document.getElementById("feedback");
+  let badgeClass = `badge-${opt.pts}`;
+  let scoreText = opt.pts > 0 ? `+${opt.pts} Points` : `${opt.pts} Point`;
+  
+  fb.innerHTML = `<span class="score-badge ${badgeClass}">${scoreText}</span><br>${opt.fb}`;
+  fb.style.display = "block";
+
+  const disc = document.getElementById("discussion");
+  disc.innerHTML = `<strong>Discussion Question:</strong> ${opt.disc}`;
+  disc.style.display = "block";
+
+  if (opt.pts === -1) {
+    document.getElementById("retry").style.display = "inline-block";
+  } else {
+    document.getElementById("next").style.display = "inline-block";
+  }
+}
+
+function chooseEmergency(opt) {
+  document.querySelectorAll(".option").forEach(btn => btn.disabled = true);
+
+  if (opt.isGood) {
+    totalScore += opt.pts;
+    document.getElementById("score-display").textContent = `Score: ${totalScore}`;
+
+    const fb = document.getElementById("feedback");
+    fb.innerHTML = `<span class="score-badge badge-3">CRITICAL SUCCESS (+2 Points)</span><br>${opt.fb}`;
+    fb.style.display = "block";
+
+    const disc = document.getElementById("discussion");
+    disc.innerHTML = `<strong>Discussion Question:</strong> ${opt.disc}`;
+    disc.style.display = "block";
+
+    document.getElementById("next").style.display = "inline-block";
+  } else {
+    showGameOver(opt.fb);
+  }
+}
+
+function retryScenario() {
+  renderStep();
+}
+
+function nextStep() {
+  currentIndex++;
+  if (currentIndex >= GAME_DATA.length) {
+    showFinalResults();
+  } else {
+    renderStep();
+  }
+}
+
+function showGameOver(reason) {
+  document.getElementById("game").style.display = "none";
+  document.getElementById("final").style.display = "block";
+  document.getElementById("end-title").style.display = "none";
+  document.getElementById("game-over-msg").style.display = "block";
+  document.getElementById("result").innerHTML = `FINAL SCORE: ${totalScore} Points`;
+  document.getElementById("debrief").innerHTML = `<p>${reason}</p><p>Operational failures ended your logistics management challenge early. Review safety protocols and emergency procedures before trying again.</p>`;
+}
+
+function showFinalResults() {
+  document.getElementById("game").style.display = "none";
+  document.getElementById("final").style.display = "block";
+  document.getElementById("end-title").style.display = "block";
+  document.getElementById("game-over-msg").style.display = "none";
+  
+  document.getElementById("result").innerHTML = `Final Score: ${totalScore} / 40 Points`;
+
+  let feedbackText = "";
+
+  if (totalScore >= 35) {
+    feedbackText = "<strong>Band 1: Strategic Supply Chain Director (35–40 pts)</strong><br>Exceptional performance under pressure! You balanced human safety, freight budgets, and client SLA demands flawlessly. Mark is recommending you for an executive promotion across European operations.";
+  } else if (totalScore >= 25) {
+    feedbackText = "<strong>Band 2: Senior Logistics Manager (25–34 pts)</strong><br>Strong operational execution! You navigated complex peak-season hurdles effectively. Minor cost overruns or slight delays occurred, but customer trust and warehouse flow remained solid throughout.";
+  } else if (totalScore >= 15) {
+    feedbackText = "<strong>Band 3: Junior Warehouse Supervisor (15–24 pts)</strong><br>You survived Black Friday, but with significant operational friction. Expensive express freight, inventory errors, and staff tension reduced margins. Strategic planning improvements are needed.";
+  } else {
+    feedbackText = "<strong>Band 4: Operations Bottleneck (Under 15 pts)</strong><br>Critical operational struggle. Warehouse congestion, damaged goods, unhappy clients, and cost overruns impacted the business severely. Review supply chain management practices and replay.";
+  }
+
+  document.getElementById("debrief").innerHTML = feedbackText;
+}
+</script>
+</body>
+</html>

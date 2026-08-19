@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Warehouse Logistics Coordinator: B1 English Game</title>
+    <style>
+        :root {
+            --bg-warehouse: #0b1220;
+            --card-bg: #ffffff;
+            --accent: #0369a1;
+            --accent-hover: #035388;
+            --warning-amber: #d97706;
+            --success-green: #16a34a;
+            --info-blue: #0ea5a4;
+            --text-dark: #0f172a;
+            --border-color: #cbd5e1;
+            --error-red: #dc2626;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-warehouse);
+            background-image: radial-gradient(#122030 1.5px, transparent 0);
+            background-size: 24px 24px;
+            color: var(--text-dark);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .game-container {
+            background-color: var(--card-bg);
+            width: 100%;
+            max-width: 780px;
+            border-radius: 12px;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
+            padding: 30px;
+            border: 3px solid var(--accent);
+        }
+
+        header {
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        h1 {
+            color: var(--accent);
+            font-size: 1.6rem;
+        }
+
+        .status-bar {
+            display: flex;
+            gap: 15px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            background: #f1f5f9;
+            padding: 8px 14px;
+            border-radius: 20px;
+            color: var(--text-dark);
+        }
+
+        .scenario-box { margin-bottom: 20px; }
+        .scenario-text { font-size: 1.1rem; line-height: 1.6; margin-bottom: 15px; }
+
+        .feedback-banner { 
+            padding: 14px 18px; 
+            border-radius: 8px; 
+            margin-bottom: 20px; 
+            font-size: 0.98rem; 
+            line-height: 1.5; 
+            display: none; 
+            border-left: 5px solid; 
+        }
+        .feedback-banner.success { background-color: #f0fdf4; color: var(--success-green); border-color: var(--success-green); }
+        .feedback-banner.info-blue { background-color: #f0f9ff; color: var(--info-blue); border-color: var(--info-blue); }
+        .feedback-banner.warning { background-color: #fffbeb; color: var(--warning-amber); border-color: var(--warning-amber); }
+        .feedback-banner.error { background-color: #fef2f2; color: var(--error-red); border-color: var(--error-red); }
+
+        .vocab-box {
+            background: #f8fafc;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 0.92rem;
+            color: #334155;
+            border: 1px solid #e2e8f0;
+        }
+
+        .discussion-box {
+            background: #fefce8;
+            padding: 14px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-style: italic;
+            color: #854d0e;
+            border-left: 4px solid #ca8a04;
+            font-size: 0.95rem;
+        }
+
+        .options-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+        
+        .btn-option { 
+            background-color: #ffffff; 
+            border: 2px solid var(--border-color); 
+            border-radius: 8px; 
+            padding: 14px 18px; 
+            text-align: left; 
+            font-size: 0.98rem; 
+            color: var(--text-dark); 
+            cursor: pointer; 
+            transition: all 0.2s ease; 
+            line-height: 1.4; 
+        }
+        .btn-option:hover { border-color: var(--accent); background-color: #f8fafc; transform: translateY(-2px); }
+        .btn-option:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        .btn-action { 
+            background-color: var(--accent); 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            padding: 14px 28px; 
+            font-size: 1.05rem; 
+            font-weight: bold; 
+            cursor: pointer; 
+            margin-top: 15px; 
+            display: inline-block; 
+            transition: background-color 0.2s, transform 0.1s; 
+        }
+        .btn-action:hover { background-color: var(--accent-hover); transform: scale(1.02); }
+
+        .hidden { display: none !important; }
+        .final-score { font-size: 2rem; color: var(--accent); font-weight: bold; margin: 15px 0; }
+        .badge { display: inline-block; padding: 4px 10px; background: var(--accent); color: white; border-radius: 4px; font-size: 0.85rem; font-weight: 600; margin-bottom: 10px; }
+
+        .landing-card { text-align: center; padding: 10px 0; }
+        .landing-card h2 { color: var(--accent); font-size: 1.8rem; margin-bottom: 15px; }
+        .landing-card p { font-size: 1.05rem; line-height: 1.6; margin-bottom: 15px; text-align: left; }
+        
+        .emergency-title {
+            color: var(--error-red);
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        @media (max-width: 500px) { .game-container { padding: 18px; } h1 { font-size: 1.3rem; } }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <header id="game-header" class="hidden">
+        <h1>Oak & Pine Logistics</h1>
+        <div class="status-bar">
+            <span>Scenario: <span id="step-display">1</span>/12</span>
+            <span>Score: <span id="score-display">0</span></span>
+        </div>
+    </header>
+
+    <main id="game-body">
+        <!-- LANDING PAGE -->
+        <div id="landing-screen" class="landing-card">
+            <h2>Welcome to Oak & Pine Furniture Warehouse!</h2>
+            <p>You work as a Logistics Coordinator in Liège, Belgium. Peak season is starting: large shipments are arriving, delivery deadlines are tight, and supply chain disruptions require quick thinking and professional communication.</p>
+            <p><strong>Game Rules:</strong></p>
+            <ul style="text-align: left; margin: 0 0 15px 25px; line-height: 1.6;">
+                <li>12 Standard Scenarios (+3 Excellent, +2 Good, +1 Average, -1 Poor with forced retry).</li>
+                <li>2 Critical Emergency Scenarios (after Scenarios 4 & 10). Selecting the wrong choice results in an immediate <strong>Game Over</strong>.</li>
+                <li>Maximum Score: <strong>40 Points</strong>.</li>
+            </ul>
+            <p style="text-align: center; font-weight: bold; color: var(--accent);">Put on your high-visibility vest, grab your digital clipboard, and manage your shift!</p>
+            <button class="btn-action" onclick="startGame()">Start Shift</button>
+        </div>
+
+        <!-- GAMEPLAY SCREEN -->
+        <div id="gameplay-screen" class="hidden">
+            <span class="badge" id="location-badge">Location: Office</span>
+            <div class="scenario-box">
+                <div class="scenario-text" id="scenario-text">Loading shift...</div>
+            </div>
+
+            <div class="vocab-box" id="vocab-box"></div>
+
+            <div class="options-grid" id="options-container"></div>
+
+            <div id="feedback" class="feedback-banner"></div>
+            <div id="discussion" class="discussion-box" style="display:none"></div>
+
+            <button id="next-btn" class="btn-action hidden" onclick="nextStep()">Continue Shift</button>
+            <button id="retry-btn" class="btn-action hidden" onclick="retryStep()">Try Again</button>
+        </div>
+
+        <!-- FINAL RESULTS SCREEN -->
+        <div id="final-screen" class="landing-card hidden">
+            <h2 id="final-header">Shift Completed!</h2>
+            <div class="final-score" id="final-score-display">0 / 40 Points</div>
+            <div id="debrief-text" style="text-align: left; line-height: 1.6; margin-bottom: 20px;"></div>
+            <button class="btn-action" onclick="resetToLanding()">Play Again</button>
+        </div>
+    </main>
+</div>
+
+<script>
+const GAME_DATA = [
+  // --- SCENARIO 1 ---
+  {
+    type: "standard",
+    location: "Receiving Dock (Monday 08:00 AM)",
+    text: "A delivery truck arrives at your Liège warehouse with a consignment of wooden chair legs. Upon inspection, you notice structural damage on the corner of the leading pallet. How do you handle this receiving issue?",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Consignment</em> = a batch of goods delivered to a warehouse.<br>• <em>Quarantine area</em> = a designated space for holding damaged or unverified stock.<br>• <em>Bill of Lading / Delivery Note</em> = official document listing the details of a freight shipment.",
+    options: [
+      { pts: 3, t: "Halt the unloading process, transfer the affected pallet to the quarantine area, and document the specific damage on the consignment delivery note.", fb: "Excellent initiative! Isolating damaged goods immediately protects active inventory records and provides clear proof for supplier claims.", disc: "What professional phrases can you use to explain consignment damage to a freight driver?" },
+      { pts: 2, t: "Stage the damaged items in a temporary holding zone and accept the remaining undamaged portion of the shipment.", fb: "Reasonable approach, though you must ensure the driver signs a formal damage acknowledgment before leaving.", disc: "Under what circumstances is accepting a partial consignment commercially acceptable?" },
+      { pts: 1, t: "Move the entire pallet into standard storage racking to keep the loading dock clear for incoming vehicles.", fb: "You maintained dock flow, but mixing damaged items into active rack space will cause picking errors later.", disc: "What problems arise when damaged inventory is logged into standard warehouse racks?" },
+      { pts: -1, t: "Ignore the structural defect and authorize the team to pack the items for an outbound client delivery.", fb: "Critical error! Shipping defective items to customers leads to expensive returns and damages company reputation.", disc: "Why must quality assurance checks take priority over fast dispatch schedules?" }
+    ]
+  },
+
+  // --- SCENARIO 2 ---
+  {
+    type: "standard",
+    location: "Receiving Office (Monday 11:00 AM)",
+    text: "When reconciling the supplier invoice against the physical count, you notice a discrepancy: the shipping documentation indicates 100 dining tables, but dock staff counted only 90 units. What is your next step?",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Reconcile</em> = compare two sets of data to ensure they match.<br>• <em>Discrepancy</em> = an unexpected difference between recorded data and physical reality.<br>• <em>Shortage report</em> = an official document recording missing items from a delivery.",
+    options: [
+      { pts: 3, t: "Record the 10-unit shortage on the official delivery manifest, capture photographic evidence, and send a formal shortage report to the supplier.", fb: "Outstanding accuracy! Precise documentation prevents your company from being billed for unreceived inventory.", disc: "How do you structure a formal professional email when reporting a stock shortage to a supplier?" },
+      { pts: 2, t: "Request the warehouse supervisor to perform a secondary recount on the dock before signing the partial receipt.", fb: "Prudent decision. Verifying physical counts with a senior colleague ensures inventory data integrity.", disc: "Why is a dual-verification process recommended for high-value stock discrepancies?" },
+      { pts: 1, t: "Sign the delivery receipt for the full 100 units and assume the missing 10 tables will arrive in a subsequent shipment.", fb: "Risky practice. Signing for unreceived stock waives your legal right to claim a financial credit from the supplier.", disc: "What financial risks do logistics companies face when signing unchecked delivery manifests?" },
+      { pts: -1, t: "Manually adjust the Warehouse Management System (WMS) to reflect 100 tables without investigating the missing units.", fb: "Unacceptable action! Altering database records without verification creates severe stock audit failures.", disc: "Why is data integrity vital for modern warehouse operations?" }
+    ]
+  },
+
+  // --- SCENARIO 3 ---
+  {
+    type: "standard",
+    location: "Loading Dock (Tuesday 09:00 AM)",
+    text: "A heavy freight truck from a key raw material supplier in Namur arrives two hours behind schedule. Dock queues are growing and your morning shift targets are falling behind. How do you resolve this bottleneck?",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Behind schedule</em> = running later than planned in a timeline.<br>• <em>Bottleneck</em> = a point of congestion that slows down an entire process.<br>• <em>Prioritize</em> = arrange tasks in order of importance or urgency.",
+    options: [
+      { pts: 3, t: "Perform a rapid risk assessment, prioritize offloading urgent assembly materials first, and communicate the updated timeline to floor managers.", fb: "Brilliant management! Offloading critical production materials first prevented expensive assembly line downtime.", disc: "How do you evaluate which freight shipments should take priority during operational delays?" },
+      { pts: 2, t: "Offload the delayed truck sequentially while informing production supervisors about the adjusted material availability times.", fb: "Methodical response. Maintaining standard safety procedures kept dock operations safe despite the delay.", disc: "Why is transparent communication essential when managing schedule delays?" },
+      { pts: 1, t: "Instruct the driver to wait in the staging yard while your team offloads trucks that arrived on time.", fb: "This decision created vehicle congestion in the yard and escalated tension with the freight carrier.", disc: "How can logistics managers de-escalate frustration when drivers experience long wait times?" },
+      { pts: -1, t: "Rill the team to bypass safety inspection protocols and unload the cargo as quickly as possible.", fb: "Dangerous choice! Rushing offloading procedures significantly increases accident rates and product damage.", disc: "Why should operational speed never compromise workplace safety standards?" }
+    ]
+  },
+
+  // --- SCENARIO 4 ---
+  {
+    type: "standard",
+    location: "Warehouse Aisle (Tuesday 02:00 PM)",
+    text: "A forklift operator informs you that his vehicle's braking system feels unresponsive and is emitting a metallic grinding noise. How do you respond?",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Unresponsive</em> = failing to react properly or quickly to controls.<br>• <em>Tag out / Lockout</em> = attach a warning label to defective machinery to prevent usage.<br>• <em>Maintenance log</em> = official record of equipment repairs and servicing.",
+    options: [
+      { pts: 3, t: "Order the operator to stop using the forklift immediately, place a formal 'Out of Service' tag on the controls, and log an urgent repair request.", fb: "Correct protocol! Tagging out faulty machinery immediately eliminates the risk of severe workplace accidents.", disc: "What steps are included in a standard equipment lockout/tagout procedure?" },
+      { pts: 2, t: "Instruct the driver to park the vehicle safely in the maintenance bay and transition to a manual pallet truck.", fb: "Safe alternative action. Switching equipment kept warehouse picking moving without risking worker safety.", disc: "What contingency plans does your facility have when heavy material-handling equipment fails?" },
+      { pts: 1, t: "Advise the operator to drive at reduced speed and complete his current picking list before taking the vehicle for service.", fb: "Hazardous delay. Brake failures can worsen rapidly, posing an extreme risk in narrow warehouse aisles.", disc: "What potential consequences could occur if a forklift loses braking power in a busy aisle?" },
+      { pts: -1, t: "Instruct the worker to ignore the mechanical noise and finish the afternoon shift because order volume is high.", fb: "Severe safety violation! Forcing an employee to operate unsafe equipment breaches occupational health regulations.", disc: "Why must safety compliance take precedence over short-term operational throughput?" }
+    ]
+  },
+
+  // --- EMERGENCY 1 ---
+  {
+    type: "emergency",
+    location: "Electrical Room — CRITICAL HAZARD",
+    text: "CRITICAL HAZARD: Electrical sparks and dense smoke are issuing from the main distribution panel near the packaging station! The fire alarm system has not activated automatically yet.",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Distribution panel</em> = central electrical component distributing power to circuits.<br>• <em>Assembly point</em> = designated safe area outside a facility where staff gather during emergencies.",
+    options: [
+      { pts: 2, isGood: true, t: "ACTIVATE EMERGENCY PROTOCOL: Manually trigger the nearest fire alarm, evacuate all personnel to the assembly point, and call emergency services (112).", fb: "Heroic leadership! Immediate evacuation prevented smoke injuries and allowed fire crews to isolate the blaze quickly.", disc: "Where are the primary emergency exits and fire assembly points located in your workplace?" },
+      { pts: 0, isGood: false, t: "ATTEMPT MANUAL EXTINGUISHMENT: Open the electrical panel door and throw a bucket of water on the sparking components.", fb: "CRITICAL FAILURE: Water on live electrical infrastructure causes severe electrocution and explosive fire spread. GAME OVER.", disc: "" }
+    ]
+  },
+
+  // --- SCENARIO 5 ---
+  {
+    type: "standard",
+    location: "Storage Zone C (Wednesday 08:30 AM)",
+    text: "The inventory system indicates that 50 solid oak wardrobes are located in Rack 12, but physical inspection reveals the racking is empty. Outbound client orders are currently pending.",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Inventory audit / Cycle count</em> = checking physical stock against digital records.<br>• <em>System freeze</em> = temporarily pausing digital transactions for a specific product code.<br>• <em>Misallocation</em> = placing inventory in the incorrect storage location.",
+    options: [
+      { pts: 3, t: "Apply a temporary system freeze on that product code, notify customer service, and initiate a targeted cycle count in Zone C.", fb: "Proactive crisis management! Freezing the SKU prevented further unfulfillable orders while staff located the stock.", disc: "How do you explain inventory misallocations to customer service reps who face angry clients?" },
+      { pts: 2, t: "Conduct a systematic search of adjacent rack locations in Zone C to locate misallocated pallets.", fb: "Good logical deduction. Misplaced pallets are frequently discovered in nearby racking slots due to scanning errors.", disc: "How do barcode verification systems reduce human error in pallet placement?" },
+      { pts: 1, t: "Allow customer service to continue processing orders while warehouse pickers search unmapped storage bays.", fb: "This decision resulted in 20 failed order fulfillments and increased customer service workload.", disc: "Why is selling phantom inventory damaging to customer retention and brand trust?" },
+      { pts: -1, t: "Halt all warehouse operations completely for the remainder of the day to perform a facility-wide stock recount.", fb: "Disproportionate response! Shutting down an entire facility for a localized inventory discrepancy caused massive backlogs.", disc: "Why are localized cycle counts more efficient than full facility operational shutdowns?" }
+    ]
+  },
+
+  // --- SCENARIO 6 ---
+  {
+    type: "standard",
+    day: "Storage Aisle 4 (Wednesday 01:30 PM)",
+    text: "A pallet jack gets wedged under a stretch-wrapped sofa, tearing the protective plastic wrap and causing the load to lean precariously against the rack.",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Precariously</em> = unstable and likely to tip over or fall.<br>• <em>Stretch-wrap</em> = elastic plastic film used to secure goods on pallets.<br>• <em>Load stability</em> = the balance and security of stacked items during movement.",
+    options: [
+      { pts: 3, t: "Secure the area, carefully lower the lifting mechanism, and enlist a colleague to help stabilize and re-wrap the furniture safely.", fb: "Exceptional safety protocol! Securing the area and balancing the load prevented product damage and staff injury.", disc: "Why is team coordination critical when dealing with unstable overhead loads?" },
+      { pts: 2, t: "Transport the leaning load slowly to the re-work station and apply fresh stretch-wrap immediately.", fb: "Acceptable recovery. Re-wrapping damaged packaging quickly protects exposed upholstery from dirt and moisture.", disc: "What impact does damaged transit packaging have on customer perception?" },
+      { pts: 1, t: "Forcefully pull the pallet jack backward to dislodge it from underneath the sofa frame.", fb: "Aggressive action. Forcing the machinery tore the underlying upholstery, resulting in expensive product repairs.", disc: "Why does applying excessive force to jammed machinery usually increase overall damage?" },
+      { pts: -1, t: "Abandon the unstable load in Aisle 4 and move on to your next picking assignment.", fb: "Negligent behavior! Leaving an unstable, leaning load in an active traffic aisle creates a severe hazard.", disc: "What physical hazards are created when unstable loads block warehouse traffic corridors?" }
+    ]
+  },
+
+  // --- SCENARIO 7 ---
+  {
+    type: "standard",
+    location: "Packing Area (Thursday 09:00 AM)",
+    text: "The automated carton-sealing machine suffers a mechanical jam. Packaging cardboard is tearing, bringing a line of 30 dining chairs to an abrupt halt.",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Mechanical jam</em> = blockage preventing a machine from operating.<br>• <em>Contingency plan</em> = a secondary action plan designed for unexpected problems.<br>• <em>Downtime</em> = period during which production or operational activity is stopped.",
+    options: [
+      { pts: 3, t: "Isolate power to the machine, remove torn cardboard safely, re-box damaged items, and lodge a ticket with maintenance.", fb: "Proper procedure! De-energizing equipment before clearing blockages prevents severe mechanical injuries.", disc: "What safety steps must be completed before attempting to clear machinery blockages?" },
+      { pts: 2, t: "Implement a manual packaging contingency plan to keep dining chair dispatches moving while maintenance inspects the line.", fb: "Excellent operational agility! Switching to manual packing preserved dispatch targets during machinery downtime.", disc: "How do manual backup protocols maintain business continuity during equipment failure?" },
+      { pts: 1, t: "Apply industrial tape over torn outer cartons and pass them directly to the dispatch staging lane.", fb: "Substandard packaging. Patched cartons broke open during transit, resulting in damaged furniture returns.", disc: "Why is structural packaging integrity essential for long-distance transport?" },
+      { pts: -1, t: "Attempt to pull torn cartons through the active machine feed rollers while the drive motor is still running.", fb: "Reckless safety breach! Placing hands near moving drive rollers violates fundamental machinery safety laws.", disc: "Why must machinery be isolated from power sources prior to maintenance intervention?" }
+    ]
+  },
+
+  // --- SCENARIO 8 ---
+  {
+    type: "standard",
+    location: "Packing Station (Thursday 04:00 PM)",
+    text: "It is 04:00 PM and daily dispatch volume is 30% higher than forecasted. Packing operators are displaying signs of severe fatigue, and unprocessed orders are piling up.",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Forecasted</em> = predicted or estimated based on data.<br>• <em>Fatigue</em> = extreme tiredness resulting from mental or physical exertion.<br>• <em>Reallocate</em> = assign resources or staff to a different task.",
+    options: [
+      { pts: 3, t: "Reallocate trained administrative staff to assist with order staging and authorize short structured hydration breaks for floor staff.", fb: "Inspirational leadership! Cross-functional support boosted morale and cleared the dispatch backlog safely.", disc: "How does cross-training office employees benefit logistics operations during peak periods?" },
+      { pts: 2, t: "Offer voluntary overtime pay incentives for staff willing to extend their shift by ninety minutes.", fb: "Effective motivation. Paid voluntary overtime provided the additional labor required to complete dispatches.", disc: "What strategies can managers use to maintain team motivation during high-stress peak periods?" },
+      { pts: 1, t: "Cap daily dispatch processing at current levels and roll the remaining backlog over to Friday morning.", fb: "Controlled strategy, but postponing dispatches creates an overwhelming workload for the Friday morning shift.", disc: "What are the trade-offs between capping daily throughput and incurring staff overtime expenses?" },
+      { pts: -1, t: "Mandate an compulsory 14-hour continuous shift for all floor operators without extending rest intervals.", fb: "Illegal labor practice! Pushing exhausted staff beyond legal working hours leads to severe accidents and union grievances.", disc: "What legal limits exist regarding maximum daily working hours in your country?" }
+    ]
+  },
+
+  // --- SCENARIO 9 ---
+  {
+    type: "standard",
+    location: "Loading Dock (Friday 08:00 AM)",
+    text: "Your primary transport provider fails to dispatch four expected articulated trailers due to driver shortages. Staging lanes are rapidly overflowing with packaged furniture.",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Freight provider / Carrier</em> = business contracted to transport goods by road, rail, or sea.<br>• <em>Spot market</em> = hiring transport services on short notice at current market rates.<br>• <em>Staging lane</em> = designated floor space where outbound goods are organized prior to loading.",
+    options: [
+      { pts: 3, t: "Procure spot-market haulage capacity through secondary pre-vetted regional freight brokers.", fb: "Decisive action! Sourcing spot-market transport prevented severe dock congestion and kept dispatches moving.", disc: "Why is maintaining contracts with secondary transport providers vital for supply chain resilience?" },
+      { pts: 2, t: "Reorganize staging lanes to stack rigid crates vertically, preserving floor space while awaiting carrier updates.", fb: "Effective space management. Vertical stacking kept dock corridors clear and organized during the transport delay.", disc: "What structural precautions must be taken when stacking freight vertically in staging areas?" },
+      { pts: 1, t: "Deploy company utility vans to fulfill urgent local orders while delaying long-distance regional shipments.", fb: "Local customers remained satisfied, but regional distribution hubs suffered stockouts due to delayed freight.", disc: "How do you decide between prioritizing local deliveries or regional distribution center shipments?" },
+      { pts: -1, t: "Stage high-value leather sofa packaging outside on uncovered loading bays during heavy rain.", fb: "Disastrous choice! Water penetrated packaging, ruining thousands of Euros worth of premium leather upholstery.", disc: "Why must weather risk assessments be conducted when managing overflow freight?" }
+    ]
+  },
+
+  // --- SCENARIO 10 ---
+  {
+    type: "standard",
+    location: "Returns Bay (Saturday 09:00 AM)",
+    text: "Customer returns arrive in high volume following promotional sales. Damaged packaging and incorrect returns are congesting the receiving bays, blocking incoming stock.",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Reverse logistics</em> = process of managing returned goods from customer back to seller.<br>• <em>Triage process</em> = sorting items based on condition to determine repair, resale, or scrap status.<br>• <em>Restock</em> = return undamaged goods to active inventory for resale.",
+    options: [
+      { pts: 3, t: "Establish a three-tier triage process: restock pristine items, route minor damage to repair, and scrap unusable parts.", fb: "Efficient reverse logistics! Systematically processing returns recovered valuable stock and cleared dock space.", disc: "Why is an organized reverse logistics process essential for maintaining profit margins?" },
+      { pts: 2, t: "Transfer unprocessed return pallets to a secure holding zone, prioritizing active outbound Saturday dispatches.", fb: "Pragmatic operational choice. Clearing active lanes ensured outbound revenue shipments proceeded without delay.", disc: "When is it appropriate to defer non-urgent administrative tasks during peak operations?" },
+      { pts: 1, t: "Authorize automatic financial refunds for all returned items without opening outer boxes to inspect contents.", fb: "Commercial financial risk! Several returned cartons contained construction debris rather than genuine furniture.", disc: "What fraud risks exist when companies implement automated refund policies without physical inspection?" },
+      { pts: -1, t: "Refuse incoming transport drop-offs for authorized customer returns until the following week.", fb: "Severe contractual failure! Rejecting authorized carrier deliveries triggered heavy financial penalty fees.", disc: "What legal obligations do logistics operations have regarding contractual freight intake?" }
+    ]
+  },
+
+  // --- EMERGENCY 2 ---
+  {
+    type: "emergency",
+    location: "Battery Charging Station — CRITICAL HAZARD",
+    text: "CRITICAL HAZARD: A heavy traction battery ruptures during charging, spilling corrosive sulfuric acid onto the floor and generating toxic chemical fumes!",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Corrosive substance</em> = a chemical liquid capable of destroying living tissue or materials.<br>• <em>Spill kit</em> = specialized equipment containing absorbent materials and protective gear for chemical cleanups.",
+    options: [
+      { pts: 2, isGood: true, t: "EXECUTE HAZMAT PROTOCOL: Evacuate the charging bay, equip personal protective equipment, isolate power sources, and apply chemical spill neutralizers.", fb: "Flawless hazmat response! Sulfuric acid was safely contained without personal injury or structural damage.", disc: "Where are chemical spill kits and emergency eyewash stations located in your facility?" },
+      { pts: 0, isGood: false, t: "MANUAL CLEANUP: Grab standard paper towels and attempt to mop up the liquid chemical spill manually.", fb: "CRITICAL FAILURE: Corrosive acid causes severe chemical burns and toxic fumes cause respiratory injury. GAME OVER.", disc: "" }
+    ]
+  },
+
+  // --- SCENARIO 11 ---
+  {
+    type: "standard",
+    location: "Packing Line 2 (Sunday 10:00 AM)",
+    text: "Your facility runs out of high-density foam corner protectors for glass-topped dining tables. Standard cardboard offers inadequate transit protection.",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Inadequate</em> = lacking the quality or quantity required for a specific purpose.<br>• <em>Fragile cargo</em> = items easily broken or damaged during transport.<br>• <em>Repurpose</em> = adapt an existing material or component for a different use.",
+    options: [
+      { pts: 3, t: "Repurpose surplus high-density foam sheets from idle packaging lines, custom-cutting them to safeguard table corners.", fb: "Resourceful problem-solving! Custom foam padding provided superior protection and zero glass breakages occurred.", disc: "How can logistics teams creatively adapt materials during packaging supply shortages?" },
+      { pts: 2, t: "Apply multiple protective layers of heavy-duty bubble wrap and affix prominent 'Fragile - Tempered Glass' labels.", fb: "Commendable effort. Most shipments arrived safely, though minor edge scuffing affected a small percentage of loads.", disc: "To what extent do warning labels compensate for reduced structural packaging?" },
+      { pts: 1, t: "Suspend dispatches of glass-topped tables until specialized corner protectors arrive from the vendor on Monday.", fb: "Product safety was preserved, but failing to dispatch orders resulted in missed weekend sales targets.", disc: "Under what conditions should dispatches be halted due to sub-standard packaging?" },
+      { pts: -1, t: "Dispatch the glass tables in unreinforced cardboard cartons without supplementary corner buffering.", fb: "Costly negligence! Dozens of glass tabletops shattered in transit, provoking severe customer complaints.", disc: "How do transit damage rates influence long-term brand equity and customer loyalty?" }
+    ]
+  },
+
+  // --- SCENARIO 12 ---
+  {
+    type: "standard",
+    location: "Dispatch Manager Office (Cyber Monday 03:00 PM)",
+    text: "It is the final surge day and freight capacity is fully booked. You must decide whether to allocate remaining transport capacity to a 200-chair commercial order for a corporate client or 200 individual e-commerce customer deliveries.",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Allocate</em> = distribute resources for a specific purpose.<br>• <em>Commercial client</em> = business customer purchasing in large volume.<br>• <em>Service Level Agreement (SLA)</em> = contractual commitment regarding service delivery standards.",
+    options: [
+      { pts: 3, t: "Split available capacity 50/50: fulfill urgent e-commerce SLAs while negotiating a partial delivery schedule with the corporate client.", fb: "Balanced strategic management! You protected direct customer SLAs while maintaining key commercial relationships.", disc: "How do you evaluate priorities when commercial client needs conflict with retail customer expectations?" },
+      { pts: 2, t: "Allocate total transport capacity to the corporate client order to protect high-value long-term commercial contracts.", fb: "Strategic priority choice. Securing high-value corporate accounts protected long-term revenue, despite minor e-commerce complaints.", disc: "Why do long-term commercial B2B contracts often take precedence over individual retail sales?" },
+      { pts: 1, t: "Allocate full transport capacity to individual e-commerce orders to secure immediate high-margin retail revenue.", fb: "Immediate profits captured, but the corporate account manager expressed extreme dissatisfaction over delayed delivery.", disc: "What long-term commercial risks occur when B2B delivery commitments are breached?" },
+      { pts: -1, t: "Cancel 50% of both order categories to reduce operational workload for your packing shift.", fb: "Unprofessional execution! Arbitrary order cancellations damaged brand reputation across both retail and corporate sectors.", disc: "Why should arbitrary order cancellations be avoided in logistics management?" }
+    ]
+  }
+];
+
+let currentIndex = 0;
+let totalScore = 0;
+
+const landingScreenEl = document.getElementById('landing-screen');
+const gameplayScreenEl = document.getElementById('gameplay-screen');
+const finalScreenEl = document.getElementById('final-screen');
+const gameHeaderEl = document.getElementById('game-header');
+
+const stepDisplayEl = document.getElementById('step-display');
+const scoreDisplayEl = document.getElementById('score-display');
+const locationBadgeEl = document.getElementById('location-badge');
+const scenarioTextEl = document.getElementById('scenario-text');
+const vocabBoxEl = document.getElementById('vocab-box');
+const optionsContainerEl = document.getElementById('options-container');
+const feedbackEl = document.getElementById('feedback');
+const discussionEl = document.getElementById('discussion');
+const nextBtnEl = document.getElementById('next-btn');
+const retryBtnEl = document.getElementById('retry-btn');
+
+function shuffleArray(array) {
+    let arr = JSON.parse(JSON.stringify(array));
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+function startGame() {
+    landingScreenEl.classList.add('hidden');
+    finalScreenEl.classList.add('hidden');
+    gameHeaderEl.classList.remove('hidden');
+    gameplayScreenEl.classList.remove('hidden');
+    
+    currentIndex = 0;
+    totalScore = 0;
+    renderStep();
+}
+
+function resetToLanding() {
+    gameplayScreenEl.classList.add('hidden');
+    finalScreenEl.classList.add('hidden');
+    gameHeaderEl.classList.add('hidden');
+    landingScreenEl.classList.remove('hidden');
+}
+
+function renderStep() {
+    const data = GAME_DATA[currentIndex];
+    
+    stepDisplayEl.textContent = currentIndex + 1;
+    scoreDisplayEl.textContent = totalScore;
+    locationBadgeEl.textContent = data.location;
+    scenarioTextEl.innerHTML = data.text;
+    vocabBoxEl.innerHTML = data.vocab;
+    
+    optionsContainerEl.innerHTML = '';
+    feedbackEl.style.display = 'none';
+    discussionEl.style.display = 'none';
+    nextBtnEl.classList.add('hidden');
+    retryBtnEl.classList.add('hidden');
+
+    const randomizedOptions = shuffleArray(data.options);
+
+    randomizedOptions.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'btn-option';
+        if (data.type === 'emergency') {
+            btn.style.borderColor = 'var(--error-red)';
+        }
+        btn.innerHTML = opt.t;
+        btn.onclick = () => {
+            if (data.type === 'standard') {
+                handleStandardChoice(opt);
+            } else {
+                handleEmergencyChoice(opt);
+            }
+        };
+        optionsContainerEl.appendChild(btn);
+    });
+}
+
+function handleStandardChoice(opt) {
+    document.querySelectorAll('.btn-option').forEach(btn => btn.disabled = true);
+    
+    totalScore += opt.pts;
+    scoreDisplayEl.textContent = totalScore;
+
+    feedbackEl.style.display = 'block';
+    
+    if (opt.pts === 3) {
+        feedbackEl.className = 'feedback-banner success';
+        feedbackEl.innerHTML = `<strong>EXCELLENT CHOICE (+3 Points)</strong><br>${opt.fb}`;
+    } else if (opt.pts === 2) {
+        feedbackEl.className = 'feedback-banner info-blue';
+        feedbackEl.innerHTML = `<strong>GOOD CHOICE (+2 Points)</strong><br>${opt.fb}`;
+    } else if (opt.pts === 1) {
+        feedbackEl.className = 'feedback-banner warning';
+        feedbackEl.innerHTML = `<strong>AVERAGE CHOICE (+1 Point)</strong><br>${opt.fb}`;
+    } else {
+        feedbackEl.className = 'feedback-banner error';
+        feedbackEl.innerHTML = `<strong>POOR CHOICE (-1 Point)</strong><br>${opt.fb}`;
+    }
+
+    discussionEl.style.display = 'block';
+    discussionEl.innerHTML = `<strong>Discussion Question:</strong> ${opt.disc}`;
+
+    if (opt.pts === -1) {
+        retryBtnEl.classList.remove('hidden');
+    } else {
+        nextBtnEl.classList.remove('hidden');
+    }
+}
+
+function handleEmergencyChoice(opt) {
+    document.querySelectorAll('.btn-option').forEach(btn => btn.disabled = true);
+
+    if (opt.isGood) {
+        totalScore += opt.pts;
+        scoreDisplayEl.textContent = totalScore;
+
+        feedbackEl.style.display = 'block';
+        feedbackEl.className = 'feedback-banner success';
+        feedbackEl.innerHTML = `<strong>CRITICAL SUCCESS (+2 Points)</strong><br>${opt.fb}`;
+
+        discussionEl.style.display = 'block';
+        discussionEl.innerHTML = `<strong>Discussion Question:</strong> ${opt.disc}`;
+
+        nextBtnEl.classList.remove('hidden');
+    } else {
+        showGameOver(opt.fb);
+    }
+}
+
+function retryStep() {
+    renderStep();
+}
+
+function nextStep() {
+    currentIndex++;
+    if (currentIndex >= GAME_DATA.length) {
+        showFinalResults();
+    } else {
+        renderStep();
+    }
+}
+
+function showGameOver(reason) {
+    gameplayScreenEl.classList.add('hidden');
+    finalScreenEl.classList.remove('hidden');
+    
+    document.getElementById('final-header').innerHTML = "<span class='emergency-title'>CRITICAL OPERATIONS FAILURE</span>";
+    document.getElementById('final-score-display').textContent = `FINAL SCORE: ${totalScore} Points`;
+    document.getElementById('debrief-text').innerHTML = `
+        <p style="color: var(--error-red); font-weight: bold; margin-bottom: 12px;">${reason}</p>
+        <p>Operational safety errors ended your warehouse shift early. Review facility safety regulations, emergency response rules, and replay the challenge!</p>
+    `;
+}
+
+function showFinalResults() {
+    gameplayScreenEl.classList.add('hidden');
+    finalScreenEl.classList.remove('hidden');
+    
+    document.getElementById('final-header').textContent = "Shift Completed!";
+    document.getElementById('final-score-display').textContent = `Final Score: ${totalScore} / 40 Points`;
+
+    let bandTitle = "";
+    let bandDescription = "";
+
+    if (totalScore >= 35) {
+        bandTitle = "Band 1: Strategic Supply Chain Manager (35–40 pts)";
+        bandDescription = "Exceptional performance! You demonstrated outstanding operational control, successfully balancing facility safety, carrier logistics, stock auditing, and commercial communication. Your supervisor is recommending you for a senior regional supply chain role!";
+    } else if (totalScore >= 25) {
+        bandTitle = "Band 2: Senior Logistics Coordinator (25–34 pts)";
+        bandDescription = "Very good performance! You handled complex warehouse challenges and emergencies effectively. Minor freight delays or small stock discrepancies occurred, but overall warehouse safety, customer trust, and operational flow remained solid.";
+    } else if (totalScore >= 15) {
+        bandTitle = "Band 3: Warehouse Supervisor (15–24 pts)";
+        bandDescription = "You completed your shift, but experienced noticeable operational friction. Unplanned transport costs, inventory auditing errors, and communication gaps reduced overall efficiency. Review standard logistics procedures and replay to improve your score!";
+    } else {
+        bandTitle = "Band 4: Operations Bottleneck (Under 15 pts)";
+        bandDescription = "Challenging shift! Warehouse congestion, damaged product packaging, client complaints, and cost overruns impacted business performance severely. Re-read the scenario vocabulary notes, focus on safety checks first, and try again!";
+    }
+
+    document.getElementById('debrief-text').innerHTML = `
+        <p style="font-size: 1.1rem; font-weight: bold; color: var(--accent); margin-bottom: 10px;">${bandTitle}</p>
+        <p>${bandDescription}</p>
+    `;
+}
+</script>
+</body>
+</html>
