@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Life with Jax: The Malinois Chronicles</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F4F6F0;--surface:#FFFFFF;--ink:#1A2421;--ink2:#4A5852;
+  --accent:#2A5C45;--danger:#A82828;--success:#2E7D32;--warn:#D97706;
+  --info:#0284C7;--r:16px;--shadow:0 10px 15px -3px rgba(0,0,0,0.1);
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);line-height:1.6;padding:1rem;display:flex;flex-direction:column;align-items:center;min-height:100vh;margin:0;}
+.shell{width:100%;max-width:650px;margin-top:2rem;margin-bottom:2rem;}
+.hidden{display:none !important;}
+.card{background:var(--surface);border-radius:var(--r);padding:2rem;box-shadow:var(--shadow);border:1px solid #D1DED6;}
+h1{font-size:28px;margin-bottom:0.5rem;text-align:center;font-weight:700;color:var(--ink);}
+.day-label{display:block;text-align:center;color:var(--accent);font-weight:700;text-transform:uppercase;font-size:12px;margin-bottom:1.5rem;letter-spacing:1px;}
+.ui-bar{display:flex;justify-content:space-between;margin-bottom:1rem;font-family:'DM Mono',monospace;font-size:13px;color:var(--ink2);}
+.options-list{display:grid;gap:12px;margin-top:1.5rem;}
+.opt-btn{background:white;border:1px solid #C2D1C8;padding:14px;border-radius:10px;text-align:left;cursor:pointer;font-size:15px;transition:0.2s;color:var(--ink);width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:#EBF2EE;}
+.opt-btn:disabled{opacity:0.6;cursor:default;}
+.feedback{margin-top:1.5rem;padding:1.25rem;border-radius:10px;display:none;font-size:15px;border-left:5px solid transparent;}
+.fb-3{background:#E8F5E9;color:#1B5E20;border-color:var(--success);}
+.fb-2{background:#E0F2FE;color:#0C4A6E;border-color:var(--info);}
+.fb-1{background:#FEF3C7;color:#78350F;border-color:var(--warn);}
+.fb-neg1{background:#FFEBEE;color:#B71C1C;border-color:var(--danger);animation:shake 0.4s ease;}
+.fb-fail{background:#1A1A1A;color:#FF6B6B;border-color:var(--danger);animation:shake 0.4s ease;}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.next-btn{margin-top:1.5rem;width:100%;background:var(--ink);color:white;border:none;padding:14px;border-radius:10px;font-weight:600;cursor:pointer;display:none;}
+.emerg-tag{background:var(--danger);color:white;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;display:inline-block;margin-bottom:10px;}
+.intro-text{color:var(--ink2);margin-bottom:1.5rem;font-size:16px;text-align:center;}
+</style>
+</head>
+<body>
+
+<div class="shell" id="screen-intro">
+  <div class="card">
+    <h1>🐕 Life with Jax: The Malinois Chronicles 🐾</h1>
+    <p class="intro-text">Your husband brought home a high-drive Belgian Malinois. He thinks he's training a K9 operative. You're just trying to preserve your sanity and home decor. Survive the week!</p>
+    <button class="opt-btn" style="text-align:center; background:var(--accent); color:white; font-weight:700; border:none;" onclick="startGame()">Begin Survival Mode</button>
+  </div>
+</div>
+
+<div class="shell hidden" id="screen-game">
+  <div class="ui-bar">
+    <div id="stat-progress">Situation 1/14</div>
+    <div id="stat-score">Sanity Score: 0</div>
+  </div>
+  <div class="card">
+    <span class="day-label" id="ui-day-text">Day 1</span>
+    <div id="ui-emerg-box"></div>
+    <p id="ui-scenario-text" style="font-size:17px; font-weight:500;"></p>
+    <div class="options-list" id="ui-options"></div>
+    <div id="ui-feedback" class="feedback"></div>
+    <button class="next-btn" id="ui-btn-next" onclick="handleNext()">Continue</button>
+  </div>
+</div>
+
+<div class="shell hidden" id="screen-result">
+  <div class="card" style="text-align:center;">
+    <h1 id="res-title">Marital & Canine Debrief</h1>
+    <div id="res-score" style="font-size:48px; font-weight:700; color:var(--accent); margin:10px 0;"></div>
+    <p id="res-msg" style="color:var(--ink2); margin-bottom:2rem; line-height:1.8; font-size:17px;"></p>
+    <button class="opt-btn" style="text-align:center; background:var(--accent); color:white; font-weight:700; border:none;" onclick="resetGame()">Play Again 🔄</button>
+  </div>
+</div>
+
+<script>
+// 12 Storyline Situations
+const SITUATIONS = [
+  // Block 1 (Situations 1-4)
+  { t: "Jax is currently scaling a 7-foot vertical fence to bite the neighbor’s hanging basket. Your husband is recording it on his phone.", choices: [
+    { text: "Command Jax into a strict heel with a bite-sleeve distraction.", pts: 3, fb: "EXCELLENT (Green): Tactical mastery! Jax hits the deck in a perfect stay. Husband looks at you with newfound fear and respect." },
+    { text: "Toss a heavy-duty Kong ball in the opposite direction.", pts: 2, fb: "GOOD (Blue): Jax redirects mid-air, redirecting 80mph of kinetic energy away from the flora." },
+    { text: "Scream 'No Jax, bad dog!' at the top of your lungs.", pts: 1, fb: "AVERAGE (Ochre): Jax treats your screaming as tactical battle music and shreds the petunias with increased vigour." },
+    { text: "Join husband in filming him because 'it's great agility work.'", pts: -1, fb: "POOR (Red): Husband buys Jax a medal. The neighbor hands you a lawyer's letter. Pick again." }
+  ]},
+  { t: "You walk into the living room to find Jax doing a tactical surveillance crawl under the sofa, having eaten three decorative throw pillows.", choices: [
+    { text: "Issue an authoritative 'Out!' and trade for an approved chew antler.", pts: 3, fb: "EXCELLENT (Green): Clean execution. Pillow foam is saved from entering his gut." },
+    { text: "Sigh and sweep up the feathers while making Jax sit.", pts: 2, fb: "GOOD (Blue): Acceptable damage control. Husband claims Jax was 'clearing room for tactical visibility.'" },
+    { text: "Try to yank the pillow remnant out of his mouth.", pts: 1, fb: "AVERAGE (Ochre): You get dragged into an involuntary 20-minute tug-of-war match. You lose." },
+    { text: "Blame your husband for placing pillows in a military operational zone.", pts: -1, fb: "POOR (Red): Husband agrees, removes all remaining furniture to create a 'K9 tactical killbox.' Pick again." }
+  ]},
+  { t: "The Amazon driver approaches. Jax does a double-flip off the dining table and hits the front window with full-body force.", choices: [
+    { text: "Instantly place Jax in a place-bed command and hand the driver a hefty tip.", pts: 3, fb: "EXCELLENT (Green): Driver survives. Jax stays vibrating on his bed like a landmine." },
+    { text: "Hold Jax back by his tactical harness while securing the box.", pts: 2, fb: "GOOD (Blue): Your biceps get a workout. Husband boasts about Jax's 'perimeter defense.'" },
+    { text: "Yell across the room while running toward the front door.", pts: 1, fb: "AVERAGE (Ochre): Jax thinks it's a joint tactical assault and breaches the glass pane." },
+    { text: "Tell the driver Jax is just a 'friendly lap dog' who wants kisses.", pts: -1, fb: "POOR (Red): The driver scales your roof and refuses to come down. The parcel is destroyed. Pick again." }
+  ]},
+  { t: "Husband is proudly demonstrating Jax's 'bite work' in the hallway using his favorite leather jacket as a sleeve.", choices: [
+    { text: "Confiscate the jacket and enforce proper bite-tug equipment usage.", pts: 3, fb: "EXCELLENT (Green): Boundaries restored! Husband learns jacket sleeves are not military kit." },
+    { text: "Redirect Jax to an actual bite wedge in the back garden.", pts: 2, fb: "GOOD (Blue): Saves the jacket, though husband sulks because 'it added realism.'" },
+    { text: "Watch in horror as the vintage leather turns into confetti.", pts: 1, fb: "AVERAGE (Ochre): Husband says 'He got a great full-mouth grip, babe!' while crying internally over his jacket." },
+    { text: "Offer your own designer handbag as the next target to test drive.", pts: -1, fb: "POOR (Red): The handbag is reduced to atoms in 4 seconds flat. Unforgivable error. Pick again." }
+  ]},
+
+  // Block 2 (Situations 5-8)
+  { t: "It’s 3:00 AM. Jax decides it's time for night-vision perimeter patrol and starts pacing, panting, and staring at the ceiling fan.", choices: [
+    { text: "Give a firm 'Place' command and reward calm baseline breathing.", pts: 3, fb: "EXCELLENT (Green): Silence returns. You assert your dominance as alpha handler of the house." },
+    { text: "Put Jax in his heavy-duty crate with a chew bone.", pts: 2, fb: "GOOD (Blue): He grumbles in high-frequency whines for 10 minutes, then sleeps." },
+    { text: "Nudge your husband to deal with his 'working dog.'", pts: 1, fb: "AVERAGE (Ochre): Husband conducts a 4:00 AM tactical sweep of the backyard with a flashlight while Jax searches for non-existent threats." },
+    { text: "Turn on the lights and play fetch in the hallway.", pts: -1, fb: "POOR (Red): Jax is now conditioned for 3:00 AM raves forever. You will never sleep again. Pick again." }
+  ]},
+  { t: "You invite guests for dinner. Jax decides to perform a 6-foot vertical leap over the dining table during the starter.", choices: [
+    { text: "Crate Jax beforehand with a frozen treat; zero tolerance for high-energy chaotic table leaps.", pts: 3, fb: "EXCELLENT (Green): Peaceful meal, impressed guests, zero soup casualties." },
+    { text: "Leash Jax to your belt loop for strict dinner monitoring.", pts: 2, fb: "GOOD (Blue): You eat with one hand, but the charcuterie board stays intact." },
+    { text: "Apologize repeatedly while Jax licks the soup off a guest's spoon.", pts: 1, fb: "AVERAGE (Ochre): Husband proudly remarks: 'Look at his spring-rate! Pure Belgian athleticism!'" },
+    { text: "Encourage Jax to show off his hurdle skills over the roast chicken.", pts: -1, fb: "POOR (Red): The chicken lands on the ceiling light. Guests leave immediately. Pick again." }
+  ]},
+  { t: "Husband bought Jax a $200 'indestructible' tactical Kevlar harness. Jax chewed through it in 12 minutes flat.", choices: [
+    { text: "Return the scraps to the seller and enforce strict chew boundaries with proper toys.", pts: 3, fb: "EXCELLENT (Green): Wallet saved. Jax is taught harness is for work, not snacks." },
+    { text: "Laugh at husband's financial miscalculation while handing him a standard leash.", pts: 2, fb: "GOOD (Blue): Moral victory achieved. Husband’s ego takes a necessary direct hit." },
+    { text: "Try to stitch the Kevlar back together with regular thread.", pts: 1, fb: "AVERAGE (Ochre): Jax snaps it in half-a-second during his next sprint." },
+    { text: "Buy an even more expensive titanium-lined vest for Jax to digest.", pts: -1, fb: "POOR (Red): Financial bankruptcy looms. Jax chews that one out of spite. Pick again." }
+  ]},
+  { t: "During a quiet walk, Jax spots a squirrel 100 yards away and instantly accelerates to Mach 1, dragging your husband into a hedge.", choices: [
+    { text: "Step in with a calm vocal drop-command, stopping Jax in his tracks.", pts: 3, fb: "EXCELLENT (Green): Absolute control demonstrated. Husband crawls out of bushes humbled." },
+    { text: "Help pull husband out of the foliage while Jax vibrates in frustration.", pts: 2, fb: "GOOD (Blue): Husband bruised, but dog secured. Teamwork saves the day." },
+    { text: "Take out your phone to film your husband getting towed through the mud.", pts: 1, fb: "AVERAGE (Ochre): Great viral footage, but your husband needs a paramedic." },
+    { text: "Unclip the leash so Jax can 'catch up with his prey.'", pts: -1, fb: "POOR (Red): Jax ascends into the upper atmosphere following the squirrel. Pick again." }
+  ]},
+
+  // Block 3 (Situations 9-12)
+  { t: "Jax has dug a trench in the lawn that resembles a WWI frontline fortification. Husband calls it a 'defensive bunker.'", choices: [
+    { text: "Fill the hole, set up an approved digging box in an isolated zone, and enforce rules.", pts: 3, fb: "EXCELLENT (Green): Lawn restored to civilian standards; dog energy channeled." },
+    { text: "Fence off the hole while lecturing husband on landscaping ethics.", pts: 2, fb: "GOOD (Blue): The yard looks ridiculous, but further crater expansion is halted." },
+    { text: "Trip into the hole during evening garbage disposal.", pts: 1, fb: "AVERAGE (Ochre): Sprained ankle. Husband notes: 'You need better situational awareness, babe.'" },
+    { text: "Hand Jax a shovel to help him finish the bunker depth.", pts: -1, fb: "POOR (Red): Your house foundation collapses into the trench network. Pick again." }
+  ]},
+  { t: "You attempt to vacuum the rug. Jax treats the Dyson as an active hostile force and attacks the nozzle.", choices: [
+    { text: "Place Jax in a controlled 'stay' in another room before operating machinery.", pts: 3, fb: "EXCELLENT (Green): Smooth house cleaning achieved without canine combat." },
+    { text: "Hold a high-value treat to keep Jax focused away from the vacuum head.", pts: 2, fb: "GOOD (Blue): Vacuum survives, though you need 3 hands to finish the job." },
+    { text: "Engage in a shouting match over the vacuum motor noise.", pts: 1, fb: "AVERAGE (Ochre): Jax rips the plastic hose off. Husband claims the vacuum 'provoked him.'" },
+    { text: "Let Jax fight the Dyson to settle who is boss of floor maintenance.", pts: -1, fb: "POOR (Red): $500 appliance destroyed. Jax claims victory over domestic tech. Pick again." }
+  ]},
+  { t: "Jax opens the fridge using his nose, steals a whole raw ribeye roast, and retreats under the kitchen table.", choices: [
+    { text: "Issue a high-authority drop command and trade for a high-value legal snack.", pts: 3, fb: "EXCELLENT (Green): Roast rescued intact! Jax gets a beef-chew consolation prize." },
+    { text: "Block his exits and wait him out calmly until he gives up the meat.", pts: 2, fb: "GOOD (Blue): Dinner delayed by 40 minutes, but no emergency vet trips required." },
+    { text: "Try to dive under the table to wrestle the raw meat out of his jaws.", pts: 1, fb: "AVERAGE (Ochre): You get covered in meat juices while Jax swallows it in two unholy gulps." },
+    { text: "Congratulate him on his successful kitchen raiding operation.", pts: -1, fb: "POOR (Red): Jax now considers the entire refrigerator his personal tactical locker. Pick again." }
+  ]},
+  { t: "Husband wants to take Jax to a specialized 'K9 Tactical Bitework' seminar for $1,200. You want a spa weekend.", choices: [
+    { text: "Negotiate a compromise: Husband funds spa trip, Jax gets basic obedience refresher.", pts: 3, fb: "EXCELLENT (Green): Master diplomacy! You relax while Jax learns actual manners." },
+    { text: "Send husband and Jax off, demanding total silence at home for 48 hours.", pts: 2, fb: "GOOD (Blue): Peaceful weekend achieved, though budget takes a painful hit." },
+    { text: "Accompany them to the seminar and sit in the freezing rain for 8 hours.", pts: 1, fb: "AVERAGE (Ochre): You get hyperthermia while watching Jax bite burlap sleeves." },
+    { text: "Enroll yourself in the bite-sleeve seminar instead of the spa.", pts: -1, fb: "POOR (Red): You return home bruised, exhausted, and holding a bite-pillow. Pick again." }
+  ]}
+];
+
+// Emergency Situations (Triggered after Situation 4 and Situation 10)
+const EMERGENCIES = [
+  { t: "🚨 EMERGENCY 1: Jax has leaped onto the kitchen counter, swallowed a whole string of raw sausages, and is now choking with blue-tinged gums!", choices: [
+    { text: "Perform the canine Heimlich maneuver immediately and clear his airway.", pts: 2, fb: "HEROIC SAVED! Sausage dislodged! Jax takes a deep breath, and husband looks at you with absolute awe." },
+    { text: "Wait for him to swallow it down while searching for advice on internet forums.", pts: -100, fb: "FATAL DELAY: Oxygen supply fails! Jax collapses. GAME OVER." }
+  ]},
+  { t: "🚨 EMERGENCY 2: Jax unlocked the back gate during a thunderstorm, bolted down the street, and is heading toward a busy main road!", choices: [
+    { text: "Sprint out, call 'Jax, RECALL/ATTACK!', throw his favorite tug toy into your yard to trigger redirection.", pts: 2, fb: "CRITICAL RECOVERY! His drive forces a 180-degree turn. Gate secured, dog saved!" },
+    { text: "Chases him from behind while screaming his name in panic.", pts: -100, fb: "DISASTER: Malinois drive makes him think it's a chase game! He runs faster into traffic. GAME OVER." }
+  ]}
+];
+
+let state = {
+  score: 0,
+  sitIdx: 0,
+  gameSequence: [],
+  gameOver: false
+};
+
+function shuffle(arr) {
+  let array = [...arr];
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+function startGame() {
+  state.score = 0;
+  state.sitIdx = 0;
+  state.gameOver = false;
+  
+  // Construct 14-step sequence (4 situations -> Emergency 1 -> 6 situations -> Emergency 2 -> 2 situations)
+  state.gameSequence = [
+    {...SITUATIONS[0], isEmerg: false},
+    {...SITUATIONS[1], isEmerg: false},
+    {...SITUATIONS[2], isEmerg: false},
+    {...SITUATIONS[3], isEmerg: false},
+    {...EMERGENCIES[0], isEmerg: true}, // Emergency after situation 4
+    {...SITUATIONS[4], isEmerg: false},
+    {...SITUATIONS[5], isEmerg: false},
+    {...SITUATIONS[6], isEmerg: false},
+    {...SITUATIONS[7], isEmerg: false},
+    {...SITUATIONS[8], isEmerg: false},
+    {...SITUATIONS[9], isEmerg: false},
+    {...EMERGENCIES[1], isEmerg: true}, // Emergency after situation 10
+    {...SITUATIONS[10], isEmerg: false},
+    {...SITUATIONS[11], isEmerg: false}
+  ];
+
+  document.getElementById('screen-intro').classList.add('hidden');
+  document.getElementById('screen-result').classList.add('hidden');
+  document.getElementById('screen-game').classList.remove('hidden');
+  render();
+}
+
+function resetGame() {
+  startGame();
+}
+
+function render() {
+  const current = state.gameSequence[state.sitIdx];
+  document.getElementById('stat-progress').innerText = `Stage: ${state.sitIdx + 1}/14`;
+  document.getElementById('stat-score').innerText = `Sanity Score: ${state.score}`;
+  document.getElementById('ui-scenario-text').innerText = current.t;
+  
+  // Calculate display day
+  let dayNum = Math.floor(state.sitIdx / 2) + 1;
+  document.getElementById('ui-day-text').innerText = current.isEmerg ? "CRITICAL HOUR" : `Day ${dayNum}`;
+  
+  const emerg = document.getElementById('ui-emerg-box');
+  emerg.innerHTML = current.isEmerg ? `<span class="emerg-tag">🚨 TACTICAL EMERGENCY 🚨</span>` : "";
+
+  const box = document.getElementById('ui-options');
+  box.innerHTML = "";
+  
+  // Randomize choices order every time played
+  const opts = shuffle(current.choices);
+  opts.forEach(o => {
+    const b = document.createElement('button');
+    b.className = "opt-btn";
+    b.innerText = o.text;
+    b.onclick = () => handleChoice(o);
+    box.appendChild(b);
+  });
+
+  document.getElementById('ui-feedback').style.display = 'none';
+  document.getElementById('ui-btn-next').style.display = 'none';
+}
+
+function handleChoice(o) {
+  const fb = document.getElementById('ui-feedback');
+  fb.innerText = o.fb;
+  fb.style.display = 'block';
+
+  if (o.pts === -100) {
+    // Bad Choice in Emergency = GAME OVER
+    fb.className = "feedback fb-fail";
+    state.gameOver = true;
+    document.getElementById('ui-btn-next').innerText = "View Debriefing";
+    document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+    document.getElementById('ui-btn-next').style.display = 'block';
+  } else if (o.pts === -1) {
+    // Poor Choice in normal situation = Penalty & Choose Again
+    fb.className = "feedback fb-neg1";
+    // Do not disable buttons completely so user can pick again!
+  } else {
+    // Valid Choice (3, 2, 1)
+    state.score += o.pts;
+    if (o.pts === 3) fb.className = "feedback fb-3";
+    else if (o.pts === 2) fb.className = "feedback fb-2";
+    else if (o.pts === 1) fb.className = "feedback fb-1";
+    
+    document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+    document.getElementById('ui-btn-next').innerText = "Continue";
+    document.getElementById('ui-btn-next').style.display = 'block';
+  }
+}
+
+function handleNext() {
+  if (state.gameOver) {
+    showResults(true);
+    return;
+  }
+  
+  state.sitIdx++;
+  if (state.sitIdx < state.gameSequence.length) {
+    render();
+  } else {
+    showResults(false);
+  }
+}
+
+function showResults(isFail) {
+  document.getElementById('screen-game').classList.add('hidden');
+  document.getElementById('screen-result').classList.remove('hidden');
+  
+  const title = document.getElementById('res-title');
+  const msg = document.getElementById('res-msg');
+  const score = document.getElementById('res-score');
+  
+  if (isFail) {
+    title.innerText = "MISSION FAILED - GAME OVER";
+    score.innerText = "0 / 40";
+    msg.innerText = "A critical tactical error caused complete household collapse. Jax has taken control of the premises, your husband is filing a K9 incident report, and you have moved into a hotel room. Try again!";
+  } else {
+    title.innerText = "Week's End Debriefing";
+    score.innerText = `${state.score} / 40`;
+    
+    // Four score bands
+    if (state.score >= 34) {
+      msg.innerText = "🥇 SUPREME K9 COMMANDER (34-40 Pts): Flawless performance! You outperformed your husband, mastered high-drive Malinois psychology, and maintained your home interior intact. Jax respects you as supreme alpha commander.";
+    } else if (state.score >= 25) {
+      msg.innerText = "🥈 OPERATIONAL SURVIVOR (25-33 Pts): Solid work! You survived the week with minor bumps, saved your sofa from destruction, and put your husband's tactical delusions in check. Jax is mostly obedient.";
+    } else if (state.score >= 15) {
+      msg.innerText = "🥉 BARELY HANGING ON (15-24 Pts): Chaotic survival. The house is partially demolished, your husband thinks Jax is ready for Special Forces, and you need a month at a day spa to recover.";
+    } else {
+      msg.innerText = "⚠️ HOUSEHOLD CASUALTY (Under 15 Pts): Total defeat. Jax owns the master bedroom, your husband gave him your car keys, and you are living on the porch. Better luck next time!";
+    }
+  }
+}
+</script>
+
+</body>
+</html>
