@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Double Booking: A2 English Decision Game</title>
+  <style>
+    :root {
+      --bg-color: #f1f5f9;
+      --card-bg: #ffffff;
+      --text-color: #1e293b;
+      --border-color: #cbd5e1;
+      --primary-color: #2563eb;
+      --primary-hover: #1d4ed8;
+      
+      /* Rating Colors */
+      --color-excellent: #15803d;
+      --bg-excellent: #f0fdf4;
+
+      --color-good: #1d4ed8;
+      --bg-good: #eff6ff;
+
+      --color-average: #b45309;
+      --bg-average: #fffbeb;
+
+      --color-bad: #b91c1c;
+      --bg-bad: #fef2f2;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+
+    .game-container {
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+      max-width: 760px;
+      width: 100%;
+      padding: 32px;
+      box-sizing: border-box;
+      border: 1px solid var(--border-color);
+    }
+
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      border-bottom: 2px solid var(--bg-color);
+      padding-bottom: 12px;
+    }
+
+    .progress-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .score-tracker {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--primary-color);
+      background-color: #dbeafe;
+      padding: 6px 14px;
+      border-radius: 20px;
+    }
+
+    .story-text {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .prompt-text {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: #0f172a;
+    }
+
+    .choices-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .choice-btn {
+      background-color: #ffffff;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      padding: 14px 18px;
+      font-size: 1rem;
+      color: var(--text-color);
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      line-height: 1.4;
+    }
+
+    .choice-btn:hover {
+      border-color: var(--primary-color);
+      background-color: #f8fafc;
+      transform: translateY(-1px);
+    }
+
+    /* Feedback Box Styling */
+    .feedback-box {
+      padding: 16px;
+      border-radius: 8px;
+      font-size: 1rem;
+      line-height: 1.5;
+      margin-bottom: 16px;
+      border-left: 6px solid;
+    }
+
+    .feedback-box.excellent {
+      background-color: var(--bg-excellent);
+      color: var(--color-excellent);
+      border-color: var(--color-excellent);
+    }
+
+    .feedback-box.good {
+      background-color: var(--bg-good);
+      color: var(--color-good);
+      border-color: var(--color-good);
+    }
+
+    .feedback-box.average {
+      background-color: var(--bg-average);
+      color: var(--color-average);
+      border-color: var(--color-average);
+    }
+
+    .feedback-box.bad {
+      background-color: var(--bg-bad);
+      color: var(--color-bad);
+      border-color: var(--color-bad);
+    }
+
+    .discussion-box {
+      background-color: #f8fafc;
+      border: 1px solid var(--border-color);
+      padding: 14px 18px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .action-btn {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 14px 20px;
+      font-size: 1rem;
+      cursor: pointer;
+      font-weight: 700;
+      width: 100%;
+      transition: background-color 0.2s ease;
+    }
+
+    .action-btn:hover {
+      background-color: var(--primary-hover);
+    }
+
+    /* Intro & Debriefing Styling */
+    .intro-list {
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary-color);
+      padding: 16px 20px;
+      border-radius: 4px;
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+
+    .intro-list ul {
+      margin: 8px 0 0 0;
+      padding-left: 20px;
+    }
+
+    .debrief-card {
+      background-color: #f8fafc;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .band-title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="game-container">
+    
+    <!-- LANDING PAGE -->
+    <div id="landing-page">
+      <h1 style="margin-top:0; color:#0f172a;">The Double Booking 📅</h1>
+      <p class="story-text">
+        Welcome to <strong>The Double Booking</strong>! This is an interactive game for English learners (A2 level). 
+        It is Friday at 6:00 PM. You suddenly realize you have made two plans at 7:00 PM: a farewell dinner for your best friend Marco, and an important work dinner with your boss, Sarah, and new clients!
+      </p>
+
+      <div class="intro-list">
+        <strong>Game Rules & Points:</strong>
+        <ul>
+          <li><strong>10 Scenarios:</strong> Make a smart choice at each moment of your evening.</li>
+          <li><strong>4 Options Every Time:</strong> The answers appear in a random order every game!</li>
+          <li>🟩 <strong>Excellent Answer (+2 points):</strong> Very smart, honest, and polite!</li>
+          <li>🟦 <strong>Good Answer (+1 point):</strong> A good and helpful choice.</li>
+          <li>🟧 <strong>Average Answer (+0 points):</strong> Okay, but slow or a bit risky.</li>
+          <li>🟥 <strong>Bad Answer (-1 point):</strong> Rude, dishonest, or bad. You lose 1 point and must try again!</li>
+          <li><strong>Maximum Points:</strong> 20 Points.</li>
+        </ul>
+      </div>
+
+      <button class="action-btn" onclick="startGame()">Start Game →</button>
+    </div>
+
+    <!-- GAMEPLAY PAGE -->
+    <div id="gameplay-page" style="display: none;">
+      <div class="header-bar">
+        <div id="progress" class="progress-title">Scenario 1 of 10</div>
+        <div id="score" class="score-tracker">Score: 0 / 20</div>
+      </div>
+
+      <div id="story" class="story-text">Loading...</div>
+      <div id="feedback" class="feedback-box" style="display: none;"></div>
+      <div id="discussion" class="discussion-box" style="display: none;"></div>
+      <div id="prompt" class="prompt-text"></div>
+      <div id="choices" class="choices-grid"></div>
+      <button id="action-btn" class="action-btn" style="display: none;">Continue →</button>
+    </div>
+
+    <!-- DEBRIEFING PAGE -->
+    <div id="debrief-page" style="display: none;">
+      <h2 style="margin-top:0;">Your Game Results</h2>
+      <div id="debrief-content"></div>
+      <button class="action-btn" onclick="location.reload()">Play Again (New Order) ↺</button>
+    </div>
+
+  </div>
+
+  <script>
+    const scenarios = [
+      {
+        id: 1,
+        title: "Scenario 1: Two Plans at the Same Time",
+        text: "It is 6:00 PM on Friday. Your phone shows two reminders for 7:00 PM: 'Goodbye Dinner for Marco' and 'Work Dinner with Clients'. You forgot you made two plans for the exact same time!",
+        prompt: "What do you do first?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Stay calm, check where both dinners are, and prepare to call both people quickly.",
+            feedback: "🟩 EXCELLENT (+2 pts): Very smart! Checking distances and staying calm helps you solve the problem.",
+            discussion: "How do you remember your weekly plans and appointments?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Call Marco right away to ask if his dinner will last until late.",
+            feedback: "🟦 GOOD (+1 pt): Fast action with a friend, but you also need to check your work dinner.",
+            discussion: "When two plans conflict, how do you choose which one to do first?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Stare at your phone for 15 minutes hoping one plan gets canceled.",
+            feedback: "🟧 AVERAGE (+0 pts): Waiting too long wastes time when you need to act fast.",
+            discussion: "Why do people sometimes freeze when they make a mistake?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Turn off your phone, go to bed, and pretend you are sick.",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Lying and hiding breaks trust with friends and bosses! Try another choice.",
+            discussion: "Why is lying about being sick a bad idea?"
+          }
+        ]
+      },
+      {
+        id: 2,
+        title: "Scenario 2: Calling Your Friend",
+        text: "Marco is moving abroad tomorrow morning, so tonight is his goodbye dinner. You call him at 6:10 PM. He says: 'Hey! Are you on your way? Everyone is excited to see you!'",
+        prompt: "What do you tell Marco?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Say: 'Marco, I am so sorry. I made a mistake and have a work dinner first. Can I come join you around 8:30 PM?'",
+            feedback: "🟩 EXCELLENT (+2 pts): Honest and clear! Offering to come later shows you care about your friendship.",
+            discussion: "What words do you use to apologize to a good friend in English?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Say: 'I have a work event at 7:00 PM, but I will try my best to come later tonight!'",
+            feedback: "🟦 GOOD (+1 pt): Honest, but giving an exact time is even better for your friend.",
+            discussion: "Why is giving an exact time better than saying 'I will try to come'?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Say: 'I might be late because of traffic, save me a seat!'",
+            feedback: "🟧 AVERAGE (+0 pts): Blaming traffic is not completely honest if you are at another dinner.",
+            discussion: "Why shouldn't you blame traffic when you have another plan?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Say: 'Something came up, I cannot come tonight. Goodbye!' and hang up.",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Canceling abruptly on a departing friend is rude. Try another choice.",
+            discussion: "How would you feel if a close friend canceled on your goodbye party?"
+          }
+        ]
+      },
+      {
+        id: 3,
+        title: "Scenario 3: Talking to Your Boss",
+        text: "Marco says: 'We will be at the restaurant until 10:30 PM, please come later!' Now you need to contact your boss, Sarah, about the work dinner at the Grand Hotel.",
+        prompt: "How do you contact Sarah at 6:20 PM?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Call Sarah and say: 'Hi Sarah, I am coming to the 7:00 PM dinner. I have a personal plan later, so I will leave at 8:15 PM.'",
+            feedback: "🟩 EXCELLENT (+2 pts): Very professional! Telling your boss early lets you attend both events smoothly.",
+            discussion: "How do you speak politely to your boss when you need to leave early?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Send a text to Sarah: 'Looking forward to tonight! I need to leave a bit early around 8:30 PM for a personal plan.'",
+            feedback: "🟦 GOOD (+1 pt): Polite message, though a quick phone call is even more professional.",
+            discussion: "When is a phone call better than a text message at work?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Do not tell Sarah now and wait to make an excuse at the restaurant during dinner.",
+            feedback: "🟧 AVERAGE (+0 pts): Waiting until the last minute can make your boss surprised or unhappy.",
+            discussion: "Why is it better to give news early instead of late?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Text Sarah: 'Sorry, emergency! I cannot come to the client dinner tonight.'",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Canceling on clients for no real emergency hurts your job. Try another choice.",
+            discussion: "Why is it important to attend important work dinners?"
+          }
+        ]
+      },
+      {
+        id: 4,
+        title: "Scenario 4: Meeting the Clients",
+        text: "You arrive at the Grand Hotel at 6:55 PM. Sarah introduces you to two important clients, Mr. Davis and Ms. Chen. Mr. Davis says: 'Sarah tells us you lead the project team! We want to hear your plan tonight.'",
+        prompt: "How do you greet the clients?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Shake hands warmly and say: 'Nice to meet you both! I am excited to share our project plan with you tonight.'",
+            feedback: "🟩 EXCELLENT (+2 pts): Confident and polite! This makes a fantastic first impression on clients.",
+            discussion: "What English words do you use when meeting new clients or customers?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Smile and say: 'Nice to meet you! I am looking forward to talking over dinner.'",
+            feedback: "🟦 GOOD (+1 pt): Friendly and polite.",
+            discussion: "How do you show you are interested when meeting someone new?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Nod quickly and say: 'Nice to meet you. Just so you know, I have to leave early tonight.'",
+            feedback: "🟧 AVERAGE (+0 pts): Saying you must leave right away before saying anything else feels a bit rushed.",
+            discussion: "Why should you say friendly greetings before talking about your schedule?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Look at your watch and say: 'Let's order food fast because I am on a tight schedule.'",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Impatient and impolite to clients! Try another choice.",
+            discussion: "Why should you never rush clients at a business dinner?"
+          }
+        ]
+      },
+      {
+        id: 5,
+        title: "Scenario 5: Slow Food Service",
+        text: "It is 7:45 PM. You explained your work plan well, but the main food has not arrived yet. You need to leave by 8:15 PM to reach Marco's dinner across town.",
+        prompt: "How do you handle the slow service?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Excuse yourself quietly, walk to the waiter, and ask politely if the food will arrive soon.",
+            feedback: "🟩 EXCELLENT (+2 pts): Great problem solving! Asking the waiter quietly away from the table keeps the mood pleasant.",
+            discussion: "How do you ask restaurant workers to bring food faster in English?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Check the time on your phone quietly under the table while continuing to talk with Ms. Chen.",
+            feedback: "🟦 GOOD (+1 pt): Polite to the client, but doing nothing about the kitchen might make you late.",
+            discussion: "How do you keep paying attention when you feel worried about time?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Say to everyone at the table: 'The service here is very slow tonight, isn't it?'",
+            feedback: "🟧 AVERAGE (+0 pts): Common comment, but complaining publicly can feel a little awkward.",
+            discussion: "Why is complaining at a business dinner usually avoided?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Snap your fingers at the waiter across the room and yell: 'We have been waiting too long!'",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Snapping fingers and yelling at workers is very rude! Try another choice.",
+            discussion: "Why is yelling at restaurant workers bad manners?"
+          }
+        ]
+      },
+      {
+        id: 6,
+        title: "Scenario 6: Leaving the Work Dinner",
+        text: "It is 8:15 PM. The food has arrived and you answered all client questions. Now you must leave politely to go to Marco's dinner.",
+        prompt: "How do you leave the table?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Stand up smoothly and say: 'It was a pleasure meeting you! As I told Sarah, I have a plan tonight, but I will email you on Monday!'",
+            feedback: "🟩 EXCELLENT (+2 pts): Smooth and professional! Saying you will email on Monday shows great work habits.",
+            discussion: "How do you say goodbye at a work event in English?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Whisper to Sarah: 'I am leaving now.' Then tell clients: 'Thank you for a great evening, enjoy your meal!'",
+            feedback: "🟦 GOOD (+1 pt): Polite and fast departure.",
+            discussion: "Is it better to tell the whole table or whisper to your boss when leaving?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Stand up fast and say: 'Okay, my time is up, I have to run across town now!'",
+            feedback: "🟧 AVERAGE (+0 pts): A bit too informal for a high-level client dinner.",
+            discussion: "Why is formal English better with new clients?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Pretend to go to the bathroom, grab your coat, and leave without saying goodbye.",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Leaving without saying goodbye is strange and unprofessional! Try another choice.",
+            discussion: "Why should you never leave a business event without saying goodbye?"
+          }
+        ]
+      },
+      {
+        id: 7,
+        title: "Scenario 7: Crossing the City",
+        text: "You step outside at 8:20 PM. Marco's restaurant is 8 kilometers away. Friday traffic is very bad and taxis have a long wait time.",
+        prompt: "How do you travel across town quickly?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Walk two minutes to the metro station and take the direct express train.",
+            feedback: "🟩 EXCELLENT (+2 pts): Smart choice! Taking the metro avoids traffic jams easily.",
+            discussion: "What public transportation do you use when city traffic is bad?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Order a taxi on your phone app and text Marco: 'On my way! Traffic is bad, see you around 8:50 PM.'",
+            feedback: "🟦 GOOD (+1 pt): Keeping Marco updated is polite, though waiting for a taxi takes extra time.",
+            discussion: "Why is texting your friend when you are late a good idea?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Start walking fast on foot for 8 kilometers in your nice work clothes.",
+            feedback: "🟧 AVERAGE (+0 pts): Walking 8 kilometers in formal clothes will make you very tired and hot.",
+            discussion: "Why is walking long distances in work clothes difficult?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Offer a random stranger on the street money to drive you in their private car.",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Getting into a stranger's private car is dangerous! Try another choice.",
+            discussion: "Why should you never compromise your personal safety to save time?"
+          }
+        ]
+      },
+      {
+        id: 8,
+        title: "Scenario 8: Arriving at Marco's Party",
+        text: "Thanks to the metro, you arrive at Marco's restaurant at 8:45 PM! Marco and his friends are laughing at a big table. Marco sees you walk in.",
+        prompt: "How do you join the party?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Walk up happily, give Marco a big hug, and say: 'I made it! I wanted to say goodbye to you! How is everyone?'",
+            feedback: "🟩 EXCELLENT (+2 pts): Warm and friendly! Shifting your energy to match a fun party is great.",
+            discussion: "How do you greet a close friend at a party in English?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Sit in an open chair next to Marco, say sorry for being late, and order a drink.",
+            feedback: "🟦 GOOD (+1 pt): Polite, though giving a happy greeting is even better than apologizing.",
+            discussion: "Why is positive energy better than long apologies at a party?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Sit at the end of the table quietly so you do not interrupt anyone.",
+            feedback: "🟧 AVERAGE (+0 pts): Quiet, but sitting far away from your friend on his goodbye night is not ideal.",
+            discussion: "Where do you like to sit at a big group dinner table?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Complain loudly to everyone about how hard your work clients were and how bad traffic was.",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Complaining about work ruins the fun party mood! Try another choice.",
+            discussion: "Why shouldn't you complain about work problems at a friend's party?"
+          }
+        ]
+      },
+      {
+        id: 9,
+        title: "Scenario 9: Paying the Restaurant Bill",
+        text: "It is 10:15 PM. Dinner is ending. The waiter brings the total bill for Marco's dinner. Someone suggests splitting the bill equally among everyone.",
+        prompt: "How do you handle paying the bill?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Say happily: 'Let's all pay for Marco's meal together, I am happy to pay an equal share to celebrate him!'",
+            feedback: "🟩 EXCELLENT (+2 pts): Very generous! Helping pay for a friend's goodbye meal shows great friendship.",
+            discussion: "How do group friends pay for dinner bills in your country?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Say quietly: 'I will pay for my drink and dessert, plus extra money to help cover Marco's food.'",
+            feedback: "🟦 GOOD (+1 pt): Fair and helpful.",
+            discussion: "How do you split a bill when people order different things?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Use your phone calculator to count your exact cents and pay only for your small dessert.",
+            feedback: "🟧 AVERAGE (+0 pts): Technically fair, but counting exact cents at a goodbye party looks a bit strict.",
+            discussion: "Why can counting exact cents feel awkward at group celebrations?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Refuse to pay anything and say: 'I was only here for one hour so I will not pay.'",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Refusing to pay at a friend's goodbye dinner is rude. Try another choice.",
+            discussion: "Why is generosity appreciated at special group events?"
+          }
+        ]
+      },
+      {
+        id: 10,
+        title: "Scenario 10: Monday at the Office",
+        text: "It is Monday morning. Marco has flown abroad safely, and you arrive at work. You see Sarah at her desk and want to talk about Friday's client dinner.",
+        prompt: "How do you follow up with your boss?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Stop by Sarah's desk with a smile: 'Good morning Sarah! Thanks for Friday. The clients seemed very happy with our plan!'",
+            feedback: "🟩 EXCELLENT (+2 pts): Fantastic work habits! Following up nicely on Monday builds a great career.",
+            discussion: "Why is saying 'good morning' and talking about past work events helpful?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Send Sarah a quick email thanking her for the dinner and asking how the rest of the night went.",
+            feedback: "🟦 GOOD (+1 pt): Good professional email follow-up.",
+            discussion: "Do you prefer sending emails or talking in person at work?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Give Sarah a quick wave as you walk past her desk to get coffee.",
+            feedback: "🟧 AVERAGE (+0 pts): Friendly, but talking about the clients shows more interest in your job.",
+            discussion: "Why is showing interest in your work projects important?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Brag to your coworkers in the breakroom about how you went to two dinners in one night.",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Bragging about double-booking makes you look disloyal! Try another choice.",
+            discussion: "Why is bragging about making double plans bad for your reputation?"
+          }
+        ]
+      }
+    ];
+
+    let currentScenarioIdx = 0;
+    let score = 0;
+    let shuffledChoices = [];
+
+    // Fisher-Yates Array Shuffle
+    function shuffleArray(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function startGame() {
+      document.getElementById('landing-page').style.display = 'none';
+      document.getElementById('gameplay-page').style.display = 'block';
+      currentScenarioIdx = 0;
+      score = 0;
+      updateScoreDisplay();
+      renderCurrentScenario();
+    }
+
+    function selectOption(shuffledIdx) {
+      const choice = shuffledChoices[shuffledIdx];
+
+      const feedbackEl = document.getElementById('feedback');
+      const discussionEl = document.getElementById('discussion');
+      const actionBtn = document.getElementById('action-btn');
+      const choicesEl = document.getElementById('choices');
+
+      feedbackEl.className = `feedback-box ${choice.type}`;
+      feedbackEl.innerText = choice.feedback;
+      feedbackEl.style.display = 'block';
+
+      if (choice.type === 'bad') {
+        score = Math.max(0, score + choice.pts);
+        updateScoreDisplay();
+        
+        discussionEl.innerHTML = `<strong>Discussion Question:</strong><br>${choice.discussion}`;
+        discussionEl.style.display = 'block';
+
+        actionBtn.innerText = "Try Scenario Again ↺";
+        actionBtn.onclick = resetScenarioChoices;
+        actionBtn.style.display = 'block';
+
+        choicesEl.style.display = 'none';
+      } else {
+        score += choice.pts;
+        updateScoreDisplay();
+
+        discussionEl.innerHTML = `<strong>Discussion Question:</strong><br>${choice.discussion}`;
+        discussionEl.style.display = 'block';
+
+        choicesEl.style.display = 'none';
+
+        if (currentScenarioIdx < scenarios.length - 1) {
+          actionBtn.innerText = "Next Scenario →";
+          actionBtn.onclick = advanceScenario;
+        } else {
+          actionBtn.innerText = "View Final Score & Results ★";
+          actionBtn.onclick = renderDebriefing;
+        }
+        actionBtn.style.display = 'block';
+      }
+    }
+
+    function resetScenarioChoices() {
+      document.getElementById('feedback').style.display = 'none';
+      document.getElementById('discussion').style.display = 'none';
+      document.getElementById('action-btn').style.display = 'none';
+      document.getElementById('choices').style.display = 'flex';
+    }
+
+    function advanceScenario() {
+      currentScenarioIdx++;
+      resetScenarioChoices();
+      renderCurrentScenario();
+    }
+
+    function updateScoreDisplay() {
+      document.getElementById('score').innerText = `Score: ${score} / 20`;
+    }
+
+    function renderCurrentScenario() {
+      const scenario = scenarios[currentScenarioIdx];
+      
+      document.getElementById('progress').innerText = `Scenario ${scenario.id} of 10`;
+      document.getElementById('story').innerText = scenario.text;
+      document.getElementById('prompt').innerText = scenario.prompt;
+
+      const choicesEl = document.getElementById('choices');
+      choicesEl.innerHTML = '';
+
+      // Randomize choices order
+      shuffledChoices = shuffleArray(scenario.choices);
+
+      shuffledChoices.forEach((choice, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.innerText = `${String.fromCharCode(65 + idx)}. ${choice.text}`;
+        btn.onclick = () => selectOption(idx);
+        choicesEl.appendChild(btn);
+      });
+    }
+
+    function renderDebriefing() {
+      document.getElementById('gameplay-page').style.display = 'none';
+      document.getElementById('debrief-page').style.display = 'block';
+
+      let bandTitle = "";
+      let bandColor = "";
+      let bandFeedback = "";
+
+      if (score >= 16) {
+        bandTitle = "Band 4: Master Planner (16–20 Points)";
+        bandColor = "var(--color-excellent)";
+        bandFeedback = "<strong>Fantastic job!</strong> You solved a difficult double booking with great English! You were honest with your friend, polite to work clients, and managed your time smartly!";
+      } else if (score >= 11) {
+        bandTitle = "Band 3: Capable Planner (11–15 Points)";
+        bandColor = "var(--color-good)";
+        bandFeedback = "<strong>Great job!</strong> You managed both dinners well and communicated politely. To get Band 4, try to give exact times earlier and take polite initiative!";
+      } else if (score >= 6) {
+        bandTitle = "Band 2: Okay Planner (6–10 Points)";
+        bandColor = "var(--color-average)";
+        bandFeedback = "<strong>Nice try!</strong> You survived the evening, but some choices were slow or caused small problems. Replay the game and practice making clear, fast decisions!";
+      } else {
+        bandTitle = "Band 1: Needs Practice (0–5 Points)";
+        bandColor = "var(--color-bad)";
+        bandFeedback = "<strong>Keep practicing!</strong> Some choices lost points or were dishonest. Play the game again and focus on honest, polite answers!";
+      }
+
+      const debriefContent = document.getElementById('debrief-content');
+      debriefContent.innerHTML = `
+        <div class="debrief-card" style="border-color: ${bandColor}">
+          <div class="progress-title" style="margin-bottom:8px;">Final Score: ${score} / 20</div>
+          <div class="band-title" style="color: ${bandColor}">${bandTitle}</div>
+          <p style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 0;">${bandFeedback}</p>
+        </div>
+
+        <div class="discussion-box">
+          <strong style="font-size: 1.05rem;">Final Class Discussion Questions:</strong>
+          <ol style="margin-top: 10px; padding-left: 20px; line-height: 1.6;">
+            <li>Which scenario was the hardest for you? Why?</li>
+            <li>Have you ever double-booked yourself in real life? What happened?</li>
+            <li>What new English words for making plans did you learn today?</li>
+          </ol>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Awkward Dinner Party: B1/B2 Decision Game</title>
+  <style>
+    :root {
+      --bg-color: #f1f5f9;
+      --card-bg: #ffffff;
+      --text-color: #1e293b;
+      --border-color: #cbd5e1;
+      --primary-color: #2563eb;
+      --primary-hover: #1d4ed8;
+      
+      /* Rating Colors */
+      --color-excellent: #15803d;
+      --bg-excellent: #f0fdf4;
+
+      --color-good: #1d4ed8;
+      --bg-good: #eff6ff;
+
+      --color-average: #b45309;
+      --bg-average: #fffbeb;
+
+      --color-bad: #b91c1c;
+      --bg-bad: #fef2f2;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+
+    .game-container {
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+      max-width: 780px;
+      width: 100%;
+      padding: 32px;
+      box-sizing: border-box;
+      border: 1px solid var(--border-color);
+    }
+
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      border-bottom: 2px solid var(--bg-color);
+      padding-bottom: 12px;
+    }
+
+    .progress-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .score-tracker {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--primary-color);
+      background-color: #dbeafe;
+      padding: 6px 14px;
+      border-radius: 20px;
+    }
+
+    .story-text {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .prompt-text {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: #0f172a;
+    }
+
+    .choices-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .choice-btn {
+      background-color: #ffffff;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      padding: 14px 18px;
+      font-size: 1rem;
+      color: var(--text-color);
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      line-height: 1.4;
+    }
+
+    .choice-btn:hover {
+      border-color: var(--primary-color);
+      background-color: #f8fafc;
+      transform: translateY(-1px);
+    }
+
+    /* Feedback Box Styling */
+    .feedback-box {
+      padding: 16px;
+      border-radius: 8px;
+      font-size: 1rem;
+      line-height: 1.5;
+      margin-bottom: 16px;
+      border-left: 6px solid;
+    }
+
+    .feedback-box.excellent {
+      background-color: var(--bg-excellent);
+      color: var(--color-excellent);
+      border-color: var(--color-excellent);
+    }
+
+    .feedback-box.good {
+      background-color: var(--bg-good);
+      color: var(--color-good);
+      border-color: var(--color-good);
+    }
+
+    .feedback-box.average {
+      background-color: var(--bg-average);
+      color: var(--color-average);
+      border-color: var(--color-average);
+    }
+
+    .feedback-box.bad {
+      background-color: var(--bg-bad);
+      color: var(--color-bad);
+      border-color: var(--color-bad);
+    }
+
+    .discussion-box {
+      background-color: #f8fafc;
+      border: 1px solid var(--border-color);
+      padding: 14px 18px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .action-btn {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 14px 20px;
+      font-size: 1rem;
+      cursor: pointer;
+      font-weight: 700;
+      width: 100%;
+      transition: background-color 0.2s ease;
+    }
+
+    .action-btn:hover {
+      background-color: var(--primary-hover);
+    }
+
+    /* Intro & Debriefing Styling */
+    .intro-list {
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary-color);
+      padding: 16px 20px;
+      border-radius: 4px;
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+
+    .intro-list ul {
+      margin: 8px 0 0 0;
+      padding-left: 20px;
+    }
+
+    .debrief-card {
+      background-color: #f8fafc;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .band-title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="game-container">
+    
+    <!-- LANDING PAGE -->
+    <div id="landing-page">
+      <h1 style="margin-top:0; color:#0f172a;">The Awkward Dinner Party 🍷</h1>
+      <p class="story-text">
+        Welcome to <strong>The Awkward Dinner Party</strong>, an interactive scenario game for English language learners (B1–B2 level).
+        You have been invited to a formal dinner at the home of your new department manager, Ms. Clara Vance. You want to make a great impression, 
+        but social landmines, unexpected dish ingredients, political debates, and household mishaps await!
+      </p>
+
+      <div class="intro-list">
+        <strong>How to Play & Score:</strong>
+        <ul>
+          <li><strong>10 Sequential Scenarios:</strong> Navigate 10 chronological dinner moments smoothly.</li>
+          <li><strong>4 Options Per Scenario:</strong> Choices appear in a randomized order every play!</li>
+          <li>🟩 <strong>Excellent Response (+2 pts):</strong> Culturally fluent, tactful, and articulate.</li>
+          <li>🟦 <strong>Good Response (+1 pt):</strong> Polite and functional, but less diplomatic.</li>
+          <li>🟧 <strong>Average Response (+0 pts):</strong> Neutral; safe but passive or slightly awkward.</li>
+          <li>🟥 <strong>Bad Response (-1 pt):</strong> Rude, offensive, or chaotic. Subtracts 1 point and forces a retry!</li>
+          <li><strong>Maximum Score:</strong> 20 Points. View your performance band at the end!</li>
+        </ul>
+      </div>
+
+      <button class="action-btn" onclick="startGame()">Start Scenario 1 →</button>
+    </div>
+
+    <!-- GAMEPLAY PAGE -->
+    <div id="gameplay-page" style="display: none;">
+      <div class="header-bar">
+        <div id="progress" class="progress-title">Scenario 1 of 10</div>
+        <div id="score" class="score-tracker">Score: 0 / 20</div>
+      </div>
+
+      <div id="story" class="story-text">Loading scenario...</div>
+      <div id="feedback" class="feedback-box" style="display: none;"></div>
+      <div id="discussion" class="discussion-box" style="display: none;"></div>
+      <div id="prompt" class="prompt-text"></div>
+      <div id="choices" class="choices-grid"></div>
+      <button id="action-btn" class="action-btn" style="display: none;">Continue →</button>
+    </div>
+
+    <!-- DEBRIEFING PAGE -->
+    <div id="debrief-page" style="display: none;">
+      <h2 style="margin-top:0;">Game Debriefing & Feedback</h2>
+      <div id="debrief-content"></div>
+      <button class="action-btn" onclick="location.reload()">Replay Game (Randomized Order) ↺</button>
+    </div>
+
+  </div>
+
+  <script>
+    const scenarios = [
+      {
+        id: 1,
+        title: "Scenario 1: Arriving at the Front Door",
+        text: "You arrive at your manager's suburban home at 6:58 PM for a 7:00 PM dinner. Ms. Vance opens the door wearing an apron, looking slightly frazzled. You hold a bottle of wine you brought as a host gift.",
+        prompt: "How do you greet your host at the door?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Smile warmly, hand her the bottle, and say: 'Thank you so much for inviting me, Ms. Vance. Here is a little something for the host.'",
+            feedback: "🟩 EXCELLENT (+2 pts): Perfect formal greeting! Presenting a host gift with gracious language starts the evening flawlessly.",
+            discussion: "What are customary host gifts in your culture when invited to someone's home for dinner?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Hand her the bottle immediately and say: 'Hello! I hope I'm not too early. Here is some wine.'",
+            feedback: "🟦 GOOD (+1 pt): Polite and friendly, though mentioning the timing creates a moment of minor self-consciousness.",
+            discussion: "In English-speaking countries, is arriving 2 minutes early considered polite or impolite?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Walk inside silently, take off your coat, and place the wine bottle on the entry table without a word.",
+            feedback: "🟧 AVERAGE (+0 pts): A bit distant. Entering without making warm initial small talk seems awkward.",
+            discussion: "Why is small talk at the front door culturally expected in western social gatherings?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Look at your watch and say: 'I'm right on time! You look really stressed out.'",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Pointing out your host's stress is blunt and insulting. Choose another option!",
+            discussion: "Why should you avoid commenting on a host's physical appearance or stress levels?"
+          }
+        ]
+      },
+      {
+        id: 2,
+        title: "Scenario 2: Shoe Policy Dilemma",
+        text: "You step into the hallway. The entryway features a pristine white carpet, but you notice Ms. Vance is wearing shoes. She does not explicitly ask you to remove your footwear.",
+        prompt: "How do you handle the shoe etiquette?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Pause near the door mat and ask politely: 'Should I take off my shoes, Ms. Vance?'",
+            feedback: "🟩 EXCELLENT (+2 pts): Tactful awareness! Asking directly respects her home without making assumptions.",
+            discussion: "How do you politely inquire about house rules regarding shoes in a foreign country?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Unlace your shoes immediately and leave them neatly by the front door mat.",
+            feedback: "🟦 GOOD (+1 pt): Respectful of her white carpet, though hosts wearing shoes sometimes prefer guests to keep theirs on.",
+            discussion: "What are the unspoken shoe rules in your native country when visiting friends versus bosses?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Wipe your feet aggressively on the door mat for 20 seconds and walk straight onto the carpet.",
+            feedback: "🟧 AVERAGE (+0 pts): Acceptable, but aggressive wiping looks funny and might still track in dirt.",
+            discussion: "How can non-verbal actions sometimes create subtle awkwardness during home visits?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Point at her white carpet and say loudly: 'Wow, it's bold of you to have white carpet with those dirty shoes on!'",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Criticizing a host's interior design or footwear is rude. Choose another option!",
+            discussion: "Why is criticizing a host's home environment a major social mistake?"
+          }
+        ]
+      },
+      {
+        id: 3,
+        title: "Scenario 3: The Pre-Dinner Drink",
+        text: "Ms. Vance leads you into the living room where two other colleagues are sitting. She asks: 'Can I get you something to drink? We have scotch, red wine, or sparkling water.' You dislike alcohol, but want to fit in.",
+        prompt: "How do you state your drink preference?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Say warmly: 'Sparkling water with a slice of lemon would be wonderful, thank you!'",
+            feedback: "🟩 EXCELLENT (+2 pts): Confident and gracious! Ordering non-alcoholic drinks without awkward explanations is sophisticated.",
+            discussion: "How can you decline alcohol politely without offering unsolicited personal or medical explanations?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Say: 'Just sparkling water for me tonight, please. I'm driving later.'",
+            feedback: "🟦 GOOD (+1 pt): Perfectly acceptable, though giving an unnecessary excuse is redundant.",
+            discussion: "Why do people often feel compelled to give excuses when declining alcohol at dinner parties?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Accept the scotch to avoid looking different, even though you know you won't drink it.",
+            feedback: "🟧 AVERAGE (+0 pts): Wasteful. Leaving a full glass of expensive alcohol untouched looks unappreciative.",
+            discussion: "Is peer pressure around food and drink common in professional networking events?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Make a face and say: 'Alcohol is horrible for your liver. I'll just take plain tap water.'",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Preachy and judgmental. You insulted her offerings and her guests. Choose another option!",
+            discussion: "Why should you avoid preaching about health choices at social gatherings?"
+          }
+        ]
+      },
+      {
+        id: 4,
+        title: "Scenario 4: The Unpalatable Starter",
+        text: "Everyone sits down at the dining table. Ms. Vance proudly serves the starter: a sea urchin and coriander soup. You are severely allergic to coriander (cilantro) and find sea urchin repulsive.",
+        prompt: "How do you handle the dish you cannot eat?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Catch Ms. Vance's eye quietly and say softly: 'Ms. Vance, this looks incredible, but I have a severe allergy to coriander. I am so sorry to be a trouble!'",
+            feedback: "🟩 EXCELLENT (+2 pts): Honest, polite, and safe! Apologizing sincerely while stating dietary allergies prevents health risks smoothly.",
+            discussion: "What phrasing can you use to inform a host of a food allergy without making them feel guilty?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Eat two small spoonfuls of the soup around the coriander leaves and quietly leave the rest.",
+            feedback: "🟦 GOOD (+1 pt): Politely hides your dislike, but taking risks with severe allergies is dangerous.",
+            discussion: "How do you navigate mild food dislikes versus medical food allergies at dinner parties?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Use your spoon to push the sea urchin pieces under the rim of the bowl so it looks empty.",
+            feedback: "🟧 AVERAGE (+0 pts): Immature. Hiding food under bowls or napkins is easily noticed by nearby guests.",
+            discussion: "Why is hiding food considered bad table manners in adult dining etiquette?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Gag loudly, push the bowl away, and say: 'Sea urchin smells like a wet fish market!'",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Extremely rude! Insulting a host's homemade meal is inexcusable. Choose another option!",
+            discussion: "What is the universal rule regarding expressing disgust toward served food?"
+          }
+        ]
+      },
+      {
+        id: 5,
+        title: "Scenario 5: The Awkward Topic",
+        text: "During the main course, another colleague at the table suddenly brings up a controversial local political election, expressing a strong opinion that you strongly disagree with. Everyone looks at you for your response.",
+        prompt: "How do you navigate the political conversation?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Smile neutrally and say: 'It's certainly a complex debate with valid points on both sides. Speaking of local developments, Ms. Vance, how is the new park project coming along?'",
+            feedback: "🟩 EXCELLENT (+2 pts): Masterful pivot! Acknowledging the complexity and deflecting to a safe topic preserves party harmony.",
+            discussion: "What strategy works best when guests introduce taboo topics like politics or money at dinner?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Say calmly: 'I actually see it a bit differently, but I try to keep politics away from dinner tables!'",
+            feedback: "🟦 GOOD (+1 pt): Honest and boundary-setting, though stating your disagreement keeps mild tension in the air.",
+            discussion: "How can you set conversational boundaries in English without sounding defensive?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Nod silently, stare down at your plate, and chew your food in complete silence.",
+            feedback: "🟧 AVERAGE (+0 pts): Avoids argument, but complete silence makes the tension very obvious to everyone.",
+            discussion: "Why does total silence sometimes heighten awkwardness during small group conversations?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Slam your fork down and say: 'Anyone who votes for that party is completely ignorant!'",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Aggressive and hostile! Starting arguments ruins the host's party. Choose another option!",
+            discussion: "Why is attacking another guest's personal beliefs at a dinner party unacceptable?"
+          }
+        ]
+      },
+      {
+        id: 6,
+        title: "Scenario 6: The Spilled Gravy",
+        text: "While reaching for the salt shaker, your elbow accidentally catches the gravy boat. Warm brown gravy spills across the white tablecloth and splashes onto Ms. Vance's cloth napkin.",
+        prompt: "How do you handle your embarrassing spill?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Apologize immediately: 'I am so sorry, Ms. Vance! Let me help clean that up right away,' and dab the spill gently with your napkin.",
+            feedback: "🟩 EXCELLENT (+2 pts): Responsible, sincere, and proactive! Owning mistakes calmly reduces host anxiety.",
+            discussion: "What exact phrases in English show sincere regret without sounding overly dramatic?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Say: 'Oh no, I'm so clumsy! I am terribly sorry, Ms. Vance,' and hand her your clean napkin.",
+            feedback: "🟦 GOOD (+1 pt): Sincere apology, though calling yourself names highlights your panic.",
+            discussion: "Why should you avoid excessive self-deprecation when making minor accidental mistakes?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Freeze in panic, gasp loudly, and wait for Ms. Vance to bring paper towels from the kitchen.",
+            feedback: "🟧 AVERAGE (+0 pts): Natural fear response, but failing to assist leaves the host doing all the work.",
+            discussion: "How can you train yourself to react proactively rather than freezing during social accidents?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Blame the person next to you: 'If you hadn't put the salt so far away, I wouldn't have spilled this!'",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Blaming others for your own physical accident is childish and embarrassing. Choose another option!",
+            discussion: "Why is taking personal accountability vital for professional credibility?"
+          }
+        ]
+      },
+      {
+        id: 7,
+        title: "Scenario 7: The Unsolicited Compliment",
+        text: "Ms. Vance's partner, who cooked the main dish, asks you directly: 'Be honest, how is the roast beef? I tried a new recipe and I'm worried it turned out a bit dry.' In reality, it is quite tough and dry.",
+        prompt: "How do you offer polite feedback to the cook?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Say warmly: 'The flavor and seasoning are fantastic! Thank you so much for putting so much effort into dinner for us.'",
+            feedback: "🟩 EXCELLENT (+2 pts): Diplomatic excellence! Focusing on genuine positives (flavor/effort) protects feelings graciously.",
+            discussion: "What is the 'compliment sandwich' technique, and how is it used in social diplomacy?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Say with a smile: 'I think it's very tasty! Maybe a tiny bit well-done, but I'm really enjoying it.'",
+            feedback: "🟦 GOOD (+1 pt): Honest gentleness, though agreeing that it is dry validates their self-criticism.",
+            discussion: "Is total honesty always required when asked for opinions on cooking at social events?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Take another bite, chew for a long time, and say: 'It's fine, don't worry about it.'",
+            feedback: "🟧 AVERAGE (+0 pts): Unenthusiastic. Dismissing their question with 'it's fine' sounds dismissive.",
+            discussion: "Why does the word 'fine' often carry a negative undertone in spoken English?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Say: 'Yeah, you're right, it's like chewing leather. You definitely overcooked it.'",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Brutal and insensitive. You insulted the host's partner. Choose another option!",
+            discussion: "Why is blunt criticism unacceptable when receiving free hospitality?"
+          }
+        ]
+      },
+      {
+        id: 8,
+        title: "Scenario 8: The Kitchen Help Offer",
+        text: "Dinner finishes. Ms. Vance begins stacking plates to take to the kitchen. You notice she looks tired after cooking and serving four people all evening.",
+        prompt: "How do you offer your assistance?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Stand up with your plate and say: 'Ms. Vance, please let me help you carry these to the kitchen.'",
+            feedback: "🟩 EXCELLENT (+2 pts): Proactive and helpful! Physical initiative combined with polite phrasing is ideal.",
+            discussion: "In western culture, is it polite to stand up and carry your own plate to the kitchen?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Stay seated and ask: 'Would you like any help in the kitchen, Ms. Vance?'",
+            feedback: "🟦 GOOD (+1 pt): Courteous offer, though remaining seated makes it easy for the host to decline.",
+            discussion: "Why is standing up to help more persuasive than offering verbal help while remaining seated?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Watch her clear the table silently and check your wrist watch or phone under the table.",
+            feedback: "🟧 AVERAGE (+0 pts): Passive and disengaged. Checking your phone while the host works looks rude.",
+            discussion: "What are phone etiquette rules at the dinner table during host clearing?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Say: 'Finally! I thought we'd never finish. Do you have a dishwasher or do we have to wash by hand?'",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Demanding and arrogant! You treated your host like house staff. Choose another option!",
+            discussion: "Why is treating hosts like service staff catastrophic for workplace relationships?"
+          }
+        ]
+      },
+      {
+        id: 9,
+        title: "Scenario 9: The Time to Leave",
+        text: "It is 9:45 PM. Dessert and coffee are finished. Ms. Vance suppresses a small yawn, and conversation is slowing down significantly.",
+        prompt: "How do you initiate a graceful exit?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Place your napkin down, smile, and say: 'Ms. Vance, it has been a wonderful evening, but I should let you get some rest. Thank you for your wonderful hospitality.'",
+            feedback: "🟩 EXCELLENT (+2 pts): Flawless departure! Noticing host fatigue and exiting smoothly shows high social awareness.",
+            discussion: "What verbal cues indicate that a social dinner party is coming to an end?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Stand up and say: 'Well, it's getting late! I should probably start heading home now.'",
+            feedback: "🟦 GOOD (+1 pt): Clear exit, though missing an explicit compliment on her hospitality.",
+            discussion: "Why is thanking the host for 'hospitality' an important closing phrase in formal English?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Wait until another guest stands up first so you can follow them out the door.",
+            feedback: "🟧 AVERAGE (+0 pts): Passive. Relies on others to take social initiative.",
+            discussion: "When is waiting for someone else to make a move helpful versus overly passive?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Slump back into your chair and say: 'So, what are we doing next? Got any board games?'",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Oblivious to host fatigue! Overstaying your welcome exhausts hosts. Choose another option!",
+            discussion: "What does 'overstaying your welcome' mean, and why is it problematic?"
+          }
+        ]
+      },
+      {
+        id: 10,
+        title: "Scenario 10: The Post-Party Follow-Up",
+        text: "It is the morning after the dinner party. You arrive at the office. You see Ms. Vance sitting at her desk preparing for a morning meeting.",
+        prompt: "How do you follow up on the event the next day?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Send a brief, warm thank-you email or stop by her desk to say: 'Thank you again for last night, Ms. Vance. The food was wonderful and I had a great time!'",
+            feedback: "🟩 EXCELLENT (+2 pts): Professional excellence! A next-day thank-you note solidifies a positive professional relationship.",
+            discussion: "Why is a next-day thank-you message considered standard professional etiquette?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Give her a warm wave and a smile across the office without bringing up the dinner party.",
+            feedback: "🟦 GOOD (+1 pt): Friendly, but misses a key opportunity to reinforce rapport.",
+            discussion: "How does acknowledging social events build workplace relationships over time?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Wait for her to mention the party first before saying anything about it.",
+            feedback: "🟧 AVERAGE (+0 pts): Neutral. Misses the social initiative expected after receiving hospitality.",
+            discussion: "Why is waiting for senior colleagues to initiate contact sometimes a missed opportunity?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Gossip with colleagues by the coffee machine about how dry the roast beef was.",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Disloyal and unprofessional! Gossiping about your host ruins your workplace reputation. Choose another option!",
+            discussion: "Why is workplace gossip about private social invitations destructive?"
+          }
+        ]
+      }
+    ];
+
+    let currentScenarioIdx = 0;
+    let score = 0;
+    let shuffledChoices = [];
+
+    // Fisher-Yates Array Shuffle Algorithm
+    function shuffleArray(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function startGame() {
+      document.getElementById('landing-page').style.display = 'none';
+      document.getElementById('gameplay-page').style.display = 'block';
+      currentScenarioIdx = 0;
+      score = 0;
+      updateScoreDisplay();
+      renderCurrentScenario();
+    }
+
+    function selectOption(shuffledIdx) {
+      const choice = shuffledChoices[shuffledIdx];
+
+      const feedbackEl = document.getElementById('feedback');
+      const discussionEl = document.getElementById('discussion');
+      const actionBtn = document.getElementById('action-btn');
+      const choicesEl = document.getElementById('choices');
+
+      feedbackEl.className = `feedback-box ${choice.type}`;
+      feedbackEl.innerText = choice.feedback;
+      feedbackEl.style.display = 'block';
+
+      if (choice.type === 'bad') {
+        score = Math.max(0, score + choice.pts);
+        updateScoreDisplay();
+        
+        discussionEl.innerHTML = `<strong>Discussion Question:</strong><br>${choice.discussion}`;
+        discussionEl.style.display = 'block';
+
+        actionBtn.innerText = "Try Scenario Again ↺";
+        actionBtn.onclick = resetScenarioChoices;
+        actionBtn.style.display = 'block';
+
+        choicesEl.style.display = 'none';
+      } else {
+        score += choice.pts;
+        updateScoreDisplay();
+
+        discussionEl.innerHTML = `<strong>Discussion Question for Class / Partner:</strong><br>${choice.discussion}`;
+        discussionEl.style.display = 'block';
+
+        choicesEl.style.display = 'none';
+
+        if (currentScenarioIdx < scenarios.length - 1) {
+          actionBtn.innerText = "Next Scenario →";
+          actionBtn.onclick = advanceScenario;
+        } else {
+          actionBtn.innerText = "View Final Score & Debriefing ★";
+          actionBtn.onclick = renderDebriefing;
+        }
+        actionBtn.style.display = 'block';
+      }
+    }
+
+    function resetScenarioChoices() {
+      document.getElementById('feedback').style.display = 'none';
+      document.getElementById('discussion').style.display = 'none';
+      document.getElementById('action-btn').style.display = 'none';
+      document.getElementById('choices').style.display = 'flex';
+    }
+
+    function advanceScenario() {
+      currentScenarioIdx++;
+      resetScenarioChoices();
+      renderCurrentScenario();
+    }
+
+    function updateScoreDisplay() {
+      document.getElementById('score').innerText = `Score: ${score} / 20`;
+    }
+
+    function renderCurrentScenario() {
+      const scenario = scenarios[currentScenarioIdx];
+      
+      document.getElementById('progress').innerText = `Scenario ${scenario.id} of 10`;
+      document.getElementById('story').innerText = scenario.text;
+      document.getElementById('prompt').innerText = scenario.prompt;
+
+      const choicesEl = document.getElementById('choices');
+      choicesEl.innerHTML = '';
+
+      // Randomize choice order on every scenario render
+      shuffledChoices = shuffleArray(scenario.choices);
+
+      shuffledChoices.forEach((choice, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.innerText = `${String.fromCharCode(65 + idx)}. ${choice.text}`;
+        btn.onclick = () => selectOption(idx);
+        choicesEl.appendChild(btn);
+      });
+    }
+
+    function renderDebriefing() {
+      document.getElementById('gameplay-page').style.display = 'none';
+      document.getElementById('debrief-page').style.display = 'block';
+
+      let bandTitle = "";
+      let bandColor = "";
+      let bandFeedback = "";
+
+      if (score >= 16) {
+        bandTitle = "Band 4: Diplomatic Dinner Guest (16–20 Points)";
+        bandColor = "var(--color-excellent)";
+        bandFeedback = "<strong>Outstanding Performance!</strong> You navigated a complex professional dinner party with exceptional social etiquette, emotional intelligence, and diplomatic language. You handled awkward moments, allergies, and accidents with style and tact!";
+      } else if (score >= 11) {
+        bandTitle = "Band 3: Polite & Capable Guest (11–15 Points)";
+        bandColor = "var(--color-good)";
+        bandFeedback = "<strong>Great Job!</strong> You made a positive impression on your manager and handled social awkwardness successfully. To reach Band 4, focus on taking proactive verbal initiative and using compliment-framing techniques during awkward moments.";
+      } else if (score >= 6) {
+        bandTitle = "Band 2: Developing Social Navigator (6–10 Points)";
+        bandColor = "var(--color-average)";
+        bandFeedback = "<strong>Satisfactory Effort.</strong> You survived the dinner party, but some passive or indirect choices created mild social friction. Review the discussion points on host gift etiquette, tactful feedback, and smooth exits to build stronger social confidence.";
+      } else {
+        bandTitle = "Band 1: Social Landmine Hazard (0–5 Points)";
+        bandColor = "var(--color-bad)";
+        bandFeedback = "<strong>Needs Work.</strong> Several choices led to point penalties, host offense, or awkward arguments. Replay the game and focus on choosing options that prioritize host diplomacy, tactful deflection, and polite gratitude.";
+      }
+
+      const debriefContent = document.getElementById('debrief-content');
+      debriefContent.innerHTML = `
+        <div class="debrief-card" style="border-color: ${bandColor}">
+          <div class="progress-title" style="margin-bottom:8px;">Final Score: ${score} / 20</div>
+          <div class="band-title" style="color: ${bandColor}">${bandTitle}</div>
+          <p style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 0;">${bandFeedback}</p>
+        </div>
+
+        <div class="discussion-box">
+          <strong style="font-size: 1.05rem;">Final Reflection Questions for Discussion:</strong>
+          <ol style="margin-top: 10px; padding-left: 20px; line-height: 1.6;">
+            <li>Which of the 10 dinner party scenarios felt most realistic or difficult to handle in English?</li>
+            <li>How do dinner party etiquette rules in your culture differ from western dining customs shown here?</li>
+            <li>What specific English diplomatic phrases (e.g., deflecting topics, apologizing) did you find most useful?</li>
+          </ol>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>

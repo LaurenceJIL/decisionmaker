@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Lost Wallet: English Decision Game</title>
+  <style>
+    :root {
+      --bg-color: #f1f5f9;
+      --card-bg: #ffffff;
+      --text-color: #1e293b;
+      --border-color: #cbd5e1;
+      --primary-color: #2563eb;
+      --primary-hover: #1d4ed8;
+      
+      /* Rating Colors */
+      --color-excellent: #15803d;
+      --bg-excellent: #f0fdf4;
+
+      --color-good: #1d4ed8;
+      --bg-good: #eff6ff;
+
+      --color-average: #b45309;
+      --bg-average: #fffbeb;
+
+      --color-bad: #b91c1c;
+      --bg-bad: #fef2f2;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+
+    .game-container {
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+      max-width: 780px;
+      width: 100%;
+      padding: 32px;
+      box-sizing: border-box;
+      border: 1px solid var(--border-color);
+    }
+
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      border-bottom: 2px solid var(--bg-color);
+      padding-bottom: 12px;
+    }
+
+    .progress-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .score-tracker {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--primary-color);
+      background-color: #dbeafe;
+      padding: 6px 14px;
+      border-radius: 20px;
+    }
+
+    .story-text {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .prompt-text {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: #0f172a;
+    }
+
+    .choices-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .choice-btn {
+      background-color: #ffffff;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      padding: 14px 18px;
+      font-size: 1rem;
+      color: var(--text-color);
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      line-height: 1.4;
+    }
+
+    .choice-btn:hover {
+      border-color: var(--primary-color);
+      background-color: #f8fafc;
+      transform: translateY(-1px);
+    }
+
+    /* Feedback Box Styling */
+    .feedback-box {
+      padding: 16px;
+      border-radius: 8px;
+      font-size: 1rem;
+      line-height: 1.5;
+      margin-bottom: 16px;
+      border-left: 6px solid;
+    }
+
+    .feedback-box.excellent {
+      background-color: var(--bg-excellent);
+      color: var(--color-excellent);
+      border-color: var(--color-excellent);
+    }
+
+    .feedback-box.good {
+      background-color: var(--bg-good);
+      color: var(--color-good);
+      border-color: var(--color-good);
+    }
+
+    .feedback-box.average {
+      background-color: var(--bg-average);
+      color: var(--color-average);
+      border-color: var(--color-average);
+    }
+
+    .feedback-box.bad {
+      background-color: var(--bg-bad);
+      color: var(--color-bad);
+      border-color: var(--color-bad);
+    }
+
+    .discussion-box {
+      background-color: #f8fafc;
+      border: 1px solid var(--border-color);
+      padding: 14px 18px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .action-btn {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 14px 20px;
+      font-size: 1rem;
+      cursor: pointer;
+      font-weight: 700;
+      width: 100%;
+      transition: background-color 0.2s ease;
+    }
+
+    .action-btn:hover {
+      background-color: var(--primary-hover);
+    }
+
+    /* Intro & Debriefing Page Styling */
+    .intro-list {
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary-color);
+      padding: 16px 20px;
+      border-radius: 4px;
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+
+    .intro-list ul {
+      margin: 8px 0 0 0;
+      padding-left: 20px;
+    }
+
+    .debrief-card {
+      background-color: #f8fafc;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .band-title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="game-container">
+    
+    <!-- LANDING PAGE -->
+    <div id="landing-page">
+      <h1 style="margin-top:0; color:#0f172a;">The Lost Wallet 👝</h1>
+      <p class="story-text">
+        Welcome to <strong>The Lost Wallet</strong>, an interactive story game designed for English language learners (B1–B2 level). 
+        You will navigate a 10-scenario real-world emergency that tests your communication skills, problem-solving, and social judgment.
+      </p>
+
+      <div class="intro-list">
+        <strong>How to Play & Score:</strong>
+        <ul>
+          <li><strong>10 Sequential Scenarios:</strong> Make chronological decisions under time pressure.</li>
+          <li><strong>4 Options Per Scenario:</strong> Choices are randomized each time you play!</li>
+          <li>🟩 <strong>Excellent Response (+2 pts):</strong> Proactive, polite, and effective.</li>
+          <li>🟦 <strong>Good Response (+1 pt):</strong> Functional and reasonable.</li>
+          <li>🟧 <strong>Average Response (+0 pts):</strong> Neutral; safe but slow or indirect.</li>
+          <li>🟥 <strong>Bad Response (-1 pt):</strong> Rude or harmful. Subtracts 1 point and forces you to try again.</li>
+          <li><strong>Maximum Score:</strong> 20 Points. Complete all scenarios to view your feedback band!</li>
+        </ul>
+      </div>
+
+      <button class="action-btn" onclick="startGame()">Start Scenario 1 →</button>
+    </div>
+
+    <!-- GAMEPLAY PAGE -->
+    <div id="gameplay-page" style="display: none;">
+      <div class="header-bar">
+        <div id="progress" class="progress-title">Scenario 1 of 10</div>
+        <div id="score" class="score-tracker">Score: 0 / 20</div>
+      </div>
+
+      <div id="story" class="story-text">Loading scenario...</div>
+      <div id="feedback" class="feedback-box" style="display: none;"></div>
+      <div id="discussion" class="discussion-box" style="display: none;"></div>
+      <div id="prompt" class="prompt-text"></div>
+      <div id="choices" class="choices-grid"></div>
+      <button id="action-btn" class="action-btn" style="display: none;">Continue →</button>
+    </div>
+
+    <!-- DEBRIEFING PAGE -->
+    <div id="debrief-page" style="display: none;">
+      <h2 style="margin-top:0;">Game Debriefing & Feedback</h2>
+      <div id="debrief-content"></div>
+      <button class="action-btn" onclick="location.reload()">Replay Game (Randomized Choices) ↺</button>
+    </div>
+
+  </div>
+
+  <script>
+    const scenarios = [
+      {
+        id: 1,
+        title: "Scenario 1: Finding the Wallet",
+        text: "You are enjoying a morning coffee in a busy downtown cafe. On the chair next to yours, you spot a designer leather wallet. Inside, you see $300 cash, credit cards, and a train ticket departing in 20 minutes, but no driver's license or photo ID.",
+        prompt: "What is your immediate reaction?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Examine the wallet quickly for a phone number, then inform the barista you are checking for contact info.",
+            feedback: "🟩 EXCELLENT (+2 pts): Proactive and transparent! Checking for clues while informing staff prevents suspicion and speeds up the search.",
+            discussion: "Why is it important to tell staff what you are doing when handling lost property in public?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Hand the wallet over immediately to the barista at the counter.",
+            feedback: "🟦 GOOD (+1 pt): Responsible and safe, though busy staff might misplace it during peak hours.",
+            discussion: "Do you usually trust staff at public venues to take care of valuable lost property?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Leave the wallet on the chair and wait 10 minutes to see if the owner returns.",
+            feedback: "🟧 AVERAGE (+0 pts): Neutral. Waiting gives the owner a chance to return, but risks someone else stealing it.",
+            discussion: "What are the risks of leaving a valuable item unattended in a public space?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Take the $300 cash as a 'finder's fee' and leave the wallet on the chair.",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Taking cash from lost property is dishonest and illegal. Choose another option!",
+            discussion: "How would you feel if someone took money out of your lost wallet before returning it?"
+          }
+        ]
+      },
+      {
+        id: 2,
+        title: "Scenario 2: The Public Accusation",
+        text: "As you examine the wallet, you find a business card for 'Dr. Aris Thorne - Senior Botanist'. Suddenly, a loud patron nearby shouts: 'Hey! Are you searching through someone else's wallet to steal cash?'",
+        prompt: "How do you respond to the patron's outburst?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Stay calm, show them the business card, and say politely: 'I'm looking for contact details to return this.'",
+            feedback: "🟩 EXCELLENT (+2 pts): Outstanding communication! Calmly presenting evidence diffuses public confrontation immediately.",
+            discussion: "What language structures help you stay polite when defending yourself against a false accusation?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Ignore the patron completely and continue reading the business card.",
+            feedback: "🟦 GOOD (+1 pt): Focuses on the objective, but ignoring bystanders can cause them to call security unnecessarily.",
+            discussion: "Is it better to address aggressive onlookers or ignore them completely?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Hand the wallet to the patron and say: 'Fine, you deal with it then.'",
+            feedback: "🟧 AVERAGE (+0 pts): Avoids conflict, but passes responsibility to an unverified stranger.",
+            discussion: "Would you trust an angry stranger in a café to return a lost wallet?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Yell back: 'Mind your own business and shut up!'",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Aggressive language escalates tension and makes you look guilty. Choose another option!",
+            discussion: "Why does shouting back in public situations usually make things worse?"
+          }
+        ]
+      },
+      {
+        id: 3,
+        title: "Scenario 3: Locating the Owner",
+        text: "The accusing patron calms down and exclaims: 'Dr. Thorne? She works at the Botanical Gardens two blocks away!' However, the train ticket inside the wallet is for a 2:15 PM departure (in just 15 minutes).",
+        prompt: "What is your strategy to make contact?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Call the Botanical Gardens front office immediately while walking toward the train station.",
+            feedback: "🟩 EXCELLENT (+2 pts): Brilliant multi-tasking! Calling ahead confirms her location while moving toward the station.",
+            discussion: "Why is combining mobile phone communication with physical movement ideal in time-sensitive situations?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Sprint straight to the Botanical Gardens two blocks away.",
+            feedback: "🟦 GOOD (+1 pt): Direct action, but she may have already left her office for the train station.",
+            discussion: "What are the drawbacks of acting on physical impulse without checking electronic info first?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Search for Dr. Aris Thorne on social media to send her a direct message.",
+            feedback: "🟧 AVERAGE (+0 pts): Social media messaging is useful, but too slow for a train leaving in 15 minutes.",
+            discussion: "Which communication channels are fastest for urgent everyday emergencies?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Post a picture of the wallet and cash on a local forum and go home.",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Posting cash photos online invites scammers and abandons the urgent train passenger. Choose another option!",
+            discussion: "Why is it dangerous to post photos of cash or lost items on public social media?"
+          }
+        ]
+      },
+      {
+        id: 4,
+        title: "Scenario 4: The Phone Call",
+        text: "You call the Botanical Gardens receptionist. She tells you: 'Dr. Thorne just left in a panic! She realized she dropped her wallet and can't board her train without her ticket and conference pass.'",
+        prompt: "What clear instructions do you give the receptionist?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Say: 'Please call her phone now and tell her I am standing at Platform 4 entrance with her wallet.'",
+            feedback: "🟩 EXCELLENT (+2 pts): Clear, concise, and actionable! Gives a precise landmark for a rendezvous.",
+            discussion: "What makes a meeting location 'good' when coordinating through a third party?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Say: 'Tell her not to worry, I have her wallet and I'm coming to the train station.'",
+            feedback: "🟦 GOOD (+1 pt): Reassuring, but lacks a specific meeting spot inside a crowded station.",
+            discussion: "Why is being too vague about meeting spots stressful in transit hubs?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Say: 'Ask her to come back to the café to pick it up.'",
+            feedback: "🟧 AVERAGE (+0 pts): Safe for you, but forces her to miss her train by making her backtrack.",
+            discussion: "When should you prioritize convenience for the owner over your own schedule?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Hang up without giving your name or location because you are in a rush.",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Incomplete communication wastes the phone call entirely. Choose another option!",
+            discussion: "How does rushed communication cause unnecessary mistakes?"
+          }
+        ]
+      },
+      {
+        id: 5,
+        title: "Scenario 5: Navigating the Station",
+        text: "You cross the street and enter the main concourse of the train station. It is peak hour, packed with hundreds of commuters rushing around. Platform 4 is on the far side of the station.",
+        prompt: "How do you navigate the crowded concourse quickly and safely?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Keep to the right lane of pedestrian flow, walk at a brisk pace, and scan the crowd near Platform 4 gates.",
+            feedback: "🟩 EXCELLENT (+2 pts): Efficient and respectful of public transit flow.",
+            discussion: "What unwritten rules of pedestrian traffic do people follow in busy transit stations?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Run as fast as you can through the middle of the crowd to reach Platform 4.",
+            feedback: "🟦 GOOD (+1 pt): Fast, but running blind in crowds risks bumping into people or dropping things.",
+            discussion: "How do you balance urgency with public safety in crowded places?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Stop at the central Information Desk and wait for assistance from station staff.",
+            feedback: "🟧 AVERAGE (+0 pts): Safe and official, but waiting in line at an info desk will consume all remaining minutes.",
+            discussion: "When is official help too slow for an active emergency?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Push people out of your way shouting: 'Move! Emergency!'",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Rude and disruptive behavior that can get security called on you. Choose another option!",
+            discussion: "Why is shoving through public crowds unacceptable even during urgent errands?"
+          }
+        ]
+      },
+      {
+        id: 6,
+        title: "Scenario 6: Spotting the Owner",
+        text: "Near the entrance of Platform 4, you spot a woman in a green coat matching the business card photo. She is pleading anxiously with a strict ticket collector because she lacks her physical ticket.",
+        prompt: "How do you approach the situation at the barrier?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Approach calmly, address her by name: 'Dr. Thorne?', and present the wallet to both her and the collector.",
+            feedback: "🟩 EXCELLENT (+2 pts): Professional and composed! Involving the gate agent satisfies security rules.",
+            discussion: "What phrases do you use in English to intervene politely in an ongoing discussion?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Call out her name loudly from 10 meters away and hold the wallet up in the air.",
+            feedback: "🟦 GOOD (+1 pt): Direct and gets her attention quickly, though shouting attracts unnecessary stares.",
+            discussion: "Are you comfortable drawing public attention to yourself in an emergency?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Wait nearby until she finishes arguing with the ticket collector before stepping in.",
+            feedback: "🟧 AVERAGE (+0 pts): Polite, but wasting valuable seconds while the train doors prepare to close.",
+            discussion: "Why is waiting for the 'perfect moment' sometimes counterproductive?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Grab her arm from behind to turn her around quickly.",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Touching strangers without consent in public is alarming and inappropriate. Choose another option!",
+            discussion: "Why should you never grab or touch a stranger in a tense public setting?"
+          }
+        ]
+      },
+      {
+        id: 7,
+        title: "Scenario 7: Verification under Pressure",
+        text: "Dr. Thorne turns around in shock and relief. However, the strict ticket collector hesitates: 'I need to verify that this wallet and ticket actually belong to you before I let you through the turnstile.'",
+        prompt: "How do you assist with swift verification?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Open the wallet and point out her name printed on the internal business card and dry-cleaning receipt.",
+            feedback: "🟩 EXCELLENT (+2 pts): Concise, logical evidence that satisfies official security instantly.",
+            discussion: "What kind of personal items serve as secondary proof of identity?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Ask Dr. Thorne to state the exact amount of cash inside the wallet to prove ownership.",
+            feedback: "🟦 GOOD (+1 pt): Classic verification method, though slightly slower than checking printed names.",
+            discussion: "What is the best way to prove something belongs to you without official photo ID?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Tell the ticket collector: 'Trust me, I found it in her cafe chair, just let her through!'",
+            feedback: "🟧 AVERAGE (+0 pts): Well-meaning, but personal promises rarely convince strict transit staff.",
+            discussion: "Why do official workers prioritize documentation over personal assurances?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Argue with the ticket collector that he is being ridiculous and wasting time.",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Antagonizing authority figures usually causes them to refuse assistance entirely. Choose another option!",
+            discussion: "How should you speak to border, police, or transit officials to get quick results?"
+          }
+        ]
+      },
+      {
+        id: 8,
+        title: "Scenario 8: The Physical Obstacle",
+        text: "The collector validates the ticket and opens the turnstile! However, Dr. Thorne has two massive, heavy presentation crates for her botany keynote speech that she cannot carry down the platform stairs alone in time.",
+        prompt: "The train whistle blows! How do you assist her?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Pick up one heavy crate immediately and say: 'Let's run together! Which car is yours?'",
+            feedback: "🟩 EXCELLENT (+2 pts): Outstanding helpfulness and clear teamwork language!",
+            discussion: "What phrases do you use when offering immediate physical teamwork in English?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Run down the platform stairs ahead of her to ask the train conductor to hold the door open.",
+            feedback: "🟦 GOOD (+1 pt): Strategic intervention, though conductors must adhere to strict departure clocks.",
+            discussion: "Do you think train conductors should delay departures for struggling passengers?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Wish her good luck and watch her carry the crates down the stairs herself.",
+            feedback: "🟧 AVERAGE (+0 pts): You completed your primary goal of returning the wallet, but left her struggling.",
+            discussion: "Where does your responsibility end when helping a stranger in public?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Tell her to abandon her expensive presentation crates on the platform so she can catch the train.",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Bad advice—her keynote speech requires those materials! Choose another option!",
+            discussion: "Why is giving rash advice during someone else's emergency unhelpful?"
+          }
+        ]
+      },
+      {
+        id: 9,
+        title: "Scenario 9: Boarding the Train",
+        text: "You carry the heavy crate down the platform alongside her just as the carriage doors begin their warning beeps. The conductor steps out to inspect the platform before locking the doors.",
+        prompt: "How do you interact with the conductor to ensure a smooth boarding?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Lift the crate into the vestibule while making eye contact with the conductor and saying: 'Boarding now, thank you!'",
+            feedback: "🟩 EXCELLENT (+2 pts): Polite, assertive, and efficient communication under physical stress.",
+            discussion: "Why is courteous eye contact effective when dealing with transit crew?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Push the crate into the carriage quickly without speaking to the conductor.",
+            feedback: "🟦 GOOD (+1 pt): Gets the job done fast, though lacking basic politeness.",
+            discussion: "Is politeness optional when running against a strict deadline?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Ask the conductor: 'Is it okay if we load these two boxes on board?'",
+            feedback: "🟧 AVERAGE (+0 pts): Asking permission is polite, but invites unnecessary hesitation when time has expired.",
+            discussion: "When is it better to inform someone of an action rather than asking for permission?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Block the closing doors with your foot to force the train to wait.",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Blocking train doors is illegal, dangerous, and triggers safety delays. Choose another option!",
+            discussion: "What are the legal and safety consequences of blocking transit doors?"
+          }
+        ]
+      },
+      {
+        id: 10,
+        title: "Scenario 10: The Farewell & Reward",
+        text: "Dr. Thorne steps onto the train safely with all her gear and cash intact. As the doors close, she pulls out a $50 bill from her wallet, tries to hand it to you through the door gap, and says: 'Please take this for your incredible help!'",
+        prompt: "How do you handle the offer of a monetary reward?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Smile, accept it or politely decline, and say: 'I'm just glad you made your train! Have a great conference!'",
+            feedback: "🟩 EXCELLENT (+2 pts): Warm, gracious, and socially flawless! Completes the story on a high note.",
+            discussion: "What are the cultural norms around accepting cash rewards for good deeds in your country?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Take the $50 bill quickly, wave goodbye, and say: 'Thank you very much!'",
+            feedback: "🟦 GOOD (+1 pt): Direct and honest. You earned the reward through significant effort.",
+            discussion: "Is accepting a reward for returning lost property expected or optional?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Refuse the money firmly, shake your head, and step away from the train in silence.",
+            feedback: "🟧 AVERAGE (+0 pts): Humble, but refusal without warm closing words can feel cold.",
+            discussion: "How can you decline a reward without making the giver feel uncomfortable?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Complain that $50 isn't enough after all the running you did.",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Extremely rude and ungrateful behavior! Choose another option!",
+            discussion: "Why is complaining about a reward considered bad manners globally?"
+          }
+        ]
+      }
+    ];
+
+    let currentScenarioIdx = 0;
+    let score = 0;
+    let shuffledChoices = [];
+
+    // Fisher-Yates Array Shuffle Algorithm
+    function shuffleArray(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function startGame() {
+      document.getElementById('landing-page').style.display = 'none';
+      document.getElementById('gameplay-page').style.display = 'block';
+      currentScenarioIdx = 0;
+      score = 0;
+      updateScoreDisplay();
+      renderCurrentScenario();
+    }
+
+    function selectOption(shuffledIdx) {
+      const choice = shuffledChoices[shuffledIdx];
+
+      const feedbackEl = document.getElementById('feedback');
+      const discussionEl = document.getElementById('discussion');
+      const actionBtn = document.getElementById('action-btn');
+      const choicesEl = document.getElementById('choices');
+
+      feedbackEl.className = `feedback-box ${choice.type}`;
+      feedbackEl.innerText = choice.feedback;
+      feedbackEl.style.display = 'block';
+
+      if (choice.type === 'bad') {
+        score = Math.max(0, score + choice.pts);
+        updateScoreDisplay();
+        
+        discussionEl.innerHTML = `<strong>Discussion Question:</strong><br>${choice.discussion}`;
+        discussionEl.style.display = 'block';
+
+        actionBtn.innerText = "Try Scenario Again ↺";
+        actionBtn.onclick = resetScenarioChoices;
+        actionBtn.style.display = 'block';
+
+        choicesEl.style.display = 'none';
+      } else {
+        score += choice.pts;
+        updateScoreDisplay();
+
+        discussionEl.innerHTML = `<strong>Discussion Question for Class / Partner:</strong><br>${choice.discussion}`;
+        discussionEl.style.display = 'block';
+
+        choicesEl.style.display = 'none';
+
+        if (currentScenarioIdx < scenarios.length - 1) {
+          actionBtn.innerText = "Next Scenario →";
+          actionBtn.onclick = advanceScenario;
+        } else {
+          actionBtn.innerText = "View Final Score & Debriefing ★";
+          actionBtn.onclick = renderDebriefing;
+        }
+        actionBtn.style.display = 'block';
+      }
+    }
+
+    function resetScenarioChoices() {
+      document.getElementById('feedback').style.display = 'none';
+      document.getElementById('discussion').style.display = 'none';
+      document.getElementById('action-btn').style.display = 'none';
+      document.getElementById('choices').style.display = 'flex';
+    }
+
+    function advanceScenario() {
+      currentScenarioIdx++;
+      resetScenarioChoices();
+      renderCurrentScenario();
+    }
+
+    function updateScoreDisplay() {
+      document.getElementById('score').innerText = `Score: ${score} / 20`;
+    }
+
+    function renderCurrentScenario() {
+      const scenario = scenarios[currentScenarioIdx];
+      
+      document.getElementById('progress').innerText = `Scenario ${scenario.id} of 10`;
+      document.getElementById('story').innerText = scenario.text;
+      document.getElementById('prompt').innerText = scenario.prompt;
+
+      const choicesEl = document.getElementById('choices');
+      choicesEl.innerHTML = '';
+
+      // Randomize choice order on every scenario render
+      shuffledChoices = shuffleArray(scenario.choices);
+
+      shuffledChoices.forEach((choice, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.innerText = `${String.fromCharCode(65 + idx)}. ${choice.text}`;
+        btn.onclick = () => selectOption(idx);
+        choicesEl.appendChild(btn);
+      });
+    }
+
+    function renderDebriefing() {
+      document.getElementById('gameplay-page').style.display = 'none';
+      document.getElementById('debrief-page').style.display = 'block';
+
+      let bandTitle = "";
+      let bandColor = "";
+      let bandFeedback = "";
+
+      if (score >= 16) {
+        bandTitle = "Band 4: Master Communicator (16–20 Points)";
+        bandColor = "var(--color-excellent)";
+        bandFeedback = "<strong>Outstanding Performance!</strong> You demonstrated exceptional English communication skills, high social intelligence, and swift decision-making under pressure. You consistently selected options that balanced politeness, clarity, and effectiveness.";
+      } else if (score >= 11) {
+        bandTitle = "Band 3: Capable Responder (11–15 Points)";
+        bandColor = "var(--color-good)";
+        bandFeedback = "<strong>Great Job!</strong> You navigated the scenarios successfully and returned the wallet on time. Your language choices were practical and functional. To reach Band 4, focus on adding more polite framing and proactive multi-tasking during high-stress interactions.";
+      } else if (score >= 6) {
+        bandTitle = "Band 2: Developing Navigator (6–10 Points)";
+        bandColor = "var(--color-average)";
+        bandFeedback = "<strong>Satisfactory Effort.</strong> You managed to complete the story, but several decisions caused unnecessary delays or mild social friction. Review the discussion points on public etiquette, clear instructions, and polite language to improve your real-world responses.";
+      } else {
+        bandTitle = "Band 1: Needs Practice & Strategy (0–5 Points)";
+        bandColor = "var(--color-bad)";
+        bandFeedback = "<strong>Needs Work.</strong> You made several choices that resulted in point penalties, aggressive confrontations, or ineffective communication. Replay the game and focus on choosing responses that prioritize calm communication, teamwork, and official security channels.";
+      }
+
+      const debriefContent = document.getElementById('debrief-content');
+      debriefContent.innerHTML = `
+        <div class="debrief-card" style="border-color: ${bandColor}">
+          <div class="progress-title" style="margin-bottom:8px;">Final Score: ${score} / 20</div>
+          <div class="band-title" style="color: ${bandColor}">${bandTitle}</div>
+          <p style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 0;">${bandFeedback}</p>
+        </div>
+
+        <div class="discussion-box">
+          <strong style="font-size: 1.05rem;">Final Reflection Questions for Discussion:</strong>
+          <ol style="margin-top: 10px; padding-left: 20px; line-height: 1.6;">
+            <li>Which of the 10 scenarios was the hardest for you to decide on? Why?</li>
+            <li>How would you handle finding a lost wallet in your own city differently compared to this game?</li>
+            <li>What specific English vocabulary or phrasal verbs from this exercise did you find most useful?</li>
+          </ol>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>

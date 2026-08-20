@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Lost Wallet: A2 English Decision Game</title>
+  <style>
+    :root {
+      --bg-color: #f1f5f9;
+      --card-bg: #ffffff;
+      --text-color: #1e293b;
+      --border-color: #cbd5e1;
+      --primary-color: #2563eb;
+      --primary-hover: #1d4ed8;
+      
+      /* Rating Colors */
+      --color-excellent: #15803d;
+      --bg-excellent: #f0fdf4;
+
+      --color-good: #1d4ed8;
+      --bg-good: #eff6ff;
+
+      --color-average: #b45309;
+      --bg-average: #fffbeb;
+
+      --color-bad: #b91c1c;
+      --bg-bad: #fef2f2;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+
+    .game-container {
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+      max-width: 760px;
+      width: 100%;
+      padding: 32px;
+      box-sizing: border-box;
+      border: 1px solid var(--border-color);
+    }
+
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      border-bottom: 2px solid var(--bg-color);
+      padding-bottom: 12px;
+    }
+
+    .progress-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .score-tracker {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--primary-color);
+      background-color: #dbeafe;
+      padding: 6px 14px;
+      border-radius: 20px;
+    }
+
+    .story-text {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .prompt-text {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: #0f172a;
+    }
+
+    .choices-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .choice-btn {
+      background-color: #ffffff;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      padding: 14px 18px;
+      font-size: 1rem;
+      color: var(--text-color);
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      line-height: 1.4;
+    }
+
+    .choice-btn:hover {
+      border-color: var(--primary-color);
+      background-color: #f8fafc;
+      transform: translateY(-1px);
+    }
+
+    /* Feedback Box Styling */
+    .feedback-box {
+      padding: 16px;
+      border-radius: 8px;
+      font-size: 1rem;
+      line-height: 1.5;
+      margin-bottom: 16px;
+      border-left: 6px solid;
+    }
+
+    .feedback-box.excellent {
+      background-color: var(--bg-excellent);
+      color: var(--color-excellent);
+      border-color: var(--color-excellent);
+    }
+
+    .feedback-box.good {
+      background-color: var(--bg-good);
+      color: var(--color-good);
+      border-color: var(--color-good);
+    }
+
+    .feedback-box.average {
+      background-color: var(--bg-average);
+      color: var(--color-average);
+      border-color: var(--color-average);
+    }
+
+    .feedback-box.bad {
+      background-color: var(--bg-bad);
+      color: var(--color-bad);
+      border-color: var(--color-bad);
+    }
+
+    .discussion-box {
+      background-color: #f8fafc;
+      border: 1px solid var(--border-color);
+      padding: 14px 18px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .action-btn {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 14px 20px;
+      font-size: 1rem;
+      cursor: pointer;
+      font-weight: 700;
+      width: 100%;
+      transition: background-color 0.2s ease;
+    }
+
+    .action-btn:hover {
+      background-color: var(--primary-hover);
+    }
+
+    /* Intro & Debriefing Styling */
+    .intro-list {
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary-color);
+      padding: 16px 20px;
+      border-radius: 4px;
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+
+    .intro-list ul {
+      margin: 8px 0 0 0;
+      padding-left: 20px;
+    }
+
+    .debrief-card {
+      background-color: #f8fafc;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .band-title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="game-container">
+    
+    <!-- LANDING PAGE -->
+    <div id="landing-page">
+      <h1 style="margin-top:0; color:#0f172a;">The Lost Wallet 👝</h1>
+      <p class="story-text">
+        Welcome to <strong>The Lost Wallet</strong>! This is an interactive game for English learners (A2 level). 
+        You find a lost wallet in a busy café. You have 10 choices to make to help return it to its owner before her train leaves!
+      </p>
+
+      <div class="intro-list">
+        <strong>Game Rules & Points:</strong>
+        <ul>
+          <li><strong>10 Scenarios:</strong> Make a choice at each step of the story.</li>
+          <li><strong>4 Options Every Time:</strong> The answers appear in a random order every game!</li>
+          <li>🟩 <strong>Excellent Answer (+2 points):</strong> Very polite, fast, and helpful!</li>
+          <li>🟦 <strong>Good Answer (+1 point):</strong> A good and helpful choice.</li>
+          <li>🟧 <strong>Average Answer (+0 points):</strong> Okay, but slow or not very helpful.</li>
+          <li>🟥 <strong>Bad Answer (-1 point):</strong> Rude or wrong. You lose 1 point and must try again!</li>
+          <li><strong>Maximum Points:</strong> 20 Points.</li>
+        </ul>
+      </div>
+
+      <button class="action-btn" onclick="startGame()">Start Game →</button>
+    </div>
+
+    <!-- GAMEPLAY PAGE -->
+    <div id="gameplay-page" style="display: none;">
+      <div class="header-bar">
+        <div id="progress" class="progress-title">Scenario 1 of 10</div>
+        <div id="score" class="score-tracker">Score: 0 / 20</div>
+      </div>
+
+      <div id="story" class="story-text">Loading...</div>
+      <div id="feedback" class="feedback-box" style="display: none;"></div>
+      <div id="discussion" class="discussion-box" style="display: none;"></div>
+      <div id="prompt" class="prompt-text"></div>
+      <div id="choices" class="choices-grid"></div>
+      <button id="action-btn" class="action-btn" style="display: none;">Continue →</button>
+    </div>
+
+    <!-- DEBRIEFING PAGE -->
+    <div id="debrief-page" style="display: none;">
+      <h2 style="margin-top:0;">Your Game Results</h2>
+      <div id="debrief-content"></div>
+      <button class="action-btn" onclick="location.reload()">Play Again (New Order) ↺</button>
+    </div>
+
+  </div>
+
+  <script>
+    const scenarios = [
+      {
+        id: 1,
+        title: "Scenario 1: Finding the Wallet",
+        text: "You are sitting in a busy café. On a chair next to you, you see a black wallet. Inside, there is $300 in cash, credit cards, and a train ticket for a train leaving in 20 minutes. There is no photo ID.",
+        prompt: "What do you do first?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Look inside quickly for a phone number and tell the café worker what you are doing.",
+            feedback: "🟩 EXCELLENT (+2 pts): Great choice! Looking for a phone number while talking to staff is polite and fast.",
+            discussion: "Why is it important to tell the café worker what you are doing?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Give the wallet to the café worker immediately.",
+            feedback: "🟦 GOOD (+1 pt): Safe and polite, but the café worker might be too busy to check it now.",
+            discussion: "Do you trust café workers to keep lost items safe?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Leave the wallet on the chair and wait 10 minutes to see if the owner comes back.",
+            feedback: "🟧 AVERAGE (+0 pts): Okay, but waiting risks someone else taking the wallet.",
+            discussion: "What can happen if you leave money unattended in a public place?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Take the $300 cash and leave the wallet on the chair.",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Taking money from a lost wallet is dishonest! Try another choice.",
+            discussion: "How would you feel if someone took money from your lost wallet?"
+          }
+        ]
+      },
+      {
+        id: 2,
+        title: "Scenario 2: The Loud Customer",
+        text: "While looking inside the wallet, you find a small card with the name 'Dr. Aris Thorne'. Suddenly, a customer nearby shouts: 'Hey! Are you taking money from that wallet?'",
+        prompt: "How do you answer the customer?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Stay calm, show the card, and say politely: 'I am looking for a name to return this wallet.'",
+            feedback: "🟩 EXCELLENT (+2 pts): Excellent English! Staying calm and showing proof stops the argument.",
+            discussion: "What words help you stay polite when someone is angry with you?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Ignore the customer completely and read the card again.",
+            feedback: "🟦 GOOD (+1 pt): You stay focused, but ignoring people can make them angrier.",
+            discussion: "Is it better to talk to an angry person or ignore them?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Give the wallet to the customer and say: 'You take it then.'",
+            feedback: "🟧 AVERAGE (+0 pts): You avoid the argument, but you give the money to a stranger.",
+            discussion: "Would you trust a stranger in a café with lost cash?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Shout back loudly: 'Mind your own business! Shut up!'",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Shouting is rude and makes people think you are stealing! Try another choice.",
+            discussion: "Why does shouting make problems worse in public?"
+          }
+        ]
+      },
+      {
+        id: 3,
+        title: "Scenario 3: Where is the Owner?",
+        text: "The customer calms down and says: 'Dr. Thorne works at the Botanical Gardens two blocks away!' But the train ticket is for 2:15 PM (in only 15 minutes).",
+        prompt: "What is your plan?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Call the Botanical Gardens phone number while walking toward the train station.",
+            feedback: "🟩 EXCELLENT (+2 pts): Great idea! Calling on your phone while walking saves time.",
+            discussion: "Why is calling on your phone faster than walking to two different places?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Run straight to the Botanical Gardens two blocks away.",
+            feedback: "🟦 GOOD (+1 pt): Quick action, but Dr. Thorne might already be at the train station.",
+            discussion: "What happens if you run to her office but she is not there?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Search for 'Dr. Aris Thorne' on social media and send a message.",
+            feedback: "🟧 AVERAGE (+0 pts): Social media is helpful, but people don't read messages instantly when running for a train.",
+            discussion: "Which phone app is best for urgent messages?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Post a picture of the wallet and cash on the internet and go home.",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Posting cash on the internet is dangerous and does not help the owner now. Try another choice.",
+            discussion: "Why is it a bad idea to post pictures of cash on social media?"
+          }
+        ]
+      },
+      {
+        id: 4,
+        title: "Scenario 4: The Phone Call",
+        text: "You call the Botanical Gardens. The receptionist says: 'Dr. Thorne just left in a panic! She lost her wallet and cannot get on her train without her ticket.'",
+        prompt: "What do you tell the receptionist?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Say: 'Please call her phone now and tell her I am waiting at the Platform 4 entrance.'",
+            feedback: "🟩 EXCELLENT (+2 pts): Very clear! Giving an exact place to meet makes finding each other easy.",
+            discussion: "What makes a good meeting place in a big train station?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Say: 'Tell her not to worry, I am bringing her wallet to the station.'",
+            feedback: "🟦 GOOD (+1 pt): Friendly, but you did not say where inside the station you will meet.",
+            discussion: "Why is it hard to find someone if you don't choose an exact spot?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Say: 'Tell her to come back to the café to get it.'",
+            feedback: "🟧 AVERAGE (+0 pts): Easy for you, but she will miss her train if she comes back.",
+            discussion: "When should you help someone even if it takes extra time?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Hang up the phone immediately without saying your location.",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Hanging up without giving information wastes the call! Try another choice.",
+            discussion: "Why is giving clear information important during phone calls?"
+          }
+        ]
+      },
+      {
+        id: 5,
+        title: "Scenario 5: In the Busy Station",
+        text: "You cross the street and walk into the train station. It is very busy with many people walking fast. Platform 4 is far away on the other side of the station.",
+        prompt: "How do you walk through the crowd quickly?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Walk fast on the right side of the hallway and look for signs for Platform 4.",
+            feedback: "🟩 EXCELLENT (+2 pts): Very good! Walking on the right side is safe and fast in crowds.",
+            discussion: "How do people walk safely in crowded places in your country?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Run as fast as you can through the middle of the crowd.",
+            feedback: "🟦 GOOD (+1 pt): Fast, but running in crowds can cause accidents.",
+            discussion: "Is it safe to run in a crowded train station?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Stop at the information desk and wait in line to ask a worker for help.",
+            feedback: "🟧 AVERAGE (+0 pts): Safe, but waiting in line takes too much time today.",
+            discussion: "When is asking an information desk too slow?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Push people out of the way and shout: 'Move! Emergency!'",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Pushing people is rude and dangerous! Try another choice.",
+            discussion: "How do you feel when someone pushes you in a crowd?"
+          }
+        ]
+      },
+      {
+        id: 6,
+        title: "Scenario 6: Finding Dr. Thorne",
+        text: "Near Platform 4, you see a woman in a green coat. She looks like the photo on the card. She is talking nervously to a ticket worker because she does not have her ticket.",
+        prompt: "How do you approach her?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Walk up calmly, say: 'Dr. Thorne?', and show the wallet to her and the ticket worker.",
+            feedback: "🟩 EXCELLENT (+2 pts): Polite and clear! Showing the wallet to both people is smart.",
+            discussion: "What English words do you use to start speaking to a stranger politely?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Call her name loudly from across the hallway and hold up the wallet.",
+            feedback: "🟦 GOOD (+1 pt): Gets her attention quickly, but shouting makes everyone look at you.",
+            discussion: "Do you like calling people's names loudly in public?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Stand nearby and wait for her to finish talking to the worker before speaking.",
+            feedback: "🟧 AVERAGE (+0 pts): Very polite, but you are losing precious minutes before the train leaves.",
+            discussion: "When is it okay to interrupt two people who are talking?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Grab her arm from behind to turn her around quickly.",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Never touch a stranger from behind! It scares them. Try another choice.",
+            discussion: "Why should you never touch a stranger in public?"
+          }
+        ]
+      },
+      {
+        id: 7,
+        title: "Scenario 7: Proving Ownership",
+        text: "Dr. Thorne turns around and feels very happy! But the ticket worker says: 'I must check that this wallet is really hers before she can go to the train.'",
+        prompt: "How do you help prove it is her wallet?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Open the wallet and point to her name printed on the card inside.",
+            feedback: "🟩 EXCELLENT (+2 pts): Clear proof! Showing printed names is the best way to prove ownership.",
+            discussion: "What things in your wallet have your name printed on them?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Ask Dr. Thorne to say the exact amount of money inside the wallet.",
+            feedback: "🟦 GOOD (+1 pt): A good idea, but checking a printed name is faster.",
+            discussion: "How do you prove a bag or coat is yours if you lose it?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Tell the ticket worker: 'Trust me, I found it in a café, let her go!'",
+            feedback: "🟧 AVERAGE (+0 pts): Kind words, but workers need real proof, not promises.",
+            discussion: "Why do workers need real proof before giving lost items back?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Argue with the ticket worker that he is wasting time.",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Arguing with workers makes them stop helping you! Try another choice.",
+            discussion: "Why is arguing with ticket workers or police a bad idea?"
+          }
+        ]
+      },
+      {
+        id: 8,
+        title: "Scenario 8: Heavy Luggage",
+        text: "The worker lets her through! But Dr. Thorne has two very big, heavy boxes for a science meeting. She cannot carry them down the platform stairs alone in time.",
+        prompt: "The train whistle blows! How do you help her?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Pick up one heavy box immediately and say: 'Let's run together! Which car is yours?'",
+            feedback: "🟩 EXCELLENT (+2 pts): Great teamwork! Offering help immediately saves her trip.",
+            discussion: "How do you ask someone if they need help carrying heavy bags in English?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Run down the stairs ahead of her to ask the train conductor to wait a moment.",
+            feedback: "🟦 GOOD (+1 pt): Helpful, but train conductors must follow strict train times.",
+            discussion: "Do trains in your country wait for late passengers?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Wish her good luck and watch her carry the heavy boxes alone.",
+            feedback: "🟧 AVERAGE (+0 pts): You returned the wallet, but leaving her to struggle is not very helpful.",
+            discussion: "Would you carry a heavy box for a stranger at a train station?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Tell her to leave her expensive boxes at the station so she can catch the train.",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Bad advice! She needs those boxes for her meeting. Try another choice.",
+            discussion: "Why is giving bad advice unhelpful in an emergency?"
+          }
+        ]
+      },
+      {
+        id: 9,
+        title: "Scenario 9: Getting on the Train",
+        text: "You carry the heavy box to the train doors. The doors make a loud beep sound. The conductor looks at the platform before closing the doors.",
+        prompt: "What do you do at the train doors?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Put the box inside the train, look at the conductor, and say politely: 'Getting on now, thank you!'",
+            feedback: "🟩 EXCELLENT (+2 pts): Polite and fast! Talking nicely to train workers helps everything go smoothly.",
+            discussion: "Why is saying 'thank you' to train workers important?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Push the box into the train quickly without talking to the conductor.",
+            feedback: "🟦 GOOD (+1 pt): Fast, but a little impolite.",
+            discussion: "Is politeness important when you are in a big rush?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Ask the conductor: 'Is it okay if we put these two boxes on the train?'",
+            feedback: "🟧 AVERAGE (+0 pts): Very polite, but asking questions when doors are closing wastes time.",
+            discussion: "When is asking questions too slow?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Put your foot in the doors so the train cannot close them.",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Blocking train doors is dangerous and illegal! Try another choice.",
+            discussion: "Why is putting your foot in train doors dangerous?"
+          }
+        ]
+      },
+      {
+        id: 10,
+        title: "Scenario 10: The Goodbye & Reward",
+        text: "Dr. Thorne gets on the train safely. As the doors close, she takes out $50 cash, gives it to you through the window, and says: 'Thank you so much for your help!'",
+        prompt: "How do you answer her?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Smile, take or politely refuse the money, and say: 'I am happy you made your train! Have a great trip!'",
+            feedback: "🟩 EXCELLENT (+2 pts): Friendly and polite English! A great way to end the story.",
+            discussion: "What polite phrases do you say in English when someone thanks you?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Take the $50 quickly, wave goodbye, and say: 'Thank you very much!'",
+            feedback: "🟦 GOOD (+1 pt): Honest and clear. You worked hard to help her!",
+            discussion: "Is it normal to take money when you help a stranger in your country?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Say no to the money firmly and walk away in silence.",
+            feedback: "🟧 AVERAGE (+0 pts): Honest, but walking away in silence can seem a little cold.",
+            discussion: "How can you say 'no thank you' politely in English?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Complain that $50 is not enough money for all your hard work.",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Complaining about a gift is very rude! Try another choice.",
+            discussion: "Why is complaining about a reward bad manners?"
+          }
+        ]
+      }
+    ];
+
+    let currentScenarioIdx = 0;
+    let score = 0;
+    let shuffledChoices = [];
+
+    // Fisher-Yates Array Shuffle
+    function shuffleArray(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function startGame() {
+      document.getElementById('landing-page').style.display = 'none';
+      document.getElementById('gameplay-page').style.display = 'block';
+      currentScenarioIdx = 0;
+      score = 0;
+      updateScoreDisplay();
+      renderCurrentScenario();
+    }
+
+    function selectOption(shuffledIdx) {
+      const choice = shuffledChoices[shuffledIdx];
+
+      const feedbackEl = document.getElementById('feedback');
+      const discussionEl = document.getElementById('discussion');
+      const actionBtn = document.getElementById('action-btn');
+      const choicesEl = document.getElementById('choices');
+
+      feedbackEl.className = `feedback-box ${choice.type}`;
+      feedbackEl.innerText = choice.feedback;
+      feedbackEl.style.display = 'block';
+
+      if (choice.type === 'bad') {
+        score = Math.max(0, score + choice.pts);
+        updateScoreDisplay();
+        
+        discussionEl.innerHTML = `<strong>Discussion Question:</strong><br>${choice.discussion}`;
+        discussionEl.style.display = 'block';
+
+        actionBtn.innerText = "Try Scenario Again ↺";
+        actionBtn.onclick = resetScenarioChoices;
+        actionBtn.style.display = 'block';
+
+        choicesEl.style.display = 'none';
+      } else {
+        score += choice.pts;
+        updateScoreDisplay();
+
+        discussionEl.innerHTML = `<strong>Discussion Question:</strong><br>${choice.discussion}`;
+        discussionEl.style.display = 'block';
+
+        choicesEl.style.display = 'none';
+
+        if (currentScenarioIdx < scenarios.length - 1) {
+          actionBtn.innerText = "Next Scenario →";
+          actionBtn.onclick = advanceScenario;
+        } else {
+          actionBtn.innerText = "View Final Score & Results ★";
+          actionBtn.onclick = renderDebriefing;
+        }
+        actionBtn.style.display = 'block';
+      }
+    }
+
+    function resetScenarioChoices() {
+      document.getElementById('feedback').style.display = 'none';
+      document.getElementById('discussion').style.display = 'none';
+      document.getElementById('action-btn').style.display = 'none';
+      document.getElementById('choices').style.display = 'flex';
+    }
+
+    function advanceScenario() {
+      currentScenarioIdx++;
+      resetScenarioChoices();
+      renderCurrentScenario();
+    }
+
+    function updateScoreDisplay() {
+      document.getElementById('score').innerText = `Score: ${score} / 20`;
+    }
+
+    function renderCurrentScenario() {
+      const scenario = scenarios[currentScenarioIdx];
+      
+      document.getElementById('progress').innerText = `Scenario ${scenario.id} of 10`;
+      document.getElementById('story').innerText = scenario.text;
+      document.getElementById('prompt').innerText = scenario.prompt;
+
+      const choicesEl = document.getElementById('choices');
+      choicesEl.innerHTML = '';
+
+      // Randomize choices order
+      shuffledChoices = shuffleArray(scenario.choices);
+
+      shuffledChoices.forEach((choice, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.innerText = `${String.fromCharCode(65 + idx)}. ${choice.text}`;
+        btn.onclick = () => selectOption(idx);
+        choicesEl.appendChild(btn);
+      });
+    }
+
+    function renderDebriefing() {
+      document.getElementById('gameplay-page').style.display = 'none';
+      document.getElementById('debrief-page').style.display = 'block';
+
+      let bandTitle = "";
+      let bandColor = "";
+      let bandFeedback = "";
+
+      if (score >= 16) {
+        bandTitle = "Band 4: Excellent English Helper (16–20 Points)";
+        bandColor = "var(--color-excellent)";
+        bandFeedback = "<strong>Fantastic job!</strong> You have great English skills! You made polite, fast, and very helpful choices. Dr. Thorne caught her train easily because of you!";
+      } else if (score >= 11) {
+        bandTitle = "Band 2: Good Helper (11–15 Points)";
+        bandColor = "var(--color-good)";
+        bandFeedback = "<strong>Good job!</strong> You helped return the wallet and Dr. Thorne caught her train. You used good English. To get Band 4, try to choose the most polite and fast choices next time!";
+      } else if (score >= 6) {
+        bandTitle = "Band 2: Okay Helper (6–10 Points)";
+        bandColor = "var(--color-average)";
+        bandFeedback = "<strong>Nice try!</strong> You finished the story, but some of your choices were slow or caused small problems. Practice reading the choices again to make faster decisions!";
+      } else {
+        bandTitle = "Band 1: Needs Practice (0–5 Points)";
+        bandColor = "var(--color-bad)";
+        bandFeedback = "<strong>Keep practicing!</strong> You picked some bad choices that lost points. Play the game again and focus on polite, helpful answers!";
+      }
+
+      const debriefContent = document.getElementById('debrief-content');
+      debriefContent.innerHTML = `
+        <div class="debrief-card" style="border-color: ${bandColor}">
+          <div class="progress-title" style="margin-bottom:8px;">Final Score: ${score} / 20</div>
+          <div class="band-title" style="color: ${bandColor}">${bandTitle}</div>
+          <p style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 0;">${bandFeedback}</p>
+        </div>
+
+        <div class="discussion-box">
+          <strong style="font-size: 1.05rem;">Final Class Discussion Questions:</strong>
+          <ol style="margin-top: 10px; padding-left: 20px; line-height: 1.6;">
+            <li>Which scenario was the hardest for you? Why?</li>
+            <li>Have you ever found a lost item in real life? What did you do?</li>
+            <li>What new English words did you learn in this game today?</li>
+          </ol>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>

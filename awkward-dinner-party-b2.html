@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Awkward Dinner Party: A2 English Decision Game</title>
+  <style>
+    :root {
+      --bg-color: #f1f5f9;
+      --card-bg: #ffffff;
+      --text-color: #1e293b;
+      --border-color: #cbd5e1;
+      --primary-color: #2563eb;
+      --primary-hover: #1d4ed8;
+      
+      /* Rating Colors */
+      --color-excellent: #15803d;
+      --bg-excellent: #f0fdf4;
+
+      --color-good: #1d4ed8;
+      --bg-good: #eff6ff;
+
+      --color-average: #b45309;
+      --bg-average: #fffbeb;
+
+      --color-bad: #b91c1c;
+      --bg-bad: #fef2f2;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+
+    .game-container {
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+      max-width: 760px;
+      width: 100%;
+      padding: 32px;
+      box-sizing: border-box;
+      border: 1px solid var(--border-color);
+    }
+
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      border-bottom: 2px solid var(--bg-color);
+      padding-bottom: 12px;
+    }
+
+    .progress-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .score-tracker {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--primary-color);
+      background-color: #dbeafe;
+      padding: 6px 14px;
+      border-radius: 20px;
+    }
+
+    .story-text {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .prompt-text {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: #0f172a;
+    }
+
+    .choices-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .choice-btn {
+      background-color: #ffffff;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      padding: 14px 18px;
+      font-size: 1rem;
+      color: var(--text-color);
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      line-height: 1.4;
+    }
+
+    .choice-btn:hover {
+      border-color: var(--primary-color);
+      background-color: #f8fafc;
+      transform: translateY(-1px);
+    }
+
+    /* Feedback Box Styling */
+    .feedback-box {
+      padding: 16px;
+      border-radius: 8px;
+      font-size: 1rem;
+      line-height: 1.5;
+      margin-bottom: 16px;
+      border-left: 6px solid;
+    }
+
+    .feedback-box.excellent {
+      background-color: var(--bg-excellent);
+      color: var(--color-excellent);
+      border-color: var(--color-excellent);
+    }
+
+    .feedback-box.good {
+      background-color: var(--bg-good);
+      color: var(--color-good);
+      border-color: var(--color-good);
+    }
+
+    .feedback-box.average {
+      background-color: var(--bg-average);
+      color: var(--color-average);
+      border-color: var(--color-average);
+    }
+
+    .feedback-box.bad {
+      background-color: var(--bg-bad);
+      color: var(--color-bad);
+      border-color: var(--color-bad);
+    }
+
+    .discussion-box {
+      background-color: #f8fafc;
+      border: 1px solid var(--border-color);
+      padding: 14px 18px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .action-btn {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 14px 20px;
+      font-size: 1rem;
+      cursor: pointer;
+      font-weight: 700;
+      width: 100%;
+      transition: background-color 0.2s ease;
+    }
+
+    .action-btn:hover {
+      background-color: var(--primary-hover);
+    }
+
+    /* Intro & Debriefing Styling */
+    .intro-list {
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary-color);
+      padding: 16px 20px;
+      border-radius: 4px;
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+
+    .intro-list ul {
+      margin: 8px 0 0 0;
+      padding-left: 20px;
+    }
+
+    .debrief-card {
+      background-color: #f8fafc;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .band-title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="game-container">
+    
+    <!-- LANDING PAGE -->
+    <div id="landing-page">
+      <h1 style="margin-top:0; color:#0f172a;">The Awkward Dinner Party 🍷</h1>
+      <p class="story-text">
+        Welcome to <strong>The Awkward Dinner Party</strong>! This is an interactive game for English learners (A2 level). 
+        Your manager, Ms. Vance, invites you to dinner at her house. You want to be polite and make a good impression, but small social problems keep happening!
+      </p>
+
+      <div class="intro-list">
+        <strong>Game Rules & Points:</strong>
+        <ul>
+          <li><strong>10 Scenarios:</strong> Make a polite choice at each moment of the dinner.</li>
+          <li><strong>4 Options Every Time:</strong> The answers appear in a random order every game!</li>
+          <li>🟩 <strong>Excellent Answer (+2 points):</strong> Very polite and friendly!</li>
+          <li>🟦 <strong>Good Answer (+1 point):</strong> A polite choice.</li>
+          <li>🟧 <strong>Average Answer (+0 points):</strong> Okay, but a little quiet or awkward.</li>
+          <li>🟥 <strong>Bad Answer (-1 point):</strong> Rude or impolite. You lose 1 point and must try again!</li>
+          <li><strong>Maximum Points:</strong> 20 Points.</li>
+        </ul>
+      </div>
+
+      <button class="action-btn" onclick="startGame()">Start Game →</button>
+    </div>
+
+    <!-- GAMEPLAY PAGE -->
+    <div id="gameplay-page" style="display: none;">
+      <div class="header-bar">
+        <div id="progress" class="progress-title">Scenario 1 of 10</div>
+        <div id="score" class="score-tracker">Score: 0 / 20</div>
+      </div>
+
+      <div id="story" class="story-text">Loading...</div>
+      <div id="feedback" class="feedback-box" style="display: none;"></div>
+      <div id="discussion" class="discussion-box" style="display: none;"></div>
+      <div id="prompt" class="prompt-text"></div>
+      <div id="choices" class="choices-grid"></div>
+      <button id="action-btn" class="action-btn" style="display: none;">Continue →</button>
+    </div>
+
+    <!-- DEBRIEFING PAGE -->
+    <div id="debrief-page" style="display: none;">
+      <h2 style="margin-top:0;">Your Game Results</h2>
+      <div id="debrief-content"></div>
+      <button class="action-btn" onclick="location.reload()">Play Again (New Order) ↺</button>
+    </div>
+
+  </div>
+
+  <script>
+    const scenarios = [
+      {
+        id: 1,
+        title: "Scenario 1: Arriving at the Front Door",
+        text: "You arrive at your manager's house at 6:58 PM for a 7:00 PM dinner. Ms. Vance opens the door wearing an apron. She looks tired and busy. You brought a bottle of fruit juice as a gift.",
+        prompt: "How do you greet your host?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Smile warmly, hand her the bottle, and say: 'Thank you for inviting me, Ms. Vance. Here is a small gift for you.'",
+            feedback: "🟩 EXCELLENT (+2 pts): Perfect greeting! Giving a small gift with nice English is very polite.",
+            discussion: "What small gifts do people bring when visiting someone's house in your country?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Give her the bottle immediately and say: 'Hello! I hope I am not too early. Here is some juice.'",
+            feedback: "🟦 GOOD (+1 pt): Friendly and polite, but you don't need to worry about being 2 minutes early.",
+            discussion: "Is arriving 2 minutes early polite or impolite in your country?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Walk inside quietly, take off your coat, and put the bottle on a table without speaking.",
+            feedback: "🟧 AVERAGE (+0 pts): A bit quiet. It is friendly to say 'hello' and talk at the front door.",
+            discussion: "Why is it important to say friendly greeting words when you arrive?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Look at your watch and say: 'You look very stressed today!'",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Telling a host they look stressed is impolite! Try another choice.",
+            discussion: "Why should you never comment on someone's stress or tired face?"
+          }
+        ]
+      },
+      {
+        id: 2,
+        title: "Scenario 2: Shoes in the House",
+        text: "You step inside the hallway. The floor has a beautiful, clean white carpet. Ms. Vance is wearing shoes inside her house, but she does not say anything about your shoes.",
+        prompt: "What do you do with your shoes?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Pause near the door mat and ask politely: 'Should I take off my shoes, Ms. Vance?'",
+            feedback: "🟩 EXCELLENT (+2 pts): Very thoughtful! Asking politely is the best way to learn house rules.",
+            discussion: "Do people take off their shoes inside houses in your country?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Take off your shoes immediately and put them neatly by the front door.",
+            feedback: "🟦 GOOD (+1 pt): Respectful of her clean carpet, though she might tell you to keep them on.",
+            discussion: "Where do visitors put their shoes when they visit your house?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Wipe your shoes heavily on the door mat and walk onto the white carpet.",
+            feedback: "🟧 AVERAGE (+0 pts): Okay, but wiping shoes for a long time looks a little funny.",
+            discussion: "What do you do if your shoes are dirty when visiting a friend?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Point at her carpet and say: 'Your dirty shoes are going to ruin this white carpet!'",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Criticizing the host's house or shoes is rude! Try another choice.",
+            discussion: "Why is criticizing a host's house bad manners?"
+          }
+        ]
+      },
+      {
+        id: 3,
+        title: "Scenario 3: Offering Drinks",
+        text: "Ms. Vance leads you into the living room. She asks: 'Can I get you something to drink? We have soda, orange juice, or sparkling water.' You don't like soda, but you want to be easy to please.",
+        prompt: "What drink do you ask for?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Say warmly: 'Sparkling water with a slice of lemon would be wonderful, thank you!'",
+            feedback: "🟩 EXCELLENT (+2 pts): Very clear and polite English! You chose a simple drink warmly.",
+            discussion: "How do you ask for a drink politely in English?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Say: 'Just plain water for me please, thank you.'",
+            feedback: "🟦 GOOD (+1 pt): Simple, polite, and clear.",
+            discussion: "What is your favorite drink to offer guests at your house?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Say: 'Oh, anything is fine, I don't care at all.'",
+            feedback: "🟧 AVERAGE (+0 pts): Helpful, but saying 'I don't care' can sound a bit disinterested.",
+            discussion: "Why is it better to choose a specific drink when a host asks?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Make a face and say: 'Soda is terrible for your teeth. I only drink tea.'",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Preachy and rude! Never complain about the drinks offered. Try another choice.",
+            discussion: "Why should you never criticize food or drinks at a dinner party?"
+          }
+        ]
+      },
+      {
+        id: 4,
+        title: "Scenario 4: Food You Cannot Eat",
+        text: "Everyone sits at the dining table. Ms. Vance brings out the first dish: mushroom soup. You have a severe allergy to mushrooms and cannot eat them at all.",
+        prompt: "How do you tell Ms. Vance about your food allergy?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Speak softly to Ms. Vance: 'This looks lovely, but I have a severe mushroom allergy. I am so sorry!'",
+            feedback: "🟩 EXCELLENT (+2 pts): Safe and very polite! Stating allergies clearly and apologizing is the right move.",
+            discussion: "How do you explain food allergies or food restrictions in English?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Eat two small spoons of plain soup broth around the mushrooms and leave the rest.",
+            feedback: "🟦 GOOD (+1 pt): Trying to be polite, but eating food you are allergic to can be dangerous!",
+            discussion: "Why is it important to tell hosts about health allergies right away?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Use your spoon to hide the mushrooms under your napkin so the bowl looks empty.",
+            feedback: "🟧 AVERAGE (+0 pts): Hiding food under napkins is noticeable and a little immature.",
+            discussion: "What should adults do when served food they cannot eat?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Push the bowl away loudly and say: 'Mushrooms taste like rubber! Take this back.'",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Extremely rude! Saying food tastes bad hurts the host's feelings. Try another choice.",
+            discussion: "Why is it important to respect food cooked by a host?"
+          }
+        ]
+      },
+      {
+        id: 5,
+        title: "Scenario 5: Difficult Conversations",
+        text: "During the main meal, another guest at the table brings up a difficult political topic. He shares a strong opinion that you disagree with. Everyone turns to look at you for your opinion.",
+        prompt: "How do you respond to the difficult topic?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Smile politely and say: 'That is an interesting topic! By the way, Ms. Vance, this dinner is delicious.'",
+            feedback: "🟩 EXCELLENT (+2 pts): Great diplomacy! Changing the subject to the delicious food avoids an argument.",
+            discussion: "What safe topics (like weather or food) do you use to change the conversation?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Say calmly: 'I see it a bit differently, but I try not to talk about politics at dinner!'",
+            feedback: "🟦 GOOD (+1 pt): Polite and honest boundary setting.",
+            discussion: "Why do many people avoid talking about politics during meals?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Nod silently, stare at your plate, and eat your food in complete silence.",
+            feedback: "🟧 AVERAGE (+0 pts): Avoids arguments, but staying completely silent can feel a bit awkward.",
+            discussion: "Why can total silence feel awkward at a small dinner table?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Slam your fork down and shout: 'That is a foolish opinion and you are wrong!'",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Shouting and calling people foolish ruins the dinner party! Try another choice.",
+            discussion: "Why should you avoid heated arguments at a boss or friend's house?"
+          }
+        ]
+      },
+      {
+        id: 6,
+        title: "Scenario 6: The Spilled Sauce",
+        text: "While reaching for the salt, your arm accidentally hits a bowl of red sauce. The sauce spills across the clean white tablecloth and touches Ms. Vance's napkin.",
+        prompt: "How do you handle your accident?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Apologize immediately: 'I am so sorry, Ms. Vance! Let me help you clean that up right now.'",
+            feedback: "🟩 EXCELLENT (+2 pts): Responsible and quick! Apologizing right away and offering help shows good character.",
+            discussion: "What English phrases do you use when you make a mistake or spill something?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Say: 'Oh no, I am so clumsy! I am very sorry, Ms. Vance,' and hand her your napkin.",
+            feedback: "🟦 GOOD (+1 pt): Sincere apology, though calling yourself clumsy isn't necessary.",
+            discussion: "What is the best thing to do when you spill something at a friend's house?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Freeze in shock, gasp loudly, and wait for Ms. Vance to get towels from the kitchen.",
+            feedback: "🟧 AVERAGE (+0 pts): Feeling shocked is normal, but helping to clean is better.",
+            discussion: "Why is it helpful to step up and assist when an accident happens?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Point at the person next to you and say: 'You put the salt too far away, so it's your fault!'",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Blaming other people for your own accident is impolite. Try another choice.",
+            discussion: "Why should we take responsibility for our own accidents?"
+          }
+        ]
+      },
+      {
+        id: 7,
+        title: "Scenario 7: The Dry Chicken",
+        text: "Ms. Vance's husband cooked the main dish: roasted chicken. He asks you directly: 'Be honest, how is the chicken? I am worried it stayed in the oven too long and is dry.' In reality, it is very dry.",
+        prompt: "How do you answer his question politely?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Say warmly: 'The sauce and spices are delicious! Thank you for cooking such a nice meal for us.'",
+            feedback: "🟩 EXCELLENT (+2 pts): Fantastic politeness! Focusing on good flavors protects the cook's feelings.",
+            discussion: "Why is it polite to focus on positive things when someone cooks for you?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Smile and say: 'I think it is tasty! Maybe a little well-cooked, but I am enjoying it.'",
+            feedback: "🟦 GOOD (+1 pt): Gentle and honest, while still being friendly.",
+            discussion: "Is it better to be 100% honest or gentle when reviewing homemade food?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Chew for a long time and say: 'It's okay, don't worry about it.'",
+            feedback: "🟧 AVERAGE (+0 pts): Saying 'it's okay' can sound a little unenthusiastic.",
+            discussion: "How can tone of voice change the meaning of simple words like 'okay'?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Say: 'Yes, you are right. It is as dry as paper and hard to swallow.'",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Being overly critical hurts feelings. Try another choice.",
+            discussion: "Why should we avoid harsh words when receiving hospitality?"
+          }
+        ]
+      },
+      {
+        id: 8,
+        title: "Scenario 8: Clearing the Table",
+        text: "Dinner is finished. Ms. Vance starts collecting empty plates to take to the kitchen. She looks tired after cooking and serving all evening.",
+        prompt: "How do you offer to help her?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Stand up with your plate and say: 'Ms. Vance, please let me help you carry these plates to the kitchen.'",
+            feedback: "🟩 EXCELLENT (+2 pts): Excellent manners! Standing up to help shows real initiative.",
+            discussion: "Do guests help clean or carry dishes in your culture?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Stay seated and ask politely: 'Would you like any help in the kitchen, Ms. Vance?'",
+            feedback: "🟦 GOOD (+1 pt): Courteous offer, though standing up to assist is even better.",
+            discussion: "What is the most helpful thing a guest can do after dinner?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Watch her carry the plates silently and check your phone under the table.",
+            feedback: "🟧 AVERAGE (+0 pts): Looking at your phone while the host works can look a bit disengaged.",
+            discussion: "When is it impolite to check your smartphone during social events?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Say: 'Finally! Please bring out dessert now, I am waiting.'",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Demanding food like you are in a restaurant is rude. Try another choice.",
+            discussion: "Why should guests never treat a dinner host like a restaurant worker?"
+          }
+        ]
+      },
+      {
+        id: 9,
+        title: "Scenario 9: Saying Goodbye",
+        text: "It is 9:45 PM. Dessert is finished. Ms. Vance covers a small yawn, and conversation is getting quiet.",
+        prompt: "How do you prepare to leave politely?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Put your napkin on the table, smile, and say: 'Ms. Vance, thank you for a wonderful evening! I should let you rest now.'",
+            feedback: "🟩 EXCELLENT (+2 pts): Perfect timing! Noticing the host is tired and saying thank you is very thoughtful.",
+            discussion: "What signs show that a dinner party is ending?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Stand up and say: 'Well, it is getting late! I should start heading home now.'",
+            feedback: "🟦 GOOD (+1 pt): Clear and polite exit statement.",
+            discussion: "What time do dinner parties usually end in your country?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Wait until another guest stands up first so you can follow them out.",
+            feedback: "🟧 AVERAGE (+0 pts): A bit quiet, but waiting for others is safe.",
+            discussion: "Do you prefer to leave parties early or stay until the end?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Sit back in your chair and say: 'What are we doing next? Do you have any card games?'",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Staying too late when the host is tired is impolite! Try another choice.",
+            discussion: "Why is staying too late problematic for a host?"
+          }
+        ]
+      },
+      {
+        id: 10,
+        title: "Scenario 10: The Next Day at Work",
+        text: "It is the morning after the dinner party. You arrive at the office and see Ms. Vance sitting at her desk preparing for her morning work.",
+        prompt: "How do you follow up the next morning?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Send a friendly short email or stop by her desk to say: 'Thank you again for last night! The food was wonderful.'",
+            feedback: "🟩 EXCELLENT (+2 pts): Very professional! Sending a thank-you note the next day builds great relationships.",
+            discussion: "Why is saying 'thank you' the next day good manners?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Give her a warm smile and wave across the office when you walk past.",
+            feedback: "🟦 GOOD (+1 pt): Friendly, though saying a quick 'thank you' in person is even better.",
+            discussion: "How do you build good relationships with colleagues at work?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Wait for her to mention the dinner party first before saying anything.",
+            feedback: "🟧 AVERAGE (+0 pts): Okay, but taking initiative to say thank you is much nicer.",
+            discussion: "Why is taking initiative to say thank you appreciated?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Talk to other workers near the coffee machine about how dry the chicken was.",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Gossiping about your host is disloyal and rude! Try another choice.",
+            discussion: "Why is gossiping about coworkers or hosts bad for your reputation?"
+          }
+        ]
+      }
+    ];
+
+    let currentScenarioIdx = 0;
+    let score = 0;
+    let shuffledChoices = [];
+
+    // Fisher-Yates Array Shuffle
+    function shuffleArray(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function startGame() {
+      document.getElementById('landing-page').style.display = 'none';
+      document.getElementById('gameplay-page').style.display = 'block';
+      currentScenarioIdx = 0;
+      score = 0;
+      updateScoreDisplay();
+      renderCurrentScenario();
+    }
+
+    function selectOption(shuffledIdx) {
+      const choice = shuffledChoices[shuffledIdx];
+
+      const feedbackEl = document.getElementById('feedback');
+      const discussionEl = document.getElementById('discussion');
+      const actionBtn = document.getElementById('action-btn');
+      const choicesEl = document.getElementById('choices');
+
+      feedbackEl.className = `feedback-box ${choice.type}`;
+      feedbackEl.innerText = choice.feedback;
+      feedbackEl.style.display = 'block';
+
+      if (choice.type === 'bad') {
+        score = Math.max(0, score + choice.pts);
+        updateScoreDisplay();
+        
+        discussionEl.innerHTML = `<strong>Discussion Question:</strong><br>${choice.discussion}`;
+        discussionEl.style.display = 'block';
+
+        actionBtn.innerText = "Try Scenario Again ↺";
+        actionBtn.onclick = resetScenarioChoices;
+        actionBtn.style.display = 'block';
+
+        choicesEl.style.display = 'none';
+      } else {
+        score += choice.pts;
+        updateScoreDisplay();
+
+        discussionEl.innerHTML = `<strong>Discussion Question:</strong><br>${choice.discussion}`;
+        discussionEl.style.display = 'block';
+
+        choicesEl.style.display = 'none';
+
+        if (currentScenarioIdx < scenarios.length - 1) {
+          actionBtn.innerText = "Next Scenario →";
+          actionBtn.onclick = advanceScenario;
+        } else {
+          actionBtn.innerText = "View Final Score & Results ★";
+          actionBtn.onclick = renderDebriefing;
+        }
+        actionBtn.style.display = 'block';
+      }
+    }
+
+    function resetScenarioChoices() {
+      document.getElementById('feedback').style.display = 'none';
+      document.getElementById('discussion').style.display = 'none';
+      document.getElementById('action-btn').style.display = 'none';
+      document.getElementById('choices').style.display = 'flex';
+    }
+
+    function advanceScenario() {
+      currentScenarioIdx++;
+      resetScenarioChoices();
+      renderCurrentScenario();
+    }
+
+    function updateScoreDisplay() {
+      document.getElementById('score').innerText = `Score: ${score} / 20`;
+    }
+
+    function renderCurrentScenario() {
+      const scenario = scenarios[currentScenarioIdx];
+      
+      document.getElementById('progress').innerText = `Scenario ${scenario.id} of 10`;
+      document.getElementById('story').innerText = scenario.text;
+      document.getElementById('prompt').innerText = scenario.prompt;
+
+      const choicesEl = document.getElementById('choices');
+      choicesEl.innerHTML = '';
+
+      // Randomize choices order
+      shuffledChoices = shuffleArray(scenario.choices);
+
+      shuffledChoices.forEach((choice, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.innerText = `${String.fromCharCode(65 + idx)}. ${choice.text}`;
+        btn.onclick = () => selectOption(idx);
+        choicesEl.appendChild(btn);
+      });
+    }
+
+    function renderDebriefing() {
+      document.getElementById('gameplay-page').style.display = 'none';
+      document.getElementById('debrief-page').style.display = 'block';
+
+      let bandTitle = "";
+      let bandColor = "";
+      let bandFeedback = "";
+
+      if (score >= 16) {
+        bandTitle = "Band 4: Excellent Dinner Guest (16–20 Points)";
+        bandColor = "var(--color-excellent)";
+        bandFeedback = "<strong>Fantastic job!</strong> You have wonderful English manners! You made polite, warm, and helpful choices throughout the whole evening. Ms. Vance was very happy to have you as a guest!";
+      } else if (score >= 11) {
+        bandTitle = "Band 3: Polite & Friendly Guest (11–15 Points)";
+        bandColor = "var(--color-good)";
+        bandFeedback = "<strong>Great job!</strong> You made a good impression on your manager and handled social awkwardness nicely. To reach Band 4, try to take active initiative and offer polite compliments!";
+      } else if (score >= 6) {
+        bandTitle = "Band 2: Okay Guest (6–10 Points)";
+        bandColor = "var(--color-average)";
+        bandFeedback = "<strong>Nice try!</strong> You survived the dinner party, but some choices were a bit quiet or awkward. Replay the game and practice choosing the friendliest options!";
+      } else {
+        bandTitle = "Band 1: Needs Practice (0–5 Points)";
+        bandColor = "var(--color-bad)";
+        bandFeedback = "<strong>Keep practicing!</strong> Some of your choices lost points or were impolite. Play the game again and focus on polite words, helping the host, and avoiding arguments!";
+      }
+
+      const debriefContent = document.getElementById('debrief-content');
+      debriefContent.innerHTML = `
+        <div class="debrief-card" style="border-color: ${bandColor}">
+          <div class="progress-title" style="margin-bottom:8px;">Final Score: ${score} / 20</div>
+          <div class="band-title" style="color: ${bandColor}">${bandTitle}</div>
+          <p style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 0;">${bandFeedback}</p>
+        </div>
+
+        <div class="discussion-box">
+          <strong style="font-size: 1.05rem;">Final Class Discussion Questions:</strong>
+          <ol style="margin-top: 10px; padding-left: 20px; line-height: 1.6;">
+            <li>Which scenario was the hardest for you to handle? Why?</li>
+            <li>How are dinner parties in your native country different from this game?</li>
+            <li>What new English phrases for politeness did you learn today?</li>
+          </ol>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>

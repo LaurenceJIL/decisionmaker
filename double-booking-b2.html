@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Double Booking: B1/B2 Decision Game</title>
+  <style>
+    :root {
+      --bg-color: #f1f5f9;
+      --card-bg: #ffffff;
+      --text-color: #1e293b;
+      --border-color: #cbd5e1;
+      --primary-color: #2563eb;
+      --primary-hover: #1d4ed8;
+      
+      /* Rating Colors */
+      --color-excellent: #15803d;
+      --bg-excellent: #f0fdf4;
+
+      --color-good: #1d4ed8;
+      --bg-good: #eff6ff;
+
+      --color-average: #b45309;
+      --bg-average: #fffbeb;
+
+      --color-bad: #b91c1c;
+      --bg-bad: #fef2f2;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+
+    .game-container {
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+      max-width: 780px;
+      width: 100%;
+      padding: 32px;
+      box-sizing: border-box;
+      border: 1px solid var(--border-color);
+    }
+
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      border-bottom: 2px solid var(--bg-color);
+      padding-bottom: 12px;
+    }
+
+    .progress-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .score-tracker {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--primary-color);
+      background-color: #dbeafe;
+      padding: 6px 14px;
+      border-radius: 20px;
+    }
+
+    .story-text {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .prompt-text {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: #0f172a;
+    }
+
+    .choices-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .choice-btn {
+      background-color: #ffffff;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      padding: 14px 18px;
+      font-size: 1rem;
+      color: var(--text-color);
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      line-height: 1.4;
+    }
+
+    .choice-btn:hover {
+      border-color: var(--primary-color);
+      background-color: #f8fafc;
+      transform: translateY(-1px);
+    }
+
+    /* Feedback Box Styling */
+    .feedback-box {
+      padding: 16px;
+      border-radius: 8px;
+      font-size: 1rem;
+      line-height: 1.5;
+      margin-bottom: 16px;
+      border-left: 6px solid;
+    }
+
+    .feedback-box.excellent {
+      background-color: var(--bg-excellent);
+      color: var(--color-excellent);
+      border-color: var(--color-excellent);
+    }
+
+    .feedback-box.good {
+      background-color: var(--bg-good);
+      color: var(--color-good);
+      border-color: var(--color-good);
+    }
+
+    .feedback-box.average {
+      background-color: var(--bg-average);
+      color: var(--color-average);
+      border-color: var(--color-average);
+    }
+
+    .feedback-box.bad {
+      background-color: var(--bg-bad);
+      color: var(--color-bad);
+      border-color: var(--color-bad);
+    }
+
+    .discussion-box {
+      background-color: #f8fafc;
+      border: 1px solid var(--border-color);
+      padding: 14px 18px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .action-btn {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 14px 20px;
+      font-size: 1rem;
+      cursor: pointer;
+      font-weight: 700;
+      width: 100%;
+      transition: background-color 0.2s ease;
+    }
+
+    .action-btn:hover {
+      background-color: var(--primary-hover);
+    }
+
+    /* Intro & Debriefing Styling */
+    .intro-list {
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary-color);
+      padding: 16px 20px;
+      border-radius: 4px;
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+
+    .intro-list ul {
+      margin: 8px 0 0 0;
+      padding-left: 20px;
+    }
+
+    .debrief-card {
+      background-color: #f8fafc;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .band-title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="game-container">
+    
+    <!-- LANDING PAGE -->
+    <div id="landing-page">
+      <h1 style="margin-top:0; color:#0f172a;">The Double Booking 📅</h1>
+      <p class="story-text">
+        Welcome to <strong>The Double Booking</strong>, an interactive scenario game for English language learners (B1–B2 level).
+        It is Friday evening at 6:00 PM. You suddenly realize you have made two conflicting commitments at 7:00 PM on opposite sides of town: 
+        a farewell dinner for your best friend Marco, and an important networking dinner with potential high-value clients hosted by your boss, Sarah.
+      </p>
+
+      <div class="intro-list">
+        <strong>How to Play & Score:</strong>
+        <ul>
+          <li><strong>10 Sequential Scenarios:</strong> Handle the scheduling crisis chronologically.</li>
+          <li><strong>4 Options Per Scenario:</strong> Choices appear in a randomized order every play!</li>
+          <li>🟩 <strong>Excellent Response (+2 pts):</strong> Professional, diplomatic, honest, and tactful.</li>
+          <li>🟦 <strong>Good Response (+1 pt):</strong> Reasonable and polite, but less ideal.</li>
+          <li>🟧 <strong>Average Response (+0 pts):</strong> Neutral; safe but passive, vague, or risky.</li>
+          <li>🟥 <strong>Bad Response (-1 pt):</strong> Rude, dishonest, or chaotic. Subtracts 1 point and forces a retry!</li>
+          <li><strong>Maximum Score:</strong> 20 Points. View your performance band at the end!</li>
+        </ul>
+      </div>
+
+      <button class="action-btn" onclick="startGame()">Start Scenario 1 →</button>
+    </div>
+
+    <!-- GAMEPLAY PAGE -->
+    <div id="gameplay-page" style="display: none;">
+      <div class="header-bar">
+        <div id="progress" class="progress-title">Scenario 1 of 10</div>
+        <div id="score" class="score-tracker">Score: 0 / 20</div>
+      </div>
+
+      <div id="story" class="story-text">Loading scenario...</div>
+      <div id="feedback" class="feedback-box" style="display: none;"></div>
+      <div id="discussion" class="discussion-box" style="display: none;"></div>
+      <div id="prompt" class="prompt-text"></div>
+      <div id="choices" class="choices-grid"></div>
+      <button id="action-btn" class="action-btn" style="display: none;">Continue →</button>
+    </div>
+
+    <!-- DEBRIEFING PAGE -->
+    <div id="debrief-page" style="display: none;">
+      <h2 style="margin-top:0;">Game Debriefing & Feedback</h2>
+      <div id="debrief-content"></div>
+      <button class="action-btn" onclick="location.reload()">Replay Game (Randomized Order) ↺</button>
+    </div>
+
+  </div>
+
+  <script>
+    const scenarios = [
+      {
+        id: 1,
+        title: "Scenario 1: The Sudden Realization",
+        text: "It is 6:00 PM on Friday. While getting dressed, your phone chimes with two notifications: 'Farewell Dinner for Marco at Bistro Italia (7:00 PM)' and 'Networking Dinner with Clients at The Grand Hotel (7:00 PM)'. You completely forgot you agreed to both!",
+        prompt: "What is your immediate reaction to this scheduling disaster?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Take a deep breath, review the location distance, and prepare to contact both parties immediately to assess options.",
+            feedback: "🟩 EXCELLENT (+2 pts): Calm, rational, and proactive! Evaluating logistics before panicking allows clear communication.",
+            discussion: "How do you usually organize your calendar to avoid double-booking yourself?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Call Marco right away to see if his dinner time is flexible or if people are staying late.",
+            feedback: "🟦 GOOD (+1 pt): Direct action with a close friend, though checking your work commitments simultaneously is also needed.",
+            discussion: "When two events conflict, how do you decide which one takes priority?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Stare at your phone in denial for 15 minutes hoping one of the events gets canceled.",
+            feedback: "🟧 AVERAGE (+0 pts): Passive delay. Wasting 15 minutes reduces your options when time is critical.",
+            discussion: "Why do people tend to freeze or procrastinate when facing embarrassing mistakes?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Turn off your phone, crawl into bed, and pretend you had a sudden health emergency.",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Avoidance and dishonesty ruin trust in both personal and professional relationships. Choose another option!",
+            discussion: "Why is faking an illness a dangerous long-term strategy for conflict resolution?"
+          }
+        ]
+      },
+      {
+        id: 2,
+        title: "Scenario 2: Contacting Your Close Friend",
+        text: "Marco is moving abroad tomorrow morning, so tonight is his only farewell gathering. You call him at 6:10 PM. He answers excitedly: 'Hey! Are you on your way? Everyone is so excited to see you!'",
+        prompt: "How do you address Marco about the scheduling conflict?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Say: 'Marco, I am so embarrassed. I accidentally double-booked an obligatory work client dinner tonight. I am desperate to see you—can I come directly after my work event around 8:30 PM?'",
+            feedback: "🟩 EXCELLENT (+2 pts): Transparent, honest, and solution-focused! Proposing a late arrival proves you value his friendship.",
+            discussion: "What phrasing helps soften bad news when talking to a close friend?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Say: 'I have a work event at 7:00 PM that I can't skip, but I'll do my absolute best to drop by later tonight!'",
+            feedback: "🟦 GOOD (+1 pt): Clear and honest, though leaving the arrival time vague might make him doubt you will show up.",
+            discussion: "Why are specific time commitments better than saying 'I'll try to drop by'?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Say: 'I might be a little late because of traffic, save me a seat!' without mentioning the work dinner.",
+            feedback: "🟧 AVERAGE (+0 pts): Misleading. Blaming traffic creates false expectations if you are delayed by hours.",
+            discussion: "Why is making excuses about traffic risky when double-booking happens?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Say: 'Something came up, I can't make it tonight. Have a safe flight tomorrow!' and hang up.",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Extremely insensitive! Canceling abruptly on a departing friend's farewell dinner damages friendship. Choose another option!",
+            discussion: "How would you feel if a close friend canceled on your farewell party with no real explanation?"
+          }
+        ]
+      },
+      {
+        id: 3,
+        title: "Scenario 3: Communicating with Your Manager",
+        text: "Marco understands and says: 'We'll be at the bistro until 10:30 PM, please come as soon as you can!' Now you need to contact your manager, Sarah, regarding the client dinner at The Grand Hotel.",
+        prompt: "How do you message or call Sarah at 6:20 PM?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Call Sarah promptly and say: 'Hi Sarah, I am en route to The Grand Hotel for 7:00 PM. I wanted to let you know I have a brief personal commitment later in the evening, so I will need to slip away around 8:15 PM once client introductions are complete.'",
+            feedback: "🟩 EXCELLENT (+2 pts): Professional boundaries and advance notice! Setting expectations early ensures you attend both events gracefully.",
+            discussion: "How do you professionally balance personal commitments with evening work obligations?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Send a text to Sarah saying: 'Looking forward to tonight! Just letting you know I'll need to leave a bit early around 8:30 PM for a prior personal engagement.'",
+            feedback: "🟦 GOOD (+1 pt): Polite and written advance notice, though calling demonstrates higher accountability.",
+            discussion: "When is a phone call preferable to a text message in professional workplace communication?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Decide not to tell Sarah anything now and plan to make an excuse at the restaurant during dinner.",
+            feedback: "🟧 AVERAGE (+0 pts): Unprepared. Springing a sudden departure on your boss at the table can look unprofessional.",
+            discussion: "Why is giving advance notice always better than making last-minute excuses?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Text Sarah: 'Sorry, personal emergency came up, can't make client dinner tonight!' so you can spend the entire night with Marco.",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Faking emergencies and abandoning key work responsibilities damages your career reputation. Choose another option!",
+            discussion: "What are the professional risks of backing out of client dinners at the last minute?"
+          }
+        ]
+      },
+      {
+        id: 4,
+        title: "Scenario 4: Arrival and Client Introductions",
+        text: "You arrive at The Grand Hotel at 6:55 PM. Sarah introduces you to Mr. Davis and Ms. Chen, two executive clients. Mr. Davis says: 'Sarah tells us you lead the new project team! We are eager to hear your strategy tonight over dinner.'",
+        prompt: "How do you engage the clients upon arrival?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Shake hands warmly and say: 'It's a pleasure to meet you both. I've prepared key insights on our strategy and I'm excited to walk you through our initial milestones tonight.'",
+            feedback: "🟩 EXCELLENT (+2 pts): Confident, focused, and value-driven! Demonstrates high professional competence immediately.",
+            discussion: "What key phrases do you use during professional introductions with important clients?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Smile and say: 'Pleasure to meet you! I'm really looking forward to discussing the project with you over appetizers.'",
+            feedback: "🟦 GOOD (+1 pt): Friendly and professional, though setting a focal timeframe (appetizers) hints subtly at your tight schedule.",
+            discussion: "How can you show enthusiasm for a business meeting even when under time constraints?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Nod quickly and say: 'Nice to meet you. Just so you know, I have to leave early tonight.'",
+            feedback: "🟧 AVERAGE (+0 pts): Blurted out too early. Mentioning your departure before building rapport makes you seem uninterested.",
+            discussion: "Why is timing important when delivering administrative or logistical news to clients?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Check your watch in front of them and sigh: 'Great to meet you, let's order food fast because I'm on a super tight schedule.'",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Impatient and disrespectful to high-value clients. Choose another option!",
+            discussion: "Why is displaying impatience in front of clients damaging to a company's brand?"
+          }
+        ]
+      },
+      {
+        id: 5,
+        title: "Scenario 5: The Slow Kitchen Delay",
+        text: "It is 7:45 PM. You have delivered your project presentation points brilliantly, but the main courses have still not arrived. You know you need to leave by 8:15 PM to reach Marco's dinner across town before people leave.",
+        prompt: "How do you handle the restaurant's service delay?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Excuses yourself discreetly to speak with the waiter away from the table, asking politely if the main courses can be expedited.",
+            feedback: "🟩 EXCELLENT (+2 pts): Discreet and proactive! Handling logistics quietly away from clients preserves table atmosphere.",
+            discussion: "How do you politely ask restaurant staff to speed up service without creating a scene?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Check the time on your phone subtly beneath the table while maintaining active conversation with Ms. Chen.",
+            feedback: "🟦 GOOD (+1 pt): Keeps focus on the client, though doing nothing about the slow kitchen risks severe delay.",
+            discussion: "What non-verbal signals show you are engaged in a conversation even when stressed?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Mention to the whole table: 'Boy, the service here is really slow tonight, isn't it?'",
+            feedback: "🟧 AVERAGE (+0 pts): Common observation, but complaining publicly highlights the delay and risks awkwardness.",
+            discussion: "Why is complaining about service at business dinners generally discouraged?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Snap your fingers at the waiter across the dining room and yell: 'We've been waiting 45 minutes!'",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Rude to service staff and humiliating for your boss in front of clients. Choose another option!",
+            discussion: "Why does treating service staff poorly ruin professional reputations instantly?"
+          }
+        ]
+      },
+      {
+        id: 6,
+        title: "Scenario 6: Executing the Exit from Work Dinner",
+        text: "It is 8:15 PM. The main course has just arrived. You have successfully answered all client questions and impressed Mr. Davis. Now you must execute your departure diplomatically.",
+        prompt: "How do you take your leave from the business dinner?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Place your napkin beside your plate, stand up smoothly, and say: 'Mr. Davis, Ms. Chen, it has been an absolute pleasure. As I mentioned to Sarah, I have a prior obligation tonight, but I leave you in great hands. I will follow up via email on Monday!'",
+            feedback: "🟩 EXCELLENT (+2 pts): Smooth, confident, and professional! Reassuring the clients and offering follow-up seals a great impression.",
+            discussion: "What phrasing helps you leave a professional business dinner early without awkwardness?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Whisper to Sarah: 'I'm slipping out now as we discussed.' Then address the clients: 'Thank you all for a great evening, enjoy your main course!'",
+            feedback: "🟦 GOOD (+1 pt): Polite and efficient departure, though slightly sudden for the clients.",
+            discussion: "Is it better to announce your departure to the whole table or quietly inform the host?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Stand up abruptly and say: 'Okay guys, my time is up, I have to run across town now. See you Monday!'",
+            feedback: "🟧 AVERAGE (+0 pts): Informal and rushed. Lacks the polished tone expected at high-level client dinners.",
+            discussion: "How does language register (formal vs informal) affect client perceptions?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Sneak away to the restroom with your coat and leave the hotel without saying goodbye to anyone.",
+            feedback: "🟥 BAD RESPONSE (-1 pt): 'Ghosting' a client dinner is bizarre and unprofessional. Choose another option!",
+            discussion: "Why is leaving a business event without saying goodbye unacceptable?"
+          }
+        ]
+      },
+      {
+        id: 7,
+        title: "Scenario 7: Transit Crisis Across Town",
+        text: "You exit The Grand Hotel at 8:20 PM. Marco's bistro is 8 kilometers away across the city center. Heavy Friday night traffic is gridlocked, and ride-share app wait times are 20 minutes.",
+        prompt: "How do you navigate the cross-town journey efficiently?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Walk two blocks to the nearest metro/subway station, purchase a quick transit pass, and take the direct express line.",
+            feedback: "🟩 EXCELLENT (+2 pts): Resourceful and smart! Bypassing traffic via public transit is the fastest urban solution.",
+            discussion: "What alternative transportation methods do you use when city traffic is blocked?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Book the ride-share car and text Marco: 'On my way now! Traffic is heavy but I'll be there around 8:50 PM.'",
+            feedback: "🟦 GOOD (+1 pt): Keeps Marco informed of your ETA, though waiting 20 minutes for a car burns precious time.",
+            discussion: "Why is updating your estimated time of arrival (ETA) helpful when running late?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Start walking briskly toward the bistro on foot while continually refreshing the ride-share app.",
+            feedback: "🟧 AVERAGE (+0 pts): Active effort, but walking 8 kilometers in formal clothes will leave you exhausted and sweaty.",
+            discussion: "How do physical conditions (clothing, distance) influence transport choices?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Offer a random driver on the street $50 cash to give you an illegal ride in their private vehicle.",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Dangerous and foolish safety risk. Choose another option!",
+            discussion: "Why should you never compromise personal safety to save time when traveling?"
+          }
+        ]
+      },
+      {
+        id: 8,
+        title: "Scenario 8: Arriving at the Farewell Dinner",
+        text: "Thanks to the metro, you arrive at Bistro Italia at 8:45 PM! Marco and eight friends are sitting around a long table laughing and finishing main dishes. Marco spots you entering.",
+        prompt: "How do you join Marco's party?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Walk up with enthusiasm, give Marco a big hug, and say: 'I made it! I wouldn't miss saying goodbye to you for the world. How is everyone doing?'",
+            feedback: "🟩 EXCELLENT (+2 pts): Warm, energetic, and affectionate! Shifting energy instantly matches the festive personal mood.",
+            discussion: "How do you adjust your tone of voice when switching from formal work settings to relaxed personal gatherings?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Take an open chair next to Marco, apologize to the group for being late, and order a drink.",
+            feedback: "🟦 GOOD (+1 pt): Polite and smooth entry, though opening with an apology highlights your lateness unnecessarily.",
+            discussion: "Why is bringing positive energy better than opening with long apologies when joining a party late?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Sit at the far end of the table quietly so you don't interrupt the story someone is telling.",
+            feedback: "🟧 AVERAGE (+0 pts): Considerate of the speaker, but sitting far away from the guest of honor misses the point.",
+            discussion: "How can you join a busy dinner table without being disruptive?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Complain loudly to the whole table about how stressful your work clients were and how terrible city traffic was.",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Negative and self-centered! Complaining ruins the farewell celebratory mood. Choose another option!",
+            discussion: "Why is venting about work problems inappropriate at someone else's celebration?"
+          }
+        ]
+      },
+      {
+        id: 9,
+        title: "Scenario 9: The Bill and Contribution",
+        text: "It is 10:15 PM. Dinner is wrapping up. The server brings the total bill for Marco's farewell dinner. Since you arrived late, you only had a dessert and one glass of wine, but someone suggests splitting the bill equally among everyone.",
+        prompt: "How do you handle the bill split?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Offer happily: 'Let's split Marco's share among us, and I'm more than happy to contribute an equal full share to celebrate him!'",
+            feedback: "🟩 EXCELLENT (+2 pts): Generous and gracious! Prioritizing Marco's farewell gift over minor personal savings shows strong friendship.",
+            discussion: "What are the social customs in your country for paying for a friend's farewell dinner?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Say quietly to the organizer: 'I'll throw in $40 to cover my items plus a big share of Marco's meal.'",
+            feedback: "🟦 GOOD (+1 pt): Fair and practical contribution that ensures Marco's meal is covered.",
+            discussion: "How do you handle splitting restaurant bills when people order vastly different amounts?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Calculate your exact dessert and drink price on your phone calculator down to the cent and lay down exact cash.",
+            feedback: "🟧 AVERAGE (+0 pts): Technically fair, but calculating exact cents at a group farewell meal looks penny-pinching.",
+            discussion: "Why can strict item-by-item bill calculation create awkwardness at group celebrations?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Refuse to pay anything, arguing: 'I was only here for an hour and barely ate, so I shouldn't have to pay.'",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Stingy and confrontational! Ruins a special evening over a small sum. Choose another option!",
+            discussion: "Why is generosity valued during group milestone events?"
+          }
+        ]
+      },
+      {
+        id: 10,
+        title: "Scenario 10: Monday Morning Follow-Up",
+        text: "It is Monday morning. Marco has safely boarded his flight abroad, and you arrive at the office. You see Sarah, your boss, at her desk. You want to confirm the outcome of the client dinner.",
+        prompt: "How do you follow up with your boss?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Stop by Sarah's office with a warm smile: 'Good morning Sarah! Thanks again for Friday. Mr. Davis seemed very impressed with our project roadmap—I've drafted a follow-up email for them if you'd like to review it.'",
+            feedback: "🟩 EXCELLENT (+2 pts): Outstanding initiative! Connecting the success of Friday's event with proactive Monday work seals your professional reputation.",
+            discussion: "Why is Monday morning follow-up crucial after Friday business events?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Send Sarah a quick email thanking her for hosting the dinner and asking how the rest of the evening went with Mr. Davis.",
+            feedback: "🟦 GOOD (+1 pt): Professional written follow-up that shows ongoing interest in the clients.",
+            discussion: "What key elements should be included in a post-event business email?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Give Sarah a quick wave as you walk past her desk to get coffee, assuming she'll bring up the clients if needed.",
+            feedback: "🟧 AVERAGE (+0 pts): Friendly, but misses the opportunity to demonstrate professional initiative.",
+            discussion: "Why is taking the initiative appreciated by managers?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Brag to your coworkers in the breakroom about how you successfully pulled off attending two dinners in one night.",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Unprofessional! Boasting about double-booking makes you look disloyal and manipulative. Choose another option!",
+            discussion: "Why should private scheduling compromises never be bragged about in the workplace?"
+          }
+        ]
+      }
+    ];
+
+    let currentScenarioIdx = 0;
+    let score = 0;
+    let shuffledChoices = [];
+
+    // Fisher-Yates Array Shuffle Algorithm
+    function shuffleArray(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function startGame() {
+      document.getElementById('landing-page').style.display = 'none';
+      document.getElementById('gameplay-page').style.display = 'block';
+      currentScenarioIdx = 0;
+      score = 0;
+      updateScoreDisplay();
+      renderCurrentScenario();
+    }
+
+    function selectOption(shuffledIdx) {
+      const choice = shuffledChoices[shuffledIdx];
+
+      const feedbackEl = document.getElementById('feedback');
+      const discussionEl = document.getElementById('discussion');
+      const actionBtn = document.getElementById('action-btn');
+      const choicesEl = document.getElementById('choices');
+
+      feedbackEl.className = `feedback-box ${choice.type}`;
+      feedbackEl.innerText = choice.feedback;
+      feedbackEl.style.display = 'block';
+
+      if (choice.type === 'bad') {
+        score = Math.max(0, score + choice.pts);
+        updateScoreDisplay();
+        
+        discussionEl.innerHTML = `<strong>Discussion Question:</strong><br>${choice.discussion}`;
+        discussionEl.style.display = 'block';
+
+        actionBtn.innerText = "Try Scenario Again ↺";
+        actionBtn.onclick = resetScenarioChoices;
+        actionBtn.style.display = 'block';
+
+        choicesEl.style.display = 'none';
+      } else {
+        score += choice.pts;
+        updateScoreDisplay();
+
+        discussionEl.innerHTML = `<strong>Discussion Question for Class / Partner:</strong><br>${choice.discussion}`;
+        discussionEl.style.display = 'block';
+
+        choicesEl.style.display = 'none';
+
+        if (currentScenarioIdx < scenarios.length - 1) {
+          actionBtn.innerText = "Next Scenario →";
+          actionBtn.onclick = advanceScenario;
+        } else {
+          actionBtn.innerText = "View Final Score & Debriefing ★";
+          actionBtn.onclick = renderDebriefing;
+        }
+        actionBtn.style.display = 'block';
+      }
+    }
+
+    function resetScenarioChoices() {
+      document.getElementById('feedback').style.display = 'none';
+      document.getElementById('discussion').style.display = 'none';
+      document.getElementById('action-btn').style.display = 'none';
+      document.getElementById('choices').style.display = 'flex';
+    }
+
+    function advanceScenario() {
+      currentScenarioIdx++;
+      resetScenarioChoices();
+      renderCurrentScenario();
+    }
+
+    function updateScoreDisplay() {
+      document.getElementById('score').innerText = `Score: ${score} / 20`;
+    }
+
+    function renderCurrentScenario() {
+      const scenario = scenarios[currentScenarioIdx];
+      
+      document.getElementById('progress').innerText = `Scenario ${scenario.id} of 10`;
+      document.getElementById('story').innerText = scenario.text;
+      document.getElementById('prompt').innerText = scenario.prompt;
+
+      const choicesEl = document.getElementById('choices');
+      choicesEl.innerHTML = '';
+
+      // Randomize choice order on every scenario render
+      shuffledChoices = shuffleArray(scenario.choices);
+
+      shuffledChoices.forEach((choice, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.innerText = `${String.fromCharCode(65 + idx)}. ${choice.text}`;
+        btn.onclick = () => selectOption(idx);
+        choicesEl.appendChild(btn);
+      });
+    }
+
+    function renderDebriefing() {
+      document.getElementById('gameplay-page').style.display = 'none';
+      document.getElementById('debrief-page').style.display = 'block';
+
+      let bandTitle = "";
+      let bandColor = "";
+      let bandFeedback = "";
+
+      if (score >= 16) {
+        bandTitle = "Band 4: Master Time Navigator & Strategist (16–20 Points)";
+        bandColor = "var(--color-excellent)";
+        bandFeedback = "<strong>Outstanding Performance!</strong> You resolved a high-stakes scheduling conflict with incredible diplomacy, honesty, and logistical skill. You impressed executive clients, honored your friend's farewell, and maintained total professional integrity!";
+      } else if (score >= 11) {
+        bandTitle = "Band 3: Competent & Reliable Communicator (11–15 Points)";
+        bandColor = "var(--color-good)";
+        bandFeedback = "<strong>Great Job!</strong> You managed both commitments effectively and communicated well under pressure. To reach Band 4, focus on setting clearer expectations earlier and taking proactive verbal initiative during professional follow-ups.";
+      } else if (score >= 6) {
+        bandTitle = "Band 2: Developing Time Manager (6–10 Points)";
+        bandColor = "var(--color-average)";
+        bandFeedback = "<strong>Satisfactory Effort.</strong> You survived the evening, but some passive choices or delayed communications created unnecessary stress or awkward moments. Review the discussion points on time management, client diplomacy, and proactive communication.";
+      } else {
+        bandTitle = "Band 1: Scheduling Hazard (0–5 Points)";
+        bandColor = "var(--color-bad)";
+        bandFeedback = "<strong>Needs Work.</strong> Several decisions resulted in point penalties, rude excuses, or damaged trust. Replay the game and focus on choosing options that prioritize honesty, clear boundary-setting, and calm professional diplomacy.";
+      }
+
+      const debriefContent = document.getElementById('debrief-content');
+      debriefContent.innerHTML = `
+        <div class="debrief-card" style="border-color: ${bandColor}">
+          <div class="progress-title" style="margin-bottom:8px;">Final Score: ${score} / 20</div>
+          <div class="band-title" style="color: ${bandColor}">${bandTitle}</div>
+          <p style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 0;">${bandFeedback}</p>
+        </div>
+
+        <div class="discussion-box">
+          <strong style="font-size: 1.05rem;">Final Reflection Questions for Discussion:</strong>
+          <ol style="margin-top: 10px; padding-left: 20px; line-height: 1.6;">
+            <li>Which of the 10 double-booking scenarios felt most challenging to navigate in English?</li>
+            <li>How would you handle a real-life double booking between work and personal friends differently?</li>
+            <li>What specific English vocabulary or phrasal verbs (e.g., slip away, drop by, follow up) did you find most useful?</li>
+          </ol>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>
