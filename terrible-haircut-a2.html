@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Terrible Haircut: A2-B1 Decision Game</title>
+  <style>
+    :root {
+      --bg-color: #f1f5f9;
+      --card-bg: #ffffff;
+      --text-color: #1e293b;
+      --border-color: #cbd5e1;
+      --primary-color: #2563eb;
+      --primary-hover: #1d4ed8;
+      
+      /* Rating Colors */
+      --color-excellent: #15803d;
+      --bg-excellent: #f0fdf4;
+
+      --color-good: #1d4ed8;
+      --bg-good: #eff6ff;
+
+      --color-average: #b45309;
+      --bg-average: #fffbeb;
+
+      --color-bad: #b91c1c;
+      --bg-bad: #fef2f2;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+
+    .game-container {
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+      max-width: 760px;
+      width: 100%;
+      padding: 32px;
+      box-sizing: border-box;
+      border: 1px solid var(--border-color);
+    }
+
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      border-bottom: 2px solid var(--bg-color);
+      padding-bottom: 12px;
+    }
+
+    .progress-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .score-tracker {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--primary-color);
+      background-color: #dbeafe;
+      padding: 6px 14px;
+      border-radius: 20px;
+    }
+
+    .story-text {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .prompt-text {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: #0f172a;
+    }
+
+    .choices-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .choice-btn {
+      background-color: #ffffff;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      padding: 14px 18px;
+      font-size: 1rem;
+      color: var(--text-color);
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      line-height: 1.4;
+    }
+
+    .choice-btn:hover {
+      border-color: var(--primary-color);
+      background-color: #f8fafc;
+      transform: translateY(-1px);
+    }
+
+    .feedback-box {
+      padding: 16px;
+      border-radius: 8px;
+      font-size: 1rem;
+      line-height: 1.5;
+      margin-bottom: 16px;
+      border-left: 6px solid;
+    }
+
+    .feedback-box.excellent {
+      background-color: var(--bg-excellent);
+      color: var(--color-excellent);
+      border-color: var(--color-excellent);
+    }
+
+    .feedback-box.good {
+      background-color: var(--bg-good);
+      color: var(--color-good);
+      border-color: var(--color-good);
+    }
+
+    .feedback-box.average {
+      background-color: var(--bg-average);
+      color: var(--color-average);
+      border-color: var(--color-average);
+    }
+
+    .feedback-box.bad {
+      background-color: var(--bg-bad);
+      color: var(--color-bad);
+      border-color: var(--color-bad);
+    }
+
+    .discussion-box {
+      background-color: #f8fafc;
+      border: 1px solid var(--border-color);
+      padding: 14px 18px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .action-btn {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 14px 20px;
+      font-size: 1rem;
+      cursor: pointer;
+      font-weight: 700;
+      width: 100%;
+      transition: background-color 0.2s ease;
+    }
+
+    .action-btn:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .intro-list {
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary-color);
+      padding: 16px 20px;
+      border-radius: 4px;
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+
+    .intro-list ul {
+      margin: 8px 0 0 0;
+      padding-left: 20px;
+    }
+
+    .debrief-card {
+      background-color: #f8fafc;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .band-title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="game-container">
+    
+    <!-- LANDING PAGE -->
+    <div id="landing-page">
+      <h1 style="margin-top:0; color:#0f172a;">The Terrible Haircut ✂️</h1>
+      <p class="story-text">
+        Welcome to <strong>The Terrible Haircut</strong>! This is an interactive scenario game for English learners (A2–B1 level). 
+        It is 3:00 PM on Friday. You have an important job interview at 5:00 PM today. You are at a trendy hair salon, but when the hairdresser turns your chair around... your hair looks completely terrible!
+      </p>
+
+      <div class="intro-list">
+        <strong>Game Rules & Points:</strong>
+        <ul>
+          <li><strong>10 Scenarios:</strong> Make polite, smart decisions to save your haircut and job interview.</li>
+          <li><strong>4 Options Every Time:</strong> Choices are randomized every time you play!</li>
+          <li>🟩 <strong>Excellent Answer (+2 points):</strong> Polite, honest, and smart!</li>
+          <li>🟦 <strong>Good Answer (+1 point):</strong> Helpful and reasonable.</li>
+          <li>🟧 <strong>Average Answer (+0 points):</strong> Okay, but slow or passive.</li>
+          <li>🟥 <strong>Bad Answer (-1 point):</strong> Angry, rude, or unhelpful. You lose 1 point and must try again!</li>
+          <li><strong>Maximum Points:</strong> 20 Points.</li>
+        </ul>
+      </div>
+
+      <button class="action-btn" onclick="startGame()">Start Game →</button>
+    </div>
+
+    <!-- GAMEPLAY PAGE -->
+    <div id="gameplay-page" style="display: none;">
+      <div class="header-bar">
+        <div id="progress" class="progress-title">Scenario 1 of 10</div>
+        <div id="score" class="score-tracker">Score: 0 / 20</div>
+      </div>
+
+      <div id="story" class="story-text">Loading...</div>
+      <div id="feedback" class="feedback-box" style="display: none;"></div>
+      <div id="discussion" class="discussion-box" style="display: none;"></div>
+      <div id="prompt" class="prompt-text"></div>
+      <div id="choices" class="choices-grid"></div>
+      <button id="action-btn" class="action-btn" style="display: none;">Continue →</button>
+    </div>
+
+    <!-- DEBRIEFING PAGE -->
+    <div id="debrief-page" style="display: none;">
+      <h2 style="margin-top:0;">Your Game Results</h2>
+      <div id="debrief-content"></div>
+      <button class="action-btn" onclick="location.reload()">Play Again (Randomized Order) ↺</button>
+    </div>
+
+  </div>
+
+  <script>
+    const scenarios = [
+      {
+        id: 1,
+        title: "Scenario 1: Looking in the Mirror",
+        text: "The hairdresser turns your chair around and smiles. You look in the mirror and gasp! Your hair is way too short on one side, crooked in the back, and looks nothing like the picture you showed him. He asks: 'So, what do you think?'",
+        prompt: "How do you respond right away?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Take a deep breath and say politely: 'Um, it looks a bit uneven on the right side. Could you take a look at it again?'",
+            feedback: "🟩 EXCELLENT (+2 pts): Polite and clear! You pointed out the problem without making the hairdresser defensive.",
+            discussion: "Is it easy or hard for you to tell a hairdresser that you don't like your haircut?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Smile nervously and say: 'Oh, it's... different! I'm not sure if it matches the picture I showed you.'",
+            feedback: "🟦 GOOD (+1 pt): Honest, but a little too indirect. Being clear helps them fix it faster.",
+            discussion: "Why do many people pretend to like their haircut even when it looks terrible?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Smile, say 'I love it, thanks!', and plan to cry in your car later.",
+            feedback: "🟧 AVERAGE (+0 pts): Very common, but lying means you leave with bad hair 2 hours before your interview!",
+            discussion: "Have you ever lied and said you liked something just to be polite?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Scream: 'Are you blind?! You ruined my hair! I look like a lawnmower hit me!'",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Yelling and insulting people makes everyone angry and won't fix your hair. Try again!",
+            discussion: "Why is shouting in a public salon a bad idea, even when you are angry?"
+          }
+        ]
+      },
+      {
+        id: 2,
+        title: "Scenario 2: The Hairdresser's Reaction",
+        text: "The hairdresser looks surprised and says: 'Well, this is the modern style right now! But if you really don't like it, I can try to cut the left side shorter to match.' Your interview is in less than two hours.",
+        prompt: "How do you handle his offer to cut more hair?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Say calmly: 'I'm worried cutting more will make it too short. Can we just trim the edges neatly so I can style it?'",
+            feedback: "🟩 EXCELLENT (+2 pts): Smart decision! Stopping him from cutting off too much hair protects you from a bigger disaster.",
+            discussion: "When something goes wrong, how do you decide whether to stop or keep going?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Ask to speak to the salon manager first to get a second opinion before he cuts anything else.",
+            feedback: "🟦 GOOD (+1 pt): Smart move! Getting an expert second opinion is very sensible.",
+            discussion: "When is it appropriate to ask for a manager or supervisor?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Nod and say: 'Okay, go ahead, cut the left side too,' hoping for a miracle.",
+            feedback: "🟧 AVERAGE (+0 pts): Risky! Letting someone who made a mistake cut more hair can make it worse.",
+            discussion: "Do you trust people easily when they promise to fix their own mistakes?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Grab the scissors out of his hand and try to cut your own hair in the mirror.",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Dangerous and crazy! Never grab sharp tools in a salon. Try again!",
+            discussion: "Why should you never try to cut your own hair right before an important event?"
+          }
+        ]
+      },
+      {
+        id: 3,
+        title: "Scenario 3: The Manager Steps In",
+        text: "The salon manager walks over, sees your hair, and frowns at the hairdresser. She turns to you and says: 'I am so sorry. I can fix this for you personally, but it will take about 30 minutes.' It is now 3:30 PM.",
+        prompt: "What do you say to the salon manager?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Say: 'Thank you so much. I have an important job interview at 5:00 PM, so if we can finish by 4:15 PM, that would be wonderful.'",
+            feedback: "🟩 EXCELLENT (+2 pts): Fantastic communication! Giving your exact timeline helps her plan the repair quickly.",
+            discussion: "Why is explaining your schedule clearly to service staff helpful?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Say: 'Yes, please fix it! I really appreciate your help right now.'",
+            feedback: "🟦 GOOD (+1 pt): Polite and positive, though mentioning your 5:00 PM interview time would be even better.",
+            discussion: "How does staying polite help you get better customer service?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Sigh loudly and say: 'Fine, do whatever you want, but hurry up.'",
+            feedback: "🟧 AVERAGE (+0 pts): A bit rude. She is trying to help you fix someone else's mistake.",
+            discussion: "How does your tone of voice affect people who are trying to help you?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Say: 'No way! You people are all terrible at your jobs!' and run out with wet, uneven hair.",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Running away leaves you with a terrible haircut and no plan! Try again.",
+            discussion: "Why is running away from a problem worse than letting someone fix it?"
+          }
+        ]
+      },
+      {
+        id: 4,
+        title: "Scenario 4: Paying the Bill",
+        text: "The manager works quickly and skillfully. By 4:10 PM, your hair looks much better—it is short, but neat and professional! At the front desk, the cashier hands you a bill for $80 (the original full price).",
+        prompt: "How do you handle the bill for a fix-up haircut?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Politely ask the manager: 'Since the first cut was a mistake and needed fixing, could you offer a discount on today's service?'",
+            feedback: "🟩 EXCELLENT (+2 pts): Fair, assertive, and polite! Asking for a discount when service fails is normal and professional.",
+            discussion: "What English phrases can you use when asking for a refund or discount?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Pay the $80 without complaining, but tip the manager directly for saving your hair.",
+            feedback: "🟦 GOOD (+1 pt): Generous to the manager, though you paid full price for a stressful mistake.",
+            discussion: "What are tipping customs for salon services in your country?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Pay the full $80 quietly, take your receipt, and resolve never to come back again.",
+            feedback: "🟧 AVERAGE (+0 pts): Safe, but you spent a lot of money for a stressful experience.",
+            discussion: "Do you complain when you receive bad service, or do you just never go back?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Throw your wallet at the cashier, scream 'I'm not paying a single cent!', and push past the door.",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Refusing to talk like an adult and throwing things can get the police called! Try again.",
+            discussion: "What are the consequences of throwing a tantrum in a business?"
+          }
+        ]
+      },
+      {
+        id: 5,
+        title: "Scenario 5: Styling Emergency at Home",
+        text: "You rush home and arrive at 4:25 PM. You look in your bathroom mirror. The cut is neat, but it looks very flat and plain. You have 15 minutes before you must leave for your interview.",
+        prompt: "How do you style your new short hair quickly?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Use a small amount of styling gel/hairspray to neat cut edges and create a clean, professional look.",
+            feedback: "🟩 EXCELLENT (+2 pts): Great practical choice! Simple styling products make short hair look intentional and sharp.",
+            discussion: "What quick grooming habits help you look confident before an important meeting?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Wet your hair slightly, comb it neatly to one side, and blow-dry it quickly.",
+            feedback: "🟦 GOOD (+1 pt): Classic, safe, and professional solution for an interview.",
+            discussion: "How long does it usually take you to get ready for a formal event?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Put on a fashionable hat or beanie to cover your entire head for the interview.",
+            feedback: "🟧 AVERAGE (+0 pts): Wearing hats indoors during formal job interviews is usually considered unprofessional.",
+            discussion: "Why are hats generally not acceptable in formal job interviews?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Panic, try to dye your hair a completely new color in 10 minutes, and spill dye all over your shirt.",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Panic-dyeing your hair 15 minutes before an interview is a disaster! Try again.",
+            discussion: "Why does panicking under time pressure make people make silly choices?"
+          }
+        ]
+      },
+      {
+        id: 6,
+        title: "Scenario 6: Choosing the Outfit",
+        text: "It is 4:40 PM. You need to put on your interview clothes. Because your new hair is much shorter than usual, your neck and ears are very exposed, making your standard suit look a bit unusual.",
+        prompt: "How do you select your final interview outfit?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Choose a sharp, neat collar shirt/blouse that frames your neck well and complements your new short style.",
+            feedback: "🟩 EXCELLENT (+2 pts): Great eye for detail! Matching your clothes to your updated look boosts your confidence.",
+            discussion: "How does dressing well change how you feel about yourself?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Wear your original planned interview suit without worrying about your hair.",
+            feedback: "🟦 GOOD (+1 pt): Practical and fine. A clean suit is always acceptable for interviews.",
+            discussion: "How important are clothes versus grooming when making a first impression?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Wear a huge scarf that covers your neck and half your head, even though it's warm outside.",
+            feedback: "🟧 AVERAGE (+0 pts): Overdressing or wearing huge scarves indoors looks odd and uncomfortable.",
+            discussion: "Why does hiding your features make you look less confident?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Change into casual sweatpants and a hoodie because you feel 'ruined' anyway.",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Giving up on professional dress guarantees you won't get the job! Try again.",
+            discussion: "Why should you never give up right before the finish line?"
+          }
+        ]
+      },
+      {
+        id: 7,
+        title: "Scenario 7: Arrival at the Interview",
+        text: "You arrive at the company building at 4:55 PM—just in time! The receptionist greets you: 'Welcome! Please take a seat. Mr. Sterling will see you in five minutes.' You still feel a bit self-conscious about your new short hair.",
+        prompt: "How do you prepare yourself in the waiting room?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Sit up straight, take three deep breaths, smile, and review your interview notes calmly.",
+            feedback: "🟩 EXCELLENT (+2 pts): Excellent mind control! Posture and deep breathing build real inner confidence.",
+            discussion: "What techniques do you use to calm your nervous energy before big meetings?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Check your reflection one last time in your phone camera, adjust your collar, and put your phone away.",
+            feedback: "🟦 GOOD (+1 pt): Quick mirror check is fine, just don't get stuck staring at your flaws!",
+            discussion: "Is checking your phone in waiting rooms good or bad etiquette?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Constantly touch and adjust your hair every 10 seconds while looking worried.",
+            feedback: "🟧 AVERAGE (+0 pts): Fidgeting with your hair shows the interviewer that you are insecure.",
+            discussion: "What nervous habits (like touching hair or fidgeting) do you try to avoid?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Tell the receptionist: 'My hair is ugly today so please tell Mr. Sterling not to look at my head.'",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Telling receptionists your personal hair drama is awkward and unprofessional! Try again.",
+            discussion: "Why is oversharing personal problems with receptionists a mistake?"
+          }
+        ]
+      },
+      {
+        id: 8,
+        title: "Scenario 8: The Interview Greeting",
+        text: "At 5:00 PM, Mr. Sterling comes out, smiles, and shakes your hand warmly: 'Hello! Thank you for coming in today.' As you sit down, you notice him glance briefly at your hairstyle.",
+        prompt: "How do you start the interview conversation?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Smile confidently, make direct eye contact, and say: 'It's a pleasure to meet you, Mr. Sterling. Thank you for this opportunity.'",
+            feedback: "🟩 EXCELLENT (+2 pts): Professional perfection! Ignoring minor hair flaws and focusing on business shows strength.",
+            discussion: "Why is direct eye contact so powerful in English-speaking business culture?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Smile and make a light joke: 'It's great to be here! I just got a fresh haircut for today, so I'm ready to focus on the job!'",
+            feedback: "🟦 GOOD (+1 pt): Charming lighthearted humor! Addressing the elephant in the room with a smile works well.",
+            discussion: "When is self-deprecating humor helpful in professional situations?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Immediately apologize: 'Sorry about my hair, I just had a salon disaster an hour ago!'",
+            feedback: "🟧 AVERAGE (+0 pts): Unnecessary apology. Bringing up personal drama draws focus away from your professional skills.",
+            discussion: "Why shouldn't you apologize for things that aren't relevant to your job performance?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Cover your head with your hands and say: 'Stop staring at my head! Let's just talk about my resume!'",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Paranoid and rude! The interviewer was just looking at you normally. Try again.",
+            discussion: "Why shouldn't you assume people are judging your appearance harshly?"
+          }
+        ]
+      },
+      {
+        id: 9,
+        title: "Scenario 9: Answering Under Pressure",
+        text: "Mr. Sterling asks: 'Tell me about a time you faced an unexpected problem right before a deadline. How did you handle the stress and adapt?'",
+        prompt: "How do you answer this interview question?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Use your afternoon as an example: 'Actually, today I had a minor prep issue, but I stayed calm, adapted quickly, and arrived on time. I focus on solutions, not problems.'",
+            feedback: "🟩 EXCELLENT (+2 pts): Genius answer! Turning your real-life afternoon struggle into a showcase of adaptability is brilliant.",
+            discussion: "How can you turn personal setbacks into positive stories during job interviews?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Share a clear, real story from your previous job where you solved a project crisis under pressure.",
+            feedback: "🟦 GOOD (+1 pt): Solid, traditional interview answer that proves your skills.",
+            discussion: "What structure (like STAR method: Situation, Task, Action, Result) do you use for interview questions?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Say: 'I never get stressed out. I am perfect under pressure and nothing ever goes wrong for me.'",
+            feedback: "🟧 AVERAGE (+0 pts): Unbelievable. Claiming you never experience stress sounds fake to experienced managers.",
+            discussion: "Why do interviewers prefer honest stories over claims of perfection?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Start crying and say: 'Today was the worst day of my life because my hairdresser ruined my whole weekend!'",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Crying over a haircut in an executive interview shows poor emotional control! Try again.",
+            discussion: "Why is emotional resilience important in the workplace?"
+          }
+        ]
+      },
+      {
+        id: 10,
+        title: "Scenario 10: The Post-Interview Reflection",
+        text: "The interview ends at 5:40 PM. Mr. Sterling smiles warmly, shakes your hand, and says: 'You did a fantastic job today. We'll send you an official offer letter on Monday!' You walk out into the evening air.",
+        prompt: "How do you finish your day?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Send a polite thank-you email to Mr. Sterling, then laugh at your short hair in the mirror—hair grows back, but a great job stays!",
+            feedback: "🟩 EXCELLENT (+2 pts): Perfect ending! Following up professionally and keeping a sense of humor shows high maturity.",
+            discussion: "Why is keeping a sense of humor vital when life throws unexpected problems at you?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Call a good friend to celebrate getting the job and ask them for advice on cool short hairstyles.",
+            feedback: "🟦 GOOD (+1 pt): Positive and fun way to celebrate success with friends!",
+            discussion: "Who is the first person you call when you get good news?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Go straight home and wear a hoodie until your hair grows back in three weeks.",
+            feedback: "🟧 AVERAGE (+0 pts): A bit dramatic, but at least you got the job offer!",
+            discussion: "How long does it usually take for you to get used to a new style or haircut?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Call the salon and leave an angry, abusive review on their Google page calling them evil criminals.",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Abusive online reviews are unprofessional and vengeful. Try another choice.",
+            discussion: "What is the difference between a constructive review and an angry online rant?"
+          }
+        ]
+      }
+    ];
+
+    let currentScenarioIdx = 0;
+    let score = 0;
+    let shuffledChoices = [];
+
+    // Fisher-Yates Array Shuffle
+    function shuffleArray(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function startGame() {
+      document.getElementById('landing-page').style.display = 'none';
+      document.getElementById('gameplay-page').style.display = 'block';
+      currentScenarioIdx = 0;
+      score = 0;
+      updateScoreDisplay();
+      renderCurrentScenario();
+    }
+
+    function selectOption(shuffledIdx) {
+      const choice = shuffledChoices[shuffledIdx];
+
+      const feedbackEl = document.getElementById('feedback');
+      const discussionEl = document.getElementById('discussion');
+      const actionBtn = document.getElementById('action-btn');
+      const choicesEl = document.getElementById('choices');
+
+      feedbackEl.className = `feedback-box ${choice.type}`;
+      feedbackEl.innerText = choice.feedback;
+      feedbackEl.style.display = 'block';
+
+      if (choice.type === 'bad') {
+        score = Math.max(0, score + choice.pts);
+        updateScoreDisplay();
+        
+        discussionEl.innerHTML = `<strong>Discussion Question:</strong><br>${choice.discussion}`;
+        discussionEl.style.display = 'block';
+
+        actionBtn.innerText = "Try Scenario Again ↺";
+        actionBtn.onclick = resetScenarioChoices;
+        actionBtn.style.display = 'block';
+
+        choicesEl.style.display = 'none';
+      } else {
+        score += choice.pts;
+        updateScoreDisplay();
+
+        discussionEl.innerHTML = `<strong>Discussion Question:</strong><br>${choice.discussion}`;
+        discussionEl.style.display = 'block';
+
+        choicesEl.style.display = 'none';
+
+        if (currentScenarioIdx < scenarios.length - 1) {
+          actionBtn.innerText = "Next Scenario →";
+          actionBtn.onclick = advanceScenario;
+        } else {
+          actionBtn.innerText = "View Final Score & Results ★";
+          actionBtn.onclick = renderDebriefing;
+        }
+        actionBtn.style.display = 'block';
+      }
+    }
+
+    function resetScenarioChoices() {
+      document.getElementById('feedback').style.display = 'none';
+      document.getElementById('discussion').style.display = 'none';
+      document.getElementById('action-btn').style.display = 'none';
+      document.getElementById('choices').style.display = 'flex';
+    }
+
+    function advanceScenario() {
+      currentScenarioIdx++;
+      resetScenarioChoices();
+      renderCurrentScenario();
+    }
+
+    function updateScoreDisplay() {
+      document.getElementById('score').innerText = `Score: ${score} / 20`;
+    }
+
+    function renderCurrentScenario() {
+      const scenario = scenarios[currentScenarioIdx];
+      
+      document.getElementById('progress').innerText = `Scenario ${scenario.id} of 10`;
+      document.getElementById('story').innerText = scenario.text;
+      document.getElementById('prompt').innerText = scenario.prompt;
+
+      const choicesEl = document.getElementById('choices');
+      choicesEl.innerHTML = '';
+
+      // Randomize choices order
+      shuffledChoices = shuffleArray(scenario.choices);
+
+      shuffledChoices.forEach((choice, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.innerText = `${String.fromCharCode(65 + idx)}. ${choice.text}`;
+        btn.onclick = () => selectOption(idx);
+        choicesEl.appendChild(btn);
+      });
+    }
+
+    function renderDebriefing() {
+      document.getElementById('gameplay-page').style.display = 'none';
+      document.getElementById('debrief-page').style.display = 'block';
+
+      let bandTitle = "";
+      let bandColor = "";
+      let bandFeedback = "";
+
+      if (score >= 16) {
+        bandTitle = "Band 4: Cool, Calm & Professional (16–20 Points)";
+        bandColor = "var(--color-excellent)";
+        bandFeedback = "<strong>Fantastic job!</strong> You handled a real beauty nightmare with incredible maturity, clear communication, and impressive confidence. You saved your haircut AND got the job offer!";
+      } else if (score >= 11) {
+        bandTitle = "Band 3: Smart & Adaptable (11–15 Points)";
+        bandColor = "var(--color-good)";
+        bandFeedback = "<strong>Great job!</strong> You navigated a stressful situation well and didn't let a bad haircut stop you from succeeding in your interview. To reach Band 4, practice asking for discounts and stating your needs directly!";
+      } else if (score >= 6) {
+        bandTitle = "Band 2: Surviving under Pressure (6–10 Points)";
+        bandColor = "var(--color-average)";
+        bandFeedback = "<strong>Nice try!</strong> You made it through the afternoon, but some passive choices made your day much more stressful than it needed to be. Replay to practice speaking up for yourself!";
+      } else {
+        bandTitle = "Band 1: Haircut Panic Hazard (0–5 Points)";
+        bandColor = "var(--color-bad)";
+        bandFeedback = "<strong>Keep practicing!</strong> Panic and anger made a bad haircut worse. Replay the game and focus on calm communication, problem-solving, and staying confident under pressure!";
+      }
+
+      const debriefContent = document.getElementById('debrief-content');
+      debriefContent.innerHTML = `
+        <div class="debrief-card" style="border-color: ${bandColor}">
+          <div class="progress-title" style="margin-bottom:8px;">Final Score: ${score} / 20</div>
+          <div class="band-title" style="color: ${bandColor}">${bandTitle}</div>
+          <p style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 0;">${bandFeedback}</p>
+        </div>
+
+        <div class="discussion-box">
+          <strong style="font-size: 1.05rem;">Final Class Discussion Questions:</strong>
+          <ol style="margin-top: 10px; padding-left: 20px; line-height: 1.6;">
+            <li>What would you do if you received a terrible haircut 2 hours before an important event?</li>
+            <li>How much does personal appearance affect job interview success in your opinion?</li>
+            <li>What new English vocabulary for styling, salon visits, or interviews did you learn today?</li>
+          </ol>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>

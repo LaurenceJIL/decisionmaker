@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Terrible Haircut: B1-B2 Decision Game</title>
+  <style>
+    :root {
+      --bg-color: #f1f5f9;
+      --card-bg: #ffffff;
+      --text-color: #1e293b;
+      --border-color: #cbd5e1;
+      --primary-color: #2563eb;
+      --primary-hover: #1d4ed8;
+      
+      /* Rating Colors */
+      --color-excellent: #15803d;
+      --bg-excellent: #f0fdf4;
+
+      --color-good: #1d4ed8;
+      --bg-good: #eff6ff;
+
+      --color-average: #b45309;
+      --bg-average: #fffbeb;
+
+      --color-bad: #b91c1c;
+      --bg-bad: #fef2f2;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+
+    .game-container {
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+      max-width: 780px;
+      width: 100%;
+      padding: 32px;
+      box-sizing: border-box;
+      border: 1px solid var(--border-color);
+    }
+
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      border-bottom: 2px solid var(--bg-color);
+      padding-bottom: 12px;
+    }
+
+    .progress-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .score-tracker {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--primary-color);
+      background-color: #dbeafe;
+      padding: 6px 14px;
+      border-radius: 20px;
+    }
+
+    .story-text {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .prompt-text {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: #0f172a;
+    }
+
+    .choices-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .choice-btn {
+      background-color: #ffffff;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      padding: 14px 18px;
+      font-size: 1rem;
+      color: var(--text-color);
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      line-height: 1.4;
+    }
+
+    .choice-btn:hover {
+      border-color: var(--primary-color);
+      background-color: #f8fafc;
+      transform: translateY(-1px);
+    }
+
+    .feedback-box {
+      padding: 16px;
+      border-radius: 8px;
+      font-size: 1rem;
+      line-height: 1.5;
+      margin-bottom: 16px;
+      border-left: 6px solid;
+    }
+
+    .feedback-box.excellent {
+      background-color: var(--bg-excellent);
+      color: var(--color-excellent);
+      border-color: var(--color-excellent);
+    }
+
+    .feedback-box.good {
+      background-color: var(--bg-good);
+      color: var(--color-good);
+      border-color: var(--color-good);
+    }
+
+    .feedback-box.average {
+      background-color: var(--bg-average);
+      color: var(--color-average);
+      border-color: var(--color-average);
+    }
+
+    .feedback-box.bad {
+      background-color: var(--bg-bad);
+      color: var(--color-bad);
+      border-color: var(--color-bad);
+    }
+
+    .discussion-box {
+      background-color: #f8fafc;
+      border: 1px solid var(--border-color);
+      padding: 14px 18px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .action-btn {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 14px 20px;
+      font-size: 1rem;
+      cursor: pointer;
+      font-weight: 700;
+      width: 100%;
+      transition: background-color 0.2s ease;
+    }
+
+    .action-btn:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .intro-list {
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary-color);
+      padding: 16px 20px;
+      border-radius: 4px;
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+
+    .intro-list ul {
+      margin: 8px 0 0 0;
+      padding-left: 20px;
+    }
+
+    .debrief-card {
+      background-color: #f8fafc;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .band-title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="game-container">
+    
+    <!-- LANDING PAGE -->
+    <div id="landing-page">
+      <h1 style="margin-top:0; color:#0f172a;">The Terrible Haircut ✂️</h1>
+      <p class="story-text">
+        Welcome to <strong>The Terrible Haircut</strong>, an interactive scenario game for English language learners (B1–B2 level).
+        It is Friday afternoon at 3:00 PM. You have a high-stakes executive job interview at 5:00 PM. You visit a high-end salon for a quick trim, 
+        but when the stylist swivels your chair toward the mirror, you are greeted by an absolute aesthetic disaster!
+      </p>
+
+      <div class="intro-list">
+        <strong>How to Play & Score:</strong>
+        <ul>
+          <li><strong>10 Sequential Scenarios:</strong> Navigate a cosmetic crisis under tight time constraints.</li>
+          <li><strong>4 Options Per Scenario:</strong> Choices appear in a randomized order every play!</li>
+          <li>🟩 <strong>Excellent Response (+2 pts):</strong> Assertive, diplomatic, resourceful, and polished.</li>
+          <li>🟦 <strong>Good Response (+1 pt):</strong> Reasonable and polite, though less effective.</li>
+          <li>🟧 <strong>Average Response (+0 pts):</strong> Neutral; safe but passive, timid, or delayed.</li>
+          <li>🟥 <strong>Bad Response (-1 pt):</strong> Rude, hysterical, or chaotic. Subtracts 1 point and forces a retry!</li>
+          <li><strong>Maximum Score:</strong> 20 Points. View your performance band at the end!</li>
+        </ul>
+      </div>
+
+      <button class="action-btn" onclick="startGame()">Start Scenario 1 →</button>
+    </div>
+
+    <!-- GAMEPLAY PAGE -->
+    <div id="gameplay-page" style="display: none;">
+      <div class="header-bar">
+        <div id="progress" class="progress-title">Scenario 1 of 10</div>
+        <div id="score" class="score-tracker">Score: 0 / 20</div>
+      </div>
+
+      <div id="story" class="story-text">Loading scenario...</div>
+      <div id="feedback" class="feedback-box" style="display: none;"></div>
+      <div id="discussion" class="discussion-box" style="display: none;"></div>
+      <div id="prompt" class="prompt-text"></div>
+      <div id="choices" class="choices-grid"></div>
+      <button id="action-btn" class="action-btn" style="display: none;">Continue →</button>
+    </div>
+
+    <!-- DEBRIEFING PAGE -->
+    <div id="debrief-page" style="display: none;">
+      <h2 style="margin-top:0;">Game Debriefing & Feedback</h2>
+      <div id="debrief-content"></div>
+      <button class="action-btn" onclick="location.reload()">Replay Game (Randomized Order) ↺</button>
+    </div>
+
+  </div>
+
+  <script>
+    const scenarios = [
+      {
+        id: 1,
+        title: "Scenario 1: Confronting the Mirror",
+        text: "The stylist proudly swivels your chair toward the mirror with a flourish. You gasp—your hair is completely asymmetrical, jagged at the back, and far shorter than the reference photo you provided. The stylist asks cheerfully: 'So, how does it feel?'",
+        prompt: "How do you handle the immediate shock?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Maintain composure, gesture calmly toward the uneven sections, and say: 'It's significantly shorter and more uneven than the reference photo. We need to evaluate how to balance this out.'",
+            feedback: "🟩 EXCELLENT (+2 pts): Diplomatic and assertive! Pointing out objective defects calmly prevents defensive arguments.",
+            discussion: "What phrasing helps you express dissatisfaction with a service without sounding aggressive?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Exclaim with concern: 'Oh wow, this isn't quite what we agreed on. It looks very uneven on the right side.'",
+            feedback: "🟦 GOOD (+1 pt): Direct and honest, though showing obvious distress gives the stylist room to make excuses.",
+            discussion: "Why do customer service interactions go smoother when you separate emotion from facts?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Force a fake smile, say 'Looks great, thanks!', and plan to wear a hat for the next month.",
+            feedback: "🟧 AVERAGE (+0 pts): Passive avoidance. Faking satisfaction leaves you with a disaster 2 hours before a major interview.",
+            discussion: "Why do people frequently suffer in silence rather than confront service providers?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Scream: 'Are you completely incompetent?! You've ruined my life right before an important interview!'",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Hostile outbursts destroy professional rapport and escalate conflict unnecessarily. Choose another option!",
+            discussion: "Why is verbal abuse counterproductive when trying to get someone to rectify a mistake?"
+          }
+        ]
+      },
+      {
+        id: 2,
+        title: "Scenario 2: The Stylist's Justification",
+        text: "The stylist defensively claims: 'Well, this avant-garde look is very trendy right now! But if you're uncomfortable, I can cut the other side even shorter to match.' Your interview is in under two hours.",
+        prompt: "How do you respond to the offer for further cutting?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Say firmly: 'I don't want any more length removed. Please fetch the salon manager so we can assess corrective styling options together.'",
+            feedback: "🟩 EXCELLENT (+2 pts): Brilliant risk management! Escalating to management stops an unqualified stylist from worsening the damage.",
+            discussion: "When is escalating a customer complaint to management the most strategic choice?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Say: 'I really don't think taking off more length is the right solution. Let's explore how to style what's left.'",
+            feedback: "🟦 GOOD (+1 pt): Sets clear boundaries regarding length, though relying on the same stylist is risky.",
+            discussion: "How do you set firm boundaries with service workers who press unhelpful suggestions?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Hesitate, sigh, and say: 'I suppose if you think cutting the other side will balance it out, go ahead.'",
+            feedback: "🟧 AVERAGE (+0 pts): High risk. Permitting a struggling stylist to take off more length usually leads to worse results.",
+            discussion: "What is the 'sunk cost fallacy' in decision-making, and how does it apply here?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Snatch the shears off the counter and attempt to trim your own bangs in the mirror.",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Reckless and unsafe! Taking physical control of salon equipment is foolish. Choose another option!",
+            discussion: "Why does taking impulsive physical action during a crisis usually compound the emergency?"
+          }
+        ]
+      },
+      {
+        id: 3,
+        title: "Scenario 3: Manager Intervention",
+        text: "The salon manager arrives, inspects your hair with dismay, and scolds the stylist. She turns to you apologetically: 'I am deeply sorry. I can re-shape this into a sleek, professional pixie cut, but I need 35 minutes.' It is now 3:30 PM.",
+        prompt: "How do you negotiate the corrective service?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Say: 'I appreciate you stepping in. I have an executive interview at 5:00 PM across town, so as long as we wrap up by 4:10 PM, I am in your hands.'",
+            feedback: "🟩 EXCELLENT (+2 pts): Masterful diplomacy! Establishing your hard deadline enables the manager to execute a rapid recovery.",
+            discussion: "Why is communicating hard constraints (like time or budget) essential during emergency negotiations?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Say: 'Thank you for taking over. Please do whatever you can to make it look professional for an interview today.'",
+            feedback: "🟦 GOOD (+1 pt): Gracious and cooperative, though failing to explicitly state your 4:10 PM departure deadline is a slight oversight.",
+            discussion: "How can expressing gratitude toward someone fixing a problem improve the outcome?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Cross your arms and grumble: 'Fine, but if this looks bad too, I'm suing this salon.'",
+            feedback: "🟧 AVERAGE (+0 pts): Threatening legal action creates hostility while someone is actively trying to salvage your appearance.",
+            discussion: "Why are aggressive threats ineffective motivators during delicate customer service fixes?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Storm out of the salon with half-wet, lopsided hair while shouting insults at the staff.",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Abandoning the salon without a solution leaves you stranded with ruined hair. Choose another option!",
+            discussion: "Why is emotional storming out almost always worse than staying to negotiate a fix?"
+          }
+        ]
+      },
+      {
+        id: 4,
+        title: "Scenario 4: The Financial Settlement",
+        text: "By 4:10 PM, the manager works miracles. The result is short and dramatic, but remarkably chic and professional! At reception, the cashier presents the standard $95 bill for the appointment.",
+        prompt: "How do you handle the payment interaction?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Speak with the manager privately: 'I genuinely appreciate your skill in salvaging this, but given the initial distress and original error, I request that today's fee be waived.'",
+            feedback: "🟩 EXCELLENT (+2 pts): Professional, fair, and assertive! Requesting a fee waiver for severe service failure is standard protocol.",
+            discussion: "What phrasing distinguishes a polite, professional fee waiver request from unreasonable complaining?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Pay the bill in full, but hand a generous cash tip directly to the manager to thank her for saving your afternoon.",
+            feedback: "🟦 GOOD (+1 pt): High integrity and generous to the manager, though absorbing the full cost of a botched cut is financially passive.",
+            discussion: "How do you balance standing up for your consumer rights with rewarding exceptional individual service?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Pay the $95 silently, decline the receipt, and resolve never to return to the establishment.",
+            feedback: "🟧 AVERAGE (+0 pts): Passive consumer behavior. Absorbing financial losses without feedback deprives businesses of learning.",
+            discussion: "Why do many consumers avoid negotiating prices even when service falls well below standards?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Slam your hand on the register, yell 'You should be paying ME!', and push through the door without paying.",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Unlawful exit that can result in theft charges or public embarrassment. Choose another option!",
+            discussion: "What are the legal and reputational risks of refusing to settle disputed bills appropriately?"
+          }
+        ]
+      },
+      {
+        id: 5,
+        title: "Scenario 5: Emergency Wardrobe Adaptation",
+        text: "You arrive home at 4:30 PM. Your new cropped hairstyle completely alters your silhouette—your neck and shoulders are much more prominent, making your pre-selected high-collar suit look awkward.",
+        prompt: "How do you adjust your professional attire under time pressure?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Select a sleek tailored blazer with a modern neckline that complements the structure of your new short hairstyle.",
+            feedback: "🟩 EXCELLENT (+2 pts): Exceptional adaptability! Framing your new look intentionally transforms an accident into a bold fashion statement.",
+            discussion: "How can adapting your wardrobe or styling boost your psychological confidence during unexpected changes?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Stick with your original pre-selected suit, focusing entirely on making sure it is clean, pressed, and professional.",
+            feedback: "🟦 GOOD (+1 pt): Practical and focused on core standards, ignoring minor aesthetic mismatches.",
+            discussion: "When time is short, why is sticking to reliable basics better than over-complicating choices?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Attempt to cover your neck and jawline with a heavy silk scarf despite the warm weather outside.",
+            feedback: "🟧 AVERAGE (+0 pts): Hiding physical features with unnatural accessories indoor signals self-consciousness to interviewers.",
+            discussion: "Why do subtle attempts to hide perceived flaws often draw more attention to them?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Change into an oversized, casual hoodie to 'hide your head' and head to the interview underdressed.",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Abandoning professional dress standards destroys your interview chances immediately. Choose another option!",
+            discussion: "Why is professional attire non-negotiable for formal corporate evaluations?"
+          }
+        ]
+      },
+      {
+        id: 6,
+        title: "Scenario 6: Product & Styling Polish",
+        text: "It is 4:42 PM. You have 8 minutes before leaving. Your short hair looks neat, but lacks texture and structure. You have pomade, texturizing spray, and hairspray on your vanity.",
+        prompt: "How do you apply final styling touches?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Apply a minimal dime-sized amount of matte pomade to define edges neatly, ensuring a clean, executive finish.",
+            feedback: "🟩 EXCELLENT (+2 pts): Precision grooming! Less is more when styling unfamiliar short hair under tight deadlines.",
+            discussion: "What does the phrase 'less is more' mean in executive grooming and professional presentation?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Lightly mist hairspray over the top to keep stray hairs flat and avoid touching it further.",
+            feedback: "🟦 GOOD (+1 pt): Safe and controlled, preventing last-minute product mishaps.",
+            discussion: "Why is playing it safe better than experimenting with new grooming products right before events?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Apply generous amounts of gel and hairspray simultaneously, making your hair look stiff and shiny.",
+            feedback: "🟧 AVERAGE (+0 pts): Over-styling. Excessive product can create an unnatural, overly rigid appearance.",
+            discussion: "How can over-preparing or over-styling backfire in professional settings?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Attempt to blow-dry and curl the remaining short fringe, accidentally scorching your forehead with the hot iron.",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Rushed hot-tool usage leads to physical injury and heightened panic! Choose another option!",
+            discussion: "Why is rushing high-risk tasks right before deadlines dangerous?"
+          }
+        ]
+      },
+      {
+        id: 7,
+        title: "Scenario 7: Pre-Interview Psychological Prep",
+        text: "You arrive at the corporate headquarters at 4:54 PM. The receptionist escorts you to an executive holding lounge. You catch your reflection in the glass wall and feel a surge of self-consciousness.",
+        prompt: "How do you mentally prepare during these final 5 minutes?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Engage in deliberate deep breathing, reframe your image as 'modern and decisive', and focus entirely on your core value proposition.",
+            feedback: "🟩 EXCELLENT (+2 pts): Outstanding mental toughness! Reframing your internal narrative replaces anxiety with executive presence.",
+            discussion: "What is cognitive reframing, and how can it help manage high-stress moments?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Review your portfolio notes on your tablet to keep your mind occupied on business strategy.",
+            feedback: "🟦 GOOD (+1 pt): Disciplined distraction, anchoring your focus on professional competence.",
+            discussion: "How does focusing on data and preparation help reduce social anxiety?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Continuously adjust your fringe in the glass reflection, checking your phone camera every 30 seconds.",
+            feedback: "🟧 AVERAGE (+0 pts): Displays visible anxiety. Fidgeting in lobby mirrors looks insecure to observing staff.",
+            discussion: "Why should candidates assume they are being observed from the moment they enter a building?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Inform the receptionist that you have an emergency, reschedule the interview, and leave the building.",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Forfeiting a major career opportunity over a temporary haircut is disastrous. Choose another option!",
+            discussion: "Why should you never let minor aesthetic flaws sabotage major professional milestones?"
+          }
+        ]
+      },
+      {
+        id: 8,
+        title: "Scenario 8: The Executive Greeting",
+        text: "At 5:00 PM precisely, Vice President Ms. Vance (coincidentally sharing the name of your host!) opens the door. She extends a firm handshake, looking sharp and professional. She glances briefly at your striking short style.",
+        prompt: "How do you execute your opening interaction?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Maintain strong eye contact, offer a confident handshake, and say: 'Ms. Vance, it's a pleasure to meet you. Thank you for making time for our discussion today.'",
+            feedback: "🟩 EXCELLENT (+2 pts): Flawless executive posture! Ignoring minor self-consciousness signals total authority and focus.",
+            discussion: "Why is non-verbal confidence (posture, eye contact) often more memorable than physical appearance?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Offer a warm smile and say with light humor: 'Pleasure to meet you! I decided on a bold new look today to match my enthusiasm for this role.'",
+            feedback: "🟦 GOOD (+1 pt): Charming and self-assured! Addressing the fresh cut with disarming humor displays high social comfort.",
+            discussion: "When is self-deprecating or lighthearted humor effective in high-level interviews?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Apologize immediately: 'Please excuse my hair today, I had an absolute nightmare at a salon an hour ago.'",
+            feedback: "🟧 AVERAGE (+0 pts): Unnecessary vulnerability. Initiating an interview with personal excuses diminishes your executive presence.",
+            discussion: "Why does apologizing for unprompted personal details undermine authority?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Touch your head self-consciously and say: 'Don't judge me by my hair, the stylist ruined it!'",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Defensive and insecure. Assuming judgment creates instant social awkwardness. Choose another option!",
+            discussion: "Why is defensive projection harmful during first impressions?"
+          }
+        ]
+      },
+      {
+        id: 9,
+        title: "Scenario 9: Turning Vulnerability into Strength",
+        text: "During the interview, Ms. Vance asks: 'Describe a situation where a project plan went completely off the rails at the last minute. How did you maintain composure and deliver results?'",
+        prompt: "How do you frame your response?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Briefly reference your afternoon: 'Ironically, two hours ago a pre-interview grooming appointment went wrong. Rather than panicking, I managed constraints, adapted my styling, and arrived on time. I apply that exact agility to business crisis management.'",
+            feedback: "🟩 EXCELLENT (+2 pts): Genius storytelling! Transforming a real-world setback into live proof of adaptability wins interviews.",
+            discussion: "How can candidates use real-time experiences to demonstrate soft skills like adaptability?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Deliver a structured STAR-method response detailing a major supply-chain crisis you resolved at your previous firm.",
+            feedback: "🟦 GOOD (+1 pt): Rigorous, professional, and effective standard interview technique.",
+            discussion: "What are the core components of the STAR (Situation, Task, Action, Result) interview response method?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Give a vague answer claiming: 'I never panic. I am extremely organized, so my plans never fail.'",
+            feedback: "🟧 AVERAGE (+0 pts): Unrealistic. Claiming perfection signals a lack of genuine self-awareness to senior executives.",
+            discussion: "Why do experienced leaders distrust candidates who claim they never experience failure?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Become visibly emotional and rant for five minutes about how incompetent service workers are nowadays.",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Emotional instability and ranting in an interview is a red flag for employers. Choose another option!",
+            discussion: "Why is emotional regulation considered a critical component of leadership capability?"
+          }
+        ]
+      },
+      {
+        id: 10,
+        title: "Scenario 10: Closing and Post-Game Debrief",
+        text: "At 5:45 PM, Ms. Vance smiles warmly, stands up, and says: 'Your composure, adaptability, and clear strategic thinking are exactly what this firm needs. Expect an official offer letter by Monday.' You walk out into the evening sun.",
+        prompt: "How do you close out the experience?",
+        choices: [
+          {
+            type: "excellent",
+            pts: 2,
+            text: "Send a succinct, professional thank-you email reaffirming your key points, then celebrate—hair grows back, but a career breakthrough is permanent!",
+            feedback: "🟩 EXCELLENT (+2 pts): Flawless execution from start to finish! High emotional intelligence and professional follow-through.",
+            discussion: "What key elements should be included in a high-level post-interview thank-you communication?"
+          },
+          {
+            type: "good",
+            pts: 1,
+            text: "Call a trusted mentor to share the job offer success and discuss booking a top-tier stylist for future maintenance.",
+            feedback: "🟦 GOOD (+1 pt): Proactive career and personal image management.",
+            discussion: "Why is maintaining a network of mentors valuable during career transitions?"
+          },
+          {
+            type: "average",
+            pts: 0,
+            text: "Go home immediately and research hair growth vitamins online for two hours.",
+            feedback: "🟧 AVERAGE (+0 pts): Fixating on temporary physical flaws after achieving a major professional victory is misaligned priorities.",
+            discussion: "How can individuals learn to celebrate major wins rather than dwelling on minor defects?"
+          },
+          {
+            type: "bad",
+            pts: -1,
+            text: "Post an aggressive, slanderous review of the salon on LinkedIn tagging the original stylist.",
+            feedback: "🟥 BAD RESPONSE (-1 pt): Unprofessional behavior on professional networks ruins industry credibility. Choose another option!",
+            discussion: "Why should professional platforms like LinkedIn never be used for personal vendettas?"
+          }
+        ]
+      }
+    ];
+
+    let currentScenarioIdx = 0;
+    let score = 0;
+    let shuffledChoices = [];
+
+    // Fisher-Yates Array Shuffle Algorithm
+    function shuffleArray(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function startGame() {
+      document.getElementById('landing-page').style.display = 'none';
+      document.getElementById('gameplay-page').style.display = 'block';
+      currentScenarioIdx = 0;
+      score = 0;
+      updateScoreDisplay();
+      renderCurrentScenario();
+    }
+
+    function selectOption(shuffledIdx) {
+      const choice = shuffledChoices[shuffledIdx];
+
+      const feedbackEl = document.getElementById('feedback');
+      const discussionEl = document.getElementById('discussion');
+      const actionBtn = document.getElementById('action-btn');
+      const choicesEl = document.getElementById('choices');
+
+      feedbackEl.className = `feedback-box ${choice.type}`;
+      feedbackEl.innerText = choice.feedback;
+      feedbackEl.style.display = 'block';
+
+      if (choice.type === 'bad') {
+        score = Math.max(0, score + choice.pts);
+        updateScoreDisplay();
+        
+        discussionEl.innerHTML = `<strong>Discussion Question:</strong><br>${choice.discussion}`;
+        discussionEl.style.display = 'block';
+
+        actionBtn.innerText = "Try Scenario Again ↺";
+        actionBtn.onclick = resetScenarioChoices;
+        actionBtn.style.display = 'block';
+
+        choicesEl.style.display = 'none';
+      } else {
+        score += choice.pts;
+        updateScoreDisplay();
+
+        discussionEl.innerHTML = `<strong>Discussion Question for Class / Partner:</strong><br>${choice.discussion}`;
+        discussionEl.style.display = 'block';
+
+        choicesEl.style.display = 'none';
+
+        if (currentScenarioIdx < scenarios.length - 1) {
+          actionBtn.innerText = "Next Scenario →";
+          actionBtn.onclick = advanceScenario;
+        } else {
+          actionBtn.innerText = "View Final Score & Debriefing ★";
+          actionBtn.onclick = renderDebriefing;
+        }
+        actionBtn.style.display = 'block';
+      }
+    }
+
+    function resetScenarioChoices() {
+      document.getElementById('feedback').style.display = 'none';
+      document.getElementById('discussion').style.display = 'none';
+      document.getElementById('action-btn').style.display = 'none';
+      document.getElementById('choices').style.display = 'flex';
+    }
+
+    function advanceScenario() {
+      currentScenarioIdx++;
+      resetScenarioChoices();
+      renderCurrentScenario();
+    }
+
+    function updateScoreDisplay() {
+      document.getElementById('score').innerText = `Score: ${score} / 20`;
+    }
+
+    function renderCurrentScenario() {
+      const scenario = scenarios[currentScenarioIdx];
+      
+      document.getElementById('progress').innerText = `Scenario ${scenario.id} of 10`;
+      document.getElementById('story').innerText = scenario.text;
+      document.getElementById('prompt').innerText = scenario.prompt;
+
+      const choicesEl = document.getElementById('choices');
+      choicesEl.innerHTML = '';
+
+      // Randomize choice order on every scenario render
+      shuffledChoices = shuffleArray(scenario.choices);
+
+      shuffledChoices.forEach((choice, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.innerText = `${String.fromCharCode(65 + idx)}. ${choice.text}`;
+        btn.onclick = () => selectOption(idx);
+        choicesEl.appendChild(btn);
+      });
+    }
+
+    function renderDebriefing() {
+      document.getElementById('gameplay-page').style.display = 'none';
+      document.getElementById('debrief-page').style.display = 'block';
+
+      let bandTitle = "";
+      let bandColor = "";
+      let bandFeedback = "";
+
+      if (score >= 16) {
+        bandTitle = "Band 4: Executive Agility & Poise (16–20 Points)";
+        bandColor = "var(--color-excellent)";
+        bandFeedback = "<strong>Outstanding Performance!</strong> You turned a potential nightmare into a masterclass in executive presence, adaptability, and diplomatic negotiation. You managed service recovery smoothly and leveraged real-time adversity to land a major career offer!";
+      } else if (score >= 11) {
+        bandTitle = "Band 3: Adaptable & Competent Communicator (11–15 Points)";
+        bandColor = "var(--color-good)";
+        bandFeedback = "<strong>Great Job!</strong> You maintained professionalism under tight deadlines and successfully secured the job offer. To reach Band 4, focus on assertive negotiation regarding service fee waivers and proactive cognitive reframing.";
+      } else if (score >= 6) {
+        bandTitle = "Band 2: Developing Crisis Manager (6–10 Points)";
+        bandColor = "var(--color-average)";
+        bandFeedback = "<strong>Satisfactory Effort.</strong> You survived the afternoon, but passive choices, hesitation, or unnecessary apologies created self-imposed friction. Review the discussion points on assertive communication and executive presence.";
+      } else {
+        bandTitle = "Band 1: Crisis Panic Hazard (0–5 Points)";
+        bandColor = "var(--color-bad)";
+        bandFeedback = "<strong>Needs Work.</strong> Emotional outbursts, defensive reactions, or poor boundary-setting undermined your potential. Replay the game and focus on choosing options that prioritize emotional regulation, objective negotiation, and strategic adaptability.";
+      }
+
+      const debriefContent = document.getElementById('debrief-content');
+      debriefContent.innerHTML = `
+        <div class="debrief-card" style="border-color: ${bandColor}">
+          <div class="progress-title" style="margin-bottom:8px;">Final Score: ${score} / 20</div>
+          <div class="band-title" style="color: ${bandColor}">${bandTitle}</div>
+          <p style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 0;">${bandFeedback}</p>
+        </div>
+
+        <div class="discussion-box">
+          <strong style="font-size: 1.05rem;">Final Reflection Questions for Discussion:</strong>
+          <ol style="margin-top: 10px; padding-left: 20px; line-height: 1.6;">
+            <li>How can professionals balance consumer assertiveness (demanding quality service) with social diplomacy?</li>
+            <li>In what ways can unexpected personal setbacks be transformed into compelling narrative strengths during job interviews?</li>
+            <li>What key business English expressions for boundary-setting or crisis management did you find most valuable?</li>
+          </ol>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>
