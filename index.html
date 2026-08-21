@@ -219,11 +219,12 @@
       letter-spacing: 0.05em;
       color: #0f172a;
       flex-shrink: 0;
+      white-space: nowrap;
     }
 
-    .tag-a2 { background: var(--badge-a2); }
-    .tag-b1 { background: var(--badge-b1); }
-    .tag-b2 { background: var(--badge-b2); }
+    .tag-a2-b1 { background: var(--badge-a2); }
+    .tag-b1-b2 { background: var(--badge-b1); }
+    .tag-b2-c1 { background: var(--badge-b2); }
     .tag-c1 { background: var(--badge-c1); }
     .tag-none { background: var(--badge-default); }
 
@@ -286,9 +287,9 @@
         <input id="filter" class="search" type="search" placeholder="Search exercises (press '/' to focus)" aria-label="Search pages" />
         <div class="filter-tags">
           <button class="filter-btn active" data-level="all">All</button>
-          <button class="filter-btn" data-level="a2">A2</button>
-          <button class="filter-btn" data-level="b1">B1</button>
-          <button class="filter-btn" data-level="b2">B2</button>
+          <button class="filter-btn" data-level="a2-b1">A2-B1</button>
+          <button class="filter-btn" data-level="b1-b2">B1-B2</button>
+          <button class="filter-btn" data-level="b2-c1">B2-C1</button>
           <button class="filter-btn" data-level="c1">C1</button>
         </div>
       </div>
@@ -331,7 +332,7 @@
           const level = tag ? tag.textContent.trim().toLowerCase() : '';
 
           const matchesQuery = query === '' || text.includes(query);
-          const matchesLevel = currentLevel === 'all' || level.startsWith(currentLevel);
+          const matchesLevel = currentLevel === 'all' || level === currentLevel;
 
           if (matchesQuery && matchesLevel) {
             li.style.display = '';
@@ -372,33 +373,37 @@
       input.addEventListener('input', debounce(applyFilters, 150));
 
       // Fetch repository contents from GitHub API and build the list dynamically.
-      // This ensures the public page always links to every .html file in the repo.
       fetch('https://api.github.com/repos/LaurenceJIL/decisionmaker/contents')
         .then(res => res.json())
         .then(files => {
-          // files is an array of objects with { name, path, type, html_url, download_url }
-          // Filter for .html files only, exclude index and assets
           const htmlFiles = (files || []).filter(f => f.type === 'file' && f.name.endsWith('.html') && !/^index\.html$/i.test(f.name) && !/^(README|styles|favicon)\./i.test(f.name));
 
-          // sort alphabetically
           htmlFiles.sort((a,b) => a.name.localeCompare(b.name));
 
-          // remove loading placeholder
           list.innerHTML = '';
 
+          // Level Mapping logic
+          const levelMap = {
+            'A2': 'A2-B1',
+            'B1': 'B1-B2',
+            'B2': 'B2-C1',
+            'C1': 'C1'
+          };
+
           htmlFiles.forEach(f => {
-            const name = f.name; // keep the filename exactly as in the repo
+            const name = f.name;
             const base = name.replace(/\.html$/i, '');
 
-            // detect level tag at end of filename
+            // Detect raw level tag from filename suffix
             const levelMatch = base.match(/-(a2|b1\+|b1|b2|c1)$/i);
-            const level = levelMatch ? levelMatch[1].toUpperCase().replace('+','+') : null;
-            const tagClass = level ? ('tag-' + level.toLowerCase().replace('+','plus')) : 'tag-none';
-            const tagText = level || '—';
+            const rawLevel = levelMatch ? levelMatch[1].toUpperCase().replace('+','') : null;
+            
+            // Map raw level to new level range
+            const newLevel = rawLevel ? (levelMap[rawLevel] || rawLevel) : null;
+            const tagClass = newLevel ? ('tag-' + newLevel.toLowerCase()) : 'tag-none';
+            const tagText = newLevel || '—';
 
-            // build a human-friendly title: remove trailing level token and replace hyphens with spaces
             let title = base.replace(/-(a2|b1\+|b1|b2|c1)$/i, '').replace(/-/g, ' ');
-            // capitalize words
             title = title.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 
             const li = document.createElement('li');
@@ -408,7 +413,7 @@
             a.setAttribute('role', 'link');
 
             a.innerHTML = `
-              <div class="btn-header"><span class="title">${escapeHtml(title)}</span><span class="tag ${level ? 'tag-' + level.toLowerCase().replace('+','') : 'tag-none'}">${escapeHtml(tagText)}</span></div>
+              <div class="btn-header"><span class="title">${escapeHtml(title)}</span><span class="tag ${tagClass}">${escapeHtml(tagText)}</span></div>
               <div class="btn-footer">Open &rarr;</div>
             `;
 
