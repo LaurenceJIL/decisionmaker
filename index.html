@@ -209,7 +209,7 @@
       line-height: 1.3;
     }
 
-    /* Badge Tags - Robust Styling with Fallbacks */
+    /* Badge Tags */
     .tag {
       font-size: 0.7rem;
       font-weight: 700;
@@ -319,13 +319,23 @@
 
       let currentLevel = 'all';
 
-      // Map single levels to ranges
+      // Level replacement lookup
       const levelMap = {
         'A2': 'A2-B1',
         'B1': 'B1-B2',
         'B2': 'B2-C1',
         'C1': 'C1'
       };
+
+      // Utility function to convert raw levels anywhere in the DOM
+      function transformTagElement(tagEl) {
+        if (!tagEl) return;
+        const txt = tagEl.textContent.trim().toUpperCase();
+        if (levelMap[txt]) {
+          tagEl.textContent = levelMap[txt];
+          tagEl.className = 'tag tag-' + txt.toLowerCase();
+        }
+      }
 
       function updateCount(){
         const visible = items.filter(li => li.style.display !== 'none').length;
@@ -337,11 +347,13 @@
         items.forEach(li => {
           const text = li.textContent.toLowerCase();
           const tag = li.querySelector('.tag');
+          
+          if (tag) transformTagElement(tag);
+          
           const level = tag ? tag.textContent.trim().toLowerCase() : '';
 
           const matchesQuery = query === '' || text.includes(query);
-          // Match against exact range or partial match (e.g., 'a2-b1')
-          const matchesLevel = currentLevel === 'all' || level === currentLevel || level.startsWith(currentLevel);
+          const matchesLevel = currentLevel === 'all' || level.startsWith(currentLevel.toLowerCase());
 
           if (matchesQuery && matchesLevel) {
             li.style.display = '';
@@ -379,8 +391,8 @@
 
       input.addEventListener('input', debounce(applyFilters, 150));
 
-      // Fetch repository contents from GitHub API
-      fetch('https://api.github.com/repos/LaurenceJIL/decisionmaker/contents')
+      // Fetch repository contents with cache-busting timestamp
+      fetch('https://api.github.com/repos/LaurenceJIL/decisionmaker/contents?t=' + Date.now())
         .then(res => res.json())
         .then(files => {
           const htmlFiles = (files || []).filter(f => f.type === 'file' && f.name.endsWith('.html') && !/^index\.html$/i.test(f.name) && !/^(README|styles|favicon)\./i.test(f.name));
@@ -392,15 +404,16 @@
             const name = f.name;
             const base = name.replace(/\.html$/i, '');
 
-            // Detect raw level tag from filename suffix (-a2, -b1, -b2, -c1)
+            // 1. EXTRACT raw level suffix BEFORE stripping it from base string
             const levelMatch = base.match(/-(a2|b1\+|b1|b2|c1)$/i);
             const rawLevel = levelMatch ? levelMatch[1].toUpperCase().replace('+','') : null;
             
-            // Map raw level to required range
+            // 2. Map level badge string
             const displayLevel = rawLevel ? (levelMap[rawLevel] || rawLevel) : null;
             const tagClass = rawLevel ? ('tag-' + rawLevel.toLowerCase()) : 'tag-none';
             const tagText = displayLevel || '—';
 
+            // 3. Construct display title
             let title = base.replace(/-(a2|b1\+|b1|b2|c1)$/i, '').replace(/-/g, ' ');
             title = title.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 
@@ -424,7 +437,14 @@
         })
         .catch(err => {
           console.error('Failed to load repository contents', err);
-          list.innerHTML = '<li>Failed to load exercises — please try again later.</li>';
+          
+          // Fallback: If API fails/throttles, force-rewrite any existing static DOM items
+          items = Array.from(list.querySelectorAll('li'));
+          items.forEach(li => {
+            const tag = li.querySelector('.tag');
+            if (tag) transformTagElement(tag);
+          });
+          applyFilters();
         });
 
       function escapeHtml(str) {
