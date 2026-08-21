@@ -327,14 +327,14 @@
         'C1': 'C1'
       };
 
-      // Utility function to convert raw levels anywhere in the DOM
-      function transformTagElement(tagEl) {
-        if (!tagEl) return;
-        const txt = tagEl.textContent.trim().toUpperCase();
-        if (levelMap[txt]) {
-          tagEl.textContent = levelMap[txt];
-          tagEl.className = 'tag tag-' + txt.toLowerCase();
-        }
+      // Utility function to convert raw levels in HTML elements instantly
+      function rewriteBadgesInDOM() {
+        document.querySelectorAll('.tag').forEach(tagEl => {
+          const txt = tagEl.textContent.trim().toUpperCase();
+          if (levelMap[txt]) {
+            tagEl.textContent = levelMap[txt];
+          }
+        });
       }
 
       function updateCount(){
@@ -348,12 +348,17 @@
           const text = li.textContent.toLowerCase();
           const tag = li.querySelector('.tag');
           
-          if (tag) transformTagElement(tag);
+          if (tag) {
+            const txt = tag.textContent.trim().toUpperCase();
+            if (levelMap[txt]) {
+              tag.textContent = levelMap[txt];
+            }
+          }
           
           const level = tag ? tag.textContent.trim().toLowerCase() : '';
 
           const matchesQuery = query === '' || text.includes(query);
-          const matchesLevel = currentLevel === 'all' || level.startsWith(currentLevel.toLowerCase());
+          const matchesLevel = currentLevel === 'all' || level.includes(currentLevel.toLowerCase());
 
           if (matchesQuery && matchesLevel) {
             li.style.display = '';
@@ -391,7 +396,10 @@
 
       input.addEventListener('input', debounce(applyFilters, 150));
 
-      // Fetch repository contents with cache-busting timestamp
+      // Run immediate badge rewrite on static HTML items if present
+      rewriteBadgesInDOM();
+
+      // Fetch repository contents from GitHub API
       fetch('https://api.github.com/repos/LaurenceJIL/decisionmaker/contents?t=' + Date.now())
         .then(res => res.json())
         .then(files => {
@@ -404,16 +412,13 @@
             const name = f.name;
             const base = name.replace(/\.html$/i, '');
 
-            // 1. EXTRACT raw level suffix BEFORE stripping it from base string
             const levelMatch = base.match(/-(a2|b1\+|b1|b2|c1)$/i);
             const rawLevel = levelMatch ? levelMatch[1].toUpperCase().replace('+','') : null;
             
-            // 2. Map level badge string
             const displayLevel = rawLevel ? (levelMap[rawLevel] || rawLevel) : null;
             const tagClass = rawLevel ? ('tag-' + rawLevel.toLowerCase()) : 'tag-none';
             const tagText = displayLevel || '—';
 
-            // 3. Construct display title
             let title = base.replace(/-(a2|b1\+|b1|b2|c1)$/i, '').replace(/-/g, ' ');
             title = title.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 
@@ -437,13 +442,8 @@
         })
         .catch(err => {
           console.error('Failed to load repository contents', err);
-          
-          // Fallback: If API fails/throttles, force-rewrite any existing static DOM items
           items = Array.from(list.querySelectorAll('li'));
-          items.forEach(li => {
-            const tag = li.querySelector('.tag');
-            if (tag) transformTagElement(tag);
-          });
+          rewriteBadgesInDOM();
           applyFilters();
         });
 
