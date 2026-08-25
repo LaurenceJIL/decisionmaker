@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Water Network Manager — B1 English Interactive Story</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F3F4F6;--surface:#FFFFFF;--surface2:#F9FAFB;--surface3:#E5E7EB;
+  --ink:#111827;--ink2:#374151;--ink3:#6B7280;
+  --rule:rgba(17,24,39,0.08);
+  --green-bg:#F0FDF4;--green-bd:#22C55E;--green-tx:#166534;
+  --amber-bg:#FFFBEB;--amber-bd:#F59E0B;--amber-tx:#92400E;
+  --red-bg:#FEF2F2;--red-bd:#EF4444;--red-tx:#991B1B;
+  --blue-bg:#EFF6FF;--blue-bd:#3B82F6;--blue-tx:#1E40AF;
+  --rxl:16px;--rs:8px;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+.shell{max-width:750px;margin:2rem auto;padding:0 1rem}
+.card{background:var(--surface);border-radius:var(--rxl);box-shadow:0 10px 25px -5px rgba(0,0,0,0.05);overflow:hidden;border:1px solid var(--rule)}
+.card-bar{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;background:#fff;border-bottom:1px solid var(--rule)}
+.progress-track{display:flex;gap:4px}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--surface3)}
+.dot.done{background:var(--green-bd)}
+.dot.active{background:var(--blue-bd)}
+.dot.emg{background:var(--red-bd);animation:pulse 1.2s infinite}
+@keyframes pulse{0%{opacity:1}50%{opacity:0.4}100%{opacity:1}}
+.score-chip{font-family:'DM Mono',monospace;font-size:13px;background:var(--blue-bg);color:var(--blue-tx);padding:4px 12px;border-radius:20px;border:1px solid var(--blue-bd)}
+.card-body{padding:1.5rem;animation:slideUp 0.35s ease-out}
+@keyframes slideUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.time-label{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.5rem}
+.scenario{font-size:16px;margin-bottom:1.5rem;color:var(--ink);font-weight:400}
+.opt{width:100%;text-align:left;padding:14px;background:var(--surface);border:1px solid var(--rule);border-radius:var(--rs);cursor:pointer;margin-bottom:10px;font-size:14px;transition:0.15s;display:flex;justify-content:space-between;align-items:center;color:var(--ink)}
+.opt:hover{background:var(--surface2);border-color:var(--ink3)}
+.opt:disabled{opacity:0.6;cursor:not-allowed;background:var(--surface3)}
+.fbox{margin-top:1rem;padding:1rem;border-radius:var(--rs);font-size:14px;display:none;border-left:4px solid}
+.fbox.show{display:block}
+.nxt{margin-top:1.5rem;padding:12px 24px;background:var(--ink);color:#fff;border:none;border-radius:var(--rs);cursor:pointer;display:none;float:right;font-weight:600}
+.nxt.show{display:block}
+.final-screen{padding:2.5rem}
+.band-box{margin:1.5rem 0;padding:1.5rem;border-radius:var(--rs);text-align:left}
+.band-1{background:var(--green-bg);border:1px solid var(--green-bd);color:var(--green-tx)}
+.band-2{background:var(--blue-bg);border:1px solid var(--blue-bd);color:var(--blue-tx)}
+.band-3{background:var(--amber-bg);border:1px solid var(--amber-bd);color:var(--amber-tx)}
+.band-4{background:var(--red-bg);border:1px solid var(--red-bd);color:var(--red-tx)}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <div class="card" id="main-card">
+    <div class="card-bar" id="card-bar" style="display:none">
+      <div style="font-family:Lora;font-weight:600">Water Network Project</div>
+      <div style="display:flex;align-items:center;gap:15px">
+        <div class="progress-track" id="dots"></div>
+        <div class="score-chip" id="score">0 pts</div>
+      </div>
+    </div>
+    <div id="content"></div>
+  </div>
+</div>
+
+<script>
+const S = { score: 0, answered: false };
+
+const DATA = {
+  // --- SCENARIO 1 ---
+  d1: {
+    label: "SCENARIO 1 — Smaller Pipes?",
+    scene: "You are designing a new city water network. The local council wants to buy smaller, cheaper pipes to save money right now. However, smaller pipes will make the pumps work much harder in the future.",
+    opts: [
+      { t: "Refuse the small pipes. Show data proving that larger pipes save more money over time.", pts: 2, color: "green", fb: "Great decision! You protected the project's long-term budget and saved energy. Larger pipes are much better for future operational costs." },
+      { t: "Accept the smaller pipes to make the city council happy with the current budget.", pts: 1, color: "blue", fb: "You kept the council happy today, but high electricity bills for the water pumps will cause financial problems very soon." },
+      { t: "Use medium pipes without checking any technical calculations or future costs.", pts: 0, color: "orange", fb: "This choice is unoriginal and risky. Guessing pipe sizes without proper calculations often leads to unexpected high costs later." },
+      { t: "Tell the construction workers on site to pick whatever pipe size they want.", pts: -1, color: "red", fb: "Poor choice! Never abandon your engineering responsibilities. You lose 1 point. Please try this step again and choose better." }
+    ],
+    next: "d2"
+  },
+
+  // --- SCENARIO 2 ---
+  d2: {
+    label: "SCENARIO 2 — The Legal Contract",
+    scene: "You are signing a contract with an international partner. They ask you to remove the standard clause that helps solve legal disputes quickly, saying it will save time.",
+    opts: [
+      { t: "Insist on keeping the standard legal protection clause in the contract.", pts: 2, color: "green", fb: "Excellent! Protecting your project with clear legal rules prevents expensive lawsuits if problems happen with international partners in the future." },
+      { t: "Agree to remove the clause, but write a private email agreement instead.", pts: 1, color: "blue", fb: "A fair effort, but informal emails offer very little legal protection if a real disagreement happens between companies later." },
+      { t: "Ask to delay the contract signing by three months to think about it.", pts: 0, color: "orange", fb: "An uninspired decision. Unnecessary delays waste valuable project time without actually solving the legal contract issue at hand." },
+      { t: "Sign the altered contract immediately without reading the fine print.", pts: -1, color: "red", fb: "Poor choice! Signing contracts blindly exposes your firm to huge financial dangers. You lose 1 point. Please try again." }
+    ],
+    next: "d3"
+  },
+
+  // --- SCENARIO 3 ---
+  d3: {
+    label: "SCENARIO 3 — Soft Ground Problems",
+    scene: "Your workers start digging a pipeline trench, but they discover wet, dangerous mud instead of solid soil. The client demands that you keep digging quickly to finish on time.",
+    opts: [
+      { t: "Pause digging to reinforce trench walls and formally adjust the schedule.", pts: 2, color: "green", fb: "Perfect action! Safety must always come first. Reinforcing unstable trenches protects your workers' lives and ensures stable pipeline construction." },
+      { t: "Tell the workers to dig faster so they finish before the mud falls.", pts: 1, color: "blue", fb: "You kept the schedule moving, but forcing workers to hurry in soft ground creates high risks of dangerous wall collapses." },
+      { t: "Order workers to fill the trench with simple gravel and keep digging.", pts: 0, color: "orange", fb: "An unimaginative solution. Basic gravel will not stop wet mud from sliding into the active trench during construction work." },
+      { t: "Ignore the soil report completely and continue digging standard trenches.", pts: -1, color: "red", fb: "Poor choice! Ignoring soil dangers risks fatal accidents on site. You lose 1 point. Please rethink and select again." }
+    ],
+    next: "d4"
+  },
+
+  // --- SCENARIO 4 ---
+  d4: {
+    label: "SCENARIO 4 — Delayed Water Pumps",
+    scene: "The overseas factory making your high-power water pumps is bankrupt, causing a 4-month delay. A local supplier can deliver similar pumps next week, but they cost 15% more.",
+    opts: [
+      { t: "Check the local pumps' quality and use backup project funds to buy them.", pts: 2, color: "green", fb: "Smart management! Paying a bit extra now keeps the project on schedule and avoids massive financial penalties for late delivery." },
+      { t: "Wait four months for the original factory to fix its business problems.", pts: 1, color: "blue", fb: "You saved money on pumps, but delaying the entire project by four months will cost far more in late fees." },
+      { t: "Buy half the required pumps now and hope the rest arrive later.", pts: 0, color: "orange", fb: "A risky and weak plan. Running a water network with missing pumps will cause low water pressure for households." },
+      { t: "Cancel the pumping station entirely and hope gravity pushes the water.", pts: -1, color: "red", fb: "Poor choice! Removing pumps without technical recalculations guarantees system failure. You lose 1 point. Please try again." }
+    ],
+    next: "emergency1"
+  },
+
+  // --- EMERGENCY 1 (AFTER DECISION 4) ---
+  emergency1: {
+    label: "EMERGENCY 1 — Extreme Pipe Pressure Crisis!",
+    scene: "CRITICAL ALERT: A field technician accidentally closes a main pipe valve too fast! A massive pressure shockwave ('water hammer') is travelling down the main line. It will burst the pipes in seconds!",
+    opts: [
+      { t: "Open the safety relief valves immediately to release excess pressure safely.", isSafe: true, fb: "SAVED! You opened safety valves quickly, releasing the pressure surge safely. The main network is undamaged and the game continues!" },
+      { t: "Quickly shut down all downstream valves manually to trap the water.", isGameOver: true, fb: "GAME OVER! Closing downstream valves made the shockwave twice as strong. Main pipes exploded, flooding the entire town! Restart required." }
+    ],
+    next: "d5"
+  },
+
+  // --- SCENARIO 5 ---
+  d5: {
+    label: "SCENARIO 5 — Weak Concrete Mix",
+    scene: "Inspectors report that a building subcontractor is using cheap, weak concrete to build the foundation of a huge 5,000-liter water tower.",
+    opts: [
+      { t: "Stop work immediately, reject the bad concrete, and order certified mix.", pts: 2, color: "green", fb: "Excellent leadership! Water towers carry heavy loads. Strong, high-quality concrete is mandatory to prevent structural failure and safeguard lives." },
+      { t: "Let them finish pouring, but pay them 5% less money as punishment.", pts: 1, color: "blue", fb: "You saved money, but taking away cash does not fix a weak concrete foundation under a heavy water tower." },
+      { t: "Ask the builder to add extra steel bars on top of bad concrete.", pts: 0, color: "orange", fb: "An average effort. Adding steel cannot fix a weak concrete base underneath. The foundation remains structurally unsafe for long-term use." },
+      { t: "Sign the approval forms anyway to keep good relationships with the builder.", pts: -1, color: "red", fb: "Poor choice! Falsifying safety papers is illegal and dangerous. You lose 1 point. Please try this step again." }
+    ],
+    next: "d6"
+  },
+
+  // --- SCENARIO 6 ---
+  d6: {
+    label: "SCENARIO 6 — Currency Exchange Drops",
+    scene: "Foreign currency values drop suddenly, making imported metal pipes 20% more expensive than planned. Your budget is in serious danger.",
+    opts: [
+      { t: "Use official contract rules to negotiate a fair budget update with the client.", pts: 2, color: "green", fb: "Very professional! Using legal financial safeguards in your contract protects your company's money during unexpected international economic changes." },
+      { t: "Buy uncertified plastic pipes locally without checking pressure limits.", pts: 1, color: "blue", fb: "You controlled costs quickly, but using cheap, uncertified plastic pipes risks serious pipeline bursts under high water pressure." },
+      { t: "Pause all project work for several weeks until currency rates change.", pts: 0, color: "orange", fb: "A passive choice. Waiting around wastes team time and risks expensive project delays without guaranteeing better currency rates." },
+      { t: "Hide the extra costs from managers and stop paying your local suppliers.", pts: -1, color: "red", fb: "Poor choice! Stopping payments breaks contracts and stops work completely. You lose 1 point. Please select a better option." }
+    ],
+    next: "d7"
+  },
+
+  // --- SCENARIO 7 ---
+  d7: {
+    label: "SCENARIO 7 — Protecting Clean Groundwater",
+    scene: "Environmental inspectors say your pipeline trench is too close to a protected natural water reserve. Digging here might pollute local drinking water.",
+    opts: [
+      { t: "Stop digging, install protective barriers, and request an official route change.", pts: 2, color: "green", fb: "Outstanding integrity! Protecting nature and clean drinking water is a top duty for engineers. Your quick action avoids pollution." },
+      { t: "Offer the inspector a small cash gift to ignore the boundary line.", pts: 1, color: "blue", fb: "Attempting to bribe inspectors is illegal and unethical. It risks heavy legal fines and ruins your corporate reputation." },
+      { t: "Put up simple warning signs and continue digging carefully along the route.", pts: 0, color: "orange", fb: "An unimaginative move. Warning signs do not stop dirty construction mud from leaking into protected clean underground water sources." },
+      { t: "Order workers to dig faster at night before formal stop orders arrive.", pts: -1, color: "red", fb: "Poor choice! Breaking environmental laws leads to immediate court shut-downs. You lose 1 point. Please try again." }
+    ],
+    next: "d8"
+  },
+
+  // --- SCENARIO 8 ---
+  d8: {
+    label: "SCENARIO 8 — Computer Network Risks",
+    scene: "Your IT team discovers that digital signals controlling remote network water valves do not have password encryption, leaving them open to hacker attacks.",
+    opts: [
+      { t: "Delay digital setup until strong computer firewalls and encryption are added.", pts: 2, color: "green", fb: "Smart decision! Modern water networks depend on computers. Securing network systems prevents bad actors from controlling city water valves." },
+      { t: "Finish the setup now, assuming hackers do not care about water systems.", pts: 1, color: "blue", fb: "A risky assumption. Infrastructure networks are frequent targets for cyber-attacks today. Safety requires digital protection." },
+      { t: "Install a simple anti-virus program on main office computers only.", pts: 0, color: "orange", fb: "A weak solution. Basic office computer software does not protect remote valve field sensors from direct network hacking." },
+      { t: "Cancel computer systems completely and hire workers to turn valves by hand.", pts: -1, color: "red", fb: "Poor choice! Manual operations for a huge modern network are inefficient and slow. You lose 1 point. Choose again." }
+    ],
+    next: "emergency2"
+  },
+
+  // --- EMERGENCY 2 (AFTER DECISION 8) ---
+  emergency2: {
+    label: "EMERGENCY 2 — Dangerous Water Contamination!",
+    scene: "CRITICAL ALERT: A pressure drop caused dirty river water to flow backward into clean drinking pipes! Polluted water is moving toward homes right now!",
+    opts: [
+      { t: "Close sector valves, warn the public to boil water, and flush pipes with chlorine.", isSafe: true, fb: "SAVED! Quick isolation, public health warnings, and chemical cleaning kept the water supply safe. The game continues!" },
+      { t: "Increase pump pressure to push dirty water away without telling local health officers.", isGameOver: true, fb: "GAME OVER! Dirty water reached thousands of homes, causing widespread illness and severe lawsuits. Mission failed!" }
+    ],
+    next: "d9"
+  },
+
+  // --- SCENARIO 9 ---
+  d9: {
+    label: "SCENARIO 9 — Extra Unpaid Work",
+    scene: "Near the end of the project, the city client asks you to build two extra water connections for free, without extending the completion deadline.",
+    opts: [
+      { t: "Politely decline free work. Ask for a formal extra contract with added pay and time.", pts: 2, color: "green", fb: "Great professional boundaries! Standing firm on contracts prevents project budget loss and ensures you get paid for extra work." },
+      { t: "Do the extra work quietly for free, hoping to get future contracts.", pts: 1, color: "blue", fb: "You pleased the client, but doing free extra work reduces your project profits and creates stressful worker over-time." },
+      { t: "Promise to build the extra connections next year after project handover.", pts: 0, color: "orange", fb: "An average delay tactic. Making vague future promises creates confusion and harms working relationships with your client." },
+      { t: "Tell site workers to fake extra connections on maps without digging.", pts: -1, color: "red", fb: "Poor choice! Falsifying engineering maps is illegal fraud. You lose 1 point. Please rethink and select another option." }
+    ],
+    next: "d10"
+  },
+
+  // --- SCENARIO 10 ---
+  d10: {
+    label: "SCENARIO 10 — Missing Map Documents",
+    scene: "The final project deadline is in 2 days, but your survey team forgot to map 30 kilometers of underground pipes on GPS. The client wants complete maps now.",
+    opts: [
+      { t: "Explain the delay, send an emergency map crew, and deliver verified GPS data.", pts: 2, color: "green", fb: "Honest and correct! Delivering 100% accurate maps ensures future maintenance crews can find underground valves safely." },
+      { t: "Draw estimated pipe locations on maps using old early drawings.", pts: 1, color: "blue", fb: "You met the deadline, but inaccurate maps will cause big problems when workers dig for repairs in the future." },
+      { t: "Hand over maps for finished sections and promise the rest in six months.", pts: 0, color: "orange", fb: "An uninspired compromise. Partial map handovers leave key city areas without clear utility documentation for too long." },
+      { t: "Delete unmapped pipe lines from final maps so files match.", pts: -1, color: "red", fb: "Poor choice! Hiding real infrastructure assets creates major safety risks. You lose 1 point. Please try again." }
+    ],
+    next: "final"
+  }
+};
+
+function fisherYatesShuffle(array) {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function buildDots(id) {
+  const stages = ["d1", "d2", "d3", "d4", "emergency1", "d5", "d6", "d7", "d8", "emergency2", "d9", "d10"];
+  const curIdx = stages.indexOf(id);
+  const el = document.getElementById('dots');
+  if (!el) return;
+  el.innerHTML = '';
+  stages.forEach((stageId, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i < curIdx ? ' done' : i === curIdx ? ' active' : '');
+    if (stageId.includes('emergency') && i === curIdx) d.className += ' emg';
+    el.appendChild(d);
+  });
+}
+
+function show(id) {
+  if (!DATA[id]) {
+    finish(false);
+    return;
+  }
+  const node = DATA[id];
+  S.answered = false;
+  
+  const bar = document.getElementById('card-bar');
+  if (bar) bar.style.display = 'flex';
+  buildDots(id);
+  
+  let h = `<div class="card-body"><div class="time-label">${node.label}</div>`;
+  h += `<div class="scenario">${node.scene}</div><div class="options" id="opt-container">`;
+  
+  let displayOpts = fisherYatesShuffle(node.opts);
+  
+  displayOpts.forEach((o, idx) => {
+    const safeOptionStr = JSON.stringify(o).replace(/'/g, "&#39;").replace(/"/g, '&quot;');
+    h += `<button class="opt" id="opt-${idx}" onclick='pick("${id}", ${idx}, ${safeOptionStr})'>
+            <span>${o.t}</span>
+          </button>`;
+  });
+  h += `</div>
+        <div class="fbox" id="fb"></div>
+        <button class="nxt" id="nxt">Next Step →</button>
+        </div>`;
+  document.getElementById('content').innerHTML = h;
+}
+
+function pick(id, idx, opt) {
+  if (S.answered && opt.pts !== -1) return;
+  
+  const fb = document.getElementById('fb');
+  const nxt = document.getElementById('nxt');
+  
+  fb.innerHTML = opt.fb;
+  fb.className = 'fbox show';
+  
+  if (opt.pts === -1) {
+    S.score += opt.pts;
+    const scoreEl = document.getElementById('score');
+    if (scoreEl) scoreEl.textContent = S.score + ' pts';
+    const optBtn = document.getElementById(`opt-${idx}`);
+    if (optBtn) optBtn.disabled = true;
+    fb.style.backgroundColor = 'var(--red-bg)';
+    fb.style.borderColor = 'var(--red-bd)';
+    fb.style.color = 'var(--red-tx)';
+    return;
+  }
+  
+  S.answered = true;
+  
+  const optContainer = document.getElementById('opt-container');
+  if (optContainer) {
+    const allButtons = optContainer.getElementsByTagName('button');
+    for (let b of allButtons) {
+      b.disabled = true;
+    }
+  }
+  
+  if (opt.pts !== undefined) S.score += opt.pts;
+  const scoreEl = document.getElementById('score');
+  if (scoreEl) scoreEl.textContent = S.score + ' pts';
+  
+  if (opt.color === "green" || opt.isSafe) {
+    fb.style.backgroundColor = 'var(--green-bg)';
+    fb.style.borderColor = 'var(--green-bd)';
+    fb.style.color = 'var(--green-tx)';
+  } else if (opt.color === "blue") {
+    fb.style.backgroundColor = 'var(--blue-bg)';
+    fb.style.borderColor = 'var(--blue-bd)';
+    fb.style.color = 'var(--blue-tx)';
+  } else if (opt.color === "orange") {
+    fb.style.backgroundColor = 'var(--amber-bg)';
+    fb.style.borderColor = 'var(--amber-bd)';
+    fb.style.color = 'var(--amber-tx)';
+  }
+  
+  if (opt.isGameOver) {
+    fb.style.backgroundColor = 'var(--red-bg)';
+    fb.style.borderColor = 'var(--red-bd)';
+    fb.style.color = 'var(--red-tx)';
+    nxt.textContent = "See Final Results";
+    nxt.onclick = () => finish(true);
+  } else {
+    nxt.textContent = "Next Step →";
+    nxt.onclick = () => {
+      const nextId = DATA[id] ? DATA[id].next : 'final';
+      if (nextId === 'final') {
+        finish(false);
+      } else {
+        show(nextId);
+      }
+    };
+  }
+  nxt.classList.add('show');
+}
+
+function finish(gameOver) {
+  const bar = document.getElementById('card-bar');
+  if (bar) bar.style.display = 'none';
+  
+  let title, text, bClass;
+  
+  if (gameOver) {
+    bClass = "band-4"; 
+    title = "Band 4: Disaster Level (Game Over)"; 
+    text = "Your project stopped because of a major emergency failure. In infrastructure engineering, ignoring safety rules can damage equipment, pollute drinking water, and cause severe danger to the public.";
+  } else if (S.score >= 17) {
+    bClass = "band-1"; 
+    title = "Band 1: Expert Project Director (17–20 points)"; 
+    text = "Outstanding work! You balanced budgets, legal safety, quality control, and worker protection perfectly. Your clear choices protected both human life and company finances throughout the project.";
+  } else if (S.score >= 12) {
+    bClass = "band-2"; 
+    title = "Band 2: Competent Project Manager (12–16 points)"; 
+    text = "Good job! You completed the water network successfully. You made a few minor compromises under budget pressure, but overall technical safety and project quality remained strong.";
+  } else if (S.score >= 6) {
+    bClass = "band-3"; 
+    title = "Band 3: Junior Assistant Engineer (6–11 points)"; 
+    text = "You finished the project, but many of your choices were risky or reactive. You often sacrificed long-term technical quality to satisfy short-term client demands. Review core engineering rules!";
+  } else {
+    bClass = "band-4"; 
+    title = "Band 4: Operational Risk (Under 6 points)"; 
+    text = "Your decisions caused frequent quality problems, financial losses, and safety vulnerabilities. Try the simulation again to practice making safer, more professional management choices!";
+  }
+
+  document.getElementById('content').innerHTML = `
+    <div class="final-screen">
+      <h2 style="font-family:Lora; font-size:26px">Project Simulation Complete</h2>
+      <div style="font-size:16px; margin:10px 0; font-family:'DM Mono'">Final Score: ${S.score} / 20 points</div>
+      <div class="band-box ${bClass}">
+        <h3 style="margin-bottom:6px; font-weight:600">${title}</h3>
+        <p style="font-size:14px; opacity:0.95">${text}</p>
+      </div>
+      <button class="opt" style="justify-content:center; margin-top:24px; font-weight:600; background:var(--ink); color:#fff" onclick="restartGame()">Play Again</button>
+    </div>`;
+}
+
+function restartGame() {
+  S.score = 0;
+  S.answered = false;
+  start();
+}
+
+function start() {
+  const bar = document.getElementById('card-bar');
+  if (bar) bar.style.display = 'none';
+  
+  document.getElementById('content').innerHTML = `
+    <div class="final-screen" style="text-align:center">
+      <h2 style="font-family:Lora; font-size:30px; margin-bottom:0.5rem">The Water Network Manager</h2>
+      <p style="font-size:15px; margin:1rem 0 1.5rem 0; color:var(--ink2)">
+        Become the lead project engineer managing a major city water supply network! Make smart technical, financial, and safety choices across 10 real-world scenarios.
+      </p>
+      <div style="text-align:left; background:var(--surface2); padding:1rem; border-radius:var(--rs); border:1px solid var(--rule); margin-bottom:1.5rem; font-size:13px; color:var(--ink2)">
+        <strong style="display:block; margin-bottom:0.5rem; color:var(--ink)">How to Play:</strong>
+        <ul style="margin-left:1.2rem; line-height:1.5">
+          <li><strong>10 Scenarios (4 Choices Each):</strong>
+            <br>• <span style="color:var(--green-bd); font-weight:600">Best Choice:</span> +2 points (Green)
+            <br>• <span style="color:var(--blue-bd); font-weight:600">Good Choice:</span> +1 point (Blue)
+            <br>• <span style="color:var(--amber-bd); font-weight:600">Average / Risky Choice:</span> 0 points (Orange)
+            <br>• <span style="color:var(--red-bd); font-weight:600">Poor Choice:</span> -1 point (Red, try again)
+          </li>
+          <li><strong>2 Emergency Situations:</strong> Survival decisions! Choose correctly to continue, or face instant Game Over.</li>
+          <li><strong>4 Final Score Bands:</strong> See your final rating at the end!</li>
+        </ul>
+      </div>
+      <button class="opt" style="justify-content:center; background:var(--ink); color:#fff; padding:16px; font-weight:600" onclick="show('d1')">Start Project →</button>
+    </div>`;
+}
+
+start();
+</script>
+</body>
+</html>
