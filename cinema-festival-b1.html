@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CineFest Manager — Film Festival Producer Challenge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#090a0f;--bg2:#12141d;--bg3:#1a1d2b;
+  --gold:#e1b12c;--gold2:#fbc531;
+  --red:#e74c3c;--red2:#ff7675;
+  --green:#27ae60;--green2:#2ecc71;
+  --blue:#2980b9;--blue2:#3498db;
+  --ochre:#d35400;--ochre2:#e67e22;
+  --white:#ffffff;--txt:#cbd5e1;
+  --font-serif:'Cinzel',serif;--font-sans:'Montserrat',sans-serif;
+  --r:12px;--shadow:0 10px 30px rgba(0,0,0,0.8);
+}
+body{background:var(--bg);color:var(--txt);font-family:var(--font-sans);display:flex;justify-content:center;align-items:center;min-height:100vh;padding:20px;overflow-x:hidden}
+
+.card{background:var(--bg2);width:100%;max-width:850px;border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;border:1px solid rgba(225,177,44,0.15);display:none;animation:fadeIn 0.4s ease forwards}
+.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+header{background:var(--bg3);padding:30px;border-bottom:4px solid var(--gold);text-align:center}
+h1{font-family:var(--font-serif);color:var(--gold);font-size:2.2rem;letter-spacing:1px;text-transform:uppercase}
+.subtitle{font-size:0.85rem;text-transform:uppercase;letter-spacing:3px;color:var(--txt);font-weight:600;margin-top:8px}
+
+.content{padding:35px}
+.story-text{font-size:1.1rem;line-height:1.7;margin-bottom:25px;color:var(--white)}
+
+.grid-choice{display:grid;grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));gap:20px;margin-bottom:30px}
+.fest-opt{background:var(--bg3);border:2px solid transparent;border-radius:var(--r);padding:25px;cursor:pointer;transition:0.3s;text-align:center;position:relative}
+.fest-opt:hover{border-color:var(--gold);transform:translateY(-5px);background:rgba(225,177,44,0.05)}
+.fest-opt .icon{font-size:3rem;margin-bottom:12px;display:block}
+.fest-opt h3{color:var(--white);margin-bottom:5px;font-size:1.2rem;font-family:var(--font-serif)}
+
+.options-stack{display:flex;flex-direction:column;gap:12px}
+.opt-btn{background:var(--bg3);border:1px solid rgba(255,255,255,0.1);padding:18px;border-radius:var(--r);color:var(--white);font-size:1rem;cursor:pointer;text-align:left;transition:0.2s;display:flex;align-items:center}
+.opt-btn:hover:not(:disabled){background:rgba(255,255,255,0.05);border-color:var(--gold)}
+.opt-btn:disabled{cursor:not-allowed;opacity:0.6}
+.opt-btn span{margin-right:15px;background:var(--bg);width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;color:var(--gold);font-weight:bold;flex-shrink:0;font-size:0.9rem;border:1px solid var(--gold)}
+
+.feedback{margin-top:25px;padding:25px;border-radius:var(--r);display:none;animation:slideUp 0.3s ease}
+@keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.fb-excellent{background:rgba(39,174,96,0.15);border:1px solid var(--green);color:var(--green2)}
+.fb-good{background:rgba(41,128,185,0.15);border:1px solid var(--blue);color:var(--blue2)}
+.fb-average{background:rgba(211,84,0,0.15);border:1px solid var(--ochre);color:var(--ochre2)}
+.fb-poor{background:rgba(231,76,60,0.15);border:1px solid var(--red);color:var(--red2)}
+
+.btn-next{width:100%;margin-top:20px;padding:18px;background:var(--gold);border:none;border-radius:var(--r);color:var(--bg);font-weight:900;font-size:1.05rem;cursor:pointer;text-transform:uppercase;letter-spacing:2px;transition:0.3s}
+.btn-next:hover{background:var(--gold2)}
+
+.stats-bar{display:flex;justify-content:space-between;padding:15px 30px;background:rgba(0,0,0,0.5);font-weight:bold;font-size:0.9rem;border-bottom:1px solid rgba(255,255,255,0.1)}
+.stat-item .val{color:var(--gold);font-size:1.2rem;letter-spacing:1px;margin-left:8px}
+
+.emergency-mode header{background:var(--red);border-bottom-color:var(--white)}
+.emergency-mode h1{color:var(--white)}
+.emergency-mode .subtitle{color:var(--gold2)}
+</style>
+</head>
+<body>
+
+<div class="card active" id="fest-screen">
+  <header>
+    <h1>CineFest Manager</h1>
+    <div class="subtitle">International Film Commission Initiative</div>
+  </header>
+  <div class="content">
+    <p class="story-text">As the newly appointed Festival Director, your duty is to curate, launch, and manage a prestige film festival. Navigate 10 strategic decisions and handle emergency crises to determine your festival's legacy!</p>
+    <div class="grid-choice" id="fest-choices"></div>
+  </div>
+</div>
+
+<div class="card" id="game-screen">
+  <div class="stats-bar">
+    <div class="stat-item">PROGRESS <span class="val" id="cur-step">1/10</span></div>
+    <div class="stat-item">REPUTATION: <span class="val" id="cur-score">0 🎬</span></div>
+  </div>
+  <header id="game-header">
+    <h1 id="q-title">Stage 1</h1>
+  </header>
+  <div class="content">
+    <p class="story-text" id="q-desc"></p>
+    <div class="options-stack" id="options-cont"></div>
+    <div class="feedback" id="fb-box">
+      <p id="fb-text"></p>
+      <button class="btn-next" onclick="nextStep()" id="next-btn-el">Continue</button>
+      <button class="btn-next" style="display:none; background:var(--red); color:white" id="gameover-btn-el" onclick="restartGame()">Restart Career</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="win-screen">
+  <header>
+    <h1>Festival Debriefing</h1>
+    <div class="subtitle" id="fest-title-final">Film Festival Name</div>
+  </header>
+  <div class="content" style="text-align:center">
+    <div style="font-size:4.5rem; margin-bottom:20px" id="final-emoji-display">🏆</div>
+    <h2 id="w-title" style="color:var(--white); font-size:1.6rem; font-family:var(--font-serif)">Performance Review</h2>
+    <p class="story-text" id="w-desc" style="margin-top:20px"></p>
+    <button class="btn-next" onclick="restartGame()">Direct Another Festival Theme</button>
+  </div>
+</div>
+
+<script>
+const FESTIVALS = [
+  { id: 'indie', title:'Indie Vision Showcase', icon: '🎨', emoji: '📽️' },
+  { id: 'scifi', title:'Sci-Fi & Horizon Summit', icon: '🚀', emoji: '🛸' },
+  { id: 'documentary', title:'Real Worlds DocFest', icon: '🌍', emoji: '📹' },
+  { id: 'horror', title:'Midnight Shivers Horror', icon: '🕯️', emoji: '💀' },
+  { id: 'classic', title:'Heritage Cinema Gala', icon: '🏛️', emoji: '🎞️' },
+  { id: 'animation', title:'Frame-by-Frame Fest', icon: '✏️', emoji: '🎨' }
+];
+
+const GAME_DATA = {
+  indie: {
+    scenarios: [
+      { q: "1. Selection Committee", d: "How do you select the opening night indie feature?", opts: [
+        { t: "Pick a raw, zero-budget micro-drama that won hearts in quiet previews.", grade: "excellent", pts: 2, fb: "Excellent! The choice champions authentic grassroots talent and receives glowing critical acclaim." },
+        { t: "Choose an established director's quirky mid-budget comedy.", grade: "good", pts: 2, fb: "Good choice! It brings solid attendance and positive press, keeping sponsors happy." },
+        { t: "Program a film featuring a mainstream actor attempting dramatic work.", grade: "average", pts: 0, fb: "Average. It draws curious crowds, but purists find the selection uninspired and safe." },
+        { t: "Select an unedited 4-hour experimental video test sequence.", grade: "poor", pts: -1, fb: "Poor decision. Half the audience walked out within twenty minutes! Try another option." }
+      ]},
+      { q: "2. Festival Venue", d: "Where will the primary screenings take place?", opts: [
+        { t: "Partner with a historic, art-house cinema with restored 35mm projectors.", grade: "excellent", pts: 2, fb: "Excellent! The atmospheric setting perfectly matches the indie film aesthetic." },
+        { t: "Rent a modern downtown multiplex with reliable seating.", grade: "good", pts: 2, fb: "Good choice! Screenings run smoothly, though it lacks a unique art-house personality." },
+        { t: "Host screenings in a repurposed vacant warehouse.", grade: "average", pts: 0, fb: "Average. The urban vibe is trendy, but poor acoustic dampening causes echo issues." },
+        { t: "Set up a bedsheet screen outdoors in a windy coastal park.", grade: "poor", pts: -1, fb: "Poor decision. Flapping sheets and gusts ruined projection clarity. Pick a proper venue." }
+      ]},
+      { q: "3. Panel Discussions", d: "Who will lead the filmmaker masterclass?", opts: [
+        { t: "A panel of acclaimed independent directors and veteran editors.", grade: "excellent", pts: 2, fb: "Excellent! Attendees leave with profound insights into independent film craft." },
+        { t: "A respected film historian discussing narrative structure.", grade: "good", pts: 2, fb: "Good choice! A thoughtful lecture that appeals to cinephiles and students alike." },
+        { t: "A tech company representative showcasing AI script tools.", grade: "average", pts: 0, fb: "Average. The talk generates debate, but misses the artistic spirit of the event." },
+        { t: "A celebrity viral streamer who admits to never watching film festivals.", grade: "poor", pts: -1, fb: "Poor decision. The panel was superficial and annoyed ticket holders. Choose again." }
+      ]},
+      { q: "4. Press & Publicity", d: "How will you handle festival coverage?", opts: [
+        { t: "Offer exclusive accreditation to independent critics and film journals.", grade: "excellent", pts: 2, fb: "Excellent! Deep, thoughtful reviews establish the festival's artistic credibility." },
+        { t: "Distribute press kits to major regional newspapers.", grade: "good", pts: 2, fb: "Good choice! Stable media coverage secures steady local ticket sales." },
+        { t: "Rely solely on automated social media hashtags.", grade: "average", pts: 0, fb: "Average. Moderate online chatter, but lacks formal review prestige." },
+        { t: "Pay tabloids to manufacture fake scandals about lead actors.", grade: "poor", pts: -1, fb: "Poor decision. It damaged the festival's reputation and alienated filmmakers. Try another approach." }
+      ]},
+      { q: "5. VIP Guest Hospitality", d: "How do you accommodate guest directors?", opts: [
+        { t: "Partner with a boutique eco-hotel and provide eco-friendly transport.", grade: "excellent", pts: 2, fb: "Excellent! Directors appreciate the thoughtful, cozy hospitality." },
+        { t: "Book standard mid-range business hotels near venues.", grade: "good", pts: 2, fb: "Good choice! Practical, reliable, and keeps logistics running on schedule." },
+        { t: "Offer shared hostel dorms to save operational costs.", grade: "average", pts: 0, fb: "Average. Budget-conscious, but high-profile directors complained about lack of privacy." },
+        { t: "Have guests stay on mattresses inside venue storage rooms.", grade: "poor", pts: -1, fb: "Poor decision. Two guest speakers cancelled their panels immediately. Pick another option." }
+      ]},
+      { q: "6. Merchandising", d: "What merchandise best represents the festival?", opts: [
+        { t: "Screen-printed organic cotton totes designed by local artists.", grade: "excellent", pts: 2, fb: "Excellent! High demand, stylish, and reinforces the community-focused ethos." },
+        { t: "Printed physical festival booklets with detailed director essays.", grade: "good", pts: 2, fb: "Good choice! Cinephiles love taking home a collectible program." },
+        { t: "Generic plastic keychains with a tiny logo.", grade: "average", pts: 0, fb: "Average. Cheap to produce, but ultimately uninspired." },
+        { t: "Unbranded blank paper bags sold at premium prices.", grade: "poor", pts: -1, fb: "Poor decision. Attendees felt scammed by the lack of effort. Choose a real product." }
+      ]},
+      { q: "7. Award Trophies", d: "What will the Grand Jury Prize trophy be?", opts: [
+        { t: "Handcrafted glass awards crafted by local artisans.", grade: "excellent", pts: 2, fb: "Excellent! Unique and artistic, winning directors treasure them." },
+        { t: "Sleek engraved brass film reels.", grade: "good", pts: 2, fb: "Good choice! Traditional, elegant, and looks impressive on stage." },
+        { t: "3D-printed plastic plaques.", grade: "average", pts: 0, fb: "Average. Functional, but feels lightweight for a prestigious honor." },
+        { t: "Spray-painted cardboard cutouts.", grade: "poor", pts: -1, fb: "Poor decision. The award literally broke during the ceremony. Try again!" }
+      ]},
+      { q: "8. Closing Gala", d: "How do you organize the closing celebration?", opts: [
+        { t: "Host a rooftop networking reception with local jazz and catering.", grade: "excellent", pts: 2, fb: "Excellent! A memorable evening that fosters future creative collaborations." },
+        { t: "Organize a seated dinner at a respected downtown restaurant.", grade: "good", pts: 2, fb: "Good choice! Classy, professional, and well-organized." },
+        { t: "Rent a noisy nightclub with an open bar.", grade: "average", pts: 0, fb: "Average. Energetic, but too loud for filmmakers to actually talk business." },
+        { t: "Direct everyone to a fast-food drive-thru late at night.", grade: "poor", pts: -1, fb: "Poor decision. An insulting capstone to an artistic festival. Choose better." }
+      ]},
+      { q: "9. Archival & Distribution", d: "How do you support selected films after the festival?", opts: [
+        { t: "Connect filmmakers directly with reputable indie distribution buyers.", grade: "excellent", pts: 2, fb: "Excellent! Three films secured international distribution deals!" },
+        { t: "Create an online festival streaming portal for 7 days post-event.", grade: "good", pts: 2, fb: "Good choice! Expands reach to audiences unable to attend physically." },
+        { t: "Provide basic digital certificates of participation.", grade: "average", pts: 0, fb: "Average. Nice gesture, but offers little practical career support." },
+        { t: "Leak work-in-progress cuts onto public file-sharing sites.", grade: "poor", pts: -1, fb: "Poor decision. Serious breach of copyright! Directors are threatening legal action. Select again." }
+      ]},
+      { q: "10. Future Strategy", d: "How do you plan next year's festival edition?", opts: [
+        { t: "Establish an indie film fund using this year's box-office proceeds.", grade: "excellent", pts: 2, fb: "Excellent! Ensures continuous growth and attracts top talent worldwide." },
+        { t: "Expand the festival duration by two days to fit more films.", grade: "good", pts: 2, fb: "Good choice! Solid expansion plan that caters to rising demand." },
+        { t: "Keep everything identical without any updates or changes.", grade: "average", pts: 0, fb: "Average. Safe, but risks becoming stale over time." },
+        { t: "Pivot entirely into an unvetted commercial ad showcase.", grade: "poor", pts: -1, fb: "Poor decision. You destroyed the festival's artistic core. Choose a sustainable plan." }
+      ]}
+    ],
+    emergencies: {
+      4: { q: "🚨 PROJECTOR BREAKDOWN!", d: "The main cinema projector lamp explodes 5 minutes before the flagship premiere!", opts: [
+        { t: "Switch seamlessly to the dual backup laser projector unit.", fail: false, fb: "Crisis averted! The premiere starts with only a 3-minute delay.", pts: 2 },
+        { t: "Cancel the screening and tell everyone to read the plot online.", fail: true, fb: "Audience erupted in anger and demanded full refunds. GAME OVER." }
+      ]},
+      8: { q: "🚨 RED CARPET FLOOD!", d: "A burst pipe ruins the main premiere entrance 1 hour before stars arrive!", opts: [
+        { t: "Reroute entrance through the historic grand foyer with velvet ropes.", fail: false, fb: "Brilliant pivot! Guests praised the elegant alternative entrance.", pts: 2 },
+        { t: "Force VIP guests to wade through shallow water.", fail: true, fb: "Celebrities left instantly and media roasted the festival. GAME OVER." }
+      ]}
+    }
+  },
+  scifi: generateSciFiData(),
+  documentary: generateDocData(),
+  horror: generateHorrorData(),
+  classic: generateClassicData(),
+  animation: generateAnimData()
+};
+
+function generateSciFiData() {
+  return {
+    scenarios: [
+      { q: "1. Keynote Speaker", d: "Who opens the Sci-Fi festival?", opts: [
+        { t: "Invite a visionary director alongside a renowned astrophysicist.", grade: "excellent", pts: 2, fb: "Excellent! Blending hard science with cinematic imagination thrills the audience." },
+        { t: "Hire a famous sci-fi franchise actor for a Q&A.", grade: "good", pts: 2, fb: "Good choice! High turnout and enthusiastic fan engagement." },
+        { t: "Book a tech startup founder pitching space tourism.", grade: "average", pts: 0, fb: "Average. Mildly interesting, but feels like a corporate pitch." },
+        { t: "Bring in a fake alien impersonator in a latex mask.", grade: "poor", pts: -1, fb: "Poor decision. Audience found it tacky and insulting. Reconsider." }
+      ]},
+      { q: "2. Visual Setup", d: "How will you design the venue atmosphere?", opts: [
+        { t: "Deploy immersive holographic ambient projections and LED tunnels.", grade: "excellent", pts: 2, fb: "Excellent! Transports attendees straight into a futuristic world." },
+        { t: "Set up high-definition ambient widescreen displays.", grade: "good", pts: 2, fb: "Good choice! Clean, modern look fitting for sci-fi." },
+        { t: "Hang silver foil on walls and dark blue mood lights.", grade: "average", pts: 0, fb: "Average. Passable retro aesthetic, but looks slightly low-budget." },
+        { t: "Leave venue dark with zero signage or lighting.", grade: "poor", pts: -1, fb: "Poor decision. Attendees kept tripping over seats in the dark. Select another setup." }
+      ]},
+      { q: "3. Sound System", d: "What audio configuration will be installed?", opts: [
+        { t: "Install state-of-the-art 3D spatial surround sound.", grade: "excellent", pts: 2, fb: "Excellent! Explosive deep-space sequences sound truly spectacular." },
+        { t: "Calibrate standard Dolby 7.1 theatrical surround.", grade: "good", pts: 2, fb: "Good choice! Crisp dialogue and deep bass impact." },
+        { t: "Use basic venue stereo speakers turned up loud.", grade: "average", pts: 0, fb: "Average. Loud, but audio distorts during high-frequency sound effects." },
+        { t: "Rely on a single mono portable loudspeaker on stage.", grade: "poor", pts: -1, fb: "Poor decision. Space battles sounded tinny and flat. Try again." }
+      ]},
+      { q: "4. VR Corner", d: "How do you feature Sci-Fi Virtual Reality projects?", opts: [
+        { t: "Curate room-scale interactive VR experiences with trained attendants.", grade: "excellent", pts: 2, fb: "Excellent! The line for VR immersion remains packed all festival." },
+        { t: "Set up seated VR headset stations showing 360 short films.", grade: "good", pts: 2, fb: "Good choice! Smooth operation and enjoyable mini-experiences." },
+        { t: "Place mobile cardboard VR goggles on tables without instructions.", grade: "average", pts: 0, fb: "Average. Clumsy setup, but a few guests enjoy it." },
+        { t: "Charge $50 for 30 seconds of a blurry static video screen.", grade: "poor", pts: -1, fb: "Poor decision. Attendees complained of headaches and rip-offs. Choose better." }
+      ]},
+      { q: "5. Catering", d: "What thematic concessions do you provide?", opts: [
+        { t: "Offer molecular gastronomy snacks and glowing thematic mocktails.", grade: "excellent", pts: 2, fb: "Excellent! Hits the futuristic theme perfectly and goes viral online." },
+        { t: "Provide high-end futuristic-branded bento boxes and espresso bars.", grade: "good", pts: 2, fb: "Good choice! Fresh, fast, and satisfying for attendees." },
+        { t: "Serve standard hot dogs labeled 'Cyber-Dogs'.", grade: "average", pts: 0, fb: "Average. Imaginative naming, but generic food quality." },
+        { t: "Serve dehydrated military surplus emergency paste.", grade: "poor", pts: -1, fb: "Poor decision. Completely unpalatable! Choose an appetizing menu." }
+      ]},
+      { q: "6. Program Guide", d: "How do attendees navigate schedule details?", opts: [
+        { t: "Launch an interactive augmented-reality mobile app with live alerts.", grade: "excellent", pts: 2, fb: "Excellent! Seamless, futuristic, and highly convenient." },
+        { t: "Provide clear digital QR-code schedules around venues.", grade: "good", pts: 2, fb: "Good choice! Eco-friendly and easily readable on smartphones." },
+        { t: "Hand out black-and-white printed flyer sheets.", grade: "average", pts: 0, fb: "Average. Functional, but feels old-fashioned for a tech festival." },
+        { t: "Write schedules in coded alien runes without a decipher key.", grade: "poor", pts: -1, fb: "Poor decision. Nobody knew when screenings started! Pick a real guide." }
+      ]},
+      { q: "7. Cosplay Policy", d: "How do you manage fan costume events?", opts: [
+        { t: "Host a judged costume showcase with prop safety check stations.", grade: "excellent", pts: 2, fb: "Excellent! Safe, incredibly vibrant, and draws huge crowd fan energy." },
+        { t: "Allow costumes with basic safety guidelines at registration.", grade: "good", pts: 2, fb: "Good choice! Smoothly integrated fan fun." },
+        { t: "Restrict costumes strictly to designated outdoor corridors.", grade: "average", pts: 0, fb: "Average. Overly cautious, dampening fan excitement." },
+        { t: "Permit real sharp metal props and laser pointers inside theaters.", grade: "poor", pts: -1, fb: "Poor decision. Hazardous! Security shut down the foyer. Try again." }
+      ]},
+      { q: "8. Retrospective Strand", d: "Which retrospective cinema strand do you screen?", opts: [
+        { t: "Screen 4K restorations of forgotten 70s cyberpunk classics.", grade: "excellent", pts: 2, fb: "Excellent! Cinephiles and genre fans hail it as a masterclass stream." },
+        { t: "Run a marathon of iconic 80s space adventure blockbusters.", grade: "good", pts: 2, fb: "Good choice! High crowd satisfaction and nostalgia." },
+        { t: "Show mediocre B-movies from the late 90s without context.", grade: "average", pts: 0, fb: "Average. Mild irony value, but low overall engagement." },
+        { t: "Screen unreleased bootlegs with intrusive watermarks.", grade: "poor", pts: -1, fb: "Poor decision. Unprofessional and potential copyright risk. Reconsider." }
+      ]},
+      { q: "9. Distribution Panel", d: "How do you assist indie Sci-Fi directors?", opts: [
+        { t: "Host pitching sessions with top streaming platforms and genre labels.", grade: "excellent", pts: 2, fb: "Excellent! Multiple sci-fi shorts get optioned for feature development!" },
+        { t: "Organize a networking mixer with VFX studios and producers.", grade: "good", pts: 2, fb: "Good choice! Valuable connections made for future projects." },
+        { t: "Provide a generic advice flyer on self-distribution.", grade: "average", pts: 0, fb: "Average. Helpful, but lacks direct industry impact." },
+        { t: "Advise directors to post full movies on free video forums.", grade: "poor", pts: -1, fb: "Poor decision. Undermines commercial value for creators. Choose better." }
+      ]},
+      { q: "10. Closing Ceremony", d: "How does the Sci-Fi festival conclude?", opts: [
+        { t: "A synchronized outdoor drone light show depicting classic sci-fi icons.", grade: "excellent", pts: 2, fb: "Excellent! A breathtaking finale that lands on front-page news." },
+        { t: "An awards ceremony followed by an exclusive finale screening.", grade: "good", pts: 2, fb: "Good choice! Traditional, dignified, and satisfying." },
+        { t: "A quick speech in the lobby while cleaning staff sweep up.", grade: "average", pts: 0, fb: "Average. Anti-climactic ending after a big festival." },
+        { t: "Set off loud pyrotechnics inside a low-ceiling auditorium.", grade: "poor", pts: -1, fb: "Poor decision. Triggered fire alarms and evacuations! Try another conclusion." }
+      ]}
+    ],
+    emergencies: {
+      4: { q: "🚨 SATELLITE FEED DOWN!", d: "Live premiere satellite beam fails 10 minutes before an international simulcast!", opts: [
+        { t: "Switch immediately to pre-encrypted high-speed physical fiber backup.", fail: false, fb: "Seamless backup connection! Broadcast proceeds perfectly.", pts: 2 },
+        { t: "Broadcast a static screen with elevator music for two hours.", fail: true, fb: "Viewers revolted and sponsors pulled out. GAME OVER." }
+      ]},
+      8: { q: "🚨 SERVER RANSOMWARE!", d: "Digital ticketing and scheduling servers lock up due to a cyber attack!", opts: [
+        { t: "Deploy isolated offline backup databases and paper backup tickets.", fail: false, fb: "Heroic IT recovery! Lines moved continuously without loss of data.", pts: 2 },
+        { t: "Pay anonymous hackers immediately using festival funds.", fail: true, fb: "Funds disappeared and servers remained locked. GAME OVER." }
+      ]}
+    }
+  };
+}
+
+function generateDocData() {
+  return {
+    scenarios: [
+      { q: "1. Opening Documentary", d: "What subject launches Real Worlds DocFest?", opts: [
+        { t: "An investigative masterpiece on global ocean preservation.", grade: "excellent", pts: 2, fb: "Excellent! Powerful, visually stunning, and inspires immediate action." },
+        { t: "A touching biographical study of a pioneering humanitarian artist.", grade: "good", pts: 2, fb: "Good choice! Emotionally resonant and warmly received." },
+        { t: "A dry economic retrospective on tax policy changes.", grade: "average", pts: 0, fb: "Average. Informative, but lacks cinematic emotional weight." },
+        { t: "A scripted mockumentary pretending to be real news.", grade: "poor", pts: -1, fb: "Poor decision. Misled audiences and damaged documentary integrity. Choose again." }
+      ]},
+      { q: "2. Ethics Standard", d: "How do you handle sensitive subject matter?", opts: [
+        { t: "Establish clear ethical protocols ensuring subject safety and consent.", grade: "excellent", pts: 2, fb: "Excellent! Sets an industry standard for respectful documentary practice." },
+        { t: "Host Q&A sessions focused on non-fiction ethics.", grade: "good", pts: 2, fb: "Good choice! Thoughtful dialogue between filmmakers and public." },
+        { t: "Let directors handle ethics without festival oversight.", grade: "average", pts: 0, fb: "Average. Standard approach, though minor disputes arise." },
+        { t: "Sensationalize personal tragedies in promotional banners.", grade: "poor", pts: -1, fb: "Poor decision. Exploitative marketing sparked widespread protests. Reconsider." }
+      ]},
+      { q: "3. Venue Choice", d: "Where are screenings hosted?", opts: [
+        { t: "Civic auditoriums equipped with crystal-clear audio and acoustic treatment.", grade: "excellent", pts: 2, fb: "Excellent! Ensures every spoken interview detail is heard perfectly." },
+        { t: "University lecture halls with modern projection.", grade: "good", pts: 2, fb: "Good choice! Functional, spacious, and accessible." },
+        { t: "Echoey gymnasium spaces with folding chairs.", grade: "average", pts: 0, fb: "Average. Accommodates crowds, but poor audio clarity hurts talks." },
+        { t: "Noisy open market square during peak traffic hours.", grade: "poor", pts: -1, fb: "Poor decision. Horns and ambient noise drowned out documentary audio. Pick another venue." }
+      ]},
+      { q: "4. Impact Lab", d: "How do you connect filmmakers with activists?", opts: [
+        { t: "Organize an 'Impact Forum' pairing directors with global NGOs.", grade: "excellent", pts: 2, fb: "Excellent! Films gain real-world campaign backing and funding." },
+        { t: "Provide networking lounges for documentary producers.", grade: "good", pts: 2, fb: "Good choice! Useful business contacts were made throughout." },
+        { t: "Put up a bulletin board for business cards.", grade: "average", pts: 0, fb: "Average. Low cost, but yields limited active partnerships." },
+        { t: "Charge non-profits heavy fees just to enter the venue lobby.", grade: "poor", pts: -1, fb: "Poor decision. Alienated key partners in the documentary space. Try again." }
+      ]},
+      { q: "5. Fact-Checking", d: "How do you verify documentary claims?", opts: [
+        { t: "Appoint an independent editorial advisory board to review entries.", grade: "excellent", pts: 2, fb: "Excellent! Protects festival authority and journalistic integrity." },
+        { t: "Require filmmakers to submit verification documentation.", grade: "good", pts: 2, fb: "Good choice! Standard practice that prevents major factual errors." },
+        { t: "Assume all submitted documentaries are entirely accurate.", grade: "average", pts: 0, fb: "Average. Risk-prone, though no immediate issues occurred." },
+        { t: "Promote unverified conspiracy theories for shock value.", grade: "poor", pts: -1, fb: "Poor decision. Complete breakdown of credibility. Choose a factual option." }
+      ]},
+      { q: "6. Guest Journalists", d: "Which press figures do you invite?", opts: [
+        { t: "Veteran investigative reporters and international photojournalists.", grade: "excellent", pts: 2, fb: "Excellent! High-level discussions elevate festival standing." },
+        { t: "Regional cultural correspondents and documentary reviewers.", grade: "good", pts: 2, fb: "Good choice! Solid media coverage across news outlets." },
+        { t: "Lifestyle bloggers focused primarily on festival catering.", grade: "average", pts: 0, fb: "Average. Light exposure, but ignores film content." },
+        { t: "Paparazzi seeking gossip on documentary subjects.", grade: "poor", pts: -1, fb: "Poor decision. Intrusive and disrespects serious journalism. Try another choice." }
+      ]},
+      { q: "7. Audience Engagement", d: "How do viewers participate post-screening?", opts: [
+        { t: "Moderate structured Q&As with live translations for overseas guests.", grade: "excellent", pts: 2, fb: "Excellent! Deeply engaging and inclusive discussions." },
+        { t: "Host standard 15-minute director Q&As after screenings.", grade: "good", pts: 2, fb: "Good choice! Keeps schedules moving while giving audience voice." },
+        { t: "Allow audience members to shout questions without microphones.", grade: "average", pts: 0, fb: "Average. Chaotic, but some interesting points were made." },
+        { t: "Cut off all Q&As immediately to empty room faster.", grade: "poor", pts: -1, fb: "Poor decision. Left audiences disappointed and disconnected. Reconsider." }
+      ]},
+      { q: "8. Educational Outreach", d: "How do you involve local schools?", opts: [
+        { t: "Host free youth matinees with curriculum-linked study guides.", grade: "excellent", pts: 2, fb: "Excellent! Teachers and students praise the educational value." },
+        { t: "Offer discounted student passes for afternoon sessions.", grade: "good", pts: 2, fb: "Good choice! Increases youth attendance across venues." },
+        { t: "Send promotional posters to local colleges.", grade: "average", pts: 0, fb: "Average. Minimal effort, moderate student uptake." },
+        { t: "Ban anyone under 21 from attending non-fiction screenings.", grade: "poor", pts: -1, fb: "Poor decision. Excluded young learners eager to engage. Pick better." }
+      ]},
+      { q: "9. Archival Preservation", d: "How are festival doc prints preserved?", opts: [
+        { t: "Partner with national film archives for digital master preservation.", grade: "excellent", pts: 2, fb: "Excellent! Secures long-term legacy of important non-fiction work." },
+        { t: "Store digital master files on secure cloud servers.", grade: "good", pts: 2, fb: "Good choice! Safe, reliable modern storage." },
+        { t: "Keep hard drives in an unmonitored office drawer.", grade: "average", pts: 0, fb: "Average. Risky, but works temporarily." },
+        { t: "Delete files immediately after screening to save disc space.", grade: "poor", pts: -1, fb: "Poor decision. Irreplaceable footage lost! Choose a safe archival plan." }
+      ]},
+      { q: "10. Legacy Project", d: "What long-term initiative comes out of the festival?", opts: [
+        { t: "Establish an annual grant for underrepresented documentary makers.", grade: "excellent", pts: 2, fb: "Excellent! Creates enduring real-world impact for future storytellers." },
+        { t: "Publish an annual journal collecting festival research papers.", grade: "good", pts: 2, fb: "Good choice! Respectable academic contribution." },
+        { t: "Sell branded notepad souvenirs.", grade: "average", pts: 0, fb: "Average. Small revenue, but no lasting impact." },
+        { t: "Sell participant contact details to marketing agencies.", grade: "poor", pts: -1, fb: "Poor decision. Breach of trust destroyed community faith. Select another option." }
+      ]}
+    ],
+    emergencies: {
+      4: { q: "🚨 DIPLOMATIC PROTEST!", d: "An embassy demands cancellation of a controversial human rights doc!", opts: [
+        { t: "Uphold artistic freedom, increase security, and issue a statement.", fail: false, fb: "Courageous stance! Festival lauded globally for integrity.", pts: 2 },
+        { t: "Caves instantly and burn the screening master tape.", fail: true, fb: "Filmmakers boycotted and international press condemned you. GAME OVER." }
+      ]},
+      8: { q: "🚨 AUDIO FILE CORRUPTION!", d: "The main audio track for the feature doc gets corrupted 30 mins before screening!", opts: [
+        { t: "Load uncompressed backup stems from master drive vault.", fail: false, fb: "flawless tech recovery! Screening sounds perfect.", pts: 2 },
+        { t: "Attempt live dubbed voiceovers yourself on stage.", fail: true, fb: "Audience laughed at tragic moment. Total disaster. GAME OVER." }
+      ]}
+    }
+  };
+}
+
+function generateHorrorData() {
+  return {
+    scenarios: [
+      { q: "1. Midnight Screening", d: "How do you launch Midnight Shivers Horror?", opts: [
+        { t: "Premiere an atmosphere-rich psychological horror film with live tension score.", grade: "excellent", pts: 2, fb: "Excellent! Masterful suspense sets an incredibly high festival tone." },
+        { t: "Show a high-energy creature feature with practical effects.", grade: "good", pts: 2, fb: "Good choice! Fun crowd-pleaser that gets screams and cheers." },
+        { t: "Screen a generic slasher full of predictable jump scares.", grade: "average", pts: 0, fb: "Average. Entertaining, but critics found it formulaic." },
+        { t: "Play a comedy film with zero horror elements.", grade: "poor", pts: -1, fb: "Poor decision. The horror audience felt misled and booed. Try again." }
+      ]},
+      { q: "2. Atmosphere & Venue", d: "How do you decorate the main venue?", opts: [
+        { t: "Transform venue with vintage gothic cinema aesthetics and subtle fog.", grade: "excellent", pts: 2, fb: "Excellent! Eerie, classy, and immersive without being tacky." },
+        { t: "Place tasteful thematic horror props and moody red lighting.", grade: "good", pts: 2, fb: "Good choice! Creates great photo opportunities for fans." },
+        { t: "Hang cheap plastic spiders and fake cobwebs everywhere.", grade: "average", pts: 0, fb: "Average. Looks a bit like a Spirit Halloween shop." },
+        { t: "Spray real rotten meat scents through the ventilation system.", grade: "poor", pts: -1, fb: "Poor decision. Attendees threw up and evacuated venue. Pick another setup." }
+      ]},
+      { q: "3. Special Guest", d: "Which horror icon do you invite?", opts: [
+        { t: "A legendary horror director celebrating a career retrospective.", grade: "excellent", pts: 2, fb: "Excellent! Packs theaters and brings immense genre prestige." },
+        { t: "A famous 'Scream Queen' actress for a career Q&A.", grade: "good", pts: 2, fb: "Good choice! Enthusiastic fan lines and great media buzz." },
+        { t: "A stunt double who worked on a single 90s horror film.", grade: "average", pts: 0, fb: "Average. Niche appeal, but die-hard fans appreciated it." },
+        { t: "A random magician who performs card tricks.", grade: "poor", pts: -1, fb: "Poor decision. Irrelevant to horror cinema. Reconsider choice." }
+      ]},
+      { q: "4. Safety Protocols", d: "How do you handle intense horror screenings?", opts: [
+        { t: "Provide clear content warnings, discreet exit doors, and trained medics.", grade: "excellent", pts: 2, fb: "Excellent! Ensures safety while respecting viewer boundaries." },
+        { t: "Post basic age ratings and warning signs outside halls.", grade: "good", pts: 2, fb: "Good choice! Standard industry safety protocol met." },
+        { t: "Distribute paper vomit bags as a promotional stunt.", grade: "average", pts: 0, fb: "Average. Gimmicky, but harmless fun." },
+        { t: "Lock theater doors from outside so nobody can leave during scares.", grade: "poor", pts: -1, fb: "Poor decision. Severe safety violation! Fire marshal intervened. Select again." }
+      ]},
+      { q: "5. Short Film Strand", d: "How do you structure the short film block?", opts: [
+        { t: "Curate a tightly edited 90-minute block of innovative horror shorts.", grade: "excellent", pts: 2, fb: "Excellent! Pacing is relentless and audience enthusiasm explodes." },
+        { t: "Group shorts by sub-genre (Ghost stories, Body horror, Sci-fi horror).", grade: "good", pts: 2, fb: "Good choice! Organized well for fan preferences." },
+        { t: "Play 20 shorts back-to-back without any intermissions.", grade: "average", pts: 0, fb: "Average. Exhausting, but contains great gems." },
+        { t: "Include unfinished home video clips without permission.", grade: "poor", pts: -1, fb: "Poor decision. Unprofessional quality ruined the block. Try again." }
+      ]},
+      { q: "6. Concessions", d: "What food & drinks are served?", opts: [
+        { t: "Craft red velvet treats and thematic artisan cocktails.", grade: "excellent", pts: 2, fb: "Excellent! Tasty, photogenic, and incredibly popular." },
+        { t: "Black popcorn boxes and blood-orange sodas.", grade: "good", pts: 2, fb: "Good choice! Fun thematic twist on classic snacks." },
+        { t: "Standard cinema snacks with no thematic touch.", grade: "average", pts: 0, fb: "Average. Works fine, but missed easy branding fun." },
+        { t: "Raw unseasoned liver plates.", grade: "poor", pts: -1, fb: "Poor decision. Grossed out patrons who refused to buy. Pick real food." }
+      ]},
+      { q: "7. Q&A Panels", d: "What topic is discussed at the main panel?", opts: [
+        { t: "'Practical FX vs Digital Gore: Crafting Relatable Fear.'", grade: "excellent", pts: 2, fb: "Excellent! Inspiring, technical, and deeply insightful for creators." },
+        { t: "'The History of Survival Horror in International Cinema.'", grade: "good", pts: 2, fb: "Good choice! Intellectual discussion well-received by fans." },
+        { t: "'Why Jump Scares Make People Jump.'", grade: "average", pts: 0, fb: "Average. Superfluous topic, but kept people entertained." },
+        { t: "A debate arguing that horror films should be banned completely.", grade: "poor", pts: -1, fb: "Poor decision. Confused attendees at a horror festival. Reconsider." }
+      ]},
+      { q: "8. Midnight Event", d: "What surprise happens at midnight?", opts: [
+        { t: "A secret screening of a newly unearthed, unreleased classic print.", grade: "excellent", pts: 2, fb: "Excellent! Crowd erupts in excitement; festival goes viral!" },
+        { t: "A live shadow-cast performance accompanying a cult film.", grade: "good", pts: 2, fb: "Good choice! High audience energy and fun participation." },
+        { t: "A raffle giving away horror movie DVDs.", grade: "average", pts: 0, fb: "Average. Okay gesture, but lacks flair for midnight." },
+        { t: "Have staff jump out with chainsaws without warning in dark corridors.", grade: "poor", pts: -1, fb: "Poor decision. Caused panic and injuries. Choose a safer thrill." }
+      ]},
+      { q: "9. Awards Ceremony", d: "What is the festival trophy?", opts: [
+        { t: "Custom carved obsidian skull with silver plaque.", grade: "excellent", pts: 2, fb: "Excellent! Stunning, gothic trophy directors proudly display." },
+        { t: "Engraved bronze dagger emblem mounted on wood.", grade: "good", pts: 2, fb: "Good choice! Fits horror aesthetic well." },
+        { t: "Generic plastic trophy with a ghost sticker.", grade: "average", pts: 0, fb: "Average. Tacky, but functional." },
+        { t: "A bucket of fake blood given to winning directors.", grade: "poor", pts: -1, fb: "Poor decision. Ruined winning director's formal clothes. Try again." }
+      ]},
+      { q: "10. Wrap-Up", d: "How do you close Midnight Shivers?", opts: [
+        { t: "Announce an annual horror screenwriting grant for indie creators.", grade: "excellent", pts: 2, fb: "Excellent! Builds lasting credibility in horror filmmaking." },
+        { t: "Publish an anthology book featuring festival conceptual art.", grade: "good", pts: 2, fb: "Good choice! Great physical souvenir for fans." },
+        { t: "Send a simple thank-you email to ticket holders.", grade: "average", pts: 0, fb: "Average. Minimal, but polite." },
+        { t: "Leave venue doors open unattended with trash piling up.", grade: "poor", pts: -1, fb: "Poor decision. Venue fined the festival heavily. Select better closing." }
+      ]}
+    ],
+    emergencies: {
+      4: { q: "🚨 REAL MEDICAL COLLAPSE!", d: "An audience member faints during a intense gore scene!", opts: [
+        { t: "Pause film instantly, turn on house lights, let festival medics handle it.", fail: false, fb: "Professional medical response! Patient recovered quickly.", pts: 2 },
+        { t: "Tell crowd it's a fake promotional stunt and keep film running.", fail: true, fb: "Gross negligence exposed on news. Festival shut down. GAME OVER." }
+      ]},
+      8: { q: "🚨 SCRIPTED MONSTER ESCAPE!", d: "An actor in full monster prosthetic gets stuck in venue elevator with VIP critics!", opts: [
+        { t: "Tech team manual overrides elevator while actor stays in charming character.", fail: false, fb: "Hilarious rescue! Critics praised the immersive fun.", pts: 2 },
+        { t: "Pry doors open with crowbar breaking elevator mechanics.", fail: true, fb: "Caused structural damage and frightened guests. GAME OVER." }
+      ]}
+    }
+  };
+}
+
+function generateClassicData() {
+  return {
+    scenarios: [
+      { q: "1. Opening Masterpiece", d: "What film opens Heritage Cinema Gala?", opts: [
+        { t: "A pristine 4K film restoration of a 1930s silent masterpiece with live orchestra.", grade: "excellent", pts: 2, fb: "Excellent! A majestic opening that leaves patrons spellbound." },
+        { t: "A technicolor 1950s musical classic on 35mm.", grade: "good", pts: 2, fb: "Good choice! Vibrant, joyful, and brings high audience turnouts." },
+        { t: "A obscure 1920s instructional documentary on grain farming.", grade: "average", pts: 0, fb: "Average. Historically interesting, but dry opening choice." },
+        { t: "A compressed cell phone video of a modern action film.", grade: "poor", pts: -1, fb: "Poor decision. Insulting to cinema heritage! Reconsider." }
+      ]},
+      { q: "2. Projection Setup", d: "What projection tech is utilized?", opts: [
+        { t: "Employ certified archivist projectionists running carbon-arc 35mm/70mm gear.", grade: "excellent", pts: 2, fb: "Excellent! True film grain authentic historical experience." },
+        { t: "High-end dual 4K laser projection calibrated for archival color space.", grade: "good", pts: 2, fb: "Good choice! Sharp, clean, and reliable presentation." },
+        { t: "Standard digital consumer Blu-ray player.", grade: "average", pts: 0, fb: "Average. Acceptable, but lacks archival prestige." },
+        { t: "Bootleg VHS tape played on a fuzzy tube TV.", grade: "poor", pts: -1, fb: "Poor decision. Terrible visual quality ruined historic films. Try again." }
+      ]},
+      { q: "3. Guest Historians", d: "Who leads classic film intros?", opts: [
+        { t: "World-renowned film archivists and classic cinema restoration experts.", grade: "excellent", pts: 2, fb: "Excellent! Provides essential historical context and fascination." },
+        { t: "Biographers of classic Golden Era Hollywood stars.", grade: "good", pts: 2, fb: "Good choice! Engaging stories entertain attendees." },
+        { t: "Local film club president reading Wikipedia articles.", grade: "average", pts: 0, fb: "Average. Passable, but lacks fresh academic insight." },
+        { t: "Someone claiming they were a movie star in a past life.", grade: "poor", pts: -1, fb: "Poor decision. Bizarre presentation embarrassed patrons. Pick better." }
+      ]},
+      { q: "4. Dress Code", d: "What style guideline is set for galas?", opts: [
+        { t: "Encourage vintage formal black-tie elegance for premiere nights.", grade: "excellent", pts: 2, fb: "Excellent! Atmosphere feels like Hollywood’s Golden Era." },
+        { t: "Smart casual with optional vintage attire accessories.", grade: "good", pts: 2, fb: "Good choice! Accessible while maintaining class." },
+        { t: "No dress code whatsoever; total casual free-for-all.", grade: "average", pts: 0, fb: "Average. Comfortable, but lacks gala magic." },
+        { t: "Mandatory 18th-century powdered wigs and heavy cloaks.", grade: "poor", pts: -1, fb: "Poor decision. Guests sweltered in heat and complained. Reconsider." }
+      ]},
+      { q: "5. Program Booklet", d: "What program guide is produced?", opts: [
+        { t: "Hardbound commemorative catalog with archival essays and rare stills.", grade: "excellent", pts: 2, fb: "Excellent! Becomes a sought-after collector's item." },
+        { t: "High-quality gloss magazine booklet with credits.", grade: "good", pts: 2, fb: "Good choice! Informative and well-designed." },
+        { t: "Single-page printed sheet with title lists.", grade: "average", pts: 0, fb: "Average. Minimalist, but works." },
+        { t: "Handwritten scribbles on scrap paper napkins.", grade: "poor", pts: -1, fb: "Poor decision. Tacky and unreadable. Try another approach." }
+      ]},
+      { q: "6. Concessions", d: "What classic concessions are offered?", opts: [
+        { t: "Vintage champagne lounge, classic cocktails, and gourmet butter popcorn.", grade: "excellent", pts: 2, fb: "Excellent! High end experience boosting overall patron happiness." },
+        { t: "Traditional soda fountain counter serving egg creams and candy.", grade: "good", pts: 2, fb: "Good choice! Nostalgic charm loved by guests." },
+        { t: "Basic vending machine snacks.", grade: "average", pts: 0, fb: "Average. Functional, lacks thematic grace." },
+        { t: "Expired vintage canned meat from 1960.", grade: "poor", pts: -1, fb: "Poor decision. Health hazard risk! Choose safe catering." }
+      ]},
+      { q: "7. Exhibition Strand", d: "Which retrospective takes spotlight?", opts: [
+        { t: "Pioneering Female Directors of Silent Cinema strand.", grade: "excellent", pts: 2, fb: "Excellent! Praised by international press for historical significance." },
+        { t: "Focus on 1940s Film Noir masterpieces.", grade: "good", pts: 2, fb: "Good choice! Highly popular with consistent sold-out crowds." },
+        { t: "Selection of random 1950s public domain westerns.", grade: "average", pts: 0, fb: "Average. Decent turnout, but predictable." },
+        { t: "Screening unedited commercial ads from 1930s local radio.", grade: "poor", pts: -1, fb: "Poor decision. Boring content drove audiences away. Select real cinema." }
+      ]},
+      { q: "8. Musical Accompaniment", d: "How are silent films scored?", opts: [
+        { t: "Live 30-piece orchestra performing newly restored original scores.", grade: "excellent", pts: 2, fb: "Excellent! Unforgettable, breathtaking cinematic experience!" },
+        { t: "Master theater organist playing live accompaniment.", grade: "good", pts: 2, fb: "Good choice! Authentic historical feel." },
+        { t: "Pre-recorded stock classical audio CD.", grade: "average", pts: 0, fb: "Average. Adequate synchronization, lacks live flair." },
+        { t: "Heavy metal electric guitar improvisation over romantic silent film.", grade: "poor", pts: -1, fb: "Poor decision. Clashing styles ruined classic film mood. Reconsider." }
+      ]},
+      { q: "9. Restoration Award", d: "How do you honor preservationists?", opts: [
+        { t: "Award the Heritage Preservation Award with a research grant.", grade: "excellent", pts: 2, fb: "Excellent! Supports vital archive work for future generations." },
+        { t: "Present an engraved silver film reel award.", grade: "good", pts: 2, fb: "Good choice! Dignified and appropriate honor." },
+        { t: "Hand out paper certificate of appreciation.", grade: "average", pts: 0, fb: "Average. Standard, but modest." },
+        { t: "Give recipient a piece of damaged film stock.", grade: "poor", pts: -1, fb: "Poor decision. Felt like giving trash to an honored guest. Try again." }
+      ]},
+      { q: "10. Festival Closure", d: "How does the Heritage Gala wrap up?", opts: [
+        { t: "Announce a partnership with national archives to restore 3 lost films.", grade: "excellent", pts: 2, fb: "Excellent! Leaves an indelible mark on cinematic preservation history!" },
+        { t: "Host a celebratory grand ball featuring big band orchestra music.", grade: "good", pts: 2, fb: "Good choice! Classy, elegant ending loved by attendees." },
+        { t: "Play a quick closing slide thanking sponsors.", grade: "average", pts: 0, fb: "Average. Simple, understated finish." },
+        { t: "Abruptly turn off hall lights while audience sits in seats.", grade: "poor", pts: -1, fb: "Poor decision. Rude and jarring conclusion. Choose better." }
+      ]}
+    ],
+    emergencies: {
+      4: { q: "🚨 NITRATE FILM SMOKE SCARE!", d: "Vintage film print begins emitting light smoke in projection booth!", opts: [
+        { t: "Isolate print in fireproof vault immediately and switch to safety digital copy.", fail: false, fb: "Flawless emergency action! Safety preserved and film continued.", pts: 2 },
+        { t: "Pour water bucket directly onto operating vintage projector.", fail: true, fb: "Destroyed priceless projector and rare film. GAME OVER." }
+      ]},
+      8: { q: "🚨 PIANO PLAYER ABSENCE!", d: "Lead silent film accompanist gets trapped in traffic minutes before show!", opts: [
+        { t: "Deploy festival's backup organist who knows score by heart.", fail: false, fb: "Brilliant save! Screening ran seamlessly.", pts: 2 },
+        { t: "Run film in total silence without informing audience.", fail: true, fb: "Audience complained of boring experience and demanded refunds. GAME OVER." }
+      ]}
+    }
+  };
+}
+
+function generateAnimData() {
+  return {
+    scenarios: [
+      { q: "1. Opening Feature", d: "What film opens Frame-by-Frame Fest?", opts: [
+        { t: "A breathtaking hand-drawn watercolor animated feature from an indie studio.", grade: "excellent", pts: 2, fb: "Excellent! Mesmerizing artistry captures international headlines!" },
+        { t: "A vibrant 3D computer-animated family adventure film.", grade: "good", pts: 2, fb: "Good choice! Packed theaters and strong family turnouts." },
+        { t: "A experimental stop-motion film made entirely with clay balls.", grade: "average", pts: 0, fb: "Average. Artistic, though pacing proved slow for general crowds." },
+        { t: "An unrendered 3D wireframe test with no textures or sound.", grade: "poor", pts: -1, fb: "Poor decision. Unfinished test footage bored viewers. Choose real film." }
+      ]},
+      { q: "2. Masterclass Session", d: "Who leads the primary animation workshop?", opts: [
+        { t: "A veteran stop-motion master demonstrating physical puppet rigging.", grade: "excellent", pts: 2, fb: "Excellent! Inspiring masterclass praised by animation professionals." },
+        { t: "A senior CGI character animator breaking down performance principles.", grade: "good", pts: 2, fb: "Good choice! High educational value and great Q&A." },
+        { t: "A software seller demonstrating automated lip-sync tools.", grade: "average", pts: 0, fb: "Average. Commercialized feel, but practical info." },
+        { t: "Someone flipping sticky-note flipbooks lazily on camera.", grade: "poor", pts: -1, fb: "Poor decision. Disrespected audience paying for masterclasses. Reconsider." }
+      ]},
+      { q: "3. Exhibition Space", d: "How do you display production artwork?", opts: [
+        { t: "Set up a gallery showing original storyboards, puppets, and concept art.", grade: "excellent", pts: 2, fb: "Excellent! Gives fans rare, stunning insight into animation production." },
+        { t: "Display high-res digital concept prints on backlit gallery boards.", grade: "good", pts: 2, fb: "Good choice! Sleek, modern display aesthetic." },
+        { t: "Tape printed digital art files onto hallway walls.", grade: "average", pts: 0, fb: "Average. Looks low-budget, but art shines through." },
+        { t: "Store original artwork loose on floor tables where people drop drinks.", grade: "poor", pts: -1, fb: "Poor decision. Damaged original artwork! Choose proper gallery setups." }
+      ]},
+      { q: "4. Student Short Showcase", d: "How are student animators featured?", opts: [
+        { t: "Dedicate a prime-time evening slot for global student animation awards.", grade: "excellent", pts: 2, fb: "Excellent! Launches careers of promising new animation directors!" },
+        { t: "Include student shorts ahead of main feature film screenings.", grade: "good", pts: 2, fb: "Good choice! Great exposure in front of packed auditoriums." },
+        { t: "Screen student shorts in a small side room during lunch break.", grade: "average", pts: 0, fb: "Average. Limited audience, but appreciated by students." },
+        { t: "Charge student animators heavy entry fees without screening their work.", grade: "poor", pts: -1, fb: "Poor decision. Exploitative practice ruined community reputation. Reconsider." }
+      ]},
+      { q: "5. Technology Expo", d: "What hardware/software tech do you feature?", opts: [
+        { t: "Interactive stations with digital drawing tablets and motion-capture rigs.", grade: "excellent", pts: 2, fb: "Excellent! Attendees love hands-on experience with cutting-edge tools." },
+        { t: "Demonstration booths featuring top animation software suites.", grade: "good", pts: 2, fb: "Good choice! Popular spot for aspiring artists." },
+        { t: "A table with basic flipbooks and colored pencils.", grade: "average", pts: 0, fb: "Average. Nostalgic, but underwhelming for tech lovers." },
+        { t: "Outdated 1990s desktop computers that crash repeatedly.", grade: "poor", pts: -1, fb: "Poor decision. Frustrating tech failures angered guests. Try again." }
+      ]},
+      { q: "6. Concessions & Theming", d: "What concessions best fit the event?", opts: [
+        { t: "Whimsical, colorful thematic desserts inspired by animated classics.", grade: "excellent", pts: 2, fb: "Excellent! Delights kids and adults alike; highly shared online." },
+        { t: "Freshly made popcorn and specialty fruit smoothies.", grade: "good", pts: 2, fb: "Good choice! Healthy and popular cinema snacks." },
+        { t: "Generic pre-packaged candy bars.", grade: "average", pts: 0, fb: "Average. Standard festival food." },
+        { t: "Bowls of plain flour labeled 'Creative Dust'.", grade: "poor", pts: -1, fb: "Poor decision. Inedible gimmick. Pick real food." }
+      ]},
+      { q: "7. Voice Acting Panel", d: "How do you structure the voice acting event?", opts: [
+        { t: "Live voice recording booth where actors table-read scripts with fans.", grade: "excellent", pts: 2, fb: "Excellent! Tremendous fan engagement and unforgettable fun!" },
+        { t: "Q&A panel featuring prominent animation voice artists.", grade: "good", pts: 2, fb: "Good choice! Full auditorium and great behind-the-mic stories." },
+        { t: "Panel discussing voice contract law without actors present.", grade: "average", pts: 0, fb: "Average. Dry topic, but informative for professionals." },
+        { t: "Using computer text-to-speech software to read script roles live.", grade: "poor", pts: -1, fb: "Poor decision. Soulless robot voices bored audience. Select human talent." }
+      ]},
+      { q: "8. Retrospective Strand", d: "Which animation retrospective is showcased?", opts: [
+        { t: "A celebration of classic hand-drawn anime and pioneering short films.", grade: "excellent", pts: 2, fb: "Excellent! Packed screens and intense enthusiasm from fans." },
+        { t: "A retrospective of early 3D computer animation breakthroughs.", grade: "good", pts: 2, fb: "Good choice! Nostalgic and historical educational value." },
+        { t: "Compilation of vintage Saturday morning commercial breaks.", grade: "average", pts: 0, fb: "Average. Fun nostalgia, but lacks artistic weight." },
+        { t: "Screening low-resolution viral web animations without creator credit.", grade: "poor", pts: -1, fb: "Poor decision. Plagiarism backlash hurt festival standing. Reconsider." }
+      ]},
+      { q: "9. Award Trophy", d: "What design is chosen for festival awards?", opts: [
+        { t: "A custom sculpted golden zoetrope that spins physically.", grade: "excellent", pts: 2, fb: "Excellent! Iconic moving trophy celebrated across animation media!" },
+        { t: "An elegant crystal block containing 3D laser-engraved frame artwork.", grade: "good", pts: 2, fb: "Good choice! Sleek and prestigious award." },
+        { t: "A plastic cartoon character figurine.", grade: "average", pts: 0, fb: "Average. Cute, but feels cheap for awards." },
+        { t: "A lump of unshaped clay in a cardboard box.", grade: "poor", pts: -1, fb: "Poor decision. Winners felt disrespected by lazy trophies. Try again." }
+      ]},
+      { q: "10. Closing Finale", d: "How do you end Frame-by-Frame Fest?", opts: [
+        { t: "A collaborative giant animated short rendered live using attendee drawings.", grade: "excellent", pts: 2, fb: "Excellent! Inspiring community finale that captivates audiences!" },
+        { t: "An awards ceremony followed by premiere of winning student films.", grade: "good", pts: 2, fb: "Good choice! Uplifting, career-building finale." },
+        { t: "A brief thank-you speech by venue organizers.", grade: "average", pts: 0, fb: "Average. Simple and quick exit." },
+        { t: "Abruptly pull power cables during final speech.", grade: "poor", pts: -1, fb: "Poor decision. Rude tech error ruined event end. Select better." }
+      ]}
+    ],
+    emergencies: {
+      4: { q: "🚨 FILE CORRUPTION DISASTER!", d: "Digital master file for headlining feature gets corrupted 15 mins before premiere!", opts: [
+        { t: "Switch to secondary physical backup drive stored in secure venue vault.", fail: false, fb: "Saved by redundant backups! Screening launched flawlessly.", pts: 2 },
+        { t: "Stream a low-resolution compressed internet version with ads.", fail: true, fb: "Audience demanded refunds and studio revoked rights. GAME OVER." }
+      ]},
+      8: { q: "🚨 STOP-MOTION DISPLAY COLLAPSE!", d: "A fragile stop-motion puppet exhibit display falls over near eager crowds!", opts: [
+        { t: "Secures perimeter instantly, bring lead puppet conservator to inspect safely.", fail: false, fb: "Quick rescue! Puppet undamaged and crowd kept safe.", pts: 2 },
+        { t: "Sweep broken props into trash bin right in front of horrified creator.", fail: true, fb: "Creator sued festival and industry boycotted event. GAME OVER." }
+      ]}
+    }
+  };
+}
+
+let state = {
+  fest: null,
+  score: 0,
+  step: 0,
+  activeOptions: [],
+  answered: false
+};
+
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+function startWith(f) {
+  state.fest = f;
+  state.score = 0;
+  state.step = 0;
+  document.getElementById('fest-screen').classList.remove('active');
+  document.getElementById('game-screen').classList.add('active');
+  updateTally();
+  loadStep();
+}
+
+function updateTally() {
+  const el = document.getElementById('cur-score');
+  el.innerHTML = `${state.score} ${state.fest.emoji}`;
+}
+
+function loadStep() {
+  state.answered = false;
+  document.getElementById('fb-box').style.display = 'none';
+  document.getElementById('gameover-btn-el').style.display = 'none';
+  document.getElementById('next-btn-el').style.display = 'block';
+  
+  let data;
+  const emg = GAME_DATA[state.fest.id].emergencies[state.step + 1];
+  
+  if (emg) {
+    data = emg;
+    document.body.classList.add('emergency-mode');
+    document.getElementById('cur-step').textContent = `CRISIS ${state.step + 1}`;
+  } else {
+    data = GAME_DATA[state.fest.id].scenarios[state.step];
+    document.body.classList.remove('emergency-mode');
+    document.getElementById('cur-step').textContent = `${state.step + 1}/10`;
+  }
+
+  document.getElementById('q-title').textContent = data.q;
+  document.getElementById('q-desc').textContent = data.d;
+  
+  state.activeOptions = [...data.opts];
+  renderOptions();
+}
+
+function renderOptions() {
+  const cont = document.getElementById('options-cont');
+  cont.innerHTML = '';
+  const shuffled = shuffle([...state.activeOptions]);
+
+  shuffled.forEach((o, i) => {
+    const b = document.createElement('button');
+    b.className = 'opt-btn';
+    b.innerHTML = `<span>${String.fromCharCode(65 + i)}</span> ${o.t}`;
+    b.onclick = () => handleChoice(o, b);
+    cont.appendChild(b);
+  });
+}
+
+function handleChoice(o, btn) {
+  if (state.answered) return;
+  const fbBox = document.getElementById('fb-box');
+  const fbText = document.getElementById('fb-text');
+
+  if (o.grade === "poor") {
+    state.score = Math.max(0, state.score - 1);
+    updateTally();
+    fbBox.style.display = 'block';
+    fbBox.className = 'feedback fb-poor';
+    fbText.textContent = o.fb;
+    state.activeOptions = state.activeOptions.filter(opt => opt !== o);
+    renderOptions();
+    return;
+  }
+
+  state.answered = true;
+  
+  if (o.fail) {
+    fbBox.style.display = 'block';
+    fbBox.className = 'feedback fb-poor';
+    fbText.textContent = o.fb;
+    document.getElementById('next-btn-el').style.display = 'none';
+    document.getElementById('gameover-btn-el').style.display = 'block';
+  } else {
+    state.score += (o.pts || 0);
+    updateTally();
+    fbBox.style.display = 'block';
+    
+    if (o.grade === "excellent") {
+      fbBox.className = 'feedback fb-excellent';
+    } else if (o.grade === "good") {
+      fbBox.className = 'feedback fb-good';
+    } else if (o.grade === "average") {
+      fbBox.className = 'feedback fb-average';
+    } else {
+      fbBox.className = 'feedback fb-excellent';
+    }
+    
+    fbText.textContent = o.fb;
+  }
+  
+  document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+}
+
+function nextStep() {
+  state.step++;
+  if (state.step >= 10) {
+    showWin();
+  } else {
+    loadStep();
+  }
+}
+
+function showWin() {
+  document.getElementById('game-screen').classList.remove('active');
+  document.getElementById('win-screen').classList.add('active');
+  document.getElementById('fest-title-final').textContent = state.fest.title;
+  
+  const desc = document.getElementById('w-desc');
+  const title = document.getElementById('w-title');
+  const emoji = document.getElementById('final-emoji-display');
+
+  if (state.score >= 20) {
+    emoji.textContent = "🏆";
+    title.textContent = "Palme d'Or Level Prestige!";
+    desc.textContent = "Unbelievable achievement! Your flawless curation, exquisite hospitality, and calm handling of unexpected emergencies elevated your festival into a premier global cinematic event. International film critics are calling it an instant legendary festival edition!";
+  } else if (state.score >= 14) {
+    emoji.textContent = "🌟";
+    title.textContent = "Critical Success!";
+    desc.textContent = "Great job! Your festival maintained high artistic standards, strong attendance, and smooth operations. Audiences left inspired, press coverage was consistently favorable, and sponsors are eager to fund your next festival edition!";
+  } else if (state.score >= 8) {
+    emoji.textContent = "🎬";
+    title.textContent = "Modest Premiere";
+    desc.textContent = "The festival concluded safely, but some uninspired or safe choices limited its cultural impact. While ticket sales covered basic expenses, cinephiles felt the programming lacked bold vision. Refine your curation and try again!";
+  } else {
+    emoji.textContent = "📉";
+    title.textContent = "Box Office Flop";
+    desc.textContent = "A disappointing run. A combination of faulty decisions, poor quality choices, and organizational missteps damaged the festival's artistic reputation. Review festival management principles and try directing a fresh festival theme!";
+  }
+}
+
+function restartGame() {
+  state = { fest: null, score: 0, step: 0, activeOptions: [], answered: false };
+  document.body.classList.remove('emergency-mode');
+  document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+  document.getElementById('fest-screen').classList.add('active');
+}
+
+function init() {
+  const cont = document.getElementById('fest-choices');
+  cont.innerHTML = '';
+  FESTIVALS.forEach(f => {
+    const div = document.createElement('div');
+    div.className = 'fest-opt';
+    div.innerHTML = `<span class="icon">${f.icon}</span><h3>${f.title}</h3>`;
+    div.onclick = () => startWith(f);
+    cont.appendChild(div);
+  });
+}
+
+window.onload = init;
+</script>
+
+</body>
+</html>
