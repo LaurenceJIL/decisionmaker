@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>New York City Adventure — A2 Level 3-Day Trip</title>
+<title>New York City Adventure — B1 Level 3-Day Trip</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght=700&family=Lato:wght=400;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -64,8 +64,8 @@
 <div id="landingPage">
   <div class="landing-inner">
     <h1 class="landing-title">NYC Trip</h1>
-    <p>Welcome to New York City! You have <strong>$600</strong> for a 3-day trip.</p>
-    <p>Try to get many <b>Fun Points</b>. Don't spend all your money!</p>
+    <p>Welcome to New York City! You have <strong>$300</strong> for a 3-day trip.</p>
+    <p>Balance your spending wisely to maximize your experience without running out of funds!</p>
     <button class="landing-btn" onclick="startGame()">Start Trip →</button>
   </div>
 </div>
@@ -76,7 +76,7 @@
 
 <div class="stats-bar">
   <div class="stat-item">⭐ Fun Points: <span id="scoreDisplay">0</span></div>
-  <div class="stat-item">💰 Money: <span id="budgetDisplay">$600</span></div>
+  <div class="stat-item">💰 Money: <span id="budgetDisplay">$300</span></div>
 </div>
 
 <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
@@ -92,161 +92,163 @@
 <script>
 let currentStepIndex = 0;
 let score = 0;
-let budget = 600;
+let budget = 300;
 
 const gameData = [
   // DAY 1
   {
     title: "Day 1 — Step 1: Arriving in New York",
-    desc: "You are at JFK Airport. How do you want to go to your hotel in the city?",
+    desc: "You have just landed at JFK Airport. How do you plan to reach your downtown hotel?",
     choices: [
-      { text: "Take the train and the subway.", cost: 12, pts: 10, fb: "<b>Good job!</b> This is cheap and fast. You can travel like a real New York citizen." },
-      { text: "Take a yellow taxi cab.", cost: 75, pts: 20, fb: "<b>Exciting!</b> You see the big buildings from the window, but the taxi is expensive." },
-      { text: "Rent a big, luxury limousine car.", cost: 180, pts: 35, fb: "<b>Amazing!</b> You feel like a rich movie star, but it costs too much money." },
-      { text: "Walk to the city on the big highway road.", cost: 0, pts: 0, type: "poor", fb: "<b>Stop!</b> Walking on a highway is not safe and it takes 5 hours. Choose something else!" }
+      { text: "Take the AirTrain and connect to the subway network.", cost: 12, pts: 10, fb: "<b>Practical choice!</b> It is inexpensive, reliable, and helps you navigate the city like a resident." },
+      { text: "Hail an official yellow taxi cab outside the terminal.", cost: 75, pts: 20, fb: "<b>Convenient!</b> You enjoy iconic views of the skyline during the drive, though traffic adds to the cost." },
+      { text: "Book a private luxury airport transfer service.", cost: 140, pts: 30, fb: "<b>Extravagant!</b> Exceptionally comfortable, but it consumes nearly half of your total trip budget!" },
+      { text: "Board an unlicensed private van offered by a driver in the terminal.", cost: 45, pts: 0, type: "poor", fb: "<b>Risky idea!</b> Unlicensed airport transportation often charges hidden fees and lacks safety regulation. Stick to official options!" }
     ]
   },
   {
-    title: "Day 1 — Step 2: Morning Walk",
-    desc: "The sun is shining. Where do you want to go first?",
+    title: "Day 1 — Step 2: Morning Sightseeing",
+    desc: "The morning is clear and sunny. Where will you head first?",
     choices: [
-      { text: "Go to the Top of the Rock observation deck.", cost: 45, pts: 25, fb: "<b>Beautiful!</b> You go up to the 70th floor. You can see all of Central Park and the city below." },
-      { text: "Visit Grand Central Train Station.", cost: 15, pts: 15, fb: "<b>Interesting!</b> You see the beautiful blue ceiling with stars on it and learn about old trains." },
-      { text: "Walk around Rockefeller Center plaza.", cost: 0, pts: 10, fb: "<b>Nice!</b> It is free. You can see famous statues and see many people walking by." },
-      { text: "Climb a tall construction machine to look at the city.", cost: 0, pts: 0, type: "poor", fb: "<b>No!</b> That is illegal and very dangerous. You can fall. Choose a safe option!" }
+      { text: "Purchase admission to the Top of the Rock observation deck.", cost: 45, pts: 25, fb: "<b>Breathtaking!</b> Standing on the 70th floor offers magnificent panoramic views of Central Park and Manhattan." },
+      { text: "Explore the historic main concourse of Grand Central Terminal.", cost: 0, pts: 15, fb: "<b>Fascinating!</b> Admission is free. You can admire the astronomical ceiling painting and the famous four-faced clock." },
+      { text: "Stroll around the public plazas of Rockefeller Center.", cost: 0, pts: 10, fb: "<b>Enjoyable!</b> A pleasant, budget-friendly walk past famous landmarks, art installations, and street life." },
+      { text: "Wait in a long line at a popular bakery for a viral pastry.", cost: 25, pts: 5, type: "poor", fb: "<b>Time lost!</b> You spent nearly two hours in line for an overpriced snack, leaving little time for real sightseeing. Reconsider your priority!" }
     ]
   },
   {
-    title: "Day 1 — Step 3: Lunch Time",
-    desc: "You are hungry. What do you want to eat for lunch?",
+    title: "Day 1 — Step 3: Midday Dining",
+    desc: "It is time for lunch. Which option fits your midday plans best?",
     choices: [
-      { text: "Buy a slice of hot cheese pizza on the street.", cost: 5, pts: 15, fb: "<b>Delicious!</b> You eat it outside. It is very cheap and tastes wonderful." },
-      { text: "Eat at a fun Broadway diner restaurant.", cost: 35, pts: 18, fb: "<b>Fun!</b> The waiters sing popular songs while they bring you a burger and french fries." },
-      { text: "Buy chicken and rice from a street food cart.", cost: 12, pts: 15, fb: "<b>Great choice!</b> The food smells amazing and gives you energy for the afternoon." },
-      { text: "Look inside a trash can for food leftovers.", cost: 0, pts: 0, type: "poor", fb: "<b>Yuck!</b> That is dirty. You have enough money to buy real, clean food. Try again!" }
+      { text: "Grab two fresh slices of authentic New York street pizza.", cost: 6, pts: 15, fb: "<b>Delicious!</b> Classic, fast, and extremely affordable street dining." },
+      { text: "Dine at a historic Broadway restaurant with singing servers.", cost: 35, pts: 18, fb: "<b>Entertaining!</b> The lively atmosphere and live performances make for a memorable meal." },
+      { text: "Order a warm platter of chicken and rice from a popular halal cart.", cost: 12, pts: 15, fb: "<b>Satisfying choice!</b> Generous portions, rich spices, and very popular with locals." },
+      { text: "Sit down at a high-end hotel restaurant for a multi-course lunch.", cost: 85, pts: 10, type: "poor", fb: "<b>Overpriced!</b> The lunch consumes too much time and money early in your trip. A lighter lunch leaves more options for dinner!" }
     ]
   },
   {
-    title: "Day 1 — Step 4: The First Night",
-    desc: "It is dark now and the city lights are on. What do you want to do?",
+    title: "Day 1 — Step 4: Evening Entertainment",
+    desc: "Night falls and the city light up. How would you like to end your day?",
     choices: [
-      { text: "Buy tickets for a famous Broadway theater show.", cost: 140, pts: 40, fb: "<b>Wonderful!</b> The actors, music, and colorful costumes are fantastic." },
-      { text: "Walk through Times Square to see the big screens.", cost: 0, pts: 15, fb: "<b>Bright!</b> There are many neon lights and people. It is free and beautiful." },
-      { text: "Go to a high rooftop café to see the view.", cost: 30, pts: 20, fb: "<b>Nice!</b> You drink something cold and watch the cars drive below you." },
-      { text: "Try to run onto the theater stage during a show.", cost: 0, pts: 0, type: "poor", fb: "<b>Bad idea!</b> The police will catch you. You cannot do that. Choose an ordinary activity!" }
+      { text: "Purchase a last-minute ticket for a Broadway musical.", cost: 110, pts: 35, fb: "<b>Spectacular!</b> The world-class performances, music, and stage production are unforgettable." },
+      { text: "Walk through Times Square to experience the giant illuminated billboards.", cost: 0, pts: 15, fb: "<b>Vibrant!</b> The energy and massive LED screens capture the essence of Midtown Manhattan for free." },
+      { text: "Relax with a beverage at a rooftop lounge overlooking Midtown.", cost: 28, pts: 20, fb: "<b>Sophisticated!</b> Great atmosphere and impressive evening views of surrounding skyscrapers." },
+      { text: "Buy dynamic tickets from an unlicensed street vendor outside a theater.", cost: 70, pts: 0, type: "poor", fb: "<b>Caution!</b> Purchasing tickets from street scalpers often results in invalid passes or severe overcharging. Use official box offices!" }
     ]
   },
   // EMERGENCY 1
   {
-    title: "🚨 EMERGENCY: Lost MetroCard!",
-    desc: "Oh no! Your subway ticket fell out of your pocket. It is gone!",
+    title: "🚨 EMERGENCY: Lost Transit Pass!",
+    desc: "While exploring, you realize your transit card has slipped out of your pocket!",
     choices: [
-      { text: "Buy a new subway ticket at the station machine.", cost: 20, pts: 5, fb: "<b>Good.</b> You lose a little money, but now you can ride the subway again." },
-      { text: "Use your smartphone to pay at the gate.", cost: 3, pts: 12, fb: "<b>Smart!</b> The subway machine can scan your phone. It is very cheap and quick." },
-      { text: "Jump over the subway gate so you do not pay.", cost: 0, pts: 0, type: "poor", fb: "<b>Don't do that!</b> Jumping the gate is against the law. You can get a big fine. Pay for a ticket!" }
+      { text: "Purchase a replacement unlimited transit pass at the station booth.", cost: 20, pts: 5, fb: "<b>Resolved.</b> An unexpected expense, but you regain seamless transit access across the subway system." },
+      { text: "Use contactless payment via your phone or card directly at the turnstile.", cost: 3, pts: 12, fb: "<b>Efficient!</b> Modern fare gates accept direct contactless payment, saving time and cash." },
+      { text: "Attempt to walk everywhere for the rest of the day to avoid paying again.", cost: 0, pts: 0, type: "poor", fb: "<b>Exhausting!</b> Walking dozens of blocks leaves you too fatigued to enjoy evening activities. Invest in proper transit!" }
     ]
   },
   // DAY 2
   {
-    title: "Day 2 — Step 5: Day 2 Morning",
-    desc: "Good morning! It is a beautiful day. Where do you want to go?",
+    title: "Day 2 — Step 5: Morning Exploration",
+    desc: "Good morning! The weather is fantastic. How will you spend your morning?",
     choices: [
-      { text: "Rent a bicycle to ride around Central Park.", cost: 25, pts: 22, fb: "<b>Healthy!</b> You ride past trees, fountains, and lakes. It is a fast way to see the park." },
-      { text: "Visit the 9/11 Memorial and Museum.", cost: 30, pts: 25, fb: "<b>Important history.</b> You see the large water fountains and learn about the city's past." },
-      { text: "Walk across the famous Brooklyn Bridge.", cost: 0, pts: 18, fb: "<b>Great view!</b> Walking across this old bridge is free and you can take beautiful photos." },
-      { text: "Jump into the park lake for a swim.", cost: 0, pts: 0, type: "poor", fb: "<b>No!</b> Swimming is not allowed in the park pools. It is dangerous. Pick something else!" }
+      { text: "Rent a bicycle to explore the pathways of Central Park.", cost: 25, pts: 22, fb: "<b>Refreshing!</b> A great, active way to cover wide areas of the park, past fountains, meadows, and bridges." },
+      { text: "Visit the 9/11 Memorial Plaza and Museum.", cost: 30, pts: 25, fb: "<b>Moving experience.</b> Paying tribute at the reflecting pools offers deep insight into contemporary city history." },
+      { text: "Walk across the historic Brooklyn Bridge to Brooklyn Heights.", cost: 0, pts: 18, fb: "<b>Iconic views!</b> Crossing over the East River provides outstanding sightlines of Lower Manhattan." },
+      { text: "Book an early morning commercial shopping tour in industrial Queens.", cost: 40, pts: 5, type: "poor", fb: "<b>Disappointing!</b> The tour mostly consists of retail stops with limited cultural value, wasting prime morning hours." }
     ]
   },
   {
-    title: "Day 2 — Step 6: Afternoon Lunch",
-    desc: "You are walking in Chinatown. What do you want to eat?",
+    title: "Day 2 — Step 6: Cultural Lunch",
+    desc: "You find yourself exploring Chinatown. What is your lunch strategy?",
     choices: [
-      { text: "Eat hot Chinese dumplings in a small restaurant.", cost: 18, pts: 20, fb: "<b>Yummy!</b> The food is cheap, warm, and traditional. You enjoy it a lot." },
-      { text: "Go to a very expensive, modern bistro café.", cost: 55, pts: 22, fb: "<b>Fancy!</b> You eat a fresh salad and see a famous internet star sitting near you." },
-      { text: "Eat a big meat sandwich at a famous old deli.", cost: 32, pts: 25, fb: "<b>Huge!</b> The sandwich has a lot of meat. It is a famous New York food experience." },
-      { text: "Try to eat a plastic food model from a shop window.", cost: 10, pts: 0, type: "poor", fb: "<b>Silly!</b> That is toy food for display, not real lunch. Buy something you can eat!" }
+      { text: "Try freshly steamed dumplings at an authentic neighborhood spot.", cost: 16, pts: 20, fb: "<b>Flavorful!</b> Authentic, fast, and remarkably affordable regional cuisine." },
+      { text: "Reserve a table at a sleek, contemporary Asian-fusion bistro.", cost: 50, pts: 22, fb: "<b>Stylish!</b> Creative culinary presentation in an upscale environment, though higher in cost." },
+      { text: "Enjoy an oversized hot pastrami sandwich at a classic Jewish deli.", cost: 32, pts: 25, fb: "<b>Generous portion!</b> A quintessential New York culinary staple rich in history." },
+      { text: "Rely solely on complimentary supermarket food samples instead of a meal.", cost: 0, pts: 5, type: "poor", fb: "<b>Unsatisfying!</b> Snack samples won't sustain your energy for an afternoon of sightseeing. Treat yourself to proper fuel!" }
     ]
   },
   {
-    title: "Day 2 — Step 7: Visiting a Museum",
-    desc: "Let's look at some world-famous art. Which museum do you choose?",
+    title: "Day 2 — Step 7: Cultural Immersion",
+    desc: "Spend your afternoon discovering art and culture. Which venue do you choose?",
     choices: [
-      { text: "Go to the Metropolitan Museum of Art (The Met).", cost: 30, pts: 28, fb: "<b>Incredible!</b> You see old Egyptian statues and beautiful paintings from Europe." },
-      { text: "See modern art at the MoMA museum.", cost: 25, pts: 22, fb: "<b>Cool!</b> You see colorful, strange, and exciting paintings by modern artists." },
-      { text: "Walk around free art galleries in Chelsea.", cost: 0, pts: 15, fb: "<b>Interesting!</b> It is free to enter these small shops and look at new art pieces." },
-      { text: "Draw a picture on the museum wall with a marker.", cost: 0, pts: 0, type: "poor", fb: "<b>Stop!</b> You cannot draw on museum walls. That is illegal graffiti. Choose a better option!" }
+      { text: "Explore the vast collections at the Metropolitan Museum of Art.", cost: 30, pts: 28, fb: "<b>World-class!</b> From ancient Egyptian temples to European masterpieces, the collections are extraordinary." },
+      { text: "View iconic modern masterpieces at MoMA.", cost: 25, pts: 22, fb: "<b>Inspiring!</b> Featuring celebrated modern art and thought-provoking contemporary exhibitions." },
+      { text: "Self-guide a tour through contemporary art galleries in Chelsea.", cost: 0, pts: 15, fb: "<b>Engaging!</b> Browsing cutting-edge contemporary gallery spaces is completely free to the public." },
+      { text: "Join an overly lengthy souvenir shopping excursion inside a department store.", cost: 60, pts: 5, type: "poor", fb: "<b>Time-consuming!</b> Spending prime afternoon hours in crowded commercial stores reduces your time for unique cultural sites." }
     ]
   },
   {
-    title: "Day 2 — Step 8: Evening in Brooklyn",
-    desc: "You go to Brooklyn for the evening. What do you want to do?",
+    title: "Day 2 — Step 8: Brooklyn Evening",
+    desc: "You are spending the evening across the East River in Brooklyn. What is the plan?",
     choices: [
-      { text: "Go to a live music concert.", cost: 45, pts: 25, fb: "<b>Loud and fun!</b> You listen to a new rock band and dance with young people." },
-      { text: "Sit in the park near the river at sunset.", cost: 0, pts: 18, fb: "<b>Relaxing!</b> You watch the sun go down and see the city buildings start to shine." },
-      { text: "Go on a big dinner boat cruise in the water.", cost: 110, pts: 35, fb: "<b>Luxury!</b> You eat nice food while sailing past the Statue of Liberty at night." },
-      { text: "Start a fight with a group of street dancers.", cost: 0, pts: 0, type: "poor", fb: "<b>Dangerous!</b> That is a bad idea. Be friendly and choose a real activity!" }
+      { text: "Attend an indie live music performance in Williamsburg.", cost: 35, pts: 25, fb: "<b>Lively!</b> Immersing yourself in local music culture provides a authentic taste of Brooklyn nightlife." },
+      { text: "Watch the sunset over the Manhattan skyline from Brooklyn Bridge Park.", cost: 0, pts: 18, fb: "<b>Picturesque!</b> The dramatic view as city lights turn on across the harbor is completely free and peaceful." },
+      { text: "Embark on an evening harbor dinner cruise around the harbor.", cost: 110, pts: 35, fb: "<b>Memorable!</b> Outstanding multi-course dining paired with spectacular nighttime views of the Statue of Liberty." },
+      { text: "Take an unguided late-night walk through unfamiliar residential neighborhoods.", cost: 0, pts: 0, type: "poor", fb: "<b>Unproductive!</b> Wandering quiet residential streets late at night offers limited sights and raises unnecessary safety concerns." }
     ]
   },
   // EMERGENCY 2
   {
-    title: "🚨 EMERGENCY: Big Rainstorm!",
-    desc: "Suddenly, a very big rainstorm starts! Water is falling everywhere!",
+    title: "🚨 EMERGENCY: Sudden Downpour!",
+    desc: "An unexpected torrential thunderstorm hits the city! Rain is pouring down in sheets.",
     choices: [
-      { text: "Buy an expensive umbrella from a street seller.", cost: 15, pts: 5, fb: "<b>Dry!</b> The umbrella breaks later, but it keeps you dry for now." },
-      { text: "Go inside the public library to wait for the rain to stop.", cost: 0, pts: 10, fb: "<b>Smart!</b> You stay dry, save your money, and look at old books for free." },
-      { text: "Stand in the cold rain until your clothes are wet.", cost: 0, pts: 0, type: "gameover", fb: "<b>GAME OVER!</b> You get very wet and sick. You must stay in bed for the rest of your trip!" }
+      { text: "Purchase a sturdy compact umbrella from a neighborhood vendor.", cost: 15, pts: 5, fb: "<b>Practical!</b> It keeps you dry enough to continue navigating destination points safely." },
+      { text: "Take shelter inside the historic Stephen A. Schwarzman Building (Public Library).", cost: 0, pts: 10, fb: "<b>Resourceful!</b> You remain completely dry, admire majestic grand architecture, and save your funds." },
+      { text: "Continue outdoor sightseeing in the heavy storm without rain gear.", cost: 0, pts: 0, type: "gameover", fb: "<b>GAME OVER!</b> Soaked to the skin and catching a severe chill, you are forced to spend the remainder of your trip resting in your hotel!" }
     ]
   },
   // DAY 3
   {
-    title: "Day 3 — Step 9: Famous Places",
-    desc: "It is your last day! What famous place do you want to see?",
+    title: "Day 3 — Step 9: Final Morning Landmark",
+    desc: "It is your final day in the city! Which destination will you prioritize?",
     choices: [
-      { text: "Take a boat ferry to see the Statue of Liberty.", cost: 25, pts: 30, fb: "<b>Great!</b> You stand near the huge green statue and learn about American history." },
-      { text: "Walk on the High Line park path.", cost: 0, pts: 20, fb: "<b>Beautiful!</b> This is an old train track turned into a park with flowers above the streets." },
-      { text: "Pay for a short helicopter ride over the city.", cost: 210, pts: 50, fb: "<b>Amazing!</b> You fly high in the air next to the buildings. Very expensive, but you will never forget it." },
-      { text: "Try to swim across the wide river to the statue.", cost: 0, pts: 0, type: "poor", fb: "<b>No!</b> The water is too cold and big boats are dangerous. Use the tourist boat ferry!" }
+      { text: "Take the reserve ferry to Liberty Island to view the Statue of Liberty.", cost: 25, pts: 30, fb: "<b>Historic!</b> Getting close to national monuments offers excellent historic context and harbor photos." },
+      { text: "Walk along the High Line elevated urban park corridor.", cost: 0, pts: 20, fb: "<b>Innovative design!</b> A repurposed historic freight rail line converted into a lush public walkway above street level." },
+      { text: "Book an exclusive scenic helicopter excursion over Manhattan.", cost: 190, pts: 45, fb: "<b>Thrilling!</b> Unmatched aerial view of skyscrapers, though heavily impacting your remaining travel funds." },
+      { text: "Book a bus trip to an out-of-town suburban outlet shopping mall.", cost: 35, pts: 5, type: "poor", fb: "<b>Inconvenient!</b> Traveling hours away from the city center wastes your precious final hours in New York." }
     ]
   },
   {
-    title: "Day 3 — Step 10: Souvenir Lunch",
-    desc: "Where do you want to eat lunch and buy gifts for your family?",
+    title: "Day 3 — Step 10: Souvenir & Lunch Stop",
+    desc: "Where will you have lunch and select memorable keepsakes for friends?",
     choices: [
-      { text: "Eat at Chelsea Market and buy handmade gifts.", cost: 40, pts: 20, fb: "<b>Great food!</b> You eat seafood and buy nice postcards and toys from local artists." },
-      { text: "Buy a cheap hot dog and a New York T-shirt outside.", cost: 8, pts: 12, fb: "<b>Classic!</b> You eat quickly on the street and get a nice, cheap shirt." },
-      { text: "Go to a luxury chocolate shop for sweet gifts.", cost: 50, pts: 22, fb: "<b>Sweet!</b> You try delicious candy and buy beautiful boxes of chocolate for your friends." },
-      { text: "Steal a red traffic sign from the street.", cost: 0, pts: 0, type: "poor", fb: "<b>Don't steal!</b> Taking city property is illegal. Buy a normal gift in a gift shop!" }
+      { text: "Sample artisanal dishes at Chelsea Market and buy local crafts.", cost: 38, pts: 20, fb: "<b>Vibrant food hall!</b> Excellent culinary options and unique artisanal products made by local designers." },
+      { text: "Enjoy a quick street-cart meal and purchase souvenir postcards.", cost: 10, pts: 12, fb: "<b>Traditional!</b> Quick, economical, and leaves plenty of funds remaining for your final evening." },
+      { text: "Select packaged gourmet confectionery from a boutique chocolate shop.", cost: 45, pts: 22, fb: "<b>Decadent!</b> High quality, beautifully presented gifts, though slightly pricey." },
+      { text: "Purchase mass-produced novelty items from overpriced tourist gift shops in Midtown.", cost: 30, pts: 5, type: "poor", fb: "<b>Generic!</b> Low-quality merchandise marked up significantly for tourists. Seek out authentic local crafts instead!" }
     ]
   },
   {
-    title: "Day 3 — Step 11: Afternoon Relaxation",
-    desc: "Your trip is almost finished. How do you spend your last hours?",
+    title: "Day 3 — Step 11: Afternoon Leisure",
+    desc: "With a few hours remaining before departure, how will you spend your late afternoon?",
     choices: [
-      { text: "Visit the big modern shopping mall at Hudson Yards.", cost: 10, pts: 15, fb: "<b>Modern!</b> You see strange modern buildings and look at luxury shops." },
-      { text: "Sit in Washington Square Park and listen to musicians.", cost: 0, pts: 18, fb: "<b>Peaceful!</b> You sit near a big stone arch and listen to people playing the piano." },
-      { text: "Ride the Roosevelt Island overhead cable car.", cost: 3, pts: 20, fb: "<b>Great view!</b> You fly over the river in a red cable car for the price of a subway ticket." },
-      { text: "Lie down on the road in front of city buses to sleep.", cost: 0, pts: 0, type: "poor", fb: "<b>Dangerous!</b> Buses cannot see you on the road. Find a safe park bench to sit on!" }
+      { text: "Explore contemporary architecture and retail space at Hudson Yards.", cost: 45, pts: 15, fb: "<b>Modern marvel!</b> Marvelous modern engineering, impressive public space structures, and window shopping." },
+      { text: "Relax in Washington Square Park and enjoy street performers.", cost: 0, pts: 18, fb: "<b>Classic NYC atmosphere!</b> Soaking in community culture, live acoustic music, and vibrant park life for free." },
+      { text: "Take the Roosevelt Island Tramway for elevated aerial views.", cost: 3, pts: 20, fb: "<b>Unique transit experience!</b> Offers stunning skyline viewpoints for merely the price of a standard subway fare." },
+      { text: "Spend several hours waiting in your hotel lobby long before check-out.", cost: 0, pts: 0, type: "poor", fb: "<b>Missed opportunity!</b> Sitting idle in a lobby wastes valuable time that could be spent enjoying public parks or neighborhood sights." }
     ]
   },
   {
-    title: "Day 3 — Step 12: Final Evening Goodbye",
-    desc: "It is your last hour before you go to the airport. How do you say goodbye?",
+    title: "Day 3 — Step 12: Final Evening Farewell",
+    desc: "You have one final evening activity before taking transportation to the airport. How do you conclude your trip?",
     choices: [
-      { text: "Listen to live music at an old jazz club.", cost: 45, pts: 30, fb: "<b>Relaxing sounds!</b> You listen to piano and saxophone music. It is a beautiful end to your trip." },
-      { text: "Look at the city lights from the Brooklyn park.", cost: 0, pts: 15, fb: "<b>Quiet.</b> You look across the dark water at the shiny buildings and smile." },
-      { text: "Eat a big, expensive steak dinner at a restaurant.", cost: 120, pts: 35, fb: "<b>Excellent food!</b> You eat a wonderful meal with great service to celebrate your trip." },
-      { text: "Hide inside a small train locker so you don't leave.", cost: 0, pts: 0, type: "poor", fb: "<b>Impossible!</b> The lockers are too small and you must go home. Say goodbye like a regular person!" }
+      { text: "Enjoy a live performance at a historic Greenwich Village jazz club.", cost: 40, pts: 30, fb: "<b>Atmospheric!</b> Rich acoustics, intimate setting, and historic musical culture provide a memorable finale." },
+      { text: "Take a quiet final walk along the waterfront promenade in DUMBO.", cost: 0, pts: 15, fb: "<b>Serene!</b> Reflecting on your journey while taking in nighttime skyline views across the water." },
+      { text: "Indulge in a multi-course dinner at a premier Manhattan steakhouse.", cost: 110, pts: 35, fb: "<b>Luxurious dining!</b> Flawless service and exquisite food, provided you managed your budget well throughout!" },
+      { text: "Arrive five hours early at the airport terminal to sit at the gate.", cost: 15, pts: 0, type: "poor", fb: "<b>Unnecessary waiting!</b> Spending excessive hours in an airport lounge cuts your city experience short without benefit." }
     ]
   }
 ];
 
 const vocabulary = [
-  { word: "Subway", def: "An electric train that travels under the ground." },
-  { word: "Observation Deck", def: "A high place on a tall building where people look at the view." },
-  { word: "Souvenir", def: "Something small you buy to remember a city or a place." },
-  { word: "Ferry", def: "A boat that carries passengers across a river or lake." },
-  { word: "Bistro", def: "A small, cozy restaurant or café." },
-  { word: "Highway", def: "A large, fast road for cars and trucks." }
+  { word: "Concourse", def: "A large, open hall or area in a public building like a station or airport." },
+  { word: "Observation Deck", def: "An elevated viewing platform located near the top of a skyscraper." },
+  { word: "Halal Cart", def: "A popular street food vendor serving seasoned meats, rice, and Mediterranean dishes." },
+  { word: "Indie", def: "Independent music, art, or media produced outside major commercial studios." },
+  { word: "Bistro", def: "A small, stylish, and casual neighborhood restaurant." },
+  { word: "Skyscraper", def: "A tall, continuously habitable building having many stories." },
+  { word: "Torrential", def: "Heavy, dense, and fast-falling rain precipitation." },
+  { word: "Promenade", def: "A paved public walk or path along a waterfront or park." }
 ];
 
 function shuffleArray(array) {
@@ -276,7 +278,7 @@ function loadStep() {
         btn.disabled = true;
     }
 
-    btn.innerHTML = `<span>${c.text} ${(!canAfford && c.type !== "poor" && c.type !== "gameover") ? '<b style="color:red">(Too expensive!)</b>' : ''}</span>
+    btn.innerHTML = `<span>${c.text} ${(!canAfford && c.type !== "poor" && c.type !== "gameover") ? '<b style="color:red">(Over budget!)</b>' : ''}</span>
       <span class="price-tag cost-tag">$${c.cost}</span>`;
     
     btn.onclick = () => selectChoice(c);
@@ -337,18 +339,18 @@ function nextStep() {
 function renderFinalScreen() {
   let title, message;
   
-  if (score >= 260) {
-    title = "🥇 King of New York!";
-    message = "Amazing! You had a perfect trip. You saw the best things, ate wonderful food, and saved your money well.";
-  } else if (score >= 160) {
-    title = "🥈 Experienced Tourist";
-    message = "Great job! You had a classic New York trip. You saw many big sights and handled the emergencies well.";
+  if (score >= 250) {
+    title = "🥇 Expert New Yorker!";
+    message = "Outstanding! You balanced your budget, explored top cultural highlights, and made smart, authentic decisions throughout your journey.";
+  } else if (score >= 150) {
+    title = "🥈 Savvy Traveler";
+    message = "Well done! You experienced key sights, navigated minor obstacles effectively, and managed a realistic tourist itinerary.";
   } else {
-    title = "🥉 NYC Survivor";
-    message = "You made it home! The trip was a bit difficult for you, but you learned a lot about the big city.";
+    title = "🥉 NYC Explorer";
+    message = "You completed your journey! You faced a tight budget and unexpected challenges, gaining valuable lessons for your next trip.";
   }
 
-  let vocabHTML = `<div class="vocab-section"><h3>New Words Learned:</h3><div class="vocab-grid">`;
+  let vocabHTML = `<div class="vocab-section"><h3>Key Vocabulary Encountered:</h3><div class="vocab-grid">`;
   vocabulary.forEach(v => { vocabHTML += `<div class="vocab-item"><b>${v.word}:</b> ${v.def}</div>`; });
   vocabHTML += `</div></div>`;
 
@@ -357,8 +359,8 @@ function renderFinalScreen() {
     <p>${message}</p>
     <hr>
     <div style="font-size: 1.2rem; margin: 20px 0;">
-      <p>Final Fun Points: <b>${score}</b></p>
-      <p>Money Left: <b>$${budget}</b></p>
+      <p>Final Experience Points: <b>${score}</b></p>
+      <p>Remaining Budget: <b>$${budget}</b></p>
     </div>
     ${vocabHTML}
     <button class="btn-next" style="display:block" onclick="location.reload()">Play Again ↩</button>
