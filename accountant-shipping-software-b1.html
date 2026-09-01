@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="B1 workplace English decision game for an accountant in a shipping and transportation software company.">
+<title>A Busy Day — Accountant at a Shipping Software Company</title>
+<style>
+*{box-sizing:border-box}
+:root{
+  --bg:#f7f7f4;--surface:#fff;--surface2:#efeee8;--border:#d9d8d2;
+  --text:#1d1d1b;--muted:#6c6c67;--blue:#e7f1fb;--blue-b:#83b7ea;--blue-t:#124a7c;
+  --green:#eaf4df;--green-b:#94c65a;--green-t:#28540b;
+  --amber:#faf0dc;--amber-b:#e9a33b;--amber-t:#684008;
+  --red:#fceaea;--red-b:#e99393;--red-t:#762020;--fatal:#df4545;
+  --radius:10px
+}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--text);
+  font-family:Arial,Helvetica,sans-serif;display:flex;justify-content:center;
+  padding:28px 14px 55px}
+.wrap{width:100%;max-width:720px}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.kicker{font-size:12px;color:#92928c;text-transform:uppercase;letter-spacing:.09em}
+.level{font-size:11px;color:var(--blue-t);background:var(--blue);border:1px solid var(--blue-b);
+  border-radius:20px;padding:5px 10px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  padding:26px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.header{display:flex;justify-content:space-between;gap:14px;border-bottom:1px solid var(--border);
+  padding-bottom:16px;margin-bottom:18px}
+.name{font-weight:700;font-size:15px}.role{font-size:12px;color:var(--muted);margin-top:3px}
+.right{display:flex;align-items:center;gap:10px}.dots{display:flex;gap:4px}.dot{width:8px;height:8px;border-radius:50%;background:#d7d6d0}
+.dot.done{background:#6c9f2e}.dot.active{background:#3988d4}.dot.emergency{background:var(--fatal)}
+.score{font-size:12px;font-weight:700;background:var(--green);color:var(--green-t);
+  border:1px solid var(--green-b);border-radius:20px;padding:5px 11px;white-space:nowrap}
+.time{font-size:11px;color:#92928c;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.alert{background:var(--red);border:1px solid var(--red-b);color:var(--red-t);padding:11px 13px;
+  border-radius:7px;font-size:13px;margin-bottom:13px}
+.vocab{display:flex;flex-wrap:wrap;gap:5px;align-items:center;color:var(--muted);font-size:12px;margin-bottom:14px}
+.pill{font-size:11px;background:var(--blue);color:var(--blue-t);padding:4px 8px;border-radius:5px}
+.scene{font-size:15px;line-height:1.7;margin-bottom:17px}
+.options{display:grid;gap:10px}
+.option{width:100%;text-align:left;background:#fff;border:1px solid var(--border);border-radius:7px;
+  padding:14px 15px;font:inherit;font-size:14px;line-height:1.55;cursor:pointer}
+.option:hover:not(:disabled){background:var(--surface2);border-color:#aaa}
+.option:focus-visible,.next:focus-visible,.restart:focus-visible{outline:3px solid #9bc6ee;outline-offset:2px}
+.option:disabled{cursor:default}
+.option.good{background:var(--green);border-color:var(--green-b);color:var(--green-t)}
+.option.ok{background:var(--amber);border-color:var(--amber-b);color:var(--amber-t)}
+.option.bad{background:var(--red);border-color:var(--red-b);color:var(--red-t)}
+.option.fatal{background:var(--red);border:2px solid var(--fatal);color:var(--red-t)}
+.tag{float:right;font-size:11px;font-weight:700;margin-left:10px;padding:3px 7px;border-radius:12px;visibility:hidden}
+.tag.show{visibility:visible}.tag3{background:var(--green);color:var(--green-t)}
+.tag2{background:var(--amber);color:var(--amber-t)}.tag1,.tag0{background:var(--red);color:var(--red-t)}
+.feedback,.discussion{display:none;margin-top:15px;padding:14px 15px;border-radius:7px;font-size:14px;line-height:1.65}
+.feedback.show,.discussion.show{display:block}
+.feedback.good{background:var(--green);border:1px solid var(--green-b);color:var(--green-t)}
+.feedback.ok{background:var(--amber);border:1px solid var(--amber-b);color:var(--amber-t)}
+.feedback.bad{background:var(--red);border:1px solid var(--red-b);color:var(--red-t)}
+.feedback.fatal{background:var(--red);border:2px solid var(--fatal);color:var(--red-t)}
+.discussion{background:var(--blue);border:1px solid var(--blue-b);color:var(--blue-t)}
+.discussion strong,.feedback strong{display:block;margin-bottom:4px}
+.next,.restart{margin-top:15px;background:#fff;border:1px solid #999;border-radius:7px;padding:10px 20px;
+  font:inherit;font-size:14px;cursor:pointer;display:none}.next.show,.restart.show{display:inline-block}
+.final{text-align:center}.final-label{font-size:11px;color:#92928c;text-transform:uppercase;letter-spacing:.08em}
+.final-score{font-size:58px;font-weight:700;line-height:1.1;margin:9px 0 2px}
+.final-max{font-size:13px;color:var(--muted);margin-bottom:15px}
+.bar{height:10px;background:var(--surface2);border-radius:20px;overflow:hidden;margin-bottom:18px}
+.fill{height:100%;width:0;background:#6c9f2e;transition:width .8s ease}
+.grade{font-size:18px;font-weight:700;margin-bottom:10px}.final-text{text-align:left;font-size:14px;line-height:1.7}
+.debrief{margin-top:18px;text-align:left;background:var(--blue);border:1px solid var(--blue-b);
+  border-radius:7px;padding:15px;font-size:14px;line-height:1.7}
+.debrief h3{font-size:14px;margin:0 0 8px}.debrief ul{margin:7px 0 0 20px;padding:0}
+.footer{border-top:1px solid var(--border);margin-top:18px;padding-top:13px;color:var(--muted);font-size:11px}
+@media(max-width:520px){body{padding:18px 10px 40px}.card{padding:18px}.right{gap:6px}.dots{display:none}.final-score{font-size:46px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><div class="kicker">English in the Workplace</div><div class="level">Strong B1</div></div>
+  <main class="card" id="game" aria-live="polite"></main>
+</div>
+
+<script>
+"use strict";
+
+/* -----------------------------
+   DATA: branching decision tree
+   ----------------------------- */
+const N = {
+d1:{
+  stage:1,label:"08:40 — The missing payment",
+  scene:`You are <strong>Sam</strong>, an accountant at <strong>RouteFlow</strong>, a company that makes software for shipping and transportation companies. You arrive to find an email from <strong>NorthStar Logistics</strong>, an important customer. They say they have not received an invoice for their monthly software subscription and cannot close their accounts. At the same time, your sales manager asks for an urgent revenue figure for a customer meeting.`,
+  vocab:["customer","subscription","invoice","revenue figure"],
+  opts:[
+    {t:"Deal with NorthStar first. Check the billing system, find out what happened, and promise a clear update before 10:00.",pts:3,
+     fb:"Strong choice. You identify an important customer problem and give yourself a clear deadline. In a software company, accurate billing is important for both cash flow and customer trust."},
+    {t:"Work on the sales manager's revenue figure first. The customer can wait because the email is not marked urgent.",pts:1,
+     fb:"The sales request matters, but the customer cannot close their accounts without the invoice. A useful habit is to judge urgency by business impact, not only by the subject line."},
+    {t:"Forward the customer email to your manager and ask them to decide what you should do.",pts:2,
+     fb:"You have identified the problem, but you are giving the whole task to your manager. A better approach is to investigate first and escalate only if you find something you cannot resolve."}
+  ],next:{3:"d2a",2:"d2b",1:"d2c"}
+},
+d2a:{
+  stage:2,label:"09:05 — A billing problem",
+  scene:`The billing system shows that NorthStar's monthly subscription is active, but the invoice was not generated. You discover that someone changed the customer's billing plan last week. The new plan is £1,850 per month. You are not sure whether the change was approved.`,
+  vocab:["billing plan","generate an invoice","approved","subscription"],
+  opts:[
+    {t:"Check the change history and contact the account manager to confirm the approved price before generating the invoice.",pts:3,
+     fb:"Exactly right. You check the evidence before creating a financial document. This protects the company from sending an incorrect invoice and gives the customer a reliable answer."},
+    {t:"Generate the £1,850 invoice because that is the price currently shown in the system.",pts:1,
+     fb:"The system is useful evidence, but you have already seen an unusual change. If the price was not approved, the customer may challenge the invoice. Check the reason for the change first."}
+  ],next:{3:"d3a",1:"d3b"}
+},
+d2b:{
+  stage:2,label:"09:10 — The customer calls",
+  scene:`NorthStar calls you. Their finance manager says: <em>"We need the invoice this morning. Can you just send the amount from last month?"</em> You know the billing plan changed, but you have not confirmed the new price yet.`,
+  vocab:["finance manager","amount","billing plan","confirm"],
+  opts:[
+    {t:"Explain that you are checking a billing-plan change and will confirm the correct amount shortly. Do not guess.",pts:3,
+     fb:"Excellent. You are helpful without giving unconfirmed information. Phrases such as <em>I’m checking that now</em> and <em>I’ll confirm the amount shortly</em> are useful professional English."},
+    {t:"Tell them the old amount so they can finish their accounts, and correct it later if necessary.",pts:1,
+     fb:"This creates a risk. An accountant should not give a customer an amount that may be wrong. A short delay is better than sending incorrect financial information."},
+    {t:"Tell them you cannot help and ask them to contact the sales team.",pts:2,
+     fb:"This avoids giving incorrect information, which is good, but you could be more helpful. You have access to the billing system, so you should investigate and coordinate with sales if necessary."}
+  ],next:{3:"d3c",2:"d3d",1:"d3b"}
+},
+d2c:{
+  stage:2,label:"09:15 — Your manager asks for the number",
+  scene:`Your manager asks for the revenue figure for the sales meeting. You have not finished the NorthStar invoice problem. The manager says: <em>"I need a number in five minutes. Even a rough figure is fine."</em> You can see a revenue report, but it includes several invoices that are still being checked.`,
+  vocab:["revenue","rough figure","report","under review"],
+  opts:[
+    {t:"Give a clearly labelled estimate and explain which invoices are still under review.",pts:3,
+     fb:"Good accounting communication. A forecast or estimate can be useful if it is clearly labelled. You are giving the manager information without pretending it is final."},
+    {t:"Give the number from the report as if it were final. You do not have time to explain the details.",pts:1,
+     fb:"This is risky. If some invoices are still under review, the figure may be misleading. When numbers are uncertain, say so clearly."}
+  ],next:{3:"d3e",1:"d3f"}
+},
+d3a:{
+  stage:3,label:"10:00 — The customer wants an answer",
+  scene:`You confirm that the account manager approved the new £1,850 monthly plan. You generate the invoice and send it to NorthStar. Their finance manager replies: <em>"Thanks. Can you also give me a statement showing our unpaid invoices?"</em> You notice one old invoice is marked as unpaid, but the customer says they paid it last week.`,
+  vocab:["statement","unpaid","payment","check"],
+  opts:[
+    {t:"Check the bank/payment records before telling the customer that the invoice is unpaid.",pts:3,
+     fb:"Correct. The accounting system may not have been updated yet. Checking the payment record avoids an unnecessary dispute with a customer."},
+    {t:"Send the statement immediately. The system says the invoice is unpaid, so that must be correct.",pts:1,
+     fb:"The system is not always up to date. The customer says they paid, so this is a good reason to check the payment record before making a firm statement."},
+    {t:"Tell the customer the invoice is unpaid and ask them to send proof of payment.",pts:2,
+     fb:"Reasonable, but slightly premature. Asking for proof may be necessary later, but first check your own records. This shows the customer that you take responsibility for your data."}
+  ],next:{3:"d4a",2:"d4b",1:"d4c"}
+},
+d3b:{
+  stage:3,label:"10:00 — The price is still unclear",
+  scene:`The account manager confirms that the new price is correct, but the change was approved by email rather than through the normal approval form. Your manager asks: <em>"Can we invoice the customer now?"</em> The customer is waiting.`,
+  vocab:["approval form","confirm","invoice","procedure"],
+  opts:[
+    {t:"Invoice the customer, but record the email approval and flag the missing approval form for follow-up.",pts:3,
+     fb:"A practical response. You have evidence of approval, but you also record the process problem so it can be corrected. Good accountants solve the immediate issue without ignoring control weaknesses."},
+    {t:"Refuse to invoice until the formal approval form is completed, even though the manager has confirmed the price.",pts:2,
+     fb:"This protects the control process, but it may create an unnecessary delay if your company accepts written approval by email. The best response is to check the policy and document the exception."},
+    {t:"Invoice the customer and delete the old billing information so nobody gets confused.",pts:0,
+     fb:"Deleting financial history is a serious mistake. Records should be kept and changes should be traceable. Never remove information just to make a file look cleaner."}
+  ],next:{3:"d4a",2:"d4b",0:"d4c"}
+},
+d3c:{
+  stage:3,label:"10:05 — A payment does not match",
+  scene:`You check the payment records. NorthStar did pay the old invoice, but the payment reference is different from the invoice number. The £3,200 payment is sitting in an <strong>unallocated cash</strong> account. The customer needs the statement today.`,
+  vocab:["payment reference","unallocated cash","statement","match"],
+  opts:[
+    {t:"Match the payment to the correct invoice, document the reason, and then send the updated statement.",pts:3,
+     fb:"Excellent reconciliation work. You identify why the payment was not matched, correct the record, and keep an audit trail."},
+    {t:"Move the £3,200 to the most recent invoice because the amounts are similar.",pts:1,
+     fb:"Do not guess when allocating cash. A payment must be matched using reliable evidence. Moving it to the wrong invoice can create a new customer-account problem."}
+  ],next:{3:"d4a",1:"d4c"}
+},
+d3d:{
+  stage:3,label:"10:10 — The customer is waiting",
+  scene:`You tell NorthStar you are checking the payment. They reply: <em>"We need a statement now. Can you just send the system version and we'll sort it out?"</em> You know it may show the old unpaid invoice.`,
+  vocab:["system version","statement","unpaid invoice","accurate"],
+  opts:[
+    {t:"Explain that you are checking a payment and will send an accurate statement as soon as it is corrected.",pts:3,
+     fb:"Professional and clear. You set a realistic expectation and protect the quality of the financial information."},
+    {t:"Send the system version but add: 'Please ignore any errors.'",pts:1,
+     fb:"That is not a good customer document. If you know the statement may be wrong, do not send it as if it were reliable. Fix it or clearly explain what is missing."}
+  ],next:{3:"d4a",1:"d4c"}
+},
+d3e:{
+  stage:3,label:"10:05 — A number for sales",
+  scene:`You review the revenue report. About £12,000 is still under review because invoices were issued at the end of the month. Your manager says: <em>"Just give me the total. They don't need the details."</em>`,
+  vocab:["under review","total","revenue report","estimate"],
+  opts:[
+    {t:"Give the total as an estimate and say that £12,000 is still under review.",pts:3,
+     fb:"Strong choice. You provide useful information while making the uncertainty clear. That is better than hiding the issue."},
+    {t:"Give the total as a final figure because your manager asked for it.",pts:1,
+     fb:"A manager's request does not change the quality of the number. If £12,000 is under review, the figure should not be presented as final."},
+    {t:"Refuse to give any figure until every invoice is final.",pts:2,
+     fb:"Safe, but not very helpful. Managers often need estimates. The better solution is to provide a clearly labelled estimate and explain the uncertainty."}
+  ],next:{3:"d4a",2:"d4b",1:"d4c"}
+},
+d3f:{
+  stage:3,label:"10:05 — Sales meeting pressure",
+  scene:`You explain that the revenue figure includes invoices under review. Your manager says: <em>"Fine. Give me the number excluding those invoices."</em> You calculate the figure, but you are worried that the sales team may use it as if it were the final monthly revenue.`,
+  vocab:["excluding","final figure","revenue","clarify"],
+  opts:[
+    {t:"Give the figure and clearly say: 'This excludes £12,000 currently under review. It is not the final month-end figure.'",pts:3,
+     fb:"Excellent. You answer the question and prevent the number from being misunderstood. Clear qualifications are an important part of professional accounting communication."},
+    {t:"Give the figure without any explanation because your manager already knows the situation.",pts:1,
+     fb:"Even if your manager knows, the number may be repeated later without the context. A short explanation protects everyone."}
+  ],next:{3:"d4a",1:"d4c"}
+},
+d4a:{
+  stage:4,label:"11:30 — The suspicious refund",
+  scene:`A support manager asks you to approve a £4,800 refund for a transport company called <strong>BlueHaul</strong>. The reason is a service problem. However, the refund is much larger than normal and the bank account is different from the account used for previous refunds.`,
+  vocab:["refund","approve","bank account","unusual"],
+  opts:[
+    {t:"Stop the refund and verify the request and bank details with an authorised contact before approving it.",pts:3,
+     fb:"Exactly right. The unusual amount and new bank account are warning signs. Verification is more important than speed when money is going to a different account."},
+    {t:"Approve it because the support manager has requested it.",pts:1,
+     fb:"The request comes from a colleague, but that does not prove the payment details are correct. Unusual refunds need independent verification."},
+    {t:"Email the customer using the new bank details and ask them to confirm that the account is correct.",pts:2,
+     fb:"Verification is good, but be careful not to use the suspicious details as if they were already trusted. Use a known contact method and independently verify the customer's identity."}
+  ],next:{3:"d5a",2:"d5b",1:"d5c"}
+},
+d4b:{
+  stage:4,label:"11:30 — A spreadsheet request",
+  scene:`Your sales colleague asks you to change a spreadsheet so that a customer who has not yet signed the contract appears as a paying customer. He says: <em>"It's only for today's presentation. We'll change it back later."</em>`,
+  vocab:["contract","paying customer","spreadsheet","change back"],
+  opts:[
+    {t:"Refuse to change the figures. Offer to label the customer as 'contract pending' instead.",pts:3,
+     fb:"Strong professional judgement. You can help the presentation without creating a false financial picture. Clear labels are much safer than changing the facts."},
+    {t:"Change the spreadsheet and set a reminder to change it back tomorrow.",pts:1,
+     fb:"This creates a misleading report. Even temporary changes can be copied, emailed or used in decisions. Financial information should remain accurate."}
+  ],next:{3:"d5a",1:"d5c"}
+},
+d4c:{
+  stage:4,label:"11:30 — A shortcut",
+  scene:`You are under pressure. A colleague says: <em>"The finance system is slow. Just enter the refund manually and we'll add the supporting document later."</em> The refund is for £2,100 and is due today.`,
+  vocab:["supporting document","manual entry","refund","due"],
+  opts:[
+    {t:"Ask for the supporting document first and follow the normal approval process.",pts:3,
+     fb:"Correct. A supporting document is part of the evidence for the transaction. Following the normal process protects the company and makes the record easy to check later."},
+    {t:"Enter the refund now and ask for the document afterwards.",pts:1,
+     fb:"This creates a weak audit trail. If the document never arrives, nobody can easily prove why the refund was made."},
+    {t:"Enter it now but write 'document to follow' in the notes.",pts:2,
+     fb:"Better than hiding the missing document, but still not ideal. If the control requires evidence before payment, a note does not replace the evidence."}
+  ],next:{3:"d5a",2:"d5b",1:"d5c"}
+},
+d5a:{
+  stage:5,label:"13:30 — A major customer dispute",
+  scene:`A large shipping company, <strong>OceanBridge</strong>, disputes a £18,000 invoice. Their message says: <em>"Your software was unavailable for six hours. We are not paying this invoice."</em> Your contract includes service-level terms, but you need to check the actual outage record.`,
+  vocab:["dispute","outage","contract","service level"],
+  opts:[
+    {t:"Check the outage record and contract terms, then give OceanBridge a factual response with the account manager.",pts:3,
+     fb:"Good approach. You investigate the facts before agreeing or rejecting the dispute. This keeps the conversation professional and gives the customer a clear explanation."},
+    {t:"Cancel the invoice immediately because the customer is important.",pts:1,
+     fb:"Customer relationships matter, but cancelling £18,000 without checking the contract and outage record is not sound accounting."},
+    {t:"Tell OceanBridge they must pay because the invoice has already been issued.",pts:2,
+     fb:"Too strong. An invoice can be disputed for a valid reason. Check the contract and evidence before deciding what should happen."}
+  ],next:{3:"d6a",2:"d6b",1:"d6c"}
+},
+d5b:{
+  stage:5,label:"13:30 — A tempting shortcut",
+  scene:`The refund verification is taking time. A senior colleague says: <em>"I know the customer. Approve it and I'll explain the details later."</em> You still have not independently verified the changed bank account.`,
+  vocab:["verify","senior colleague","bank account","approve"],
+  opts:[
+    {t:"Explain that you need independent verification because the bank details have changed.",pts:3,
+     fb:"Correct. Seniority does not remove the need for financial controls. You explain the reason instead of simply saying no."},
+    {t:"Approve it because the colleague is senior and accepts responsibility.",pts:1,
+     fb:"Do not transfer responsibility for a financial-control decision just because someone is senior. If the bank details are wrong, the company can lose the money."}
+  ],next:{3:"d6a",1:"d6c"}
+},
+d5c:{
+  stage:5,label:"13:30 — Your manager notices",
+  scene:`Your manager reviews the morning's work and asks why one transaction does not have its supporting document. You have not processed it yet. They say: <em>"We need to close this today."</em>`,
+  vocab:["supporting document","close","transaction","process"],
+  opts:[
+    {t:"Explain that the document is missing and say you will contact the owner immediately and process the transaction once the evidence is received.",pts:3,
+     fb:"Good. You are transparent about the status and give a clear next step. That is better than hiding the missing document just to meet a deadline."},
+    {t:"Process it now and tell your manager you will collect the document later.",pts:1,
+     fb:"The deadline does not remove the control requirement. If evidence is required before processing, wait for it or get an authorised exception."}
+  ],next:{3:"d6a",1:"d6c"}
+},
+d6a:{
+  stage:6,label:"15:00 — Emergency: ransomware alert",
+  emergency:true,
+  scene:`The IT team sends an urgent message: <strong>"Possible ransomware attack. Do not open shared finance files or approve payments until further notice."</strong> You are about to approve a £27,000 supplier payment. Your manager is in a customer meeting.`,
+  vocab:["ransomware","shared files","approve payments","security"],
+  opts:[
+    {t:"Stop the payment, follow the IT instruction, and inform your manager using the approved emergency contact method.",safe:true,
+     fb:"Correct. When IT reports a possible ransomware attack, normal payment activity may be unsafe. Stop, follow the security instruction, and escalate through the approved channel."},
+    {t:"Approve the payment quickly before the system is completely locked.",gameOver:true,
+     fb:"<strong>GAME OVER.</strong> The payment is made during a suspected security incident. The finance team cannot confirm whether the payment file was compromised, and the incident becomes much more serious."},
+    {t:"Ignore the message because the payment is for a trusted supplier.",safe:true,
+     fb:"The supplier may be trusted, but the security warning applies to the finance system itself. A familiar supplier does not make an unsafe payment safe. Stop and follow IT's instructions."}
+  ],next:"d7"}
+,
+d6c:{
+  stage:6,label:"15:00 — A security warning",
+  emergency:true,
+  scene:`The IT team sends an urgent message: <strong>"Possible ransomware attack. Do not open shared finance files or approve payments until further notice."</strong> You have three supplier payments waiting. Your colleague says: <em>"We can probably still use the system. Let's just finish these."</em>`,
+  vocab:["ransomware","security warning","supplier payments","system"],
+  opts:[
+    {t:"Stop finance processing, tell your colleague to stop too, and follow the IT team's instructions.",safe:true,
+     fb:"Exactly right. A security warning changes the situation. You do not try to guess whether the system is safe; you follow the specialist team's instructions."},
+    {t:"Finish the three payments because they were already prepared.",gameOver:true,
+     fb:"<strong>GAME OVER.</strong> You process payments during a suspected ransomware incident. This can increase financial loss and make the security incident harder to contain."}
+  ],next:"d7"}
+,
+d7:{
+  stage:7,label:"16:30 — End-of-day debrief",
+  scene:`The security incident is under control. Before leaving, your manager asks: <em>"What should we improve tomorrow?"</em> You have notes about the NorthStar billing problem, the unusual refund request, and the ransomware warning.`,
+  vocab:["improve","billing","refund","security incident"],
+  opts:[
+    {t:"Suggest three actions: review unusual billing changes, strengthen refund verification, and agree a clear finance procedure for IT security incidents.",pts:3,
+     fb:"Excellent end-of-day thinking. You turn individual problems into process improvements. That is a strong habit for an accountant working in a fast-moving software company."},
+    {t:"Say the problems were mostly caused by other teams, so there is not much finance can change.",pts:1,
+     fb:"Other teams were involved, but finance still controls many important processes. A good debrief focuses on what the finance team can improve."},
+    {t:"Say everything is fine because the incidents did not cause a final loss.",pts:2,
+     fb:"The company was lucky, but near-misses are useful lessons. A good debrief asks what could have gone wrong and how to reduce the risk next time."}
+  ],next:"final"}
+};
+
+const MAX=21;
+const S={score:0,answered:false,path:[],current:null,shuffled:[]};
+
+function esc(s){
+  return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+}
+function shuffle(a){
+  const x=a.slice();
+  for(let i=x.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[x[i],x[j]]=[x[j],x[i]]}
+  return x;
+}
+function stageIndex(id){
+  const n=N[id]; return n && n.stage ? n.stage : 1;
+}
+function buildDots(stage, emergency){
+  let s="";
+  for(let i=1;i<=7;i++) s+=`<span class="dot ${i<stage?"done":i===stage?(emergency?"emergency":"active"):""}"></span>`;
+  return s;
+}
+function nextId(node,pts){
+  if(typeof node.next==="string") return node.next;
+  return node.next[pts] ?? Object.values(node.next)[0] ?? null;
+}
+function render(id){
+  const node=N[id];
+  if(!node){showFinal(false);return}
+  S.current=id; S.answered=false;
+  S.shuffled=shuffle(node.opts.map((o,i)=>({...o,_i:i})));
+  const game=document.getElementById("game");
+  const alert=node.emergency?`<div class="alert"><strong>⚠ Emergency</strong> — no points this round, but your decision matters.</div>`:"";
+  const vocab=node.vocab?.length?`<div class="vocab"><span>Key words:</span>${node.vocab.map(v=>`<span class="pill">${esc(v)}</span>`).join("")}</div>`:"";
+  game.innerHTML=`
+    <div class="header">
+      <div><div class="name">Sam Taylor</div><div class="role">Accountant — RouteFlow (shipping & transportation software)</div></div>
+      <div class="right"><div class="dots">${buildDots(stageIndex(id),!!node.emergency)}</div><div class="score" id="score">${S.score} pts</div></div>
+    </div>
+    <div class="time">${esc(node.label)}</div>
+    ${alert}${vocab}
+    <div class="scene">${node.scene}</div>
+    <div class="options" id="options"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="discussion" id="discussion"></div>
+    <button class="next" id="next">Next →</button>
+  `;
+  const box=document.getElementById("options");
+  S.shuffled.forEach((o,i)=>{
+    const b=document.createElement("button");
+    b.className="option";
+    b.type="button";
+    b.innerHTML=`<span>${o.t}</span><span class="tag ${o.pts===3?"tag3":o.pts===2?"tag2":"tag1"}">${node.emergency?"":(o.pts>0?"+":"")+o.pts}</span>`;
+    b.addEventListener("click",()=>pick(i),{once:true});
+    box.appendChild(b);
+  });
+}
+function pick(i){
+  if(S.answered)return;
+  const node=N[S.current],o=S.shuffled[i];
+  S.answered=true;
+  document.querySelectorAll(".option").forEach((b,idx)=>{
+    b.disabled=true;
+    const tag=b.querySelector(".tag"); if(tag)tag.classList.add("show");
+    if(idx===i)b.classList.add(node.emergency?(o.gameOver?"fatal":"ok"):(o.pts===3?"good":o.pts===2?"ok":"bad"));
+  });
+  if(!node.emergency){
+    S.score+=Number(o.pts)||0;
+    S.path.push({id:S.current,pts:o.pts});
+    document.getElementById("score").textContent=S.score+" pts";
+  }
+  const fb=document.getElementById("feedback");
+  fb.className="feedback show "+(node.emergency?(o.gameOver?"fatal":"ok"):(o.pts===3?"good":o.pts===2?"ok":"bad"));
+  fb.innerHTML=o.fb;
+
+  const d=document.getElementById("discussion");
+  const prompts=[
+    "Discussion: Would you make the same decision? Why or why not?",
+    "Discussion: What could go wrong if you chose differently?",
+    "Discussion: What would you say to the colleague or customer in this situation?"
+  ];
+  const prompt=prompts[(S.path.length + i)%prompts.length];
+  d.innerHTML=`<strong>Discuss</strong>${prompt}`;
+  d.className="discussion show";
+
+  const nb=document.getElementById("next");
+  nb.className="next show";
+  if(o.gameOver){nb.textContent="See final debrief";nb.onclick=()=>showFinal(true)}
+  else{
+    const nx=nextId(node,o.pts);
+    nb.textContent=nx==="final"?"See final debrief":"Next →";
+    nb.onclick=()=>nx==="final"?showFinal(false):render(nx);
+  }
+}
+function showFinal(gameOver){
+  const pct=Math.round((S.score/MAX)*100);
+  let grade,body,focus;
+  if(gameOver){
+    grade="The day ended early.";
+    body="You made a decision during a serious security incident that should have been avoided. The main lesson is simple: when IT reports a possible ransomware attack, stop finance processing and follow the security procedure.";
+    focus=["follow specialist instructions","stop risky payments","escalate security incidents quickly"];
+  }else if(S.score>=18){
+    grade="Excellent professional judgement.";
+    body="You handled the day with strong control, clear communication and good priorities. You checked information before acting, protected financial records and knew when a situation needed escalation.";
+    focus=["verify unusual transactions","communicate uncertainty clearly","turn problems into process improvements"];
+  }else if(S.score>=14){
+    grade="Strong performance.";
+    body="You made mostly sound decisions and showed good professional instincts. A few choices could have been more careful, especially when financial information or controls were uncertain.";
+    focus=["avoid guessing with financial data","document exceptions","use clear escalation language"];
+  }else if(S.score>=10){
+    grade="A solid learning day.";
+    body="You avoided the most serious risks, but several situations required faster or more precise judgement. In accounting, small shortcuts can create bigger problems later.";
+    focus=["check evidence before approval","keep reports accurate","separate urgency from pressure"];
+  }else{
+    grade="A difficult day — but useful practice.";
+    body="The exercise shows why accountants in software companies need both financial knowledge and good communication. The most important skills are accuracy, control, verification and knowing when to stop and escalate.";
+    focus=["financial controls","customer billing accuracy","security and escalation"];
+  }
+  const game=document.getElementById("game");
+  game.innerHTML=`
+    <div class="final">
+      <div class="final-label">End of day — Sam Taylor, RouteFlow</div>
+      <div class="final-score">${gameOver?"—":S.score}</div>
+      <div class="final-max">${gameOver?"game over":"out of "+MAX+" points"}</div>
+      <div class="bar"><div class="fill" id="fill"></div></div>
+      <div class="grade">${grade}</div>
+      <div class="final-text">${body}</div>
+      <div class="debrief">
+        <h3>Final debrief — discuss</h3>
+        <div><strong>1.</strong> Which decision was easiest? Why?</div>
+        <div><strong>2.</strong> Which situation would be most difficult in your real job?</div>
+        <div><strong>3.</strong> When should an accountant say “I need to check this first”?</div>
+        <div><strong>4.</strong> Which professional phrase from the exercise would you like to use at work?</div>
+        <h3 style="margin-top:13px">Key points to remember</h3>
+        <ul>${focus.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>
+      </div>
+      <div class="footer">Vocabulary: invoice · revenue · billing plan · payment reference · refund · approval · supporting document · dispute · outage · contract · verify · security incident · ransomware · escalate</div>
+      <button class="restart show" type="button" id="restart">Play again — take a different path</button>
+    </div>`;
+  requestAnimationFrame(()=>{const f=document.getElementById("fill");if(f)f.style.width=(gameOver?0:pct)+"%"});
+  document.getElementById("restart").addEventListener("click",restart);
+}
+function restart(){
+  S.score=0;S.answered=false;S.path=[];S.current=null;S.shuffled=[];
+  render("d1");
+}
+window.addEventListener("error",e=>{console.error("Game error:",e.error||e.message)});
+render("d1");
+</script>
+</body>
+</html>
