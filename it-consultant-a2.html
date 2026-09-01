@@ -41,7 +41,7 @@
         .game-container {
             background-color: var(--card-bg);
             width: 100%;
-            max-width: 780px;
+            max-width: 820px;
             border-radius: 12px;
             box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
             padding: 30px;
@@ -230,7 +230,7 @@
     <header id="game-header" class="hidden">
         <h1>ERP Project Manager Challenge</h1>
         <div class="status-bar">
-            <span>Decisions: <span id="decision-count">0</span></span>
+            <span>Situation: <span id="decision-count">0</span> / 12</span>
             <span>Score: <span id="score-display">0</span></span>
         </div>
     </header>
@@ -239,9 +239,9 @@
         <!-- LANDING PAGE -->
         <div id="landing-screen" class="landing-card">
             <h2>Welcome to Your International ERP Project Week!</h2>
-            <p>You are an <strong>IT Consultant and Project Manager</strong> at a software company that develops ERP solutions (enterprise software package / <em>progiciel</em>). This week, you must lead remote online meetings with international, English-speaking clients and colleagues!</p>
+            <p>You are an <strong>IT Consultant and Project Manager</strong> leading a full 12-stage work week. You must facilitate remote online meetings, manage scope, handle technical emergencies, and communicate effectively with international teams in business English!</p>
             
-            <p>This game will test your <strong>English comprehension, decision-making, and speaking fluency</strong>. In every step, read the choices carefully and <strong>speak your response out loud</strong> to practice your English!</p>
+            <p>This game evaluates your <strong>English comprehension, decision-making, and speaking fluency</strong>. Read each scenario carefully, evaluate the nuances in each response option, and <strong>speak your response out loud</strong> before selecting your choice.</p>
 
             <p style="text-align: center; font-weight: bold; color: var(--tech-blue);">Open your laptop, check your calendar, and let's start Monday morning!</p>
 
@@ -269,405 +269,406 @@
 
 <script>
 const gameData = {
-    // MONDAY: Kick-off Meeting & Internet Lag
-    start: {
-        location: "Monday - 09:00 AM (Remote Kick-off Meeting)",
-        text: "You are hosting an online kick-off meeting with an English client for a new ERP implementation. At the start of the call, you notice some participants have their microphones muted. How do you welcome them and start?",
-        prompt: "🗣️ Practice out loud: Greet the team politely and set a clear agenda for the meeting.",
+    // 1. MONDAY MORNING: KICK-OFF MEETING
+    sit_1: {
+        location: "Situation 1/12: Monday - 09:00 AM (Remote Kick-off)",
+        text: "You are hosting an online kick-off meeting with international clients. Several participants are silent with cameras off. How do you greet them and begin the agenda?",
+        prompt: "🗣️ Practice out loud: Welcome the participants politely and set a clear meeting goal.",
         options: [
             { 
-                text: "'Good morning everyone! Can you hear me well? Today we will present the ERP project plan and discuss modules.'", 
+                text: "'Good morning everyone! Can you hear me clearly? Today we will review the ERP project plan and discuss our key milestones together.'", 
                 score: 3, 
-                next: "mon_connection",
-                feedback: "Excellent! Professional, polite, and clear. You checked audio quality and stated the agenda confidently."
+                next: "sit_2",
+                feedback: "Excellent! Professional, welcoming, and clear. You checked audio quality and stated the agenda confidently."
             },
             { 
-                text: "'Hello. I share my screen now and read the presentation slides.'", 
+                text: "'Hello team. I will share my screen now and read through the project slides to show you our software implementation steps.'", 
                 score: 2, 
-                next: "mon_connection",
-                feedback: "Understandable, but a bit direct. Adding a warm greeting and checking sound makes international clients feel welcome."
+                next: "sit_2",
+                feedback: "Clear and understandable, but slightly direct. A brief audio check and formal greeting makes clients feel more welcome."
             },
             { 
-                text: "'Hi. Sorry my English is bad, but we must look at software now.'", 
+                text: "'Hi all. Sorry my English is not very perfect, but we must start looking at this software presentation right now.'", 
                 score: 1, 
-                next: "mon_catchup",
-                feedback: "Try to avoid apologizing for your English right away! Be confident with simple sentences. You can do it!"
+                next: "sit_2",
+                feedback: "Avoid apologizing for your language skills! Focus on communicating simply and clearly with professional confidence."
             },
             { 
-                text: "'Okay guys, quiet please. I press record and start talking without waiting.'", 
+                text: "'Okay quiet please. I am pressing record now and starting the presentation immediately without waiting for anyone else.'", 
                 score: -1, 
-                retry: true, 
-                feedback: "Too abrupt! In remote business meetings, it is polite to check if everyone is ready before starting. Try again."
+                next: "sit_2",
+                feedback: "Too abrupt and commanding! In remote international business meetings, confirm readiness before starting."
             }
         ]
     },
 
-    mon_catchup: {
-        location: "Monday - 09:15 AM (Meeting Catch-up)",
-        text: "The client product owner asks a complex question about data migration, but you did not catch a key word. What do you say?",
-        prompt: "🗣️ Practice out loud: Ask for clarification politely without losing your confidence.",
+    // 2. MONDAY MIDDAY: AUDIO/VIDEO LAG
+    sit_2: {
+        location: "Situation 2/12: Monday - 11:30 AM (Technical Audio Lag)",
+        text: "During the ERP module demo, a client says: 'Your video stream is frozen and your voice is cutting out!' How do you handle this connection issue?",
+        prompt: "🗣️ Practice out loud: Address the technical lag calmly and offer an immediate solution.",
         options: [
             { 
-                text: "'I'm sorry, could you repeat that last point about data migration please? The connection was a bit quiet.'", 
+                text: "'My apologies! I will turn off my webcam to save bandwidth and re-share my screen so you can follow clearly.'", 
                 score: 3, 
-                next: "mon_connection",
-                feedback: "Perfect strategy! Blaming the connection or asking politely to repeat is standard professional English."
+                next: "sit_3",
+                feedback: "Top troubleshooting! Disabling video frees up bandwidth and resolves screen lag in remote meeting tools."
             },
             { 
-                text: "'Can you speak slower please? I didn't understand the word.'", 
+                text: "'Please hold on for two minutes while I restart my internet connection to fix this transmission issue.'", 
                 score: 2, 
-                next: "mon_connection",
-                feedback: "Clear and direct. Clients are happy to adapt their pace when asked politely."
+                next: "sit_3",
+                feedback: "Acceptable backup plan, though rebooting a connection pauses the client meeting completely."
             },
             { 
-                text: "'Yes, yes, correct, no problem!' (even though you did not understand).", 
+                text: "'My network line shows green icons, so the connection problem is likely on your local office network side.'", 
                 score: 1, 
-                next: "mon_connection",
-                feedback: "Dangerous habit! Guessing or pretending to understand leads to big software configuration errors later."
+                next: "sit_3",
+                feedback: "Defensive tone! Even if true, blaming the client's network sounds undiplomatic in project management."
             },
             { 
-                text: "Disconnect from the call intentionally and send an email saying your computer crashed.", 
+                text: "'I will keep speaking louder for ten minutes and ignore the screen lag until the presentation finishes.'", 
                 score: -1, 
-                retry: true, 
-                feedback: "Avoid running away! Miscommunication happens to everyone. Just ask for clarification. Try again!"
+                next: "sit_3",
+                feedback: "Ineffective! If participants cannot see the demo screen, continuing the presentation wastes everyone's time."
             }
         ]
     },
 
-    mon_connection: {
-        location: "Monday - 11:30 AM (Technical Audio Issue)",
-        text: "During your software demonstration, the client says: 'Your screen is frozen and your voice is cutting out!' What is your immediate response?",
-        prompt: "🗣️ Practice out loud: Explain the technical issue simply and offer a quick solution.",
+    // 3. TUESDAY MORNING: SCOPE CREEP REQUEST
+    sit_3: {
+        location: "Situation 3/12: Tuesday - 10:00 AM (Requirement Gathering)",
+        text: "The client product owner asks: 'Can you add custom real-time analytics dashboards to the standard package by tomorrow morning?' How do you respond?",
+        prompt: "🗣️ Practice out loud: Explain scope boundaries politely without creating conflict.",
         options: [
             { 
-                text: "'Apologies! I will turn off my webcam to save bandwidth and re-share my screen now.'", 
+                text: "'That is a great feature idea, but custom dashboards are out of scope. I can submit a formal change request with estimates.'", 
                 score: 3, 
-                next: "tue_requirements",
-                feedback: "Top troubleshooting! Disabling video frees up bandwidth and resolves screen lag in online meetings."
+                next: "sit_4",
+                feedback: "Flawless scope management! You set clear professional boundaries while providing a formal PM solution."
             },
             { 
-                text: "'Please wait two minutes, I will restart my internet router.'", 
+                text: "'We can evaluate that, but standard ERP reporting already covers sales analytics. Let me demonstrate the built-in option first.'", 
                 score: 2, 
-                next: "tue_requirements",
-                feedback: "Acceptable, but restarting a router takes time and pauses the meeting completely."
+                next: "sit_4",
+                feedback: "Good response! Steering clients toward built-in standard features saves budget and prevents delays."
             },
             { 
-                text: "'My connection is fine here, it must be a problem on your side.'", 
+                text: "'Yes absolutely! Our development team will customize everything you need by tomorrow morning at no additional cost.'", 
                 score: 1, 
-                next: "mon_lag_catchup",
-                feedback: "A bit diplomatic-risk! Even if true, it sounds slightly defensive to international clients."
+                next: "sit_4",
+                feedback: "Risky promise! Accepting uncosted custom work creates unrealistic deadlines and severe budget overruns."
             },
             { 
-                text: "Keep speaking loudly for 10 minutes without fixing the screen lag.", 
+                text: "'No way! That is a ridiculous request and our software system is not designed to handle such custom logic.'", 
                 score: -1, 
-                retry: true, 
-                feedback: "Ineffective! If participants cannot see your screen, the presentation is lost. Address tech issues fast!"
+                next: "sit_4",
+                feedback: "Unprofessional phrasing! Use polite business phrasing like 'out of scope' rather than dismissing client ideas."
             }
         ]
     },
 
-    mon_lag_catchup: {
-        location: "Monday - 11:45 AM (Screen Lag Recovery)",
-        text: "The client still cannot see your ERP software menu. What do you suggest to keep the meeting productive?",
-        prompt: "🗣️ Practice out loud: Propose an alternative solution clearly.",
+    // 4. TUESDAY AFTERNOON: DEVELOPER FEASIBILITY SYNC
+    sit_4: {
+        location: "Situation 4/12: Tuesday - 02:00 PM (Developer Alignment)",
+        text: "Your lead software engineer warns: 'Building that custom reporting module without testing will break database indexes.' How do you communicate this?",
+        prompt: "🗣️ Practice out loud: Reframe developer feedback into realistic timelines for the client.",
         options: [
             { 
-                text: "'I will send the PDF slide deck in the chat now, and we can follow page 5 together.'", 
+                text: "'After consulting our engineering team, custom building requires five days. Let us focus on standard features for Phase 1.'", 
                 score: 3, 
-                next: "tue_requirements",
-                feedback: "Great plan B! Sharing documents in chat keeps remote meetings moving forward smoothly."
+                next: "sit_5",
+                feedback: "Excellent leadership! Translating engineering risks into structured phases protects project stability."
             },
             { 
-                text: "'Let's reschedule this demonstration for tomorrow morning after I test my line.'", 
+                text: "'We have encountered a minor technical issue. Can we deliver this custom reporting feature next month instead?'", 
                 score: 2, 
-                next: "tue_requirements",
-                feedback: "Sensible choice if tech fails completely, though providing a backup document is faster."
+                next: "sit_5",
+                feedback: "Clear communication, though distinguishing between Phase 1 and Phase 2 provides better clarity."
             },
             { 
-                text: "'I will describe the buttons verbally without any visual slides.'", 
+                text: "'My main developer refused to code this feature today, so we will not be providing it to your team.'", 
                 score: 1, 
-                next: "tue_requirements",
-                feedback: "Describing complex ERP software interfaces purely verbally can confuse language learners and clients."
+                next: "sit_5",
+                feedback: "Avoid blaming colleagues directly to clients. Speak on behalf of the unified project team."
             },
             { 
-                text: "Cancel the entire ERP contract via chat.", 
+                text: "'I will order the developer to work all night long without breaks until the custom database code is finished.'", 
                 score: -1, 
-                retry: true, 
-                feedback: "Extreme overreaction! Technical glitches happen every day in IT. Fix them calmly!"
+                next: "sit_5",
+                feedback: "Poor management practice! Unreasonable pressure leads to severe software bugs and team burnout."
             }
         ]
     },
 
-    // TUESDAY: Requirements Gathering & Scope Creep
-    tue_requirements: {
-        location: "Tuesday - 10:00 AM (Requirement Gathering)",
-        text: "On Tuesday, you analyze client needs. The client asks for a custom feature not included in the standard ERP package: 'We want custom real-time automated reports by tomorrow.' What do you reply?",
-        prompt: "🗣️ Practice out loud: Say no professionally or explain project scope limitations.",
-        options: [
-            { 
-                text: "'That is an interesting requirement. However, custom reports are out of initial scope. I can write a change request and estimate the extra time.'", 
-                score: 3, 
-                next: "emergency_1",
-                feedback: "Flawless IT Project Management! You set clear boundaries (scope management) while staying polite and helpful."
-            },
-            { 
-                text: "'We can try, but standard ERP reports already cover sales analysis. Can I show you the standard option first?'", 
-                score: 2, 
-                next: "emergency_1",
-                feedback: "Good response! Promoting standard software features saves budget and prevents custom coding delays."
-            },
-            { 
-                text: "'Yes, sure! We will code everything you want by tomorrow for free!'", 
-                score: 1, 
-                next: "tue_scope_catchup",
-                feedback: "Careful! Promising uncosted custom features creates unrealistic deadlines and project budget overruns."
-            },
-            { 
-                text: "'No way! That is a stupid idea and our software doesn't do that.'", 
-                score: -1, 
-                retry: true, 
-                feedback: "Unprofessional language! Always use courteous business terms like 'out of scope' or 'additional requirement'."
-            }
-        ]
-    },
-
-    tue_scope_catchup: {
-        location: "Tuesday - 02:00 PM (Scope Recovery)",
-        text: "Your lead developer warns you: 'We cannot build this custom feature by tomorrow without breaking the database!' How do you correct this with the client?",
-        prompt: "🗣️ Practice out loud: Explain a technical delay politely and suggest a manageable timeline.",
-        options: [
-            { 
-                text: "'After consulting our technical team, custom development requires 5 days. Let's stick to standard features for Phase 1.'", 
-                score: 3, 
-                next: "emergency_1",
-                feedback: "Excellent recovery! Informing the client based on technical team feedback restores realistic project timelines."
-            },
-            { 
-                text: "'We have a small technical delay. Can we deliver this feature next month instead?'", 
-                score: 2, 
-                next: "emergency_1",
-                feedback: "Clear communication, though specifying Phase 1 vs Phase 2 helps organize deliverables better."
-            },
-            { 
-                text: "'My developer refused to work on it, so we won't do it.'", 
-                score: 1, 
-                next: "emergency_1",
-                feedback: "Blaming internal colleagues directly to clients looks unprofessional. Speak as 'our team'."
-            },
-            { 
-                text: "Force your developer to work 24 hours without sleep to finish it.", 
-                score: -1, 
-                retry: true, 
-                feedback: "Bad leadership! Unreasonable pressure causes burnout and buggy software. Manage client scope instead."
-            }
-        ]
-    },
-
-    // EMERGENCY 1: Critical Hazard Checkpoint (Server Crash)
-    emergency_1: {
+    // 5. WEDNESDAY MORNING: SERVER DOWNTIME (EMERGENCY)
+    sit_5: {
         isEmergency: true,
-        location: "Wednesday - 08:30 AM - CRITICAL SYSTEM ALERT",
-        text: "CRITICAL INCIDENT: During live testing, the cloud staging server crashes! All ERP user access is blocked, and the Steering Committee meeting starts in 15 minutes! What do you do?",
-        prompt: "🗣️ Practice out loud: React fast under pressure using clear, calm English instructions.",
+        location: "Situation 5/12: Wednesday - 08:30 AM (Critical System Incident)",
+        text: "CRITICAL INCIDENT: The cloud staging server crashes right before executive testing! All user access is completely blocked. What is your immediate action?",
+        prompt: "🗣️ Practice out loud: Manage an active IT crisis calmly and decisively.",
         options: [
             { 
-                text: "Send an urgent alert to DevOps to restore backup, post a calm update to the client status group, and prepare a backup local demo.", 
+                text: "Send an urgent ticket to DevOps, notify the client group with an estimated recovery time, and prepare a local offline backup demo.", 
                 score: 3, 
-                next: "wed_training", 
+                next: "sit_6", 
                 survive: true,
-                feedback: "Heroic crisis management! You alerted engineers, communicated proactively with stakeholders, and secured a backup plan."
+                feedback: "Heroic crisis management! You alerted technical teams, communicated transparently, and activated a backup plan."
             },
             { 
-                text: "Panic, turn off your mobile phone, and pretend you have no internet access today.", 
+                text: "Post an immediate notice in the chat, call the infrastructure team lead, and ask stakeholders to wait thirty minutes.", 
+                score: 2, 
+                next: "sit_6", 
+                survive: true,
+                feedback: "Solid reactive response, though having an offline backup demo prepared is even better."
+            },
+            { 
+                text: "Send a quick email stating the system is down, then sit quietly until technical support sends an update email.", 
+                score: 1, 
+                next: "sit_6", 
+                survive: true,
+                feedback: "Too passive for an IT crisis! Active follow-ups and client coordination are essential."
+            },
+            { 
+                text: "Panic completely, turn off your corporate mobile phone, and pretend your home computer suffered a total hardware failure.", 
                 score: 0, 
                 survive: false, 
-                failReason: "CRITICAL FAILURE: Hiding during a server crash destroys client trust! You must communicate transparently in IT crises."
+                failReason: "CRITICAL PROJECT FAILURE: Disappearing during a system outage destroys client trust! IT crises require transparent communication."
             }
         ]
     },
 
-    // WEDNESDAY: Key User Training & Difficult Questions
-    wed_training: {
-        location: "Wednesday - 02:00 PM (Key User Training Session)",
-        text: "You are conducting an online training workshop for key ERP users. A user says: 'The new system is too complicated! The old software was much easier!' How do you respond?",
-        prompt: "🗣️ Practice out loud: Validate their feelings and highlight the business benefits clearly.",
+    // 6. WEDNESDAY AFTERNOON: USER TRAINING RESISTANCE
+    sit_6: {
+        location: "Situation 6/12: Wednesday - 02:00 PM (Key User Training)",
+        text: "During key user training, a department manager complains: 'This new interface is far too complicated! The legacy system was much easier.' What do you say?",
+        prompt: "🗣️ Practice out loud: Validate user feelings and explain the business efficiency gains.",
         options: [
             { 
-                text: "'I understand change can be difficult. The new ERP automates manual steps to save you 2 hours every day. Let's do a step-by-step example together.'", 
+                text: "'I understand transitions are difficult. This ERP automates routine entry to save you two hours daily. Let us walk through it.'", 
                 score: 3, 
-                next: "thu_data_bug",
-                feedback: "Outstanding empathy and clarity! Acknowledging user frustration and showing benefits builds user adoption."
+                next: "sit_7",
+                feedback: "Outstanding empathy! Validating frustration while emphasizing tangible time savings builds adoption."
             },
             { 
-                text: "'Don't worry, after two weeks of practice, it will feel very simple.'", 
+                text: "'Please do not worry too much, after two weeks of regular practice the system will feel very natural to use.'", 
                 score: 2, 
-                next: "thu_data_bug",
-                feedback: "Positive and encouraging, though showing a practical example immediately helps reduce anxiety faster."
+                next: "sit_7",
+                feedback: "Reassuring tone, though offering a guided step-by-step example addresses immediate anxiety better."
             },
             { 
-                text: "'Management decided to change software, so everyone must learn it.'", 
+                text: "'Executive management mandated this new software platform, so every staff member is required to learn how to operate it.'", 
                 score: 1, 
-                next: "wed_training_catchup",
-                feedback: "True, but stating executive orders makes users feel ignored and resistant to learning."
+                next: "sit_7",
+                feedback: "Citing corporate mandates alienates users and increases resistance to software adoption."
             },
             { 
-                text: "'If you cannot use this software, you should talk to HR.'", 
+                text: "'If you are unable to operate modern software interfaces, you should discuss your role alignment with human resources.'", 
                 score: -1, 
-                retry: true, 
-                feedback: "Unacceptable tone! An IT Consultant must support and coach users through change management."
+                next: "sit_7",
+                feedback: "Unacceptable communication! An IT consultant must guide and empower users through change management."
             }
         ]
     },
 
-    wed_training_catchup: {
-        location: "Wednesday - 03:30 PM (Training Support Catch-up)",
-        text: "The users are still hesitant to practice in the test environment. What exercise do you give them?",
-        prompt: "🗣️ Practice out loud: Give simple, encouraging instructions.",
+    // 7. THURSDAY MORNING: BUG TRIAGING
+    sit_7: {
+        location: "Situation 7/12: Thursday - 11:00 AM (Bug Triaging with Developers)",
+        text: "A bug is detected in invoicing: VAT calculates at 19% instead of 20% for UK customers. How do you log this issue clearly for international developers?",
+        prompt: "🗣️ Practice out loud: Describe software bugs using specific technical details.",
         options: [
             { 
-                text: "'Let's do a short 5-minute task: everyone creates one test purchase order. I am here to help if you get stuck.'", 
+                text: "'We logged bug #402 in billing. When invoicing UK clients, VAT applies 19% instead of 20%. Steps to reproduce are attached.'", 
                 score: 3, 
-                next: "thu_data_bug",
-                feedback: "Great active learning! Breaking tasks into small, guided steps builds confidence quickly."
+                next: "sit_8",
+                feedback: "Brilliant ticket logging! Providing module names, expected vs actual values, and reproduction steps speeds up fixes."
             },
             { 
-                text: "'Please read the 100-page user manual tonight and we practice tomorrow.'", 
+                text: "'The accounting system contains a tax calculation error. Please review the customer billing rules and tax tables.'", 
                 score: 2, 
-                next: "thu_data_bug",
-                feedback: "Manuals are useful, but hands-on practice during workshops is much more effective."
+                next: "sit_8",
+                feedback: "Clear summary, though attaching exact reproduction steps helps developers isolate code faster."
             },
             { 
-                text: "'I will do all the clicks on my screen while you watch silently.'", 
+                text: "'The financial module is completely broken and dangerous. All numbers are totally incorrect across the entire application.'", 
                 score: 1, 
-                next: "thu_data_bug",
-                feedback: "Passive watching does not teach software skills effectively. Users need to click themselves!"
+                next: "sit_8",
+                feedback: "Overly dramatic and vague! Developers need actionable data, not generalized alarm."
             },
             { 
-                text: "'End training early and go drink coffee.'", 
+                text: "'Ignore the one percent variance for now because nobody will notice minor discrepancies on monthly financial statements.'", 
                 score: -1, 
-                retry: true, 
-                feedback: "Incomplete training causes major operational errors at Go-Live! Stick with your users."
+                next: "sit_8",
+                feedback: "Compliance breach! Financial software must calculate taxes accurately to avoid regulatory penalties."
             }
         ]
     },
 
-    // THURSDAY: Data Bug & Developer Sync
-    thu_data_bug: {
-        location: "Thursday - 11:00 AM (Bug Triaging with Developers)",
-        text: "A bug is found: VAT calculation in customer invoices is off by 1%. You meet with international developers on Teams. How do you explain the bug clearly?",
-        prompt: "🗣️ Practice out loud: Describe a technical bug clearly with reproducible steps.",
+    // 8. THURSDAY AFTERNOON: UAT FEEDBACK ESCALATION
+    sit_8: {
+        location: "Situation 8/12: Thursday - 03:00 PM (User Acceptance Testing)",
+        text: "The client tester states: 'The purchase order approval workflow requires five extra clicks compared to our old process!' How do you reply?",
+        prompt: "🗣️ Practice out loud: Address user feedback professionally while explaining internal controls.",
         options: [
             { 
-                text: "'We found a bug in the billing module. When creating an invoice for UK clients, VAT calculates at 19% instead of 20%. Here are the exact steps to reproduce it.'", 
+                text: "'Thank you for the feedback. Those steps ensure compliance, but I will review the workflow with UI designers for optimization.'", 
                 score: 3, 
-                next: "emergency_2",
-                feedback: "Brilliant technical reporting! Providing specific module names, expected vs actual behavior, and steps saves developer time."
+                next: "sit_9",
+                feedback: "Great balance! Explaining compliance requirements while offering UI optimization builds trust."
             },
             { 
-                text: "'The accounting module has a calculation error. Can you check invoice rounding rules?'", 
+                text: "'We hear your concern. We can document this UI complaint and evaluate improvements during our next scheduled software release.'", 
                 score: 2, 
-                next: "emergency_2",
-                feedback: "Good concise summary, though attaching exact steps to reproduce makes debugging faster."
+                next: "sit_9",
+                feedback: "Reasonable management, though offering to review UI design with experts immediately shows higher responsiveness."
             },
             { 
-                text: "'Invoices are totally wrong and dangerous. Everything is broken!'", 
+                text: "'You will get used to clicking five times. That is simply how standard enterprise software workflows function everywhere.'", 
                 score: 1, 
-                next: "thu_bug_catchup",
-                feedback: "Vague and alarming! Technical teams need precise details, not general drama."
+                next: "sit_9",
+                feedback: "Dismissive attitude! Dismissing user ergonomics causes friction during software rollouts."
             },
             { 
-                text: "'Ignore the 1% difference, nobody will notice on financial statements.'", 
+                text: "'Stop complaining about mouse clicks and just complete your assigned testing forms before the deadline today.'", 
                 score: -1, 
-                retry: true, 
-                feedback: "Major compliance risk! Accounting software must be 100% accurate. Tax errors lead to legal fines!"
+                next: "sit_9",
+                feedback: "Rude and pushy! Professional project managers treat testing teams with courtesy and respect."
             }
         ]
     },
 
-    thu_bug_catchup: {
-        location: "Thursday - 01:30 PM (Bug Log Clarification)",
-        text: "The lead developer messages: 'I need logs or screenshot examples to fix this issue.' What do you send?",
-        prompt: "🗣️ Practice out loud: Confirm what technical details you are providing.",
-        options: [
-            { 
-                text: "'I am attaching the error screenshot, invoice ID #1042, and system error log file to the ticket now.'", 
-                score: 3, 
-                next: "emergency_2",
-                feedback: "Top IT support habit! Ticket references and screenshots allow developers to patch code immediately."
-            },
-            { 
-                text: "'Look at customer invoice #1042 on the test server.'", 
-                score: 2, 
-                next: "emergency_2",
-                feedback: "Helps locate the issue, but attaching error logs speed up the debugging process."
-            },
-            { 
-                text: "'I don't have screenshots, just test it yourself until you see it.'", 
-                score: 1, 
-                next: "emergency_2",
-                feedback: "Unhelpful! Without reproduction details, developers spend hours hunting phantom bugs."
-            },
-            { 
-                text: "Delete the bug ticket from the tracking board.", 
-                score: -1, 
-                retry: true, 
-                feedback: "Hiding software bugs causes disasters when real money is processed! Always log and track issues."
-            }
-        ]
-    },
-
-    // EMERGENCY 2: Critical Hazard Checkpoint (Data Leak / Security Breach)
-    emergency_2: {
+    // 9. FRIDAY MORNING: SECURITY INCIDENT (EMERGENCY)
+    sit_9: {
         isEmergency: true,
-        location: "Friday - 09:00 AM - SECURITY EMERGENCY",
-        text: "CRITICAL SECURITY RISK: A user accidentally posts live production database passwords into an open public Teams channel! What is your immediate action?",
-        prompt: "🗣️ Practice out loud: Issue an immediate security order clearly.",
+        location: "Situation 9/12: Friday - 09:00 AM (Security Threat)",
+        text: "CRITICAL SECURITY RISK: A key user accidentally posts live production database passwords into an open public Teams channel! What is your immediate action?",
+        prompt: "🗣️ Practice out loud: Execute critical security containment procedures clearly.",
         options: [
             { 
-                text: "Delete message immediately, trigger mandatory password reset with IT Security, and notify Data Protection Officer.", 
+                text: "Delete the message instantly, request an immediate password reset with Security, and formally alert the Data Protection Officer.", 
                 score: 3, 
-                next: "fri_steering_comm", 
+                next: "sit_10", 
                 survive: true,
-                feedback: "Critical threat neutralized! Quick removal, credential rotation, and formal notification protect GDPR compliance."
+                feedback: "Threat contained! Rapid message deletion, credential rotation, and formal security reporting protect data privacy."
             },
             { 
-                text: "Reply in the public chat asking the user not to post credentials there.", 
+                text: "Remove the posted message right away, notify the user privately, and ask system admins to update account credentials.", 
+                score: 2, 
+                next: "sit_10", 
+                survive: true,
+                feedback: "Effective response, though formal notification to security/compliance officers is also standard protocol."
+            },
+            { 
+                text: "Send a public reply in the channel asking everyone kindly not to post sensitive database passwords in public chats.", 
+                score: 1, 
+                next: "sit_10", 
+                survive: true,
+                feedback: "Inadequate mitigation! Leaving passwords visible while chatting leaves servers open to compromise."
+            },
+            { 
+                text: "Ignore the chat post because external users do not have direct network access to the internal database servers anyway.", 
                 score: 0, 
                 survive: false, 
-                failReason: "CRITICAL FAILURE: Leaving exposed passwords active while chatting allows hackers to compromise data! Revoke access immediately!"
+                failReason: "CRITICAL SECURITY FAILURE: Unhandled credential exposure violates security policy and compromises enterprise systems!"
             }
         ]
     },
 
-    // FRIDAY: Steering Committee & Week Wrap-up
-    fri_steering_comm: {
-        location: "Friday - 03:00 PM (Steering Committee Meeting)",
-        text: "It is Friday afternoon. You present the weekly progress report to executives and international sponsors. How do you conclude your weekly summary?",
-        prompt: "🗣️ Practice out loud: Summarize key achievements and upcoming milestones professionally.",
+    // 10. FRIDAY MIDDAY: BUDGET & CHANGE ORDER
+    sit_10: {
+        location: "Situation 10/12: Friday - 11:30 AM (Scope & Budget Discussion)",
+        text: "The client asks to add a new regional warehouse site to the ERP system before go-live. How do you manage this addition professionally?",
+        prompt: "🗣️ Practice out loud: Communicate scope expansion and cost implications clearly.",
         options: [
             { 
-                text: "'To summarize, user training is completed, core modules are validated, and the tax bug is resolved. Next week, we start final user acceptance testing.'", 
+                text: "'Adding a warehouse site requires additional configuration. I will prepare a change order detailing costs and timeline adjustments.'", 
+                score: 3, 
+                next: "sit_11",
+                feedback: "Proper commercial management! Utilizing change orders ensures clear expectations for budget and deadlines."
+            },
+            { 
+                text: "'We can add this extra site, but it will delay our scheduled launch date by approximately two working weeks.'", 
+                score: 2, 
+                next: "sit_11",
+                feedback: "Clear timeline warning, but formalizing financial and scope adjustments via a change order is complete."
+            },
+            { 
+                text: "'We can try to configure it quickly for free if your team helps us input location data manually.'", 
+                score: 1, 
+                next: "sit_11",
+                feedback: "Absorbing unbudgeted project work creates quality risks and uncompensated overtime."
+            },
+            { 
+                text: "'We cannot support additional sites at all. You should have told us about this warehouse three months ago.'", 
+                score: -1, 
+                next: "sit_11",
+                feedback: "Blaming clients for evolving business needs damages partner relationships. Offer structured change solutions."
+            }
+        ]
+    },
+
+    // 11. FRIDAY AFTERNOON: STEERING COMMITTEE
+    sit_11: {
+        location: "Situation 11/12: Friday - 03:00 PM (Steering Committee Meeting)",
+        text: "You present the weekly progress report to project sponsors and company executives. How do you deliver your closing summary?",
+        prompt: "🗣️ Practice out loud: Deliver a structured executive summary confidently.",
+        options: [
+            { 
+                text: "'In summary, user training is complete, core modules are verified, and major bugs are resolved. Next week, final UAT begins.'", 
+                score: 3, 
+                next: "sit_12",
+                feedback: "Executive delivery! Summarizing key progress and setting upcoming targets demonstrates PM command."
+            },
+            { 
+                text: "'We faced major server issues and tax bugs this week, but our team resolved everything and we are back on track.'", 
+                score: 2, 
+                next: "sit_12",
+                feedback: "Honest status report, though framing updates around achievements and milestones creates a stronger tone."
+            },
+            { 
+                text: "'We worked extremely long hours every single day. Everyone is exhausted, but hopefully things go well next week.'", 
+                score: 1, 
+                next: "sit_12",
+                feedback: "Too casual for executive meetings. Focus on objective performance data rather than personal fatigue."
+            },
+            { 
+                text: "'Disconnect from the videoconference call abruptly without delivering any formal weekly progress summary to company directors.'", 
+                score: -1, 
+                next: "sit_12",
+                feedback: "Unprofessional departure! Project directors require regular summary updates on progress."
+            }
+        ]
+    },
+
+    // 12. FRIDAY END OF DAY: PROJECT WRAP-UP
+    sit_12: {
+        location: "Situation 12/12: Friday - 05:00 PM (Weekly Team Debrief)",
+        text: "The executive meeting ends successfully. You hold a 5-minute wrap-up call with your internal project team. How do you conclude the week?",
+        prompt: "🗣️ Practice out loud: Thank your team and set positive expectations for next week.",
+        options: [
+            { 
+                text: "'Fantastic effort this week, team! Thank you for resolving the critical issues quickly. Rest well and see you Monday morning.'", 
                 score: 3, 
                 next: "finish",
-                feedback: "Outstanding presentation finish! Concise executive summaries demonstrate executive maturity and control."
+                feedback: "Great leadership! Appreciating effort and encouraging rest fosters team morale and productivity."
             },
             { 
-                text: "'We had a very hard week with server crashes and bugs, but everything is okay now.'", 
+                text: "'Good job everyone. Please ensure your timesheets are submitted before logging off today so we can track project hours.'", 
                 score: 2, 
                 next: "finish",
-                feedback: "Honest feedback, though framing challenges around solutions and next steps leaves a stronger impression."
+                feedback: "Practical administrative reminder, though adding brief praise boosts team spirit after a tough week."
             },
             { 
-                text: "'We worked late every night. I am very tired, see you next week.'", 
+                text: "'The meeting went okay, but we still have many open tickets to solve over the upcoming weekend.'", 
                 score: 1, 
                 next: "finish",
-                feedback: "Too casual for a formal Steering Committee! Focus on business project status during executive updates."
+                feedback: "Demotivating tone! Acknowledge weekly milestones before diving into remaining backlog items."
             },
             { 
-                text: "Leave the meeting call abruptly without providing any weekly status update.", 
+                text: "'Log off immediately without acknowledging your team's hard work or providing any updates on next week's schedule.'", 
                 score: -1, 
-                retry: true, 
-                feedback: "Unprofessional departure! Always present your weekly status to project sponsors. Finish strong!"
+                next: "finish",
+                feedback: "Neglecting team communication reduces engagement. Always conclude weekly iterations clearly."
             }
         ]
     }
@@ -675,7 +676,7 @@ const gameData = {
 
 let currentScore = 0;
 let decisionCount = 0;
-let currentNodeKey = "start";
+let currentNodeKey = "sit_1";
 
 const landingScreenEl = document.getElementById('landing-screen');
 const gameplayScreenEl = document.getElementById('gameplay-screen');
@@ -704,10 +705,9 @@ function startGame() {
     gameHeaderEl.classList.remove('hidden');
     gameplayScreenEl.classList.remove('hidden');
     
-    // Reset game state
     currentScore = 0;
     decisionCount = 0;
-    currentNodeKey = "start";
+    currentNodeKey = "sit_1";
     
     scoreDisplayEl.textContent = currentScore;
     decisionCountEl.textContent = decisionCount;
@@ -738,7 +738,7 @@ function renderNode(nodeKey) {
         return;
     }
 
-    locationBadgeEl.textContent = `Context: ${node.location}`;
+    locationBadgeEl.textContent = node.location;
     scenarioTextEl.textContent = node.text;
     speakingPromptEl.innerHTML = node.prompt || "🗣️ <strong>Speaking Task:</strong> Read your chosen option out loud before clicking!";
     speakingPromptEl.classList.remove('hidden');
@@ -759,7 +759,7 @@ function handleChoice(option, currentNode, targetBtn) {
     feedbackEl.style.display = 'block';
     feedbackEl.textContent = option.feedback || option.failReason;
 
-    // Penalty / Retry handling
+    // Handling negative score penalty
     if (option.score === -1) {
         currentScore -= 1;
         scoreDisplayEl.textContent = currentScore;
@@ -822,23 +822,23 @@ function renderFinalResults() {
     let bandTitle = "";
     let bandDescription = "";
 
-    if (currentScore >= 24) {
-        bandTitle = "Band 1: Senior ERP Project Manager (24+ Points)";
-        bandDescription = "Outstanding performance! You managed remote client expectations, handled unexpected server crashes calmly, resolved software bugs with developers, and spoke clear, professional English. Your international remote meetings were concise, polite, and effective!";
-    } else if (currentScore >= 18) {
-        bandTitle = "Band 2: Competent IT Consultant (18–23 Points)";
-        bandDescription = "Good job! You navigated a challenging project week, kept key stakeholders informed, and handled technical issues well. With a little more fluency practice during requirement gathering and executive summaries, you will master international project leadership!";
-    } else if (currentScore >= 12) {
-        bandTitle = "Band 3: Junior ERP Consultant (12–17 Points)";
-        bandDescription = "You completed the work week, but you faced significant project delays, scope creep, and communication hurdles! Practice professional meeting phrases, review ERP technical vocabulary, and try playing again to improve your score!";
+    if (currentScore >= 30) {
+        bandTitle = "Band 1: Senior ERP Project Manager (30–36 Points)";
+        bandDescription = "Outstanding performance! You successfully navigated all 12 situations, managed client expectations, led emergency response efforts calmly, and demonstrated professional business English fluency throughout the week!";
+    } else if (currentScore >= 22) {
+        bandTitle = "Band 2: Competent IT Consultant (22–29 Points)";
+        bandDescription = "Good work! You handled most international project situations effectively and kept the implementation moving forward. Practicing scope phrasing and executive summary structures will elevate your leadership further!";
+    } else if (currentScore >= 14) {
+        bandTitle = "Band 3: Junior ERP Consultant (14–21 Points)";
+        bandDescription = "You completed the work week, but encountered project delays, communication misunderstandings, or scope overruns. Review the scenario feedback and practice speaking your choices aloud to build confidence!";
     } else {
-        bandTitle = "Band 4: Unprepared IT Trainee (Under 12 Points)";
-        bandDescription = "Your project week suffered from severe communication issues, scope overruns, and unhandled technical emergencies. Re-read the scenario feedback, practice speaking your choices out loud, and restart to build your IT business English confidence!";
+        bandTitle = "Band 4: Unprepared IT Trainee (Under 14 Points)";
+        bandDescription = "The project week suffered from severe communication and operational hurdles. Re-read the technical vocabulary, practice speaking the professional responses, and try again to improve your score!";
     }
 
     scenarioTextEl.innerHTML = `
         <h2>Project Week Completed!</h2>
-        <div class="final-score">Final Score: ${currentScore} pts</div>
+        <div class="final-score">Final Score: ${currentScore} / 36 pts</div>
         <p style="margin-bottom: 12px;"><strong>${bandTitle}</strong></p>
         <p style="line-height: 1.6; font-size: 1.05rem;">${bandDescription}</p>
     `;
