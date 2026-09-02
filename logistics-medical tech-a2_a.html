@@ -177,14 +177,14 @@
         <!-- LANDING PAGE -->
         <div id="landing-screen" class="landing-card">
             <h2>Welcome to Apex Manufacturing!</h2>
-            <p>You work as a Supply Planner[cite: 1]. You order factory parts from local suppliers and international partners, including a monthly video meeting with a supplier in Germany[cite: 1]. Your job is to get the right parts at the right time, in the right amount, for the best price[cite: 1].</p>
+            <p>You work as a Supply Planner. You order factory parts from local suppliers and international partners, including a monthly video meeting with a supplier in Germany. Your job is to get the right parts at the right time, in the right amount, and report cost changes to management.</p>
             <p><strong>How to Play:</strong></p>
             <ul style="text-align: left; margin: 0 0 15px 25px; line-height: 1.6;">
-                <li>12 Regular Questions (+3 Excellent, +2 Good, +1 Okay, -1 Bad with try again)[cite: 1].</li>
-                <li>2 Emergency Hazards (+2 Points each)[cite: 1]. Picking the wrong answer ends the game immediately![cite: 1]</li>
-                <li>Highest Possible Score: <strong>40 Points</strong>[cite: 1].</li>
+                <li>12 Regular Questions (+3 Excellent, +2 Good, +1 Okay, -1 Bad with try again).</li>
+                <li>2 Emergency Hazards (+2 Points each). Picking the wrong answer ends the game immediately!</li>
+                <li>Highest Possible Score: <strong>40 Points</strong>.</li>
             </ul>
-            <p style="text-align: center; font-weight: bold; color: var(--accent);">Check your inventory, review your orders, and start your work day![cite: 1]</p>
+            <p style="text-align: center; font-weight: bold; color: var(--accent);">Check your inventory, review your orders, and start your work day!</p>
             <button class="btn-action" onclick="startGame()">Start Shift</button>
         </div>
 
@@ -222,8 +222,8 @@ const GAME_DATA = [
   {
     type: "standard",
     location: "Supply Office (Monday 08:30 AM)",
-    text: "You check stock in the morning. An important electrical part from a local supplier will run out in two days. What do you do?[cite: 1]",
-    vocab: "<strong>Vocabulary:</strong><br>• <em>Stockout</em> = when an item is completely out of stock[cite: 1].<br>• <em>Purchase order</em> = an official document sent to buy items from a supplier[cite: 1].",
+    text: "You check stock in the morning. An important electrical part from a local supplier will run out in two days. What do you do?",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Stockout</em> = when an item is completely out of stock.<br>• <em>Purchase order</em> = an official document sent to buy items from a supplier.",
     options: [
       { pts: 3, t: "Call the local supplier to ask for an urgent fast delivery tomorrow morning.", fb: "Excellent! Fast calls get parts delivered before the factory stops.", disc: "How do you ask a supplier to deliver urgent items fast?" },
       { pts: 2, t: "Send a standard order email and wait for regular delivery.", fb: "Okay choice, but regular delivery might arrive too late.", disc: "When is normal email communication too slow for buying parts?" },
@@ -236,13 +236,13 @@ const GAME_DATA = [
   {
     type: "standard",
     location: "Supply Office (Monday 11:00 AM)",
-    text: "A local supplier says plastic parts will cost 5% more next month. What do you do?[cite: 1]",
-    vocab: "<strong>Vocabulary:</strong><br>• <em>Unit cost</em> = the price of one single item[cite: 1].<br>• <em>Negotiation</em> = talking to get a better agreement or price[cite: 1].",
+    text: "A local supplier announces that plastic parts will cost 5% more next month. What do you do?",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Unit cost</em> = the price of one single item.<br>• <em>Price variance</em> = a change between budget price and actual supplier price.",
     options: [
-      { pts: 3, t: "Check the contract, ask why prices are higher, and talk to keep costs low.", fb: "Great job! Asking questions helps protect your factory budget.", disc: "What reasons can a supplier give for higher prices?" },
-      { pts: 2, t: "Accept the price for now, but look for other local suppliers.", fb: "Good plan! You keep parts coming while looking for cheaper options.", disc: "How do you find good backup suppliers in your area?" },
-      { pts: 1, t: "Say 'No' immediately without checking market prices.", fb: "Saying no too fast can damage your relationship with the supplier.", disc: "Why is it important to keep friendly relationships with suppliers?" },
-      { pts: -1, t: "Agree to all higher prices immediately without asking your team.", fb: "Unprofessional! Agreeing to high prices loses money for the company.", disc: "Who should you talk to before agreeing to pay higher prices?" }
+      { pts: 3, t: "Check the contract terms, prepare a price change report, and escalate it to your Purchasing Manager.", fb: "Excellent! Escalating price increases with full contract details allows management to handle price discussions.", disc: "Why should price increases be reported to the purchasing manager before taking action?" },
+      { pts: 2, t: "Inform your manager about the increase and check for potential backup suppliers in your database.", fb: "Good approach! Keeping management informed while researching options supports company planning.", disc: "How does gathering data on backup suppliers help your purchasing manager?" },
+      { pts: 1, t: "Reject the price change directly without informing your manager or checking contract terms.", fb: "Improper action! Directly rejecting price changes is outside your role and can harm supplier relationships.", disc: "Why is price rejection not the responsibility of a supply planner?" },
+      { pts: -1, t: "Agree to the price increase on the spot without asking your manager.", fb: "Poor choice! Accepting price increases without management approval violates company procedure.", disc: "Who must approve price changes before they are accepted?" }
     ]
   },
 
@@ -250,8 +250,8 @@ const GAME_DATA = [
   {
     type: "standard",
     location: "Video Meeting Room (Tuesday 10:00 AM)",
-    text: "It is time for your monthly video call with your German supplier to check open orders. How do you prepare?[cite: 1]",
-    vocab: "<strong>Vocabulary:</strong><br>• <em>Lead time</em> = total time from ordering to delivery[cite: 1].<br>• <em>Open order</em> = an order placed that has not arrived yet[cite: 1].",
+    text: "It is time for your monthly video call with your German supplier to check open orders. How do you prepare?",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Lead time</em> = total time from ordering to delivery.<br>• <em>Open order</em> = an order placed that has not arrived yet.",
     options: [
       { pts: 3, t: "Prepare order lists, check delivery times, and talk about future needs.", fb: "Perfect! Organized monthly calls keep international work easy.", disc: "What details are most important to discuss in monthly meetings?" },
       { pts: 2, t: "Ask for a quick verbal update about orders during the meeting.", fb: "Decent approach, but using clean data sheets works better.", disc: "How do simple lists help overcome language barriers in calls?" },
@@ -264,8 +264,8 @@ const GAME_DATA = [
   {
     type: "standard",
     location: "Production Line (Tuesday 02:00 PM)",
-    text: "The plant manager asks for 500 extra metal parts by Friday for an urgent customer order. What do you do?[cite: 1]",
-    vocab: "<strong>Vocabulary:</strong><br>• <em>Capacity</em> = how many parts a factory can make[cite: 1].<br>• <em>Expedite</em> = to make an order move faster than usual[cite: 1].",
+    text: "The plant manager asks for 500 extra metal parts by Friday for an urgent customer order. What do you do?",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Capacity</em> = how many parts a factory can make.<br>• <em>Expedite</em> = to make an order move faster than usual.",
     options: [
       { pts: 3, t: "Check supplier stock right away, arrange fast delivery, and confirm parts.", fb: "Awesome! Quick checks make sure parts arrive in time.", disc: "How do you manage urgent changes with suppliers?" },
       { pts: 2, t: "Order 500 units online and tell the manager parts might be late.", fb: "Fair try, but ordering without checking stock causes delays.", disc: "Why check stock before placing an urgent order?" },
@@ -278,8 +278,8 @@ const GAME_DATA = [
   {
     type: "emergency",
     location: "Main Assembly Hall — CRITICAL SHORTAGE",
-    text: "DANGER: Assembly Line 1 will stop in two hours because German circuit parts are completely missing![cite: 1]",
-    vocab: "<strong>Vocabulary:</strong><br>• <em>Line stop</em> = total factory line shutdown[cite: 1].<br>• <em>Express courier</em> = fast special delivery service[cite: 1].",
+    text: "DANGER: Assembly Line 1 will stop in two hours because German circuit parts are completely missing!",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Line stop</em> = total factory line shutdown.<br>• <em>Express courier</em> = fast special delivery service.",
     options: [
       { pts: 2, isGood: true, t: "FAST TAXI: Book an express air or road driver from Germany and tell managers.", fb: "Great emergency work! The parts arrived on time and saved thousands of Euros.", disc: "What fast delivery choices does your company have?" },
       { pts: 0, isGood: false, t: "NORMAL TRUCK: Wait for the standard weekly truck transport.", fb: "CRITICAL FAILURE: The factory line stopped for 24 hours. Lost €50,000. GAME OVER.", disc: "" }
@@ -290,8 +290,8 @@ const GAME_DATA = [
   {
     type: "standard",
     location: "Receiving Office (Wednesday 11:30 AM)",
-    text: "A delivery truck arrives. The delivery paper lists 200 sensors, but workers count only 150. What do you do?[cite: 1]",
-    vocab: "<strong>Vocabulary:</strong><br>• <em>Discrepancy</em> = a difference between paper records and real items[cite: 1].<br>• <em>Shortage</em> = having less items than you need[cite: 1].",
+    text: "A delivery truck arrives. The delivery paper lists 200 sensors, but workers count only 150. What do you do?",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Discrepancy</em> = a difference between paper records and real items.<br>• <em>Shortage</em> = having less items than you need.",
     options: [
       { pts: 3, t: "Write '150 items' on the paper, take a photo, and ask for the missing 50.", fb: "Perfect action! Good records stop you from paying for missing items.", disc: "How do you tell a supplier politely about missing items?" },
       { pts: 2, t: "Type 150 into the computer system and change the factory schedule.", fb: "Good job! Changing plans early prevents sudden factory line stops.", disc: "Why must computer stock match physical stock on the dock?" },
@@ -304,8 +304,8 @@ const GAME_DATA = [
   {
     type: "standard",
     location: "Supply Office (Wednesday 02:30 PM)",
-    text: "The computer shows that safety stock for aluminum tubes is below safety limits. How do you react?[cite: 1]",
-    vocab: "<strong>Vocabulary:</strong><br>• <em>Safety stock</em> = extra buffer items kept for emergencies[cite: 1].<br>• <em>Reorder point</em> = the stock number that means 'time to order again'[cite: 1].",
+    text: "The computer shows that safety stock for aluminum tubes is below safety limits. How do you react?",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Safety stock</em> = extra buffer items kept for emergencies.<br>• <em>Reorder point</em> = the stock number that means 'time to order again'.",
     options: [
       { pts: 3, t: "Check daily usage, adjust reorder levels, and send a new purchase order.", fb: "Proactive work! Keeping extra stock safe prevents running out.", disc: "How do you calculate safe extra stock for essential items?" },
       { pts: 2, t: "Place a standard order with your main supplier to rebuild safety stock.", fb: "Solid choice! Rebuilding extra stock keeps factory work simple.", disc: "What causes stock levels to drop faster than expected?" },
@@ -318,8 +318,8 @@ const GAME_DATA = [
   {
     type: "standard",
     location: "Quality Lab (Thursday 09:30 AM)",
-    text: "The quality team checks a new box of German connectors and finds 15% are broken. What do you do?[cite: 1]",
-    vocab: "<strong>Vocabulary:</strong><br>• <em>Defect rate</em> = the percentage of broken parts[cite: 1].<br>• <em>Quarantine</em> = setting bad parts aside away from good stock[cite: 1].",
+    text: "The quality team checks a new box of German connectors and finds 15% are broken. What do you do?",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Defect rate</em> = the percentage of broken parts.<br>• <em>Quarantine</em> = setting bad parts aside away from good stock.",
     options: [
       { pts: 3, t: "Quarantine bad parts, call the German supplier, and request emergency replacements.", fb: "Right strategy! Separating broken parts protects production lines.", disc: "How do broken parts affect factory schedules?" },
       { pts: 2, t: "Send broken parts back and request a clear refund paper.", fb: "Good administrative work! Money records stay clear and organized.", disc: "What documents do you need when sending back bad parts?" },
@@ -332,13 +332,13 @@ const GAME_DATA = [
   {
     type: "standard",
     location: "Meeting Room (Thursday 02:00 PM)",
-    text: "You have a yearly review meeting with local suppliers. What is most important to talk about?[cite: 1]",
-    vocab: "<strong>Vocabulary:</strong><br>• <em>KPI</em> = Key Performance Indicator (a tool to measure performance)[cite: 1].<br>• <em>OTIF</em> = On-Time In-Full (delivery score)[cite: 1].",
+    text: "You prepare data for a yearly review meeting with local suppliers. What is most important to focus on?",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>KPI</em> = Key Performance Indicator (a tool to measure performance).<br>• <em>OTIF</em> = On-Time In-Full (delivery score).",
     options: [
-      { pts: 3, t: "Review OTIF scores, discuss prices, and set clear delivery goals.", fb: "Strategic leadership! Data-driven reviews help suppliers work better.", disc: "Which scores are best for measuring supplier success?" },
-      { pts: 2, t: "Talk about recent late deliveries and ask for a written improvement plan.", fb: "Effective feedback! Clear goals encourage suppliers to do better.", disc: "How do improvement plans help suppliers get better?" },
-      { pts: 1, t: "Send automatic review emails instead of holding real face-to-face meetings.", fb: "Impersonal! Automated emails lack human connection during negotiations.", disc: "Why are real meetings better than automated emails?" },
-      { pts: -1, t: "Shout at suppliers without showing real delivery data or numbers.", fb: "Unprofessional! Emotional arguments ruin good business partnerships.", disc: "Why should supplier feedback be based on real numbers?" }
+      { pts: 3, t: "Review OTIF scores, track delivery lead times, and set clear service goals.", fb: "Strategic work! Data-driven reviews help suppliers improve delivery performance.", disc: "Which scores are best for measuring supplier success?" },
+      { pts: 2, t: "Talk about recent late deliveries and request a written improvement plan.", fb: "Effective feedback! Clear operational goals encourage suppliers to do better.", disc: "How do improvement plans help suppliers get better?" },
+      { pts: 1, t: "Send automatic review emails instead of compiling detailed performance reports.", fb: "Impersonal! Automated emails lack the detail needed for proper operational reviews.", disc: "Why are detailed performance reports better than automated emails?" },
+      { pts: -1, t: "Complain to suppliers without showing real delivery data or numbers.", fb: "Unprofessional! Feedback must always be based on accurate delivery numbers.", disc: "Why should supplier feedback be based on real numbers?" }
     ]
   },
 
@@ -346,8 +346,8 @@ const GAME_DATA = [
   {
     type: "standard",
     location: "Supply Office (Friday 08:30 AM)",
-    text: "A national truck strike means road shipments cannot deliver your parts. How do you respond?[cite: 1]",
-    vocab: "<strong>Vocabulary:</strong><br>• <em>Contingency plan</em> = a backup plan for emergencies[cite: 1].<br>• <em>Freight forwarder</em> = a transport company that moves goods[cite: 1].",
+    text: "A national truck strike means road shipments cannot deliver your parts. How do you respond?",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Contingency plan</em> = a backup plan for emergencies.<br>• <em>Freight forwarder</em> = a transport company that moves goods.",
     options: [
       { pts: 3, t: "Use a backup plan: hire local small vans to pick up urgent parts directly.", fb: "Smart move! Direct collection keeps factory parts moving during strikes.", disc: "What backup delivery plans can your factory use?" },
       { pts: 2, t: "Call other local transport companies to look for open road routes.", fb: "Good effort! Looking for new shipping options lowers strike impact.", disc: "How do local shipping networks help during emergencies?" },
@@ -360,8 +360,8 @@ const GAME_DATA = [
   {
     type: "standard",
     location: "Supply Office (Friday 01:30 PM)",
-    text: "Customs officers hold an international delivery at the border because papers are missing. What do you do?[cite: 1]",
-    vocab: "<strong>Vocabulary:</strong><br>• <em>Customs clearance</em> = official approval to bring goods into a country[cite: 1].<br>• <em>Documentation</em> = official papers for shipping goods[cite: 1].",
+    text: "Customs officers hold an international delivery at the border because papers are missing. What do you do?",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Customs clearance</em> = official approval to bring goods into a country.<br>• <em>Documentation</em> = official papers for shipping goods.",
     options: [
       { pts: 3, t: "Contact border agents and the supplier right away to email missing papers.", fb: "Fast action! Sending papers quickly clears border holds fast.", disc: "Which papers are essential for importing goods from abroad?" },
       { pts: 2, t: "Ask the foreign supplier's shipping team for quick help.", fb: "Good effort! Involving the supplier helps get missing papers quickly.", disc: "How can foreign suppliers help prevent border stops?" },
@@ -374,8 +374,8 @@ const GAME_DATA = [
   {
     type: "emergency",
     location: "Receiving Bay — CRITICAL CHEMICAL HAZARD",
-    text: "DANGER: A container of chemical glue breaks open and leaks on the dock floor![cite: 1]",
-    vocab: "<strong>Vocabulary:</strong><br>• <em>HAZMAT</em> = dangerous chemicals or hazardous materials[cite: 1].<br>• <em>Containment</em> = keeping dangerous spills safe and contained[cite: 1].",
+    text: "DANGER: A container of chemical glue breaks open and leaks on the dock floor!",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>HAZMAT</em> = dangerous chemicals or hazardous materials.<br>• <em>Containment</em> = keeping dangerous spills safe and contained.",
     options: [
       { pts: 2, isGood: true, t: "EVACUATE & CONTAIN: Leave the area, close doors, wear mask/gloves, call HAZMAT team.", fb: "Proper response! The chemical spill was contained safely with no injuries.", disc: "Where are safety hazard response kits in your warehouse?" },
       { pts: 0, isGood: false, t: "CLEAN UP: Clean the spill with cloth towels without safety gloves or masks.", fb: "CRITICAL FAILURE: Toxic fumes caused severe injuries. GAME OVER.", disc: "" }
@@ -386,8 +386,8 @@ const GAME_DATA = [
   {
     type: "standard",
     location: "Supply Office (Monday 09:00 AM)",
-    text: "A local supplier offers a 10% discount if you use a new, cheaper material. What do you do?[cite: 1]",
-    vocab: "<strong>Vocabulary:</strong><br>• <em>Specification</em> = technical details needed for a part[cite: 1].<br>• <em>Validation</em> = testing and approving a new part[cite: 1].",
+    text: "A local supplier offers a 10% discount if you use a new, cheaper material. What do you do?",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Specification</em> = technical details needed for a part.<br>• <em>Validation</em> = testing and approving a new part.",
     options: [
       { pts: 3, t: "Ask for technical details, test samples, and engineer approval first.", fb: "Thorough work! Testing substitute materials keeps product quality high.", disc: "Why must engineering teams test new material choices?" },
       { pts: 2, t: "Send material details to the engineering team before ordering.", fb: "Sensible choice! Engineering approval makes sure parts fit correctly.", disc: "How do supply planners work together with quality engineers?" },
@@ -400,8 +400,8 @@ const GAME_DATA = [
   {
     type: "standard",
     location: "Supply Manager Office (Monday 02:00 PM)",
-    text: "It is time to plan next year's purchasing budget. What is your primary goal?[cite: 1]",
-    vocab: "<strong>Vocabulary:</strong><br>• <em>Total cost of ownership</em> = the full cost of buying and holding stock[cite: 1].<br>• <em>Service level</em> = percentage of orders delivered on time[cite: 1].",
+    text: "It is time to plan next year's purchasing budget. What is your primary goal?",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Total cost of ownership</em> = the full cost of buying and holding stock.<br>• <em>Service level</em> = percentage of orders delivered on time.",
     options: [
       { pts: 3, t: "Balance good stock levels, low storage costs, and fair supplier prices.", fb: "Masterful strategy! Balancing availability and cost brings operational success.", disc: "How do you balance high stock levels with low storage costs?" },
       { pts: 2, t: "Focus on getting big quantity discounts from key suppliers.", fb: "Strong purchasing plan! Big orders help lower unit prices.", disc: "What are the advantages of ordering from fewer suppliers?" },
