@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supply Planning Specialist: A2 English Game</title>
+    <style>
+        :root {
+            --bg-warehouse: #0b1220;
+            --card-bg: #ffffff;
+            --accent: #0369a1;
+            --accent-hover: #035388;
+            --warning-amber: #d97706;
+            --success-green: #16a34a;
+            --info-blue: #0ea5a4;
+            --text-dark: #0f172a;
+            --border-color: #cbd5e1;
+            --error-red: #dc2626;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-warehouse);
+            background-image: radial-gradient(#122030 1.5px, transparent 0);
+            background-size: 24px 24px;
+            color: var(--text-dark);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .game-container {
+            background-color: var(--card-bg);
+            width: 100%;
+            max-width: 780px;
+            border-radius: 12px;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
+            padding: 30px;
+            border: 3px solid var(--accent);
+        }
+
+        header {
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        h1 {
+            color: var(--accent);
+            font-size: 1.6rem;
+        }
+
+        .status-bar {
+            display: flex;
+            gap: 15px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            background: #f1f5f9;
+            padding: 8px 14px;
+            border-radius: 20px;
+            color: var(--text-dark);
+        }
+
+        .scenario-box { margin-bottom: 20px; }
+        .scenario-text { font-size: 1.1rem; line-height: 1.6; margin-bottom: 15px; }
+
+        .feedback-banner { 
+            padding: 14px 18px; 
+            border-radius: 8px; 
+            margin-bottom: 20px; 
+            font-size: 0.98rem; 
+            line-height: 1.5; 
+            display: none; 
+            border-left: 5px solid; 
+        }
+        .feedback-banner.success { background-color: #f0fdf4; color: var(--success-green); border-color: var(--success-green); }
+        .feedback-banner.info-blue { background-color: #f0f9ff; color: var(--info-blue); border-color: var(--info-blue); }
+        .feedback-banner.warning { background-color: #fffbeb; color: var(--warning-amber); border-color: var(--warning-amber); }
+        .feedback-banner.error { background-color: #fef2f2; color: var(--error-red); border-color: var(--error-red); }
+
+        .vocab-box {
+            background: #f8fafc;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 0.92rem;
+            color: #334155;
+            border: 1px solid #e2e8f0;
+        }
+
+        .discussion-box {
+            background: #fefce8;
+            padding: 14px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-style: italic;
+            color: #854d0e;
+            border-left: 4px solid #ca8a04;
+            font-size: 0.95rem;
+        }
+
+        .options-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+        
+        .btn-option { 
+            background-color: #ffffff; 
+            border: 2px solid var(--border-color); 
+            border-radius: 8px; 
+            padding: 14px 18px; 
+            text-align: left; 
+            font-size: 0.98rem; 
+            color: var(--text-dark); 
+            cursor: pointer; 
+            transition: all 0.2s ease; 
+            line-height: 1.4; 
+        }
+        .btn-option:hover { border-color: var(--accent); background-color: #f8fafc; transform: translateY(-2px); }
+        .btn-option:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        .btn-action { 
+            background-color: var(--accent); 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            padding: 14px 28px; 
+            font-size: 1.05rem; 
+            font-weight: bold; 
+            cursor: pointer; 
+            margin-top: 15px; 
+            display: inline-block; 
+            transition: background-color 0.2s, transform 0.1s; 
+        }
+        .btn-action:hover { background-color: var(--accent-hover); transform: scale(1.02); }
+
+        .hidden { display: none !important; }
+        .final-score { font-size: 2rem; color: var(--accent); font-weight: bold; margin: 15px 0; }
+        .badge { display: inline-block; padding: 4px 10px; background: var(--accent); color: white; border-radius: 4px; font-size: 0.85rem; font-weight: 600; margin-bottom: 10px; }
+
+        .landing-card { text-align: center; padding: 10px 0; }
+        .landing-card h2 { color: var(--accent); font-size: 1.8rem; margin-bottom: 15px; }
+        .landing-card p { font-size: 1.05rem; line-height: 1.6; margin-bottom: 15px; text-align: left; }
+        
+        .emergency-title {
+            color: var(--error-red);
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        @media (max-width: 500px) { .game-container { padding: 18px; } h1 { font-size: 1.3rem; } }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <header id="game-header" class="hidden">
+        <h1>Apex Manufacturing (Supply Operations)</h1>
+        <div class="status-bar">
+            <span>Progress: <span id="step-display">1/12</span></span>
+            <span>Score: <span id="score-display">0</span></span>
+        </div>
+    </header>
+
+    <main id="game-body">
+        <!-- LANDING PAGE -->
+        <div id="landing-screen" class="landing-card">
+            <h2>Welcome to Apex Manufacturing Supply Operations!</h2>
+            <p>You work as a Supply Planner managing a portfolio of domestic suppliers and growing international partners, including a monthly video meeting with a supplier in Germany. Your goal is to guarantee component availability at the right time, right place, right quantity, and best cost for production.</p>
+            <p><strong>Game Rules:</strong></p>
+            <ul style="text-align: left; margin: 0 0 15px 25px; line-height: 1.6;">
+                <li>12 Standard Scenarios (+3 Excellent, +2 Good, +1 Average, -1 Poor with try again).</li>
+                <li>2 Critical Emergency Hazards (+2 Points each). Choosing the wrong option triggers a buzzer and leads to an immediate <strong>Game Over</strong>.</li>
+                <li>Maximum Possible Score: <strong>40 Points</strong>.</li>
+            </ul>
+            <p style="text-align: center; font-weight: bold; color: var(--accent);">Check your inventory software, review open purchase orders, and start your shift!</p>
+            <button class="btn-action" onclick="startGame()">Start Shift</button>
+        </div>
+
+        <!-- GAMEPLAY SCREEN -->
+        <div id="gameplay-screen" class="hidden">
+            <span class="badge" id="location-badge">Location: Supply Office</span>
+            <div class="scenario-box">
+                <div class="scenario-text" id="scenario-text">Loading situation...</div>
+            </div>
+
+            <div class="vocab-box" id="vocab-box"></div>
+
+            <div class="options-grid" id="options-container"></div>
+
+            <div id="feedback" class="feedback-banner"></div>
+            <div id="discussion" class="discussion-box" style="display:none"></div>
+
+            <button id="next-btn" class="btn-action hidden" onclick="nextStep()">Continue Shift</button>
+            <button id="retry-btn" class="btn-action hidden" onclick="retryStep()">Try Again</button>
+        </div>
+
+        <!-- FINAL RESULTS SCREEN -->
+        <div id="final-screen" class="landing-card hidden">
+            <h2 id="final-header">Shift Completed!</h2>
+            <div class="final-score" id="final-score-display">0 / 40 Points</div>
+            <div id="debrief-text" style="text-align: left; line-height: 1.6; margin-bottom: 20px;"></div>
+            <button class="btn-action" onclick="resetToLanding()">Play Again</button>
+        </div>
+    </main>
+</div>
+
+<script>
+const GAME_DATA = [
+  // --- SCENARIO 1 ---
+  {
+    type: "standard",
+    location: "Supply Office (Monday 08:30 AM)",
+    text: "You check morning inventory. A crucial electrical component from a domestic supplier will run out in two days. What do you do?",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Stockout</em> = when an item runs out of stock completely.<br>• <em>Purchase order</em> = official commercial document sent to a supplier.",
+    options: [
+      { pts: 3, t: "Call the domestic supplier to negotiate an express delivery for tomorrow morning.", fb: "Excellent! Fast communication secures components before assembly line stops.", disc: "How do you persuade a supplier to send urgent deliveries quickly?" },
+      { pts: 2, t: "Send a standard email purchase order and wait for standard transport delivery.", fb: "Acceptable, but standard freight may arrive after the assembly line runs out.", disc: "When is standard email communication not fast enough for supply planning?" },
+      { pts: 1, t: "Wait until tomorrow morning to see if the assembly schedule changes dynamically.", fb: "Risky. Delaying your reorder increases the danger of an expensive production line stop.", disc: "Why is waiting until the last minute dangerous in component planning?" },
+      { pts: -1, t: "Ignore the low stock warning and assume the warehouse has uncounted extra stock.", fb: "Poor choice! Ignoring stock warnings causes unexpected production stoppages.", disc: "What happens when planners trust assumptions instead of real stock data?" }
+    ]
+  },
+
+  // --- SCENARIO 2 ---
+  {
+    type: "standard",
+    location: "Supply Office (Monday 11:00 AM)",
+    text: "A domestic supplier sends notice of a 5% price increase on plastic housings next month. What is your reaction?",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Unit cost</em> = price paid for one single item or component.<br>• <em>Negotiation</em> = discussing terms to reach an agreement.",
+    options: [
+      { pts: 3, t: "Review contract terms, request price justification, and negotiate to maintain target costs.", fb: "Great work! Protecting production budgets requires strong supplier negotiation.", disc: "What reasons can a supplier give to justify a cost increase?" },
+      { pts: 2, t: "Accept the price increase temporarily while searching for alternative local suppliers.", fb: "Good flexibility. You keep component supply safe while exploring lower market prices.", disc: "How do you find reliable backup suppliers in your region?" },
+      { pts: 1, t: "Reject the price increase immediately without reviewing current market price rates.", fb: "Direct rejection might damage supplier relations or risk delivery cancellations.", disc: "Why is it important to keep professional relationships with key suppliers?" },
+      { pts: -1, t: "Accept all new high prices instantly without informing your financial controller.", fb: "Unprofessional! Accepting uncontrolled costs harms manufacturing profit margins.", disc: "Who should you consult before approving higher component purchase prices?" }
+    ]
+  },
+
+  // --- SCENARIO 3 ---
+  {
+    type: "standard",
+    location: "Video Meeting Room (Tuesday 10:00 AM)",
+    text: "It is time for your monthly video call with your major German supplier to review pending orders. How do you prepare?",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Lead time</em> = total time from order placement to final delivery.<br>• <em>Open order</em> = order placed but not yet delivered.",
+    options: [
+      { pts: 3, t: "Prepare open order lists, review delivery lead times, and discuss upcoming needs.", fb: "Perfect approach! Structured monthly calls ensure clear international coordination.", disc: "What details are most important to discuss in monthly supplier meetings?" },
+      { pts: 2, t: "Ask for a quick verbal status report on pending deliveries during the call.", fb: "Decent approach, though structured data sheets make meetings more effective.", disc: "How do visual reports help overcome language barriers in meetings?" },
+      { pts: 1, t: "Listen to the supplier update without asking questions about past delivery delays.", fb: "Passive participation misses opportunities to improve international lead times.", disc: "Why must planners actively challenge delivery delays with suppliers?" },
+      { pts: -1, t: "Cancel the monthly call because you have routine administrative paperwork to finish.", fb: "Bad choice! Skipping regular meetings creates serious communication gaps.", disc: "What problems occur when you neglect international supplier meetings?" }
+    ]
+  },
+
+  // --- SCENARIO 4 ---
+  {
+    type: "standard",
+    location: "Production Line (Tuesday 02:00 PM)",
+    text: "The plant manager requests 500 extra metal brackets for an urgent client request by Friday. What do you do?",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Capacity</em> = maximum volume a supplier can manufacture.<br>• <em>Expedite</em> = process an order faster than normal speed.",
+    options: [
+      { pts: 3, t: "Check supplier stock instantly, negotiate expedited freight, and confirm availability.", fb: "Outstanding response! Quick verification guarantees parts arrive for production.", disc: "How do you manage urgent production changes with external suppliers?" },
+      { pts: 2, t: "Place an order for 500 units online and notify the manager about possible delays.", fb: "Fair effort, but placing standard orders without checking stock risks delays.", disc: "Why should you confirm stock availability before placing rush orders?" },
+      { pts: 1, t: "Tell the plant manager to lower production targets instead of calling suppliers.", fb: "Unhelpful. Planners should explore supply options before refusing requests.", disc: "How can planners support manufacturing goals during demand spikes?" },
+      { pts: -1, t: "Promise immediate delivery on Friday without checking supplier manufacturing capacity.", fb: "Dangerous move! Promising unconfirmed parts leads to broken client promises.", disc: "Why are false promises harmful in manufacturing supply chains?" }
+    ]
+  },
+
+  // --- EMERGENCY 1 ---
+  {
+    type: "emergency",
+    location: "Main Assembly Hall — CRITICAL SHORTAGE",
+    text: "CRITICAL RISK: Assembly Line 1 will stop in two hours because a key German circuit component is completely missing!",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Line stop</em> = total shutdown of factory assembly lines.<br>• <em>Express courier</em> = dedicated fast transport service.",
+    options: [
+      { pts: 2, isGood: true, t: "EXPRESS TAXI: Book dedicated express air/road courier from Germany and alert management.", fb: "Critical success! Express transit arrived in time, saving the factory thousands of Euros.", disc: "What emergency transport options does your company use for urgent parts?" },
+      { pts: 0, isGood: false, t: "STANDARD FREIGHT: Wait for normal weekly truck transport while letting the line run empty.", fb: "CRITICAL FAILURE: Assembly line stopped completely for 24 hours. Costs exceeded €50,000. GAME OVER.", disc: "" }
+    ]
+  },
+
+  // --- SCENARIO 5 ---
+  {
+    type: "standard",
+    location: "Receiving Office (Wednesday 11:30 AM)",
+    text: "A delivery truck arrives from a domestic supplier. The delivery note lists 200 sensors, but workers count only 150. What do you do?",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Discrepancy</em> = difference between written records and real stock.<br>• <em>Shortage</em> = state when quantity is less than needed.",
+    options: [
+      { pts: 3, t: "Note 150 items on delivery papers, photo evidence, and request immediate balance dispatch.", fb: "Perfect action! Accurate reporting prevents paying for unreceived components.", disc: "How do you handle supplier discrepancies professionally?" },
+      { pts: 2, t: "Accept 150 items in the system, update production plans, and contact account managers.", fb: "Good practical response. Adjusting schedules prevents unexpected line halts.", disc: "Why must internal computer systems match physical dock receipts?" },
+      { pts: 1, t: "Sign for 200 items on paper and trust the driver to bring 50 tomorrow.", fb: "Unsafe practice. Signing for unreceived items makes claims difficult later.", disc: "What financial risks happen when signing unverified delivery papers?" },
+      { pts: -1, t: "Reject the full shipment at the dock and send the delivery truck away.", fb: "Excessive reaction! Rejecting good parts creates artificial material shortages.", disc: "When is partial delivery acceptance better than total rejection?" }
+    ]
+  },
+
+  // --- SCENARIO 6 ---
+  {
+    type: "standard",
+    location: "Supply Office (Wednesday 02:30 PM)",
+    text: "Computer systems show safety stock for aluminum tubes falling below minimum safety limits. How do you respond?",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Safety stock</em> = extra buffer inventory held to mitigate risks.<br>• <em>Reorder point</em> = stock level that triggers new orders.",
+    options: [
+      { pts: 3, t: "Analyze consumption rates, adjust reorder points, and issue a replenishment purchase order.", fb: "Proactive inventory control! Keeping buffer stock safe prevents unexpected stockouts.", disc: "How do you calculate safe buffer levels for critical components?" },
+      { pts: 2, t: "Place a standard reorder with the primary supplier to rebuild minimum safety levels.", fb: "Solid choice. Rebuilding safety stock maintains smooth operational flow.", disc: "What factors cause safety stock levels to drop unexpectedly?" },
+      { pts: 1, t: "Delay reordering until safety stock reaches zero to minimize inventory holding costs.", fb: "Risky strategy. Zero buffer inventory leaves no protection against delays.", disc: "What is the balance between low holding costs and stockout risks?" },
+      { pts: -1, t: "Lower safety stock limits in the computer system so warnings disappear completely.", fb: "Mistake! Altering safety parameters to hide shortages creates operational chaos.", disc: "Why is honest inventory reporting essential for business safety?" }
+    ]
+  },
+
+  // --- SCENARIO 7 ---
+  {
+    type: "standard",
+    location: "Quality Lab (Thursday 09:30 AM)",
+    text: "Quality control inspects a fresh batch of German connectors and finds a 15% defect rate. What action do you take?",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Defect rate</em> = percentage of broken or imperfect parts.<br>• <em>Quarantine</em> = isolating defective items from usable stock.",
+    options: [
+      { pts: 3, t: "Quarantine defective batch, inform German supplier, and demand emergency replacement parts.", fb: "Right strategy! Isolating bad components keeps defect parts off assembly lines.", disc: "How do quality defects affect overall production schedules?" },
+      { pts: 2, t: "Return bad items to supplier and request immediate credit note documentation.", fb: "Good administrative control. Financial records remain accurate and clear.", disc: "What documents are required when returning bad parts to suppliers?" },
+      { pts: 1, t: "Ask assembly team to sort through defective batches and use acceptable parts.", fb: "Sorting wastes internal labor time and delays main production assembly.", disc: "Who should bear the labor cost of sorting defective supplier parts?" },
+      { pts: -1, t: "Instruct assembly line workers to use defective parts to maintain speed targets.", fb: "Disastrous choice! Defective components cause final product failures.", disc: "Why must quality standards never be sacrificed for short-term speed?" }
+    ]
+  },
+
+  // --- SCENARIO 8 ---
+  {
+    type: "standard",
+    location: "Meeting Room (Thursday 02:00 PM)",
+    text: "You conduct an annual performance review with key domestic component suppliers. What is your primary focus?",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Key Performance Indicator (KPI)</em> = metric measuring performance.<br>• <em>On-Time In-Full (OTIF)</em> = delivery performance standard.",
+    options: [
+      { pts: 3, t: "Review OTIF scores, discuss cost optimization targets, and set delivery goals.", fb: "Strategic leadership! Data-driven reviews improve supplier accountability and performance.", disc: "Which KPIs are most effective for evaluating component suppliers?" },
+      { pts: 2, t: "Highlight recent late delivery incidents and request formal improvement action plans.", fb: "Effective feedback. Clear expectations encourage suppliers to raise service quality.", disc: "How do supplier improvement plans work in manufacturing logistics?" },
+      { pts: 1, t: "Send automated performance emails without holding face-to-face review meetings.", fb: "Impersonal approach. Automated messages lack relational negotiation power.", disc: "Why are face-to-face meetings valuable in purchasing management?" },
+      { pts: -1, t: "Criticize supplier teams aggressively without presenting documented performance data.", fb: "Unprofessional! Emotion-based complaints ruin strategic business partnerships.", disc: "Why must supplier feedback be based on concrete operational metrics?" }
+    ]
+  },
+
+  // --- SCENARIO 9 ---
+  {
+    type: "standard",
+    location: "Supply Office (Friday 08:30 AM)",
+    text: "A national transport strike threatens upcoming road shipments of essential fasteners. How do you respond?",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Contingency plan</em> = backup strategy for emergency situations.<br>• <em>Freight forwarder</em> = company organizing transport logistics.",
+    options: [
+      { pts: 3, t: "Activate contingency transport, hiring local dedicated vans to collect urgent components directly.", fb: "Resourceful move! Direct collection keeps component supply moving during strikes.", disc: "What backup transportation routes can your company activate?" },
+      { pts: 2, t: "Contact alternative regional freight forwarders to check available road transport routes.", fb: "Good initiative. Exploring alternative transport partners reduces strike impact.", disc: "How do local freight networks help maintain supply chain resilience?" },
+      { pts: 1, t: "Inform factory supervisors of impending delays and wait for strike resolution.", fb: "Passive management. Waiting without seeking solutions creates production downtime.", disc: "What are the costs associated with unmanaged supply delays?" },
+      { pts: -1, t: "Cancel all active purchase orders until national transport networks resume normal operations.", fb: "Extreme overreaction! Canceling orders causes catastrophic long-term shortages.", disc: "Why is cancelling active orders during temporary disruptions harmful?" }
+    ]
+  },
+
+  // --- SCENARIO 10 ---
+  {
+    type: "standard",
+    location: "Supply Office (Friday 01:30 PM)",
+    text: "Customs authorities delay an international component shipment at the border due to missing tariff documentation. What do you do?",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Customs clearance</em> = official approval for international goods.<br>• <em>Documentation</em> = official papers for cross-border transit.",
+    options: [
+      { pts: 3, t: "Coordinate immediately with customs brokers and supplier to transmit required clearance documents.", fb: "Swift action! Immediate documentation support resolves international border delays fast.", disc: "Which customs documents are essential for international component imports?" },
+      { pts: 2, t: "Request urgent assistance from the international supplier shipping department.", fb: "Good effort. Involving the supplier helps obtain missing paperwork quickly.", disc: "How can international suppliers help avoid border customs delays?" },
+      { pts: 1, t: "Track shipment status online hourly while waiting for customs officers to process.", fb: "Passive monitoring. Online tracking does not solve missing paperwork issues.", disc: "Why is proactive intervention necessary during customs holds?" },
+      { pts: -1, t: "Advise delivery driver to bypass border customs controls without official authorization.", fb: "Illegal action! Attempting to bypass border customs leads to severe fines.", disc: "What legal consequences exist for non-compliant international shipping?" }
+    ]
+  },
+
+  // --- EMERGENCY 2 ---
+  {
+    type: "emergency",
+    location: "Receiving Bay — CRITICAL CHEMICAL HAZARD",
+    text: "CRITICAL DANGER: A container of chemical bonding agent from an international supplier ruptures on the loading dock!",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>HAZMAT</em> = hazardous materials and chemicals.<br>• <em>Containment</em> = action of keeping dangerous substances safe.",
+    options: [
+      { pts: 2, isGood: true, t: "EVACUATE & CONTAIN: Evacuate the dock, isolate area, wear protective gear, and call HAZMAT.", fb: "Proper emergency management! Contamination was contained safely without staff injury.", disc: "Where are safety hazard kits located in your receiving department?" },
+      { pts: 0, isGood: false, t: "MANUAL CLEANUP: Wipe chemical spill with rag cloths without wearing protective gear.", fb: "CRITICAL FAILURE: Toxic chemical fumes caused severe respiratory injuries. GAME OVER.", disc: "" }
+    ]
+  },
+
+  // --- SCENARIO 11 ---
+  {
+    type: "standard",
+    location: "Supply Office (Monday 09:00 AM)",
+    text: "A domestic supplier offers a 10% cost discount if you switch to a substitute component material. How do you evaluate?",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Specification</em> = technical standard required for parts.<br>• <em>Validation</em> = testing and approving new components.",
+    options: [
+      { pts: 3, t: "Request technical data sheets, sample parts, and quality engineering validation before deciding.", fb: "Thorough approach! Validating substitute parts protects overall product quality.", disc: "Why must engineering teams test new component material substitutes?" },
+      { pts: 2, t: "Forward technical proposal to engineering team for review before changing purchase orders.", fb: "Sensible delegation. Technical approval ensures parts meet required specs.", disc: "How do supply planners work with quality engineers?" },
+      { pts: 1, t: "Order a small trial production batch without consulting internal engineering specialists.", fb: "Risky trial. Unverified components might fail during factory assembly processes.", disc: "What risks happen when ordering unapproved component materials?" },
+      { pts: -1, t: "Switch all future purchase orders to cheaper material instantly to maximize savings.", fb: "Dangerous decision! Unverified materials can lead to total product failures.", disc: "Why can cheap component substitutes become expensive mistakes?" }
+    ]
+  },
+
+  // --- SCENARIO 12 ---
+  {
+    type: "standard",
+    location: "Supply Manager Office (Monday 02:00 PM)",
+    text: "It is annual budget planning. You must align component purchasing targets for next year across all portfolios. What is your priority?",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Total cost of ownership</em> = complete cost of buying and holding stock.<br>• <em>Service level</em> = percentage of target demand delivered on time.",
+    options: [
+      { pts: 3, t: "Balance high component availability, optimized holding costs, and competitive supplier pricing.", fb: "Masterful strategy! Balancing availability, quality, and cost achieves operational success.", disc: "How do you balance high component availability with low holding costs?" },
+      { pts: 2, t: "Focus primarily on securing volume discounts from key domestic and German suppliers.", fb: "Strong purchasing strategy. Volume discounts lower overall material procurement costs.", disc: "What are the advantages of consolidating orders with fewer suppliers?" },
+      { pts: 1, t: "Maximize warehouse inventory levels to ensure zero stockouts regardless of total cost.", fb: "Inflexible approach. Excessive inventory ties up capital and inflates storage costs.", disc: "What problems arise from holding too much inventory stock?" },
+      { pts: -1, t: "Cut overall purchasing budgets by 30% across all suppliers without reviewing demand.", fb: "Irresponsible strategy! Arbitrary budget cuts lead to severe component shortages.", disc: "Why must supply budgets align with realistic production forecasts?" }
+    ]
+  }
+];
+
+let currentIndex = 0;
+let totalScore = 0;
+
+const landingScreenEl = document.getElementById('landing-screen');
+const gameplayScreenEl = document.getElementById('gameplay-screen');
+const finalScreenEl = document.getElementById('final-screen');
+const gameHeaderEl = document.getElementById('game-header');
+
+const stepDisplayEl = document.getElementById('step-display');
+const scoreDisplayEl = document.getElementById('score-display');
+const locationBadgeEl = document.getElementById('location-badge');
+const scenarioTextEl = document.getElementById('scenario-text');
+const vocabBoxEl = document.getElementById('vocab-box');
+const optionsContainerEl = document.getElementById('options-container');
+const feedbackEl = document.getElementById('feedback');
+const discussionEl = document.getElementById('discussion');
+const nextBtnEl = document.getElementById('next-btn');
+const retryBtnEl = document.getElementById('retry-btn');
+
+function playBuzzer() {
+    try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const ctx = new AudioContext();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(130, ctx.currentTime);
+        osc.frequency.linearRampToValueAtTime(70, ctx.currentTime + 0.6);
+        
+        gain.gain.setValueAtTime(0.4, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.6);
+        
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        
+        osc.start();
+        osc.stop(ctx.currentTime + 0.6);
+    } catch (e) {
+        console.log("Audio play prevented or not supported:", e);
+    }
+}
+
+function shuffleArray(array) {
+    let arr = JSON.parse(JSON.stringify(array));
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+function startGame() {
+    landingScreenEl.classList.add('hidden');
+    finalScreenEl.classList.add('hidden');
+    gameHeaderEl.classList.remove('hidden');
+    gameplayScreenEl.classList.remove('hidden');
+    
+    currentIndex = 0;
+    totalScore = 0;
+    renderStep();
+}
+
+function resetToLanding() {
+    gameplayScreenEl.classList.add('hidden');
+    finalScreenEl.classList.add('hidden');
+    gameHeaderEl.classList.add('hidden');
+    landingScreenEl.classList.remove('hidden');
+}
+
+function renderStep() {
+    const data = GAME_DATA[currentIndex];
+    
+    // Calculate display count only for standard scenarios
+    if (data.type === 'standard') {
+        let standardCount = 0;
+        for (let i = 0; i <= currentIndex; i++) {
+            if (GAME_DATA[i].type === 'standard') {
+                standardCount++;
+            }
+        }
+        stepDisplayEl.textContent = `${standardCount}/12`;
+    } else {
+        stepDisplayEl.textContent = `CRITICAL HAZARD`;
+    }
+
+    scoreDisplayEl.textContent = totalScore;
+    locationBadgeEl.textContent = data.location;
+    scenarioTextEl.innerHTML = data.text;
+    vocabBoxEl.innerHTML = data.vocab;
+    
+    optionsContainerEl.innerHTML = '';
+    feedbackEl.style.display = 'none';
+    discussionEl.style.display = 'none';
+    nextBtnEl.classList.add('hidden');
+    retryBtnEl.classList.add('hidden');
+
+    const randomizedOptions = shuffleArray(data.options);
+
+    randomizedOptions.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'btn-option';
+        if (data.type === 'emergency') {
+            btn.style.borderColor = 'var(--error-red)';
+        }
+        btn.innerHTML = opt.t;
+        btn.onclick = () => {
+            if (data.type === 'standard') {
+                handleStandardChoice(opt);
+            } else {
+                handleEmergencyChoice(opt);
+            }
+        };
+        optionsContainerEl.appendChild(btn);
+    });
+}
+
+function handleStandardChoice(opt) {
+    document.querySelectorAll('.btn-option').forEach(btn => btn.disabled = true);
+    
+    totalScore += opt.pts;
+    scoreDisplayEl.textContent = totalScore;
+
+    feedbackEl.style.display = 'block';
+    
+    if (opt.pts === 3) {
+        feedbackEl.className = 'feedback-banner success';
+        feedbackEl.innerHTML = `<strong>EXCELLENT CHOICE (+3 Points)</strong><br>${opt.fb}`;
+    } else if (opt.pts === 2) {
+        feedbackEl.className = 'feedback-banner info-blue';
+        feedbackEl.innerHTML = `<strong>GOOD CHOICE (+2 Points)</strong><br>${opt.fb}`;
+    } else if (opt.pts === 1) {
+        feedbackEl.className = 'feedback-banner warning';
+        feedbackEl.innerHTML = `<strong>AVERAGE CHOICE (+1 Point)</strong><br>${opt.fb}`;
+    } else {
+        feedbackEl.className = 'feedback-banner error';
+        feedbackEl.innerHTML = `<strong>POOR CHOICE (-1 Point)</strong><br>${opt.fb}`;
+    }
+
+    discussionEl.style.display = 'block';
+    discussionEl.innerHTML = `<strong>Discussion Question:</strong> ${opt.disc}`;
+
+    if (opt.pts === -1) {
+        retryBtnEl.classList.remove('hidden');
+    } else {
+        nextBtnEl.classList.remove('hidden');
+    }
+}
+
+function handleEmergencyChoice(opt) {
+    document.querySelectorAll('.btn-option').forEach(btn => btn.disabled = true);
+
+    if (opt.isGood) {
+        totalScore += opt.pts; // Adds 2 points
+        scoreDisplayEl.textContent = totalScore;
+
+        feedbackEl.style.display = 'block';
+        feedbackEl.className = 'feedback-banner success';
+        feedbackEl.innerHTML = `<strong>CRITICAL SUCCESS (+2 Points)</strong><br>${opt.fb}`;
+
+        discussionEl.style.display = 'block';
+        discussionEl.innerHTML = `<strong>Discussion Question:</strong> ${opt.disc}`;
+
+        nextBtnEl.classList.remove('hidden');
+    } else {
+        playBuzzer();
+        showGameOver(opt.fb);
+    }
+}
+
+function retryStep() {
+    renderStep();
+}
+
+function nextStep() {
+    currentIndex++;
+    if (currentIndex >= GAME_DATA.length) {
+        showFinalResults();
+    } else {
+        renderStep();
+    }
+}
+
+function showGameOver(reason) {
+    gameplayScreenEl.classList.add('hidden');
+    finalScreenEl.classList.remove('hidden');
+    
+    document.getElementById('final-header').innerHTML = "<span class='emergency-title'>CRITICAL OPERATIONS FAILURE</span>";
+    document.getElementById('final-score-display').textContent = `FINAL SCORE: ${totalScore} Points`;
+    document.getElementById('debrief-text').innerHTML = `
+        <p style="color: var(--error-red); font-weight: bold; margin-bottom: 12px;">${reason}</p>
+        <p>Operational planning errors caused major production issues. Review supply management procedures, emergency response rules, and retry the scenario!</p>
+    `;
+}
+
+function showFinalResults() {
+    gameplayScreenEl.classList.add('hidden');
+    finalScreenEl.classList.remove('hidden');
+    
+    document.getElementById('final-header').textContent = "Shift Completed!";
+    document.getElementById('final-score-display').textContent = `Final Score: ${totalScore} / 40 Points`;
+
+    let bandTitle = "";
+    let bandDescription = "";
+
+    if (totalScore >= 35) {
+        bandTitle = "Band 1: Expert Supply Planner (35–40 pts)";
+        bandDescription = "Outstanding work! You managed domestic and international suppliers perfectly, kept assembly lines running, controlled unit costs, and maintained optimal safety stock. Senior management recommends you for European supply chain leadership!";
+    } else if (totalScore >= 25) {
+        bandTitle = "Band 2: Senior Supply Specialist (25–34 pts)";
+        bandDescription = "Very good job! You effectively handled component supply, supplier meetings, and transport challenges. Minor delays or small inventory discrepancies occurred, but production flow and budget targets remained safe.";
+    } else if (totalScore >= 15) {
+        bandTitle = "Band 3: Junior Supply Assistant (15–24 pts)";
+        bandDescription = "You completed your day, but encountered supply disruptions. Component shortages, extra freight costs, and communication gaps slowed production down. Review purchasing procedures and try again!";
+    } else {
+        bandTitle = "Band 4: Supply Bottleneck (Under 15 pts)";
+        bandDescription = "Challenging day! Line stoppages, budget overruns, and uncoordinated supplier communication caused severe manufacturing issues. Review inventory vocabulary, prioritize line availability, and try again!";
+    }
+
+    document.getElementById('debrief-text').innerHTML = `
+        <p style="font-size: 1.1rem; font-weight: bold; color: var(--accent); margin-bottom: 10px;">${bandTitle}</p>
+        <p>${bandDescription}</p>
+    `;
+}
+</script>
+</body>
+</html>

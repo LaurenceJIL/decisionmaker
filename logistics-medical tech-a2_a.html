@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supply Planning Specialist: Easy English Game</title>
+    <style>
+        :root {
+            --bg-warehouse: #0b1220;
+            --card-bg: #ffffff;
+            --accent: #0369a1;
+            --accent-hover: #035388;
+            --warning-amber: #d97706;
+            --success-green: #16a34a;
+            --info-blue: #0ea5a4;
+            --text-dark: #0f172a;
+            --border-color: #cbd5e1;
+            --error-red: #dc2626;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-warehouse);
+            background-image: radial-gradient(#122030 1.5px, transparent 0);
+            background-size: 24px 24px;
+            color: var(--text-dark);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .game-container {
+            background-color: var(--card-bg);
+            width: 100%;
+            max-width: 780px;
+            border-radius: 12px;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
+            padding: 30px;
+            border: 3px solid var(--accent);
+        }
+
+        header {
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        h1 {
+            color: var(--accent);
+            font-size: 1.6rem;
+        }
+
+        .status-bar {
+            display: flex;
+            gap: 15px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            background: #f1f5f9;
+            padding: 8px 14px;
+            border-radius: 20px;
+            color: var(--text-dark);
+        }
+
+        .scenario-box { margin-bottom: 20px; }
+        .scenario-text { font-size: 1.1rem; line-height: 1.6; margin-bottom: 15px; }
+
+        .feedback-banner { 
+            padding: 14px 18px; 
+            border-radius: 8px; 
+            margin-bottom: 20px; 
+            font-size: 0.98rem; 
+            line-height: 1.5; 
+            display: none; 
+            border-left: 5px solid; 
+        }
+        .feedback-banner.success { background-color: #f0fdf4; color: var(--success-green); border-color: var(--success-green); }
+        .feedback-banner.info-blue { background-color: #f0f9ff; color: var(--info-blue); border-color: var(--info-blue); }
+        .feedback-banner.warning { background-color: #fffbeb; color: var(--warning-amber); border-color: var(--warning-amber); }
+        .feedback-banner.error { background-color: #fef2f2; color: var(--error-red); border-color: var(--error-red); }
+
+        .vocab-box {
+            background: #f8fafc;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 0.92rem;
+            color: #334155;
+            border: 1px solid #e2e8f0;
+        }
+
+        .discussion-box {
+            background: #fefce8;
+            padding: 14px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-style: italic;
+            color: #854d0e;
+            border-left: 4px solid #ca8a04;
+            font-size: 0.95rem;
+        }
+
+        .options-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+        
+        .btn-option { 
+            background-color: #ffffff; 
+            border: 2px solid var(--border-color); 
+            border-radius: 8px; 
+            padding: 14px 18px; 
+            text-align: left; 
+            font-size: 0.98rem; 
+            color: var(--text-dark); 
+            cursor: pointer; 
+            transition: all 0.2s ease; 
+            line-height: 1.4; 
+        }
+        .btn-option:hover { border-color: var(--accent); background-color: #f8fafc; transform: translateY(-2px); }
+        .btn-option:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        .btn-action { 
+            background-color: var(--accent); 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            padding: 14px 28px; 
+            font-size: 1.05rem; 
+            font-weight: bold; 
+            cursor: pointer; 
+            margin-top: 15px; 
+            display: inline-block; 
+            transition: background-color 0.2s, transform 0.1s; 
+        }
+        .btn-action:hover { background-color: var(--accent-hover); transform: scale(1.02); }
+
+        .hidden { display: none !important; }
+        .final-score { font-size: 2rem; color: var(--accent); font-weight: bold; margin: 15px 0; }
+        .badge { display: inline-block; padding: 4px 10px; background: var(--accent); color: white; border-radius: 4px; font-size: 0.85rem; font-weight: 600; margin-bottom: 10px; }
+
+        .landing-card { text-align: center; padding: 10px 0; }
+        .landing-card h2 { color: var(--accent); font-size: 1.8rem; margin-bottom: 15px; }
+        .landing-card p { font-size: 1.05rem; line-height: 1.6; margin-bottom: 15px; text-align: left; }
+        
+        .emergency-title {
+            color: var(--error-red);
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        @media (max-width: 500px) { .game-container { padding: 18px; } h1 { font-size: 1.3rem; } }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <header id="game-header" class="hidden">
+        <h1>Apex Manufacturing (Supply Game)</h1>
+        <div class="status-bar">
+            <span>Progress: <span id="step-display">1/12</span></span>
+            <span>Score: <span id="score-display">0</span></span>
+        </div>
+    </header>
+
+    <main id="game-body">
+        <!-- LANDING PAGE -->
+        <div id="landing-screen" class="landing-card">
+            <h2>Welcome to Apex Manufacturing!</h2>
+            <p>You work as a Supply Planner[cite: 1]. You order factory parts from local suppliers and international partners, including a monthly video meeting with a supplier in Germany[cite: 1]. Your job is to get the right parts at the right time, in the right amount, for the best price[cite: 1].</p>
+            <p><strong>How to Play:</strong></p>
+            <ul style="text-align: left; margin: 0 0 15px 25px; line-height: 1.6;">
+                <li>12 Regular Questions (+3 Excellent, +2 Good, +1 Okay, -1 Bad with try again)[cite: 1].</li>
+                <li>2 Emergency Hazards (+2 Points each)[cite: 1]. Picking the wrong answer ends the game immediately![cite: 1]</li>
+                <li>Highest Possible Score: <strong>40 Points</strong>[cite: 1].</li>
+            </ul>
+            <p style="text-align: center; font-weight: bold; color: var(--accent);">Check your inventory, review your orders, and start your work day![cite: 1]</p>
+            <button class="btn-action" onclick="startGame()">Start Shift</button>
+        </div>
+
+        <!-- GAMEPLAY SCREEN -->
+        <div id="gameplay-screen" class="hidden">
+            <span class="badge" id="location-badge">Location: Supply Office</span>
+            <div class="scenario-box">
+                <div class="scenario-text" id="scenario-text">Loading situation...</div>
+            </div>
+
+            <div class="vocab-box" id="vocab-box"></div>
+
+            <div class="options-grid" id="options-container"></div>
+
+            <div id="feedback" class="feedback-banner"></div>
+            <div id="discussion" class="discussion-box" style="display:none"></div>
+
+            <button id="next-btn" class="btn-action hidden" onclick="nextStep()">Continue Shift</button>
+            <button id="retry-btn" class="btn-action hidden" onclick="retryStep()">Try Again</button>
+        </div>
+
+        <!-- FINAL RESULTS SCREEN -->
+        <div id="final-screen" class="landing-card hidden">
+            <h2 id="final-header">Shift Completed!</h2>
+            <div class="final-score" id="final-score-display">0 / 40 Points</div>
+            <div id="debrief-text" style="text-align: left; line-height: 1.6; margin-bottom: 20px;"></div>
+            <button class="btn-action" onclick="resetToLanding()">Play Again</button>
+        </div>
+    </main>
+</div>
+
+<script>
+const GAME_DATA = [
+  // --- SCENARIO 1 ---
+  {
+    type: "standard",
+    location: "Supply Office (Monday 08:30 AM)",
+    text: "You check stock in the morning. An important electrical part from a local supplier will run out in two days. What do you do?[cite: 1]",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Stockout</em> = when an item is completely out of stock[cite: 1].<br>• <em>Purchase order</em> = an official document sent to buy items from a supplier[cite: 1].",
+    options: [
+      { pts: 3, t: "Call the local supplier to ask for an urgent fast delivery tomorrow morning.", fb: "Excellent! Fast calls get parts delivered before the factory stops.", disc: "How do you ask a supplier to deliver urgent items fast?" },
+      { pts: 2, t: "Send a standard order email and wait for regular delivery.", fb: "Okay choice, but regular delivery might arrive too late.", disc: "When is normal email communication too slow for buying parts?" },
+      { pts: 1, t: "Wait until tomorrow morning to see if the schedule changes.", fb: "Risky! Waiting too long can stop the factory line.", disc: "Why is waiting until the last minute dangerous?" },
+      { pts: -1, t: "Ignore the low stock warning and hope extra parts are in the warehouse.", fb: "Bad choice! Ignoring warnings causes factory stops.", disc: "What happens when you guess instead of checking real data?" }
+    ]
+  },
+
+  // --- SCENARIO 2 ---
+  {
+    type: "standard",
+    location: "Supply Office (Monday 11:00 AM)",
+    text: "A local supplier says plastic parts will cost 5% more next month. What do you do?[cite: 1]",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Unit cost</em> = the price of one single item[cite: 1].<br>• <em>Negotiation</em> = talking to get a better agreement or price[cite: 1].",
+    options: [
+      { pts: 3, t: "Check the contract, ask why prices are higher, and talk to keep costs low.", fb: "Great job! Asking questions helps protect your factory budget.", disc: "What reasons can a supplier give for higher prices?" },
+      { pts: 2, t: "Accept the price for now, but look for other local suppliers.", fb: "Good plan! You keep parts coming while looking for cheaper options.", disc: "How do you find good backup suppliers in your area?" },
+      { pts: 1, t: "Say 'No' immediately without checking market prices.", fb: "Saying no too fast can damage your relationship with the supplier.", disc: "Why is it important to keep friendly relationships with suppliers?" },
+      { pts: -1, t: "Agree to all higher prices immediately without asking your team.", fb: "Unprofessional! Agreeing to high prices loses money for the company.", disc: "Who should you talk to before agreeing to pay higher prices?" }
+    ]
+  },
+
+  // --- SCENARIO 3 ---
+  {
+    type: "standard",
+    location: "Video Meeting Room (Tuesday 10:00 AM)",
+    text: "It is time for your monthly video call with your German supplier to check open orders. How do you prepare?[cite: 1]",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Lead time</em> = total time from ordering to delivery[cite: 1].<br>• <em>Open order</em> = an order placed that has not arrived yet[cite: 1].",
+    options: [
+      { pts: 3, t: "Prepare order lists, check delivery times, and talk about future needs.", fb: "Perfect! Organized monthly calls keep international work easy.", disc: "What details are most important to discuss in monthly meetings?" },
+      { pts: 2, t: "Ask for a quick verbal update about orders during the meeting.", fb: "Decent approach, but using clean data sheets works better.", disc: "How do simple lists help overcome language barriers in calls?" },
+      { pts: 1, t: "Just listen to the supplier and ask no questions about late deliveries.", fb: "Too quiet. Asking questions helps speed up late deliveries.", disc: "Why must planners ask suppliers about late deliveries?" },
+      { pts: -1, t: "Cancel the call because you have easy paperwork to finish.", fb: "Bad choice! Skipping meetings causes communication mistakes.", disc: "What problems happen when you skip supplier meetings?" }
+    ]
+  },
+
+  // --- SCENARIO 4 ---
+  {
+    type: "standard",
+    location: "Production Line (Tuesday 02:00 PM)",
+    text: "The plant manager asks for 500 extra metal parts by Friday for an urgent customer order. What do you do?[cite: 1]",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Capacity</em> = how many parts a factory can make[cite: 1].<br>• <em>Expedite</em> = to make an order move faster than usual[cite: 1].",
+    options: [
+      { pts: 3, t: "Check supplier stock right away, arrange fast delivery, and confirm parts.", fb: "Awesome! Quick checks make sure parts arrive in time.", disc: "How do you manage urgent changes with suppliers?" },
+      { pts: 2, t: "Order 500 units online and tell the manager parts might be late.", fb: "Fair try, but ordering without checking stock causes delays.", disc: "Why check stock before placing an urgent order?" },
+      { pts: 1, t: "Tell the plant manager to make fewer items instead of calling suppliers.", fb: "Not helpful. Always check with suppliers before saying no.", disc: "How can planners help factory managers during busy weeks?" },
+      { pts: -1, t: "Promise parts on Friday without checking if the supplier can make them.", fb: "Dangerous! Making promises you can't keep hurts customer trust.", disc: "Why are false promises bad in manufacturing?" }
+    ]
+  },
+
+  // --- EMERGENCY 1 ---
+  {
+    type: "emergency",
+    location: "Main Assembly Hall — CRITICAL SHORTAGE",
+    text: "DANGER: Assembly Line 1 will stop in two hours because German circuit parts are completely missing![cite: 1]",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Line stop</em> = total factory line shutdown[cite: 1].<br>• <em>Express courier</em> = fast special delivery service[cite: 1].",
+    options: [
+      { pts: 2, isGood: true, t: "FAST TAXI: Book an express air or road driver from Germany and tell managers.", fb: "Great emergency work! The parts arrived on time and saved thousands of Euros.", disc: "What fast delivery choices does your company have?" },
+      { pts: 0, isGood: false, t: "NORMAL TRUCK: Wait for the standard weekly truck transport.", fb: "CRITICAL FAILURE: The factory line stopped for 24 hours. Lost €50,000. GAME OVER.", disc: "" }
+    ]
+  },
+
+  // --- SCENARIO 5 ---
+  {
+    type: "standard",
+    location: "Receiving Office (Wednesday 11:30 AM)",
+    text: "A delivery truck arrives. The delivery paper lists 200 sensors, but workers count only 150. What do you do?[cite: 1]",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Discrepancy</em> = a difference between paper records and real items[cite: 1].<br>• <em>Shortage</em> = having less items than you need[cite: 1].",
+    options: [
+      { pts: 3, t: "Write '150 items' on the paper, take a photo, and ask for the missing 50.", fb: "Perfect action! Good records stop you from paying for missing items.", disc: "How do you tell a supplier politely about missing items?" },
+      { pts: 2, t: "Type 150 into the computer system and change the factory schedule.", fb: "Good job! Changing plans early prevents sudden factory line stops.", disc: "Why must computer stock match physical stock on the dock?" },
+      { pts: 1, t: "Sign for 200 items on paper and trust the driver to bring 50 tomorrow.", fb: "Unsafe! Signing for unreceived items makes asking for money back hard.", disc: "What money risks happen if you sign papers without counting?" },
+      { pts: -1, t: "Reject all 150 good sensors and send the driver away.", fb: "Too aggressive! Sending good parts away creates unnecessary shortages.", disc: "When is taking a partial delivery better than sending everything back?" }
+    ]
+  },
+
+  // --- SCENARIO 6 ---
+  {
+    type: "standard",
+    location: "Supply Office (Wednesday 02:30 PM)",
+    text: "The computer shows that safety stock for aluminum tubes is below safety limits. How do you react?[cite: 1]",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Safety stock</em> = extra buffer items kept for emergencies[cite: 1].<br>• <em>Reorder point</em> = the stock number that means 'time to order again'[cite: 1].",
+    options: [
+      { pts: 3, t: "Check daily usage, adjust reorder levels, and send a new purchase order.", fb: "Proactive work! Keeping extra stock safe prevents running out.", disc: "How do you calculate safe extra stock for essential items?" },
+      { pts: 2, t: "Place a standard order with your main supplier to rebuild safety stock.", fb: "Solid choice! Rebuilding extra stock keeps factory work simple.", disc: "What causes stock levels to drop faster than expected?" },
+      { pts: 1, t: "Wait until stock reaches zero before ordering to save money.", fb: "Risky! Zero extra stock leaves no protection if trucks are late.", disc: "What is the danger of keeping zero extra stock in a factory?" },
+      { pts: -1, t: "Change safety numbers in the computer so warnings turn off.", fb: "Mistake! Hiding stock warnings creates big production problems later.", disc: "Why is honest stock reporting important for the team?" }
+    ]
+  },
+
+  // --- SCENARIO 7 ---
+  {
+    type: "standard",
+    location: "Quality Lab (Thursday 09:30 AM)",
+    text: "The quality team checks a new box of German connectors and finds 15% are broken. What do you do?[cite: 1]",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Defect rate</em> = the percentage of broken parts[cite: 1].<br>• <em>Quarantine</em> = setting bad parts aside away from good stock[cite: 1].",
+    options: [
+      { pts: 3, t: "Quarantine bad parts, call the German supplier, and request emergency replacements.", fb: "Right strategy! Separating broken parts protects production lines.", disc: "How do broken parts affect factory schedules?" },
+      { pts: 2, t: "Send broken parts back and request a clear refund paper.", fb: "Good administrative work! Money records stay clear and organized.", disc: "What documents do you need when sending back bad parts?" },
+      { pts: 1, t: "Ask factory workers to sort through bad boxes and use good ones.", fb: "Sorting wastes worker time and slows down regular production work.", disc: "Who should pay for worker time spent sorting broken parts?" },
+      { pts: -1, t: "Tell workers to use broken parts anyway to keep working fast.", fb: "Disastrous choice! Using broken parts makes final products fail.", disc: "Why must quality never be ignored to gain speed?" }
+    ]
+  },
+
+  // --- SCENARIO 8 ---
+  {
+    type: "standard",
+    location: "Meeting Room (Thursday 02:00 PM)",
+    text: "You have a yearly review meeting with local suppliers. What is most important to talk about?[cite: 1]",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>KPI</em> = Key Performance Indicator (a tool to measure performance)[cite: 1].<br>• <em>OTIF</em> = On-Time In-Full (delivery score)[cite: 1].",
+    options: [
+      { pts: 3, t: "Review OTIF scores, discuss prices, and set clear delivery goals.", fb: "Strategic leadership! Data-driven reviews help suppliers work better.", disc: "Which scores are best for measuring supplier success?" },
+      { pts: 2, t: "Talk about recent late deliveries and ask for a written improvement plan.", fb: "Effective feedback! Clear goals encourage suppliers to do better.", disc: "How do improvement plans help suppliers get better?" },
+      { pts: 1, t: "Send automatic review emails instead of holding real face-to-face meetings.", fb: "Impersonal! Automated emails lack human connection during negotiations.", disc: "Why are real meetings better than automated emails?" },
+      { pts: -1, t: "Shout at suppliers without showing real delivery data or numbers.", fb: "Unprofessional! Emotional arguments ruin good business partnerships.", disc: "Why should supplier feedback be based on real numbers?" }
+    ]
+  },
+
+  // --- SCENARIO 9 ---
+  {
+    type: "standard",
+    location: "Supply Office (Friday 08:30 AM)",
+    text: "A national truck strike means road shipments cannot deliver your parts. How do you respond?[cite: 1]",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Contingency plan</em> = a backup plan for emergencies[cite: 1].<br>• <em>Freight forwarder</em> = a transport company that moves goods[cite: 1].",
+    options: [
+      { pts: 3, t: "Use a backup plan: hire local small vans to pick up urgent parts directly.", fb: "Smart move! Direct collection keeps factory parts moving during strikes.", disc: "What backup delivery plans can your factory use?" },
+      { pts: 2, t: "Call other local transport companies to look for open road routes.", fb: "Good effort! Looking for new shipping options lowers strike impact.", disc: "How do local shipping networks help during emergencies?" },
+      { pts: 1, t: "Tell factory managers about the strike and wait for it to end.", fb: "Passive strategy! Waiting without finding solutions causes downtime.", disc: "What does it cost a factory when work stops completely?" },
+      { pts: -1, t: "Cancel all orders until trucks start working normally again.", fb: "Big overreaction! Canceling orders causes long-term shortages.", disc: "Why is canceling orders during a short strike dangerous?" }
+    ]
+  },
+
+  // --- SCENARIO 10 ---
+  {
+    type: "standard",
+    location: "Supply Office (Friday 01:30 PM)",
+    text: "Customs officers hold an international delivery at the border because papers are missing. What do you do?[cite: 1]",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Customs clearance</em> = official approval to bring goods into a country[cite: 1].<br>• <em>Documentation</em> = official papers for shipping goods[cite: 1].",
+    options: [
+      { pts: 3, t: "Contact border agents and the supplier right away to email missing papers.", fb: "Fast action! Sending papers quickly clears border holds fast.", disc: "Which papers are essential for importing goods from abroad?" },
+      { pts: 2, t: "Ask the foreign supplier's shipping team for quick help.", fb: "Good effort! Involving the supplier helps get missing papers quickly.", disc: "How can foreign suppliers help prevent border stops?" },
+      { pts: 1, t: "Refresh the online tracking page every hour and wait.", fb: "Passive watching! Online tracking does not solve paper errors.", disc: "Why is calling better than watching a tracking screen?" },
+      { pts: -1, t: "Tell the truck driver to drive past border checks without stopping.", fb: "Illegal action! Trying to bypass customs brings severe legal fines.", disc: "What legal consequences happen if you break border rules?" }
+    ]
+  },
+
+  // --- EMERGENCY 2 ---
+  {
+    type: "emergency",
+    location: "Receiving Bay — CRITICAL CHEMICAL HAZARD",
+    text: "DANGER: A container of chemical glue breaks open and leaks on the dock floor![cite: 1]",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>HAZMAT</em> = dangerous chemicals or hazardous materials[cite: 1].<br>• <em>Containment</em> = keeping dangerous spills safe and contained[cite: 1].",
+    options: [
+      { pts: 2, isGood: true, t: "EVACUATE & CONTAIN: Leave the area, close doors, wear mask/gloves, call HAZMAT team.", fb: "Proper response! The chemical spill was contained safely with no injuries.", disc: "Where are safety hazard response kits in your warehouse?" },
+      { pts: 0, isGood: false, t: "CLEAN UP: Clean the spill with cloth towels without safety gloves or masks.", fb: "CRITICAL FAILURE: Toxic fumes caused severe injuries. GAME OVER.", disc: "" }
+    ]
+  },
+
+  // --- SCENARIO 11 ---
+  {
+    type: "standard",
+    location: "Supply Office (Monday 09:00 AM)",
+    text: "A local supplier offers a 10% discount if you use a new, cheaper material. What do you do?[cite: 1]",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Specification</em> = technical details needed for a part[cite: 1].<br>• <em>Validation</em> = testing and approving a new part[cite: 1].",
+    options: [
+      { pts: 3, t: "Ask for technical details, test samples, and engineer approval first.", fb: "Thorough work! Testing substitute materials keeps product quality high.", disc: "Why must engineering teams test new material choices?" },
+      { pts: 2, t: "Send material details to the engineering team before ordering.", fb: "Sensible choice! Engineering approval makes sure parts fit correctly.", disc: "How do supply planners work together with quality engineers?" },
+      { pts: 1, t: "Buy a small test batch without asking factory engineers.", fb: "Risky trial! Unchecked materials can break inside factory machines.", disc: "What risks happen when ordering unapproved parts?" },
+      { pts: -1, t: "Switch all future orders to cheaper materials immediately.", fb: "Dangerous choice! Cheap materials can cause total product failure.", disc: "Why can cheap component substitutes become costly mistakes?" }
+    ]
+  },
+
+  // --- SCENARIO 12 ---
+  {
+    type: "standard",
+    location: "Supply Manager Office (Monday 02:00 PM)",
+    text: "It is time to plan next year's purchasing budget. What is your primary goal?[cite: 1]",
+    vocab: "<strong>Vocabulary:</strong><br>• <em>Total cost of ownership</em> = the full cost of buying and holding stock[cite: 1].<br>• <em>Service level</em> = percentage of orders delivered on time[cite: 1].",
+    options: [
+      { pts: 3, t: "Balance good stock levels, low storage costs, and fair supplier prices.", fb: "Masterful strategy! Balancing availability and cost brings operational success.", disc: "How do you balance high stock levels with low storage costs?" },
+      { pts: 2, t: "Focus on getting big quantity discounts from key suppliers.", fb: "Strong purchasing plan! Big orders help lower unit prices.", disc: "What are the advantages of ordering from fewer suppliers?" },
+      { pts: 1, t: "Buy maximum warehouse stock so you never run out, regardless of cost.", fb: "Inflexible plan! Too much stock wastes money and clutters storage.", disc: "What problems happen when you hold too much stock?" },
+      { pts: -1, t: "Cut all buying budgets by 30% without checking real factory demand.", fb: "Irresponsible strategy! Arbitrary cuts lead to severe part shortages.", disc: "Why must buying budgets match real factory sales plans?" }
+    ]
+  }
+];
+
+let currentIndex = 0;
+let totalScore = 0;
+
+const landingScreenEl = document.getElementById('landing-screen');
+const gameplayScreenEl = document.getElementById('gameplay-screen');
+const finalScreenEl = document.getElementById('final-screen');
+const gameHeaderEl = document.getElementById('game-header');
+
+const stepDisplayEl = document.getElementById('step-display');
+const scoreDisplayEl = document.getElementById('score-display');
+const locationBadgeEl = document.getElementById('location-badge');
+const scenarioTextEl = document.getElementById('scenario-text');
+const vocabBoxEl = document.getElementById('vocab-box');
+const optionsContainerEl = document.getElementById('options-container');
+const feedbackEl = document.getElementById('feedback');
+const discussionEl = document.getElementById('discussion');
+const nextBtnEl = document.getElementById('next-btn');
+const retryBtnEl = document.getElementById('retry-btn');
+
+function playBuzzer() {
+    try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const ctx = new AudioContext();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(130, ctx.currentTime);
+        osc.frequency.linearRampToValueAtTime(70, ctx.currentTime + 0.6);
+        
+        gain.gain.setValueAtTime(0.4, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.6);
+        
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        
+        osc.start();
+        osc.stop(ctx.currentTime + 0.6);
+    } catch (e) {
+        console.log("Audio play prevented or not supported:", e);
+    }
+}
+
+function shuffleArray(array) {
+    let arr = JSON.parse(JSON.stringify(array));
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+function startGame() {
+    landingScreenEl.classList.add('hidden');
+    finalScreenEl.classList.add('hidden');
+    gameHeaderEl.classList.remove('hidden');
+    gameplayScreenEl.classList.remove('hidden');
+    
+    currentIndex = 0;
+    totalScore = 0;
+    renderStep();
+}
+
+function resetToLanding() {
+    gameplayScreenEl.classList.add('hidden');
+    finalScreenEl.classList.add('hidden');
+    gameHeaderEl.classList.add('hidden');
+    landingScreenEl.classList.remove('hidden');
+}
+
+function renderStep() {
+    const data = GAME_DATA[currentIndex];
+    
+    if (data.type === 'standard') {
+        let standardCount = 0;
+        for (let i = 0; i <= currentIndex; i++) {
+            if (GAME_DATA[i].type === 'standard') {
+                standardCount++;
+            }
+        }
+        stepDisplayEl.textContent = `${standardCount}/12`;
+    } else {
+        stepDisplayEl.textContent = `HAZARD!`;
+    }
+
+    scoreDisplayEl.textContent = totalScore;
+    locationBadgeEl.textContent = data.location;
+    scenarioTextEl.innerHTML = data.text;
+    vocabBoxEl.innerHTML = data.vocab;
+    
+    optionsContainerEl.innerHTML = '';
+    feedbackEl.style.display = 'none';
+    discussionEl.style.display = 'none';
+    nextBtnEl.classList.add('hidden');
+    retryBtnEl.classList.add('hidden');
+
+    const randomizedOptions = shuffleArray(data.options);
+
+    randomizedOptions.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'btn-option';
+        if (data.type === 'emergency') {
+            btn.style.borderColor = 'var(--error-red)';
+        }
+        btn.innerHTML = opt.t;
+        btn.onclick = () => {
+            if (data.type === 'standard') {
+                handleStandardChoice(opt);
+            } else {
+                handleEmergencyChoice(opt);
+            }
+        };
+        optionsContainerEl.appendChild(btn);
+    });
+}
+
+function handleStandardChoice(opt) {
+    document.querySelectorAll('.btn-option').forEach(btn => btn.disabled = true);
+    
+    totalScore += opt.pts;
+    scoreDisplayEl.textContent = totalScore;
+
+    feedbackEl.style.display = 'block';
+    
+    if (opt.pts === 3) {
+        feedbackEl.className = 'feedback-banner success';
+        feedbackEl.innerHTML = `<strong>EXCELLENT (+3 Points)</strong><br>${opt.fb}`;
+    } else if (opt.pts === 2) {
+        feedbackEl.className = 'feedback-banner info-blue';
+        feedbackEl.innerHTML = `<strong>GOOD (+2 Points)</strong><br>${opt.fb}`;
+    } else if (opt.pts === 1) {
+        feedbackEl.className = 'feedback-banner warning';
+        feedbackEl.innerHTML = `<strong>OKAY (+1 Point)</strong><br>${opt.fb}`;
+    } else {
+        feedbackEl.className = 'feedback-banner error';
+        feedbackEl.innerHTML = `<strong>POOR CHOICE (-1 Point)</strong><br>${opt.fb}`;
+    }
+
+    discussionEl.style.display = 'block';
+    discussionEl.innerHTML = `<strong>Question:</strong> ${opt.disc}`;
+
+    if (opt.pts === -1) {
+        retryBtnEl.classList.remove('hidden');
+    } else {
+        nextBtnEl.classList.remove('hidden');
+    }
+}
+
+function handleEmergencyChoice(opt) {
+    document.querySelectorAll('.btn-option').forEach(btn => btn.disabled = true);
+
+    if (opt.isGood) {
+        totalScore += opt.pts;
+        scoreDisplayEl.textContent = totalScore;
+
+        feedbackEl.style.display = 'block';
+        feedbackEl.className = 'feedback-banner success';
+        feedbackEl.innerHTML = `<strong>SUCCESS (+2 Points)</strong><br>${opt.fb}`;
+
+        discussionEl.style.display = 'block';
+        discussionEl.innerHTML = `<strong>Question:</strong> ${opt.disc}`;
+
+        nextBtnEl.classList.remove('hidden');
+    } else {
+        playBuzzer();
+        showGameOver(opt.fb);
+    }
+}
+
+function retryStep() {
+    renderStep();
+}
+
+function nextStep() {
+    currentIndex++;
+    if (currentIndex >= GAME_DATA.length) {
+        showFinalResults();
+    } else {
+        renderStep();
+    }
+}
+
+function showGameOver(reason) {
+    gameplayScreenEl.classList.add('hidden');
+    finalScreenEl.classList.remove('hidden');
+    
+    document.getElementById('final-header').innerHTML = "<span class='emergency-title'>GAME OVER!</span>";
+    document.getElementById('final-score-display').textContent = `FINAL SCORE: ${totalScore} Points`;
+    document.getElementById('debrief-text').innerHTML = `
+        <p style="color: var(--error-red); font-weight: bold; margin-bottom: 12px;">${reason}</p>
+        <p>Planning mistakes caused major problems. Review rules and try again!</p>
+    `;
+}
+
+function showFinalResults() {
+    gameplayScreenEl.classList.add('hidden');
+    finalScreenEl.classList.remove('hidden');
+    
+    document.getElementById('final-header').textContent = "Shift Completed!";
+    document.getElementById('final-score-display').textContent = `Final Score: ${totalScore} / 40 Points`;
+
+    let bandTitle = "";
+    let bandDescription = "";
+
+    if (totalScore >= 35) {
+        bandTitle = "Level 1: Master Planner (35–40 pts)";
+        bandDescription = "Outstanding job! You managed suppliers perfectly, kept production running, controlled costs, and maintained safety stock. Outstanding work!";
+    } else if (totalScore >= 25) {
+        bandTitle = "Level 2: Senior Specialist (25–34 pts)";
+        bandDescription = "Great job! You handled parts orders, supplier meetings, and shipping problems well. Production stayed safe!";
+    } else if (totalScore >= 15) {
+        bandTitle = "Level 3: Assistant Planner (15–24 pts)";
+        bandDescription = "You finished your shift, but had some supply delays. Part shortages and communication gaps slowed work down. Try again to get higher!";
+    } else {
+        bandTitle = "Level 4: Needs Practice (Under 15 pts)";
+        bandDescription = "Difficult day! Factory stops and communication problems caused issues. Review vocabulary, focus on safety stock, and try again!";
+    }
+
+    document.getElementById('debrief-text').innerHTML = `
+        <p style="font-size: 1.1rem; font-weight: bold; color: var(--accent); margin-bottom: 10px;">${bandTitle}</p>
+        <p>${bandDescription}</p>
+    `;
+}
+</script>
+</body>
+</html>
