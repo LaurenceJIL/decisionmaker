@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ropeway Plant Manager: Operational Simulator</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --grey: #1e272e;
+        --orange: #d35400;
+        --blue: #2980b9;
+        --green: #27ae60;
+        --red: #c0392b;
+        --bg: #f4f6f7;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--bg);
+        color: #2c3e50;
+        line-height: 1.5;
+    }
+
+    header {
+        background: var(--grey);
+        color: white;
+        padding: 1rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 5px solid var(--orange);
+    }
+
+    .container { max-width: 850px; margin: 2rem auto; padding: 0 1rem; }
+
+    .card {
+        background: white;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        display: none;
+    }
+    .card.active { display: block; }
+
+    h1 { font-family: 'Roboto Mono', monospace; text-transform: uppercase; font-size: 1.4rem; }
+    h2 { margin-bottom: 1rem; color: var(--grey); }
+    p { margin-bottom: 1.2rem; color: #4a5568; }
+
+    .choices-grid { display: grid; gap: 1rem; margin: 1.5rem 0; }
+    .choice-btn {
+        background: #ffffff;
+        border: 2px solid #cbd5e0;
+        padding: 1rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 0.98rem;
+        font-weight: 600;
+        text-align: left;
+        color: #2d3748;
+        transition: all 0.2s;
+    }
+    .choice-btn:hover:not(:disabled) { border-color: var(--blue); background-color: #f7fafc; }
+    .choice-btn:disabled { opacity: 0.65; cursor: not-allowed; }
+
+    .feedback {
+        padding: 1.5rem;
+        border-radius: 6px;
+        margin-top: 1.5rem;
+        display: none;
+    }
+    .fb-good { background: #e6fffa; border-left: 5px solid var(--green); }
+    .fb-bad { background: #fff5f5; border-left: 5px solid var(--red); }
+
+    .discussion-box {
+        margin-top: 1rem;
+        padding: 1rem;
+        background: #edf2f7;
+        border-radius: 6px;
+        border-left: 4px solid var(--blue);
+        font-style: italic;
+    }
+
+    .next-btn {
+        background: var(--grey);
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 800;
+        display: none;
+        width: 100%;
+        margin-top: 1.5rem;
+    }
+
+    .emergency-badge {
+        background: var(--red);
+        color: white;
+        padding: 0.3rem 0.8rem;
+        font-size: 0.85rem;
+        font-weight: bold;
+        border-radius: 4px;
+        display: inline-block;
+        margin-bottom: 0.8rem;
+    }
+
+    .vpill {
+        display: inline-block;
+        background: #e2e8f0;
+        color: #2d3748;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.82rem;
+        margin: 3px;
+        font-weight: 600;
+    }
+</style>
+</head>
+<body>
+
+<header>
+    <h1>Ropeway Plant Simulator v2.1</h1>
+    <div>Score: <span id="scoreDisplay">0</span> / 30</div>
+</header>
+
+<div class="container">
+    <div class="card active" id="screen-start">
+        <h2>Plant Manager Shift Initialization</h2>
+        <p>Welcome to the production facility. You are the Plant Operations Manager for a manufacturer producing high-capacity industrial ropeway systems (gondolas, chairlifts, and cable cars). Your factory manufactures massive load-bearing steel tower heads, bullwheel assemblies, and tensioning frames.</p>
+        <p>You oversee heavy structural welding, non-destructive testing (NDT), and complex supply chains serving strict European standards (EN 1090 / ISO 3834) and fast-growing Asian markets. Make key operational decisions to balance safety, quality, and delivery schedules.</p>
+        <button class="choice-btn" style="width: 100%; text-align: center;" onclick="startGame()">Start Operations Shift →</button>
+    </div>
+
+    <div class="card" id="screen-game">
+        <div id="step-header"></div>
+        <h2 id="step-title"></h2>
+        <p id="step-desc"></p>
+        <div class="choices-grid" id="choices-container"></div>
+        
+        <div class="feedback" id="feedback-box">
+            <strong id="points-label"></strong>
+            <p id="feedback-text" style="margin: 0.5rem 0 0 0;"></p>
+            <div class="discussion-box" id="discussion-box">
+                <strong>💬 Discussion Question:</strong>
+                <p id="discussion-text" style="margin: 0.3rem 0 0 0;"></p>
+            </div>
+        </div>
+        
+        <button class="next-btn" id="btn-next">Next Operational Challenge →</button>
+    </div>
+
+    <div class="card" id="screen-gameover">
+        <h2 style="color: var(--red);">⚠️ Critical Operational Failure</h2>
+        <p id="gameover-desc"></p>
+        <div class="discussion-box" id="gameover-discussion-box" style="margin-bottom: 1.5rem;">
+            <strong>💬 Incident Debrief Question:</strong>
+            <p id="gameover-discussion-text" style="margin: 0.3rem 0 0 0;"></p>
+        </div>
+        <button class="choice-btn" style="width: 100%; text-align: center;" onclick="location.reload()">Restart Operations Shift</button>
+    </div>
+
+    <div class="card" id="screen-final">
+        <h2>Plant Operations Report</h2>
+        <div id="final-stats" style="font-size: 1.5rem; font-weight: 800; margin: 1rem 0;"></div>
+        <p id="final-msg"></p>
+        <div id="vocab-list" style="margin-top: 2rem; border-top: 1px solid #e2e8f0; padding-top: 1rem;">
+            <h3>Industry Terms Mastered:</h3>
+            <div id="vocab-container" style="margin-top: 0.5rem;"></div>
+        </div>
+        <button class="choice-btn" style="width: 100%; text-align: center; margin-top: 2rem;" onclick="location.reload()">Restart Simulation</button>
+    </div>
+</div>
+
+<script>
+const steps = {
+    s1: {
+        title: "Scenario 1: Defect in Critical Tower Weld",
+        desc: "Ultrasonic testing (UT) on a major tower head beam bound for a Swiss Alpine client reveals internal weld porosity. The container ships in 48 hours.",
+        choices: [
+            { 
+                text: "Issue an immediate Non-Conformance Report (NCR) and execute a gouge-and-reweld process per WPS rules.", 
+                pts: 3, type: "good", 
+                fb: "Correct decision. Maintaining structural integrity protects human lives on the ropeway and upholds European ISO 3834 compliance.",
+                dq: "How do you maintain delivery schedules when unexpected quality defects require lengthy re-work?"
+            },
+            { 
+                text: "Perform Magnetic Particle Testing (MT) to verify surface cracks before deciding whether to repair.", 
+                pts: 2, type: "good", 
+                fb: "Acceptable diagnostic step, though internal porosity identified by UT still needs proper remediation.",
+                dq: "When is additional testing worth the extra time in high-stress manufacturing environments?"
+            },
+            { 
+                text: "Apply a cosmetic cover weld over the seam to pass visual inspection and meet the shipping deadline.", 
+                pts: 1, type: "bad", 
+                fb: "Dangerous shortcut. Internal voids can expand under dynamic ropeway stress loads, causing potential fatigue failure.",
+                dq: "What are the long-term commercial risks of placing delivery deadlines over product quality?"
+            },
+            { 
+                text: "Instruct the inspector to sign off on the quality sheet to prevent shipping penalties.", 
+                pts: -1, type: "bad", 
+                fb: "Falsifying safety documentation compromises safety and invites severe criminal liability. Select a compliant option.",
+                dq: "How can plant leadership foster an organizational culture where quality reporting is transparent?"
+            }
+        ],
+        next: "s2"
+    },
+    s2: {
+        title: "Scenario 2: Preheating Protocol Violation",
+        desc: "You catch a senior welder skipping the mandatory 150°C preheating step on thick S460 steel plates for an Asian urban gondola project to finish his shift early.",
+        choices: [
+            { 
+                text: "Halt the operation immediately, reject the un-preheated joint, and reinforce preheating standards with the team.", 
+                pts: 3, type: "good", 
+                fb: "Excellent. Skipping preheating on high-strength steel risks hydrogen-induced cold cracking under heavy loads.",
+                dq: "How can management encourage experienced workers to strictly follow safety protocols?"
+            },
+            { 
+                text: "Allow him to finish the current joint, but demand 100% Ultrasonic Testing before it moves to painting.", 
+                pts: 2, type: "good", 
+                fb: "You prioritized verification, but allowing active process non-compliance sets a bad precedent on the shop floor.",
+                dq: "Where is the boundary between supervisory flexibility and strict process adherence?"
+            },
+            { 
+                text: "Reprimand the welder publicly on the shop floor and tell him to turn on the heating torch.", 
+                pts: 1, type: "bad", 
+                fb: "You enforced the rule, but public shaming damages morale and lowers voluntary reporting of future mistakes.",
+                dq: "What communication strategies work best when addressing compliance failures with senior technicians?"
+            },
+            { 
+                text: "Ignore the omission because he is your most skilled welder and understands his craft.", 
+                pts: -1, type: "bad", 
+                fb: "Negligence. Material science applies equally to all workers regardless of seniority. Try again.",
+                dq: "Why must quality standards be enforced uniformly across all experience levels?"
+            }
+        ],
+        next: "s3"
+    },
+    s3: {
+        title: "Scenario 3: Steel Plate Sourcing Dilemma",
+        desc: "You need 60 tons of heavy structural steel plate for a series of bullwheel support frames. Your European mill has a 6-week lead time, but an Asian supplier offers certified steel at 30% lower cost with 1-week delivery.",
+        choices: [
+            { 
+                text: "Order from the European mill: Proven weldability and EN 10204 3.1 certificates guarantee regulatory compliance.", 
+                pts: 3, type: "good", path: "pathQuality", 
+                fb: "Strategic focus on quality. Heavy dynamic ropeway loads require total certainty regarding material composition.",
+                dq: "What factors beyond initial purchase price should be considered when selecting critical raw materials?"
+            },
+            { 
+                text: "Order from the Asian supplier, but contract an independent laboratory to verify chemical test reports upon arrival.", 
+                pts: 3, type: "good", path: "pathBudget", 
+                fb: "A pragmatic approach. You capture cost savings while mitigating risk through independent verification.",
+                dq: "How can companies build trust with new overseas suppliers without risking product compliance?"
+            },
+            { 
+                text: "Order from the Asian supplier and immediately feed plates into production without additional lab testing.", 
+                pts: 1, type: "bad", next: "e1", 
+                fb: "Risky. Unverified chemical compositions can lead to poor weldability and unexpected cracking during fabrication.",
+                dq: "What are the hidden costs of bypassing incoming raw material quality checks?"
+            },
+            { 
+                text: "Use uncertified leftover scrap steel around the yard to avoid purchasing new material.", 
+                pts: -1, type: "bad", 
+                fb: "Unacceptable. Using uncertified structural components in ropeway systems violates safety laws. Choose again.",
+                dq: "How does material traceability impact long-term liability in structural engineering?"
+            }
+        ]
+    },
+    pathQuality: {
+        title: "Quality Path: Managing Executive Expectations",
+        desc: "The Chief Financial Officer criticizes the high cost and 6-week delay from the European steel mill, claiming it damages quarterly profitability.",
+        choices: [
+            { 
+                text: "Present a risk analysis demonstrating that structural failure liabilities far outweigh raw material cost savings.", 
+                pts: 3, type: "good", 
+                fb: "Data-driven leadership. Frame technical quality choices around corporate risk management.",
+                dq: "How can technical managers effectively communicate safety risks to executive management?"
+            },
+            { 
+                text: "Explain EN 1090 EXC4 regulatory requirements that legally mandate traceable mill test certificates.", 
+                pts: 2, type: "good", 
+                fb: "Strong compliance argument. Legal standards provide clear boundaries for corporate decisions.",
+                dq: "How do international standards protect manufacturing companies from operational pressure?"
+            },
+            { 
+                text: "Promise to cut secondary labor hours in assembly to compensate for the higher steel costs.", 
+                pts: 1, type: "bad", 
+                fb: "Unrealistic compromise. Rushing assembly work creates secondary quality bottlenecks.",
+                dq: "Why do cost-cutting promises in one department often create problems in another?"
+            },
+            { 
+                text: "Blame the procurement team for failing to negotiate better terms with the mill.", 
+                pts: -1, type: "bad", 
+                fb: "Unprofessional. Blaming other departments destroys cross-functional collaboration. Try another response.",
+                dq: "How does effective cross-departmental alignment improve overall manufacturing efficiency?"
+            }
+        ],
+        next: "e1"
+    },
+    pathBudget: {
+        title: "Budget Path: Heat-Affected Zone Anomaly",
+        desc: "The lower-cost steel plate arrives, but submerged arc welding reveals lamellar tearing in the heat-affected zone due to elevated sulfur levels.",
+        choices: [
+            { 
+                text: "Halt production, quarantine the batch, and file a formal warranty claim with the supplier while sourcing verified stock.", 
+                pts: 3, type: "good", 
+                fb: "Correct containment protocol. Stopping bad material early prevents costly field failures later.",
+                dq: "What procedures should a plant have in place for quarantining non-compliant raw materials?"
+            },
+            { 
+                text: "Adjust welding parameters (lower heat input, specialized filler metals) to compensate for the material variance.", 
+                pts: 2, type: "good", 
+                fb: "Resourceful engineering solution, though it increases fabrication time and labor costs per unit.",
+                dq: "When is it appropriate to adapt manufacturing processes to accommodate material inconsistencies?"
+            },
+            { 
+                text: "Grind out visible surface cracks and continue high-speed welding operations.", 
+                pts: 1, type: "bad", 
+                fb: "Subsurface micro-cracks remain, leaving structural joints vulnerable to fatigue failures under live loads.",
+                dq: "What are the dangers of addressing surface symptoms without fixing internal material flaws?"
+            },
+            { 
+                text: "Blame the welding operator for setting incorrect machine voltage parameters.", 
+                pts: -1, type: "bad", 
+                fb: "Blaming operators for raw material metallurgical defects is unfair and unhelpful. Try again.",
+                dq: "How can managers distinguish between human operational errors and systemic material defects?"
+            }
+        ],
+        next: "e1"
+    },
+    e1: {
+        title: "EMERGENCY: Overhead Crane Load Instability",
+        isEmergency: true,
+        desc: "During the transfer of a 15-ton welded bullwheel frame, a primary rigging strap slips on the hook. The load tilts dangerously at 30 degrees and begins swinging toward an active fuel gas manifold!",
+        choices: [
+            { 
+                text: "Sound the shop evacuation alarm, clear the hoist radius immediately, and hit the remote emergency main gas shutoff.", 
+                pts: 3, type: "good", next: "s5", 
+                fb: "EXCELLENT DECISION: You prioritized personnel safety and eliminated the secondary explosion hazard over equipment preservation.",
+                dq: "Why is isolating utility hazard lines a critical step during overhead lifting emergencies?"
+            },
+            { 
+                text: "Command the crane operator to immediately lower the tilted load straight down onto the floor bay where it sits.", 
+                pts: 2, type: "good", next: "s5", 
+                fb: "GOOD DECISION: Lowering the load quickly removes the aerial kinetic energy, accepting minor concrete floor damage to stop the swing.",
+                dq: "When is accepting localized structural or facility damage an acceptable tactical trade-off?"
+            },
+            { 
+                text: "Order the crane operator to rapidly hoist the load higher to clear the gas lines while workers pull tag lines to steady it.", 
+                pts: 0, type: "bad", gameOver: true, 
+                fb: "FATAL ERROR: Hoisting an unbalanced load rapidly increases dynamic shock-loading. The damaged strap snaps completely, dropping 15 tons into the bay. Game Over.",
+                dq: "Why does dynamic shock-loading make raising an unbalanced suspended load so dangerous?"
+            }
+        ]
+    },
+    s5: {
+        title: "Scenario 5: Accelerated Asian Client Timeline",
+        desc: "An Asian municipal client requests that 12 tower head structures be shipped 3 weeks early for an urban transport inauguration. Your team is already at capacity.",
+        choices: [
+            { 
+                text: "Implement a voluntary double-shift schedule with premium overtime pay and mandatory welder fatigue monitoring.", 
+                pts: 3, type: "good", 
+                fb: "Balanced management. You meet client demands while protecting quality and worker safety against fatigue risks.",
+                dq: "How can managers effectively manage shift fatigue during mandatory push periods?"
+            },
+            { 
+                text: "Subcontract basic structural plate cutting to an ISO 3834 certified local workshop under direct QC supervision.", 
+                pts: 2, type: "good", 
+                fb: "Effective capacity expansion, provided subcontractor quality is monitored continuously.",
+                dq: "What key controls prevent quality losses when outsourcing secondary manufacturing steps?"
+            },
+            { 
+                text: "Mandate compulsory 12-hour shifts for all welding staff for three consecutive weeks without days off.", 
+                pts: 1, type: "bad", 
+                fb: "Fatigue leads to weld defects, missed NDT indicators, and increased shop-floor injury rates.",
+                dq: "What is the long-term cost of extended mandatory overtime on product defect rates?"
+            },
+            { 
+                text: "Accept the deadline and instruct quality technicians to reduce final NDT inspection percentages.", 
+                pts: -1, type: "bad", 
+                fb: "Unacceptable strategy. Bypassing quality assurance on structural ropeways invites severe liability. Try again.",
+                dq: "How should a plant manager handle unreasonable client schedule demands?"
+            }
+        ],
+        next: "s6"
+    },
+    s6: {
+        title: "Scenario 6: Robotic Welding Cell Deployment",
+        desc: "The plant installs an automated robotic MIG welding cell for high-volume tower connection brackets. The system requires initial procedure qualification.",
+        choices: [
+            { 
+                text: "Qualify the robotic Weld Procedure Specification (WPS) with destructive macro-etch testing on sample coupons first.", 
+                pts: 3, type: "good", 
+                fb: "Standard engineering procedure. Thorough validation prevents automated generation of systematic weld defects.",
+                dq: "Why is rigorous procedure qualification essential when transitioning from manual to automated welding?"
+            },
+            { 
+                text: "Run a limited trial production batch on actual parts and perform 100% Ultrasonic Testing on all robot welds.", 
+                pts: 2, type: "good", 
+                fb: "Cautious approach. Testing full production parts validates the cell, though scrap risk is higher during setup.",
+                dq: "What are the trade-offs between sample coupon testing and full production batch trials?"
+            },
+            { 
+                text: "Skip formal testing and immediately start full-scale production to recover equipment costs.", 
+                pts: 1, type: "bad", 
+                fb: "Risky. Uncalibrated robot trajectories can cause consistent lack-of-fusion defects across hundreds of parts.",
+                dq: "What risks arise when financial pay-back targets rush technical equipment commissioning?"
+            },
+            { 
+                text: "Allow night shift operators to adjust robot welding voltage without engineering approval.", 
+                pts: -1, type: "bad", 
+                fb: "Process violation. Welding parameters on certified structural components must remain under engineering change control.",
+                dq: "Why must changes to automated welding parameters follow formal change-control protocols?"
+            }
+        ],
+        next: "s7"
+    },
+    s7: {
+        title: "Scenario 7: Galvanizing Subcontractor Quality Failure",
+        desc: "A batch of heavy structural cable saddles returns from an external hot-dip galvanizing vendor showing severe zinc flaking and un-galvanized bare spots.",
+        choices: [
+            { 
+                text: "Reject the batch, issue a formal Quality Defect Report, and require the vendor to strip and re-galvanize per ISO 1461.", 
+                pts: 3, type: "good", 
+                fb: "Decisive action. Long-term corrosion protection is critical for outdoor cable car structures exposed to harsh weather.",
+                dq: "How do external coating flaws affect the multi-year lifecycle of structural ropeway installations?"
+            },
+            { 
+                text: "Apply cold zinc-rich spray touching up bare spots in-house where permitted by technical specs to save lead time.", 
+                pts: 2, type: "good", 
+                fb: "Practical solution for minor areas, provided repair procedures strictly match approved client specifications.",
+                dq: "When are touch-up repairs acceptable compared to complete component re-processing?"
+            },
+            { 
+                text: "Paint over the un-galvanized patches with standard industrial paint and ship immediately.", 
+                pts: 1, type: "bad", 
+                fb: "Superficial fix. Standard paint over un-galvanized bare steel will degrade quickly, leading to early corrosion.",
+                dq: "How do short-term cosmetic fixes impact brand reputation and warranty claims?"
+            },
+            { 
+                text: "Ship the defective batch as-is and offer the client a 5% discount on their next order.", 
+                pts: -1, type: "bad", 
+                fb: "Unacceptable. Corrosion protection on load-bearing ropeways cannot be traded for commercial discounts. Try again.",
+                dq: "Why should structural durability never be compromised for monetary concessions?"
+            }
+        ],
+        next: "e2"
+    },
+    e2: {
+        title: "EMERGENCY: Traceability Defect During EN 1090 Audit",
+        isEmergency: true,
+        desc: "During an unannounced European Notified Body audit, the inspector finds 8 finished tower head assemblies missing welder ID stamps and signed NDT tags, just hours before export loading.",
+        choices: [
+            { 
+                text: "Quarantine the batch immediately, hold the container shipment, and execute 100% UT re-inspection with full transparent logging under audit supervision.", 
+                pts: 3, type: "good", next: "s8", 
+                fb: "EXCELLENT DECISION: Total transparency and strict compliance saved factory accreditation. The auditor commended your commitment to quality integrity.",
+                dq: "How does demonstrating full transparency during quality audits protect long-term international contracts?"
+            },
+            { 
+                text: "Present central CMMS digital test logs proving inspections were completed, and request a formal 24-hour stay to re-verify physical tags.", 
+                pts: 2, type: "good", next: "s8", 
+                fb: "GOOD DECISION: Relying on verified digital CMMS records resolves the traceability gap legally while preventing long shipment delays.",
+                dq: "How can digital backup logs support physical quality control processes during regulatory inspections?"
+            },
+            { 
+                text: "Instruct the senior welder on duty to immediately apply his personal identification stamp to the missing physical tags.", 
+                pts: 0, type: "bad", gameOver: true, 
+                fb: "CRITICAL AUDIT FAILURE: Retrospective tagging without re-testing is logged as intentional falsification of compliance records. Certification revoked. Game Over.",
+                dq: "Why is retrospective record tagging without re-verification treated as legal quality fraud in structural engineering?"
+            }
+        ]
+    },
+    s8: {
+        title: "Scenario 8: Environmental & Safety Compliance",
+        desc: "Local environmental authorities issue a warning regarding high welding fume concentration inside the heavy bay and noise complaints from night grinding.",
+        choices: [
+            { 
+                text: "Install high-capacity source-capture extraction arms and construct sound-dampening enclosures around grinding stations.", 
+                pts: 3, type: "good", 
+                fb: "Outstanding commitment. Protecting worker health and maintaining community relations ensures stable operations.",
+                dq: "How do improved shop-floor environmental conditions impact worker retention and productivity?"
+            },
+            { 
+                text: "Reschedule heavy grinding operations exclusively to day shifts and upgrade operator PPE respirators.", 
+                pts: 2, type: "good", 
+                fb: "Effective schedule adjustment that solves neighborhood noise, though daytime grinding bay capacity may bottleneck.",
+                dq: "How can plants optimize noisy operational tasks within strict municipal environmental regulations?"
+            },
+            { 
+                text: "Distribute basic earplugs to nearby residents and continue round-the-clock grinding operations.", 
+                pts: 1, type: "bad", 
+                fb: "Dismissive approach. Community relations will deteriorate, leading to potential municipal work stoppage orders.",
+                dq: "What are the operational risks of ignoring municipal environmental complaints?"
+            },
+            { 
+                text: "Turn off shop extraction fans at night so fume plumes are less visible outside the plant.", 
+                pts: -1, type: "bad", 
+                fb: "Severe safety violation. Trapping heavy metal fumes indoors harms welder health and violates safety laws. Try again.",
+                dq: "Why must internal air quality standards never be sacrificed to hide external emissions?"
+            }
+        ],
+        next: "s9"
+    },
+    s9: {
+        title: "Scenario 9: Modernizing Quality Control Systems",
+        desc: "Your quality team proposes transitioning from conventional manual ultrasonic testing to Phased Array Ultrasonic Testing (PAUT) with cloud archiving for global clients.",
+        choices: [
+            { 
+                text: "Adopt PAUT for all primary structural welds and train technicians to provide digital defect scans directly to clients.", 
+                pts: 3, type: "good", 
+                fb: "Forward-thinking move. Digital weld imaging builds immense credibility with demanding European and Asian buyers.",
+                dq: "How can advanced inspection technology serve as a competitive advantage in global manufacturing?"
+            },
+            { 
+                text: "Maintain conventional manual UT testing because current technicians are comfortable with the process.", 
+                pts: 2, type: "good", 
+                fb: "Safe and compliant, though you miss opportunities to improve inspection speed and record-keeping.",
+                dq: "What strategies help traditional workforce teams adapt smoothly to new digital technologies?"
+            },
+            { 
+                text: "Buy the PAUT hardware but delay technician certification training to reduce short-term costs.", 
+                pts: 1, type: "bad", 
+                fb: "Ineffective investment. Advanced inspection tools operated by uncertified technicians render results legally invalid.",
+                dq: "Why is workforce training as critical as hardware investment when upgrading technical capabilities?"
+            },
+            { 
+                text: "Eliminate ultrasonic testing entirely and rely solely on visual inspection to save testing budget.", 
+                pts: -1, type: "bad", 
+                fb: "Unacceptable proposal. Visual checks cannot detect dangerous subsurface weld defects in heavy structural steel.",
+                dq: "What are the operational limitations of relying exclusively on visual inspection techniques?"
+            }
+        ],
+        next: "s10"
+    },
+    s10: {
+        title: "Scenario 10: Succession Planning & Operations Handover",
+        desc: "You are promoted to Vice President of Global Manufacturing. How do you prepare your plant for operational continuity before moving to corporate headquarters?",
+        choices: [
+            { 
+                text: "Develop a digital Operations Playbook, cross-train department leaders, and mentor the Quality Manager as your successor.", 
+                pts: 3, type: "good", 
+                fb: "Exceptional leadership. Sustainable documentation and talent development secure long-term operational success.",
+                dq: "What key elements must be included in a plant manager's succession plan?"
+            },
+            { 
+                text: "Appoint the most senior welder as Plant Manager immediately without management or administrative training.", 
+                pts: 1, type: "bad", 
+                fb: "Promotions without proper leadership training often lead to operational frustration and administrative oversight.",
+                dq: "How can technical experts be supported when transitioning into managerial roles?"
+            },
+            { 
+                text: "Retain key client contacts and technical decision logs in your private notes so the plant relies on your guidance.", 
+                pts: 1, type: "bad", 
+                fb: "Creates organizational dependence. True leadership leaves behind self-sustaining management systems.",
+                dq: "Why is 'knowledge hoarding' detrimental to industrial plant growth?"
+            },
+            { 
+                text: "Tell the supervisory team to manage daily challenges independently without establishing clear protocols.", 
+                pts: -1, type: "bad", 
+                fb: "Abrupt handovers cause operational drift and quality inconsistencies. Select a structured plan.",
+                dq: "What risks arise when executive handovers lack structured planning?"
+            }
+        ],
+        next: "final"
+    }
+};
+
+const BANDS = [
+    { min: 25, max: 30, label: "Director of Global Manufacturing", msg: "Outstanding performance! You run a world-class fabrication plant with top safety standards, perfect quality compliance, and strong client trust across Europe and Asia." },
+    { min: 15, max: 24, label: "Senior Plant Operations Manager", msg: "Solid operational management. The facility maintains steady production, though occasional shortcuts may require tighter long-term controls." },
+    { min: 0, max: 14, label: "Trainee Production Supervisor", msg: "Sub-optimal results. Significant improvements are needed in quality systems, safety compliance, and regulatory standards." }
+];
+
+const VOCAB = [
+    "ISO 3834 / EN 1090 Compliance", 
+    "Ultrasonic Testing (UT)", 
+    "Phased Array UT (PAUT)", 
+    "Weld Procedure Specification (WPS)", 
+    "Preheating & Hydrogen Cracking", 
+    "Non-Conformance Report (NCR)", 
+    "Heat-Affected Zone (HAZ)", 
+    "Dynamic Shock-Loading", 
+    "Hot-Dip Galvanizing (ISO 1461)", 
+    "Traceability & Mill Certificates"
+];
+
+let score = 0;
+let currentStepId = "s1";
+
+function shuffleArray(array) {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+function startGame() {
+    score = 0;
+    currentStepId = "s1";
+    updateScore();
+    showScreen("game");
+    renderStep();
+}
+
+function showScreen(id) {
+    document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+    document.getElementById('screen-' + id).classList.add('active');
+}
+
+function updateScore() {
+    document.getElementById('scoreDisplay').innerText = score;
+}
+
+function renderStep() {
+    const data = steps[currentStepId];
+    const container = document.getElementById('choices-container');
+    const header = document.getElementById('step-header');
+    
+    header.innerHTML = data.isEmergency ? `<div class="emergency-badge">⚠️ EMERGENCY CRITICAL SCENARIO</div>` : "";
+    document.getElementById('step-title').innerText = data.title;
+    document.getElementById('step-desc').innerText = data.desc;
+    
+    container.innerHTML = "";
+    document.getElementById('feedback-box').style.display = "none";
+    document.getElementById('btn-next').style.display = "none";
+
+    const shuffledChoices = shuffleArray(data.choices);
+
+    shuffledChoices.forEach(choice => {
+        const btn = document.createElement('button');
+        btn.className = "choice-btn";
+        btn.innerText = choice.text;
+        btn.onclick = () => handleChoice(choice, btn);
+        container.appendChild(btn);
+    });
+}
+
+function handleChoice(choice, btn) {
+    const fbBox = document.getElementById('feedback-box');
+    const label = document.getElementById('points-label');
+    const data = steps[currentStepId];
+
+    if (data.isEmergency) {
+        if (choice.type === "bad") {
+            label.innerText = "CRITICAL OPERATIONAL FAILURE";
+        } else if (choice.pts === 3) {
+            label.innerText = "EXCELLENT EMERGENCY ACTION (+3 Points)";
+        } else {
+            label.innerText = "GOOD EMERGENCY ACTION (+2 Points)";
+        }
+    } else {
+        label.innerText = choice.pts >= 0 ? `+${choice.pts} Performance Points` : `${choice.pts} Penalty Point`;
+    }
+    
+    document.getElementById('feedback-text').innerText = choice.fb;
+    document.getElementById('discussion-text').innerText = choice.dq;
+    
+    fbBox.className = "feedback fb-" + (choice.type === "good" ? "good" : "bad");
+    fbBox.style.display = "block";
+
+    if (choice.gameOver) {
+        document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
+        setTimeout(() => {
+            document.getElementById('gameover-desc').innerText = choice.fb;
+            document.getElementById('gameover-discussion-text').innerText = choice.dq;
+            showScreen("gameover");
+        }, 2500);
+        return;
+    }
+
+    if (choice.pts === -1) {
+        score += choice.pts; 
+        updateScore();
+        btn.disabled = true; 
+        return;
+    }
+
+    score += choice.pts; 
+    updateScore();
+    document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
+    
+    const nextBtn = document.getElementById('btn-next');
+    nextBtn.style.display = "block";
+    nextBtn.onclick = () => {
+        currentStepId = choice.path || choice.next || steps[currentStepId].next;
+        if (currentStepId === "final") {
+            showFinal();
+        } else {
+            renderStep();
+        }
+    };
+}
+
+function showFinal() {
+    showScreen("final");
+    document.getElementById('final-stats').innerText = `Final Score: ${score} / 30 Points`;
+    
+    const band = BANDS.find(b => score >= b.min && score <= b.max) || BANDS[BANDS.length - 1];
+    document.getElementById('final-msg').innerHTML = `<strong>Manager Rank: ${band.label}</strong><br>${band.msg}`;
+    
+    const vContainer = document.getElementById('vocab-container');
+    vContainer.innerHTML = "";
+    VOCAB.forEach(word => {
+        vContainer.innerHTML += `<span class="vpill">${word}</span>`;
+    });
+}
+</script>
+</body>
+</html>
